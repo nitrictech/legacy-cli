@@ -4,7 +4,8 @@
   "description": "CLI monorepo for the Nitric framework",
   "author": "Nitric <https://github.com/nitric-dev>",
   "scripts": {
-    "build:common": "yarn workspace @nitric/cli-common build"
+    "build:common": "yarn workspace @nitric/cli-common build",
+    "test": "yarn workspaces run test"
   },
   "contributors": [
     "Jye Cusch <jye.cusch@gmail.com>",
