@@ -1,0 +1,25 @@
+{
+    "compilerOptions": {
+      "target": "es2017",
+      "module": "es2015",
+      "moduleResolution": "node",
+      "esModuleInterop": true,
+      "lib": ["es2017", "dom", "dom.iterable"],
+      "declaration": true,
+      "allowSyntheticDefaultImports": true,
+      "sourceMap": true,
+      "inlineSources": true,
+      "noUnusedLocals": true,
+      "noUnusedParameters": true,
+      "noImplicitReturns": true,
+      "noFallthroughCasesInSwitch": true,
+      "experimentalDecorators": true,
+      "skipLibCheck": true,
+      "strict": true,
+      "noImplicitAny": false,
+      "composite": true,
+      "jsx": "preserve",
+      "types": ["node"]
+    }
+}
+  

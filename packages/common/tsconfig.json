@@ -1,0 +1,13 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+      "esModuleInterop": true,
+      "tsBuildInfoFile": "./lib/buildinfo",
+      "module": "commonjs",
+      "rootDir": "src",
+      "outDir": "lib"
+  },
+  "include": [
+      "src/**/*"
+  ]
+}

@@ -88,3 +88,9 @@ typings/
 .dynamodb/
 
 lib/
+
+build/
+
+!**/src/**/*
+
+.DS_Store
