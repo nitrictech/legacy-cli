@@ -102,21 +102,23 @@ export default class Run extends Command {
 		const { args, flags } = this.parse(Run);
 		const { portStart = 3000, file = './nitric.yaml' } = flags;
 		const { directory = '.' } = args;
-		const stack = readNitricDescriptor(path.join(dir, file));
+		const stack = readNitricDescriptor(path.join(directory, file));
 
 		// Run the images
 		try {
-			await runContainers(stack, portStart, dir);
+			await runContainers(stack, portStart, directory);
 
 			process.stdin.on('keypress', async (str) => {
 				// quit the application
 				if (str === 'q') {
 					try {
-						await Promise.all(
-							Object.values(runResults).map((container) => {
-								return container.stop();
-							}),
-						);
+						if (runResults) {
+							await Promise.all(
+								Object.values(runResults).map((container) => {
+									return container.stop();
+								}),
+							);
+						}
 						cli.action.stop();
 						// As we have stdin set to raw mode pausing will cause the process to gracefully exit
 						process.stdin.pause();

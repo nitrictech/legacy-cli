@@ -3,7 +3,7 @@
   "description": "An AWS plugin for Nitric",
   "version": "0.0.0",
   "author": " ",
-  "bugs": "https://github.com//plugin-aws/issues",
+  "bugs": "https://github.com/nitric-dev/cli/issues",
   "dependencies": {
     "@nitric/cli-common": "^0",
     "@oclif/command": "^1",
@@ -33,7 +33,7 @@
     "/oclif.manifest.json",
     "/yarn.lock"
   ],
-  "homepage": "https://github.com//plugin-aws",
+  "homepage": "https://nitric.io",
   "keywords": [
     "oclif-plugin"
   ],
@@ -45,7 +45,7 @@
       "@oclif/plugin-help"
     ]
   },
-  "repository": "/plugin-aws",
+  "repository": "https://github.com/nitric-dev/cli",
   "scripts": {
     "postpack": "rm -f oclif.manifest.json",
     "posttest": "eslint . --ext .ts --config .eslintrc",
