@@ -5,7 +5,8 @@
       "tsBuildInfoFile": "./lib/buildinfo",
       "module": "commonjs",
       "rootDir": "src",
-      "outDir": "lib"
+      "outDir": "lib",
+      "types":["jest", "node"]
   },
   "include": [
       "src/**/*"
