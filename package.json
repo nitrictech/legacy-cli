@@ -5,7 +5,7 @@
   "author": "Nitric <https://github.com/nitric-dev>",
   "scripts": {
     "build:common": "yarn workspace @nitric/cli-common build",
-    "test": "yarn workspaces run test"
+    "test": "ultra -r test"
   },
   "contributors": [
     "Jye Cusch <jye.cusch@gmail.com>",
@@ -29,7 +29,8 @@
     "husky": "^4.2.5",
     "lint-staged": "^10.1.3",
     "prettier": "^2.0.4",
-    "typescript": "^4.0.5"
+    "typescript": "^4.0.5",
+    "ultra-runner": "^3.5.0"
   },
   "workspaces": [
     "packages/base",
