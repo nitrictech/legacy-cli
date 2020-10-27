@@ -7,7 +7,8 @@
   "scripts": {
     "clean": "rimraf ./lib/",
     "build": "yarn run clean && yarn run build:sources",
-    "build:sources": "tsc --outDir ./lib/"
+    "build:sources": "tsc --outDir ./lib/",
+    "test": "jest"
   },
   "contributors": [
     "Jye Cusch <jye.cusch@gmail.com>",
@@ -20,8 +21,12 @@
     "yaml": "^1.10.0"
   },
   "devDependencies": {
+    "@types/jest": "^26.0.15",
+    "@types/node": "^10",
     "@types/listr": "latest",
     "rimraf": "3.0.2",
-    "typescript": "^3.3"
+    "typescript": "^3.3",
+    "jest": "^26.6.1",
+    "ts-jest": "^26.4.3"
   }
 }

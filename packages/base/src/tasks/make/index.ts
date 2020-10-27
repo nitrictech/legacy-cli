@@ -12,7 +12,7 @@ interface MakeFunctionTaskOpts {
 	name: string;
 }
 
-export class MakeFunctionTask extends Task<string> {
+export class MakeFunctionTask extends Task<void> {
 	private functionName: string;
 	private template: string;
 	private file: string;
