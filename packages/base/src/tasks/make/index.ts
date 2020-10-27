@@ -52,7 +52,7 @@ export class MakeFunctionTask extends Task<void> {
 		return `Created function ${functionName} based on template ${template}`;
 	}
 
-	async do(): Promise<void> {
+	async do(): Promise<string> {
 		const { file, directory, functionName } = this;
 
 		this.update('Checking stack descriptor');
@@ -91,5 +91,6 @@ export class MakeFunctionTask extends Task<void> {
 		writeNitricDescriptor(stack, nitricFile);
 
 		this.update(`Updated ${file}`);
+		return `Updated ${file}`;
 	}
 }

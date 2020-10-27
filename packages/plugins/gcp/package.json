@@ -3,7 +3,7 @@
   "description": "GCP plugin for Nitric",
   "version": "0.0.0",
   "author": "Tim",
-  "bugs": "https://github.com/plugins/plugin-gcp/issues",
+  "bugs": "https://github.com/nitric-dev/cli/issues",
   "dependencies": {
     "@nitric/cli-common": "^0",
     "@oclif/command": "^1",
@@ -36,7 +36,7 @@
     "/oclif.manifest.json",
     "/yarn.lock"
   ],
-  "homepage": "https://github.com/plugins/plugin-gcp",
+  "homepage": "https://nitric.io",
   "keywords": [
     "oclif-plugin"
   ],
@@ -48,7 +48,7 @@
       "@oclif/plugin-help"
     ]
   },
-  "repository": "plugins/plugin-gcp",
+  "repository": "https://github.com/nitric-dev/cli",
   "scripts": {
     "postpack": "rm -f oclif.manifest.json",
     "prepack": "rm -rf lib && tsc -b && oclif-dev manifest && oclif-dev readme",

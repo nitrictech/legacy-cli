@@ -1,0 +1,27 @@
+name: Publish to NPM on Github Release
+
+on: 
+  release:
+     types: [published]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+    - name: Use Node 14
+      uses: actions/setup-node@v1
+      with:
+        node-version: 14
+        registry-url: 'https://registry.npmjs.org'
+        always-auth: true
+    - name: Install Dependencies
+      run: yarn --frozen-lockfile
+    - name: Build Common
+      run: yarn build:common
+    - name: Publish to NPM
+      run: yarn workspaces run yarn publish --access restricted
+      env:
+        NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
