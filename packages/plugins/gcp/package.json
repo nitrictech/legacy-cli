@@ -5,7 +5,7 @@
   "author": "Tim",
   "bugs": "https://github.com/plugins/plugin-gcp/issues",
   "dependencies": {
-    "@nitric/cli-common": "^0.0.1",
+    "@nitric/cli-common": "^0",
     "@oclif/command": "^1",
     "@oclif/config": "^1",
     "dockerode": "^3.2.1",

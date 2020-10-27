@@ -8,7 +8,7 @@
   },
   "bugs": "https://github.com/packages/cli/issues",
   "dependencies": {
-    "@nitric/cli-common": "^0.0.1",
+    "@nitric/cli-common": "^0",
     "@oclif/command": "^1",
     "@oclif/config": "^1",
     "@oclif/errors": "^1",
