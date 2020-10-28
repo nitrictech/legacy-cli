@@ -2,10 +2,10 @@
   "name": "@nitric/plugin-gcp",
   "description": "GCP plugin for Nitric",
   "version": "0.0.0",
-  "author": "Tim",
+  "author": "Nitric <https://github.com/nitric-dev>",
   "bugs": "https://github.com/nitric-dev/cli/issues",
   "dependencies": {
-    "@nitric/cli-common": "^0",
+    "@nitric/cli-common": "workspace:*",
     "@oclif/command": "^1",
     "@oclif/config": "^1",
     "dockerode": "^3.2.1",
@@ -14,18 +14,18 @@
     "tslib": "^1"
   },
   "devDependencies": {
-    "@types/jest": "^26.0.15",
     "@oclif/dev-cli": "^1",
     "@oclif/plugin-help": "^3",
+    "@types/jest": "^26.0.15",
     "@types/node": "^10",
     "eslint": "^5.13",
     "eslint-config-oclif": "^3.1",
     "eslint-config-oclif-typescript": "^0.1",
     "globby": "^10",
-    "ts-node": "^8",
-    "typescript": "^3.3",
     "jest": "^26.6.1",
-    "ts-jest": "^26.4.3"
+    "ts-jest": "^26.4.3",
+    "ts-node": "^8",
+    "typescript": "^3.3"
   },
   "engines": {
     "node": ">=8.0.0"
