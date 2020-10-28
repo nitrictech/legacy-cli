@@ -20,6 +20,7 @@
     "eventemitter3": "^4.0.7",
     "execa": "^4.0.3",
     "get-port": "^5.1.1",
+    "inquirer": "^7.3.3",
     "keypress": "^0.2.1",
     "listr": "^0.14.3",
     "multimatch": "^5.0.0",
@@ -30,8 +31,7 @@
     "stream-to-promise": "^3.0.0",
     "tar-fs": "^2.1.0",
     "tslib": "^1",
-    "yaml": "^1.10.0",
-    "inquirer": "^7.3.3"
+    "yaml": "^1.10.0"
   },
   "devDependencies": {
     "@oclif/dev-cli": "^1",
