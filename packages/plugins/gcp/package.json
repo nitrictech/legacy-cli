@@ -1,0 +1,58 @@
+{
+  "name": "@nitric/plugin-gcp",
+  "description": "GCP plugin for Nitric",
+  "version": "0.0.6",
+  "author": "Nitric <https://github.com/nitric-dev>",
+  "bugs": "https://github.com/nitric-dev/cli/issues",
+  "dependencies": {
+    "@nitric/cli-common": "workspace:*",
+    "@oclif/command": "^1",
+    "@oclif/config": "^1",
+    "dockerode": "^3.2.1",
+    "googleapis": "^61.0.0",
+    "listr": "^0.14.3",
+    "tslib": "^1"
+  },
+  "devDependencies": {
+    "@oclif/dev-cli": "^1",
+    "@oclif/plugin-help": "^3",
+    "@types/jest": "^26.0.15",
+    "@types/node": "^10",
+    "eslint": "^5.13",
+    "eslint-config-oclif": "^3.1",
+    "eslint-config-oclif-typescript": "^0.1",
+    "globby": "^10",
+    "jest": "^26.6.1",
+    "ts-jest": "^26.4.3",
+    "ts-node": "^8",
+    "typescript": "^3.3"
+  },
+  "engines": {
+    "node": ">=8.0.0"
+  },
+  "files": [
+    "/lib",
+    "/npm-shrinkwrap.json",
+    "/oclif.manifest.json",
+    "/yarn.lock"
+  ],
+  "homepage": "https://nitric.io",
+  "keywords": [
+    "oclif-plugin"
+  ],
+  "license": "UNLICENSED",
+  "oclif": {
+    "commands": "./lib/commands",
+    "bin": "oclif-example",
+    "devPlugins": [
+      "@oclif/plugin-help"
+    ]
+  },
+  "repository": "https://github.com/nitric-dev/cli",
+  "scripts": {
+    "postpack": "rm -f oclif.manifest.json",
+    "prepack": "rm -rf lib && tsc -b && oclif-dev manifest && oclif-dev readme",
+    "test": "jest",
+    "version": "oclif-dev readme && git add README.md"
+  }
+}

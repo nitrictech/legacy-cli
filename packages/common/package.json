@@ -1,0 +1,33 @@
+{
+  "name": "@nitric/cli-common",
+  "version": "0.0.6",
+  "description": "Common Nitric typings and utility functions",
+  "author": "Nitric <https://github.com/nitric-dev>",
+  "main": "lib/index.js",
+  "scripts": {
+    "clean": "rimraf ./lib/",
+    "build": "yarn run clean && yarn run build:sources",
+    "build:sources": "tsc --outDir ./lib/",
+    "test": "jest"
+  },
+  "contributors": [
+    "Jye Cusch <jye.cusch@gmail.com>",
+    "Tim Holm <timothy.j.holm@gmail.com>"
+  ],
+  "license": "UNLICENSED",
+  "dependencies": {
+    "eventemitter3": "^4.0.7",
+    "rxjs": "^6.6.3",
+    "tslib": "^1",
+    "yaml": "^1.10.0"
+  },
+  "devDependencies": {
+    "@types/jest": "^26.0.15",
+    "@types/listr": "latest",
+    "@types/node": "^10",
+    "jest": "^26.6.1",
+    "rimraf": "3.0.2",
+    "ts-jest": "^26.4.3",
+    "typescript": "^3.3"
+  }
+}

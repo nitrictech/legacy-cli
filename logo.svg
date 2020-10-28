@@ -1,0 +1,33 @@
+<svg viewBox="0 0 240 80" xmlns="http://www.w3.org/2000/svg">
+ <defs>
+  <filter id="innerShadow">
+      <feDropShadow dx="0.8" dy="0.8" stdDeviation="0" 
+          flood-color="#285A84" flood-opacity="0.5"/>
+    </filter>
+    <filter id="outerShadow">
+      <feDropShadow dx="0.8" dy="0.8" stdDeviation="0" 
+          flood-color="#F55139" flood-opacity="0.5"/>
+    </filter>
+ </defs>
+ <style>
+    @import url('https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@600');
+    .nitric {
+      font-family: 'Josefin Sans', sans-serif;
+      font-size: 60px; 
+      font-weight: bold;
+      fill: #285A84;
+      
+    }
+
+    .inner {
+      filter: url(#innerShadow)
+    }
+
+    .outer {
+      filter: url(#outerShadow)
+    }
+ </style>
+ <text x="25" y="60" class="nitric">Nitric</text>
+ <circle cx="179" cy="47.25" r="5.25" fill="#F55139" class="outer"/>
+ <circle cx="170.5" cy="47.25" r="5.25" fill="#285A84" class="inner"/>
+</svg>
