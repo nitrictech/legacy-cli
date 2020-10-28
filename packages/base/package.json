@@ -20,6 +20,7 @@
     "eventemitter3": "^4.0.7",
     "execa": "^4.0.3",
     "get-port": "^5.1.1",
+    "inquirer": "^7.3.3",
     "keypress": "^0.2.1",
     "listr": "^0.14.3",
     "multimatch": "^5.0.0",
