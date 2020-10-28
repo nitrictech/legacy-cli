@@ -2,7 +2,7 @@
   "name": "@nitric/plugin-aws",
   "description": "An AWS plugin for Nitric",
   "version": "0.0.0",
-  "author": " ",
+  "author": "Nitric <https://github.com/nitric-dev>",
   "bugs": "https://github.com/nitric-dev/cli/issues",
   "dependencies": {
     "@nitric/cli-common": "workspace:*",
