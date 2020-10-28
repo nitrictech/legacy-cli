@@ -4,13 +4,15 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
-    - uses: actions/cache@v2
+    - name: Checkout
+      uses: actions/checkout@v2
+    - name: Cache Yarn Cache
+      uses: actions/cache@v2
       with:
-        path: '**/node_modules'
+        path: '.yarn/cache'
         key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
     - name: Install modules
-      run: yarn
+      run: yarn --immutable
     - name: Build Common
       run: yarn build:common
     - name: Run tests
