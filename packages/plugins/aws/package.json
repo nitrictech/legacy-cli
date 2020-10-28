@@ -5,7 +5,7 @@
   "author": " ",
   "bugs": "https://github.com/nitric-dev/cli/issues",
   "dependencies": {
-    "@nitric/cli-common": "^0",
+    "@nitric/cli-common": "workspace:*",
     "@oclif/command": "^1",
     "@oclif/config": "^1",
     "aws-sdk": "^2.589.0",

@@ -608,7 +608,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@nitric/cli-common@^0, @nitric/cli-common@workspace:packages/common":
+"@nitric/cli-common@workspace:*, @nitric/cli-common@workspace:packages/common":
   version: 0.0.0-use.local
   resolution: "@nitric/cli-common@workspace:packages/common"
   dependencies:
@@ -630,7 +630,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@nitric/cli@workspace:packages/base"
   dependencies:
-    "@nitric/cli-common": ^0
+    "@nitric/cli-common": "workspace:*"
     "@oclif/command": ^1
     "@oclif/config": ^1
     "@oclif/dev-cli": ^1
@@ -678,7 +678,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@nitric/plugin-aws@workspace:packages/plugins/aws"
   dependencies:
-    "@nitric/cli-common": ^0
+    "@nitric/cli-common": "workspace:*"
     "@oclif/command": ^1
     "@oclif/config": ^1
     "@oclif/dev-cli": ^1
@@ -703,7 +703,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@nitric/plugin-gcp@workspace:packages/plugins/gcp"
   dependencies:
-    "@nitric/cli-common": ^0
+    "@nitric/cli-common": "workspace:*"
     "@oclif/command": ^1
     "@oclif/config": ^1
     "@oclif/dev-cli": ^1
