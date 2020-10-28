@@ -67,6 +67,11 @@
   "main": "lib/index.js",
   "oclif": {
     "commands": "./lib/commands",
+    "topics": {
+      "make": { "description": "Commands to make new projects and assets." },
+      "deploy": { "description": "Plugin commands to deploy on supported providers. E.g. `$ nitric plugins:install @nitric/plugin-aws`" },
+      "down": { "description": "Plugin commands to tear down deployments on supported providers. E.g. `$ nitric plugins:install @nitric/plugin-aws`" }
+    },
     "bin": "nitric",
     "plugins": [
       "@oclif/plugin-help",
