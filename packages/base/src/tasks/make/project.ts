@@ -1,4 +1,4 @@
-import { Task } from '@nitric/common';
+import { Task } from '@nitric/cli-common';
 import fs from 'fs';
 import YAML from 'yaml';
 

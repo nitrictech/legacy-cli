@@ -1,11 +1,9 @@
 import { templateFunctionPath } from '../../common/paths';
-import { isTemplateAvailable, readNitricDescriptor, writeNitricDescriptor } from '../../utils';
-import { NitricRuntime } from '@nitric/common';
+import { NitricRuntime, isTemplateAvailable, readNitricDescriptor, writeNitricDescriptor, Task } from '@nitric/cli-common';
 import tar from 'tar-fs';
 import path from 'path';
 import streamToPromise from 'stream-to-promise';
 import fs from 'fs';
-import { Task } from '@nitric/common';
 
 interface MakeFunctionTaskOpts {
 	template: string;
