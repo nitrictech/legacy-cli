@@ -1,5 +1,7 @@
 import { templateFunctionPath } from '../../common/paths';
-import { NitricRuntime, isTemplateAvailable, readNitricDescriptor, writeNitricDescriptor, Task } from '@nitric/cli-common';
+import { NitricRuntime, readNitricDescriptor, writeNitricDescriptor, Task } from '@nitric/cli-common';
+import { isTemplateAvailable } from '../../utils';
+
 import tar from 'tar-fs';
 import path from 'path';
 import streamToPromise from 'stream-to-promise';
@@ -26,7 +28,7 @@ export class MakeFunctionTask extends Task<void> {
 		this.dir = dir;
 	}
 
-	private async makeFunction() {
+	private async makeFunction(): Promise<string> {
 		//TODO: validate inputs
 		// Validate template is installed/exists
 		//TODO: in future, we should attempt to download/install the template if possible
