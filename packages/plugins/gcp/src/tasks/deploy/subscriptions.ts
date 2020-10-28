@@ -7,7 +7,7 @@ import { google, run_v1 } from 'googleapis';
  * However the status key on cloud run deployments is not immediately available so we need to wait to ensure
  * we can correctly configure topics to push to our cloud run subscribers
  */
-export default async function (project: string, region: string, func: NitricFunction): any[] {
+export default async function (project: string, region: string, func: NitricFunction): Promise<any[]> {
 	let resources: any[] = [];
 
 	if (func.subs) {
