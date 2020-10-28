@@ -1,12 +1,12 @@
 import { Command, flags } from '@oclif/command';
 
 /**
- * Cloudless CLI create command
+ * Nitric CLI create command
  */
 export default class Create extends Command {
-	static description = 'Creates a new cloudless project';
+	static description = 'Creates a new project';
 
-	static examples = [`$ cloudless create my-cloudless-project`];
+	static examples = [`$ nitric create my-project`];
 
 	static flags = {
 		help: flags.help({ char: 'h' }),
