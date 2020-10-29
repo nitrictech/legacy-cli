@@ -13,6 +13,7 @@ export default class Project extends Command {
 
 	static flags = {
 		help: flags.help({ char: 'h' }),
+		force: flags.boolean(),
 	};
 
 	static args = [
@@ -23,9 +24,10 @@ export default class Project extends Command {
 		},
 	];
 
-	async run() {
-		const { args } = this.parse(Project);
+	async run(): Promise<void> {
+		const { args, flags } = this.parse(Project);
 		const { name } = args;
+		const { force } = flags;
 		let commands: ListrTask[] = [];
 
 		let { example }: { example: string } = await inquirer.prompt([
@@ -62,6 +64,6 @@ export default class Project extends Command {
 			];
 		}
 
-		await new Listr([wrapTaskForListr(new MakeProject(name)), ...commands]).run();
+		await new Listr([wrapTaskForListr(new MakeProject(name, force)), ...commands]).run();
 	}
 }
