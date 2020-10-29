@@ -47,7 +47,7 @@ export default class Function extends Command {
 			wrapTaskForListr(
 				new MakeFunctionTask({
 					template,
-					directory,
+					dir: directory,
 					name: functionDirectoryName,
 					file,
 				}),
