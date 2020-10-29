@@ -32,12 +32,12 @@ export function createBuildTasks(stack: NitricStack, directory: string, provider
 }
 
 /**
- * Cloudless CLI build command
+ * Nitric CLI build command
  * Will use docker to build the users application as a docker image
  * ready to be executed on a CaaS
  */
 export default class Build extends Command {
-	static description = 'Builds a nitric project';
+	static description = 'Builds a project';
 
 	static examples = [`$ nitric build .`];
 

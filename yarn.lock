@@ -654,6 +654,7 @@ __metadata:
     execa: ^4.0.3
     get-port: ^5.1.1
     globby: ^10
+    inquirer: ^7.3.3
     jest: ^26.6.1
     keypress: ^0.2.1
     listr: ^0.14.3
@@ -5058,7 +5059,7 @@ fsevents@^2.1.2:
   languageName: node
   linkType: hard
 
-"inquirer@npm:^7.0.0":
+"inquirer@npm:^7.0.0, inquirer@npm:^7.3.3":
   version: 7.3.3
   resolution: "inquirer@npm:7.3.3"
   dependencies:

@@ -78,13 +78,13 @@ async function runContainers(stack: NitricStack, portStart: number, directory: s
 }
 
 /**
- * Cloudless CLI run command
+ * Nitric CLI run command
  * Extends the build command to run the built docker images locally for testing.
  */
 export default class Run extends Command {
-	static description = 'Builds and runs a cloudless project';
+	static description = 'Builds and runs a project';
 
-	static examples = [`$ cloudless run .`];
+	static examples = [`$ nitric run .`];
 
 	static args = [...Build.args];
 

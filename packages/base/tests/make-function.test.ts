@@ -20,7 +20,7 @@ describe('Given executing nitric make:function', () => {
 			expect(async () => {
 				await new MakeFunctionTask({
 					template: 'dummy',
-					directory: 'any',
+					dir: 'any',
 					name: 'test',
 					file: 'nitric.yaml',
 				}).do();
