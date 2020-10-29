@@ -1,4 +1,4 @@
-name: Bump Package Versions and Tag
+name: Bump Package Versions, Tag and Draft Release
 
 on:
   push:
@@ -33,10 +33,24 @@ jobs:
     - name: Install Dependencies
       run: yarn --immutable
     - name: Bump and Tag
-      run: yarn bump
+      run: |
+        yarn bump
+        echo "::set-output name=TAG_REF::`git describe --abbrev=0`"
+      id: bump_tag
     - name: Merge Master -> Develop
       run: |
         git fetch
         git checkout develop
         git merge --no-ff master -m "Merge version bump into develop"
         git push origin master develop --follow-tags
+    - name: Create Draft Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ steps.bump_tag.outputs.TAG_REF }}
+        release_name: Release ${{ steps.bump_tag.outputs.TAG_REF }}
+        body: See CHANGELOG.md for changes
+        draft: true
+        prerelease: false
