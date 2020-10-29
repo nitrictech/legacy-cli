@@ -1,7 +1,7 @@
 {
   "name": "@nitric/cli",
   "description": "CLI tool for nitric applications",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "author": "Nitric <https://github.com/nitric-dev>",
   "bin": {
     "nitric": "./bin/run"
@@ -69,9 +69,15 @@
   "oclif": {
     "commands": "./lib/commands",
     "topics": {
-      "make": { "description": "Commands to make new projects and assets." },
-      "deploy": { "description": "Plugin commands to deploy on supported providers. E.g. `$ nitric plugins:install @nitric/plugin-aws`" },
-      "down": { "description": "Plugin commands to tear down deployments on supported providers. E.g. `$ nitric plugins:install @nitric/plugin-aws`" }
+      "make": {
+        "description": "Commands to make new projects and assets."
+      },
+      "deploy": {
+        "description": "Plugin commands to deploy on supported providers. E.g. `$ nitric plugins:install @nitric/plugin-aws`"
+      },
+      "down": {
+        "description": "Plugin commands to tear down deployments on supported providers. E.g. `$ nitric plugins:install @nitric/plugin-aws`"
+      }
     },
     "bin": "nitric",
     "plugins": [
