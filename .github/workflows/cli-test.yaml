@@ -1,13 +1,7 @@
 name: Tests
-on:
-  push:
-    branches-ignore:
-      - 'master'
-      - 'main'
-  pull_request:
-    branches:
-      - 'master'
-      - 'main'
+
+on: pull_request
+
 jobs:
   build:
     runs-on: ubuntu-latest
