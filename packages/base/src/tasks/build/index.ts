@@ -9,7 +9,7 @@ import {
 	Task,
 	getTagNameForFunction,
 } from '@nitric/cli-common';
-import { isTemplateAvailable, getLocalIp } from '../../utils';
+import { isTemplateAvailable } from '../../utils';
 import tar from 'tar-fs';
 import Docker from 'dockerode';
 import streamToPromise from 'stream-to-promise';
@@ -85,7 +85,6 @@ export class BuildFunctionTask extends Task<NitricImage> {
 	}
 
 	async do(): Promise<NitricImage> {
-		const myIp = await getLocalIp();
 		const docker = new Docker();
 		const functionStagingDirectory = path.join(STAGING_DIR, this.stackName, this.func.name);
 
@@ -134,7 +133,6 @@ export class BuildFunctionTask extends Task<NitricImage> {
 
 		const options = {
 			buildargs: {
-				GATEWAY_HOST: `${myIp}:5000`,
 				PROVIDER: this.provider,
 			},
 			t: getTagNameForFunction(this.stackName, this.func),

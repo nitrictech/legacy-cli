@@ -36,21 +36,32 @@ export class Down extends Task<void> {
 		const deletePolicy = this.keepResources ? 'ABANDON' : 'DELETE';
 
 		this.update('Deleting Deployment');
-
-		let { data: subOperation } = await dmClient.deployments.delete({
-			project: this.gcpProject,
-			deployment: `${sanitizeStringForDockerTag(this.stackName)}-subscriptions`,
-			deletePolicy,
-		});
+		let subOperation;
+		try {
+			const { data } = await dmClient.deployments.delete({
+				project: this.gcpProject,
+				deployment: `${sanitizeStringForDockerTag(this.stackName)}-subscriptions`,
+				deletePolicy,
+			});
+			subOperation = data;
+		} catch (error) {
+			throw new Error(error);
+		}
 
 		this.update(`Waiting for subscriptions to cleanup`);
 		await operationToPromise(this.gcpProject, subOperation);
 
-		let { data: operation } = await dmClient.deployments.delete({
-			project: this.gcpProject,
-			deployment: sanitizeStringForDockerTag(this.stackName),
-			deletePolicy,
-		});
+		let operation;
+		try {
+			const { data } = await dmClient.deployments.delete({
+				project: this.gcpProject,
+				deployment: sanitizeStringForDockerTag(this.stackName),
+				deletePolicy,
+			});
+			operation = data;
+		} catch (error) {
+			throw new Error(error);
+		}
 
 		this.update(`Waiting for infrastructure to cleanup`);
 		await operationToPromise(this.gcpProject, operation);
