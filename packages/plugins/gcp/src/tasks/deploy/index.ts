@@ -16,7 +16,7 @@ import Docker from 'dockerode';
 import yaml from 'yaml';
 import { operationToPromise } from '../utils';
 import { getGcrHost } from './regions';
-import { LocalWorkspace } from '@pulumi/pulumi/x/automation';
+import { LocalWorkspace, UpResult } from '@pulumi/pulumi/x/automation';
 
 interface CommonOptions {
 	gcpProject: string;
@@ -101,7 +101,7 @@ interface DeployOptions extends CommonOptions {
 	region: string;
 }
 
-export class Deploy extends Task<void> {
+export class Deploy extends Task<UpResult> {
 	private stack: NitricStack;
 	private gcpProject: string;
 	private region: string;
@@ -113,12 +113,11 @@ export class Deploy extends Task<void> {
 		this.region = region;
 	}
 
-	async do(): Promise<void> {
+	async do(): Promise<UpResult> {
 		this.update('Checking plugins');
 		await ensurePlugins();
 
 		this.update('Describing functions for Google Deployment Manager');
-		let resources: { [key: string]: any } = {};
 
 		const { stack, gcpProject, region } = this;
 
@@ -129,18 +128,30 @@ export class Deploy extends Task<void> {
 			const pulumiStack = await LocalWorkspace.createOrSelectStack({
 				projectName: PROJECT_NAME,
 				stackName: stack.name,
-
 				program: async () => {
+					let resources = {};
+
+					if (stack.topics) {
+						this.emit('update', 'Compiling topics');
+						// Build topics from stack
+						resources = {
+							...resources,
+							...stack.topics.reduce((acc, topic) => ({ ...acc, ...generateTopicResources(topic) }), {}),
+						};
+					}
+
 					if (stack.functions) {
 						resources = {
 							...resources,
-							...stack.functions.reduce(
-								(acc, func) => ({
+							...stack.functions.reduce((acc, func) => {
+								const service = generateFunctionResources(gcpProject, stack.name, func, region);
+								const subscriptions = generateSubscriptionsForFunction(gcpProject, func, service[func.name]);
+								return {
 									...acc,
-									...generateFunctionResources(gcpProject, stack.name, func, region),
-								}),
-								{},
-							),
+									...service,
+									...subscriptions,
+								};
+							}, {}),
 						};
 					}
 
@@ -156,14 +167,7 @@ export class Deploy extends Task<void> {
 						};
 					}
 
-					if (stack.topics) {
-						this.emit('update', 'Compiling topics');
-						// Build topics from stack
-						resources = {
-							...resources,
-							...stack.topics.reduce((acc, topic) => ({ ...acc, ...generateTopicResources(topic) }), {}),
-						};
-					}
+					return resources;
 				},
 			});
 
@@ -172,12 +176,12 @@ export class Deploy extends Task<void> {
 				'gcp:region': { value: region },
 			});
 
-			await pulumiStack.up({ onOutput: this.update.bind(this) });
+			const result = await pulumiStack.up({ onOutput: this.update.bind(this) });
+
+			return result;
 		} catch (error) {
 			throw new Error(`Error: ${JSON.stringify(error)}`);
 		}
-
-		this.update(`Deployment finished`);
 	}
 }
 

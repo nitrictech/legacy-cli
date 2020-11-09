@@ -1,4 +1,4 @@
-import { NitricFunction, sanitizeStringForDockerTag, getTagNameForFunction } from '@nitric/cli-common';
+import { NitricFunction, getTagNameForFunction } from '@nitric/cli-common';
 import { getGcrHost } from './regions';
 import { cloudrun } from '@pulumi/gcp';
 
@@ -18,6 +18,7 @@ export default function (
 	const { minScale = 0, maxScale = 10 } = func;
 
 	const service = new cloudrun.Service(func.name, {
+		name: func.name,
 		location: region,
 		template: {
 			metadata: {

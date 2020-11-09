@@ -10,7 +10,9 @@ export default function (topic: NitricTopic): { [key: string]: any } {
 
 	resources = {
 		...resources,
-		[topic.name]: new pubsub.Topic(topic.name),
+		[topic.name]: new pubsub.Topic(topic.name, {
+			name: topic.name,
+		}),
 	};
 
 	return resources;

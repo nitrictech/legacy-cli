@@ -96,6 +96,9 @@ export default class DeployCmd extends Command {
 			// ),
 		])
 			.run()
+			.then((results) => {
+				console.log(results);
+			})
 			.catch((error) => {
 				console.error(error);
 			});

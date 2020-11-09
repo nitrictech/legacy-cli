@@ -7,7 +7,9 @@ export default function (stackName: string, bucket: NitricBucket): { [key: strin
 
 	resources = {
 		...resources,
-		[bucket.name]: new storage.Bucket(`${stackName}-${bucket.name}`),
+		[bucket.name]: new storage.Bucket(`${stackName}-${bucket.name}`, {
+			name: `${stackName}-${bucket.name}`,
+		}),
 	};
 
 	return resources;
