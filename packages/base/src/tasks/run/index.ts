@@ -66,8 +66,15 @@ export class RunFunctionTask extends Task<Container> {
 			// process.stdout,
 			stdioStream,
 			dockerOptions,
-			(_: any, data: any, __: any) => {
-				console.log('Status: ' + data.StatusCode);
+			(containerError: any, data: any, __: any) => {
+				if (containerError) {
+					//TODO: handle this better
+					console.log(containerError);
+				}
+
+				if (data && data.StatusCode) {
+					console.log('Status: ' + data.StatusCode);
+				}
 			},
 		);
 
