@@ -37,7 +37,7 @@ export default function (project: string, func: NitricFunction, service: cloudru
 					topic: `projects/${project}/topics/${sub.topic}`,
 					pushConfig: {
 						oidcToken: {
-							serviceAccountEmail: `${functionServiceAccount.email}`,
+							serviceAccountEmail: functionServiceAccount.email,
 						},
 						// TODO: Function resource reference here...
 						// pushEndpoint: `$(ref.${funcResourceName}.status.url)`
