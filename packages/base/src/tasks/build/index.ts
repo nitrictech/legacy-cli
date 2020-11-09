@@ -166,7 +166,7 @@ export class BuildFunctionTask extends Task<NitricImage> {
 
 		const filteredResults = buildResults.filter((obj) => 'aux' in obj && 'ID' in obj['aux']);
 		if (filteredResults.length > 0) {
-			const imageId = filteredResults[0]['aux'].ID.split(':').pop() as string;
+			const imageId = filteredResults[filteredResults.length - 1]['aux'].ID.split(':').pop() as string;
 			return { id: imageId, func: this.func } as NitricImage;
 		} else {
 			const {
