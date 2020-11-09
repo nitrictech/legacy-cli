@@ -1,21 +1,17 @@
 import { NitricTopic } from '@nitric/cli-common';
+import { pubsub } from '@pulumi/gcp';
 
 /**
  * Create deployment manager resources for a given topic
  * @param topic
  */
-export default function (topic: NitricTopic): any[] {
-	let resources = [] as any[];
+export default function (topic: NitricTopic): { [key: string]: any } {
+	let resources = {};
 
-	resources = [
-		{
-			type: 'gcp-types/pubsub-v1:projects.topics',
-			name: topic.name,
-			properties: {
-				topic: topic.name,
-			},
-		},
-	];
+	resources = {
+		...resources,
+		[topic.name]: new pubsub.Topic(topic.name),
+	};
 
 	return resources;
 }

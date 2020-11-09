@@ -62,7 +62,6 @@ export default class DeployCmd extends Command {
 		const stack = readNitricDescriptor(path.join(dir, file));
 
 		new Listr([
-			wrapTaskForListr(new CreateTypeProviders({ gcpProject: project })),
 			{
 				title: 'Pushing Images',
 				task: (): Listr =>
@@ -88,13 +87,17 @@ export default class DeployCmd extends Command {
 					region,
 				}),
 			),
-			wrapTaskForListr(
-				new DeploySubscriptions({
-					gcpProject: project,
-					stack,
-					region,
-				}),
-			),
-		]).run();
+			// wrapTaskForListr(
+			// 	new DeploySubscriptions({
+			// 		gcpProject: project,
+			// 		stack,
+			// 		region,
+			// 	}),
+			// ),
+		])
+			.run()
+			.catch((error) => {
+				console.error(error);
+			});
 	}
 }

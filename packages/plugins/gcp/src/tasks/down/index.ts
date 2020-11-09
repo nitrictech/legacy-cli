@@ -1,12 +1,13 @@
-import { Task, sanitizeStringForDockerTag } from '@nitric/cli-common';
-import { deploymentmanager_v2beta, google } from 'googleapis';
-import { operationToPromise } from '../utils';
+import { Task } from '@nitric/cli-common';
+import { LocalWorkspace } from '@pulumi/pulumi/x/automation';
 
 interface DownOptions {
 	gcpProject: string;
 	stackName: string;
 	keepResources: boolean;
 }
+
+const PROJECT_NAME = 'nitric-gcp';
 
 /**
  * Tear down a deployed stack
@@ -24,46 +25,14 @@ export class Down extends Task<void> {
 	}
 
 	async do(): Promise<void> {
-		const auth = new google.auth.GoogleAuth({
-			scopes: ['https://www.googleapis.com/auth/cloud-platform'],
+		const pulumiStack = await LocalWorkspace.selectStack({
+			projectName: PROJECT_NAME,
+			stackName: this.stackName,
+			program: async () => {
+				this.update('Tearing down stack');
+			},
 		});
-		const authClient = await auth.getClient();
 
-		const dmClient = new deploymentmanager_v2beta.Deploymentmanager({
-			auth: authClient,
-		});
-
-		const deletePolicy = this.keepResources ? 'ABANDON' : 'DELETE';
-
-		this.update('Deleting Deployment');
-		let subOperation;
-		try {
-			const { data } = await dmClient.deployments.delete({
-				project: this.gcpProject,
-				deployment: `${sanitizeStringForDockerTag(this.stackName)}-subscriptions`,
-				deletePolicy,
-			});
-			subOperation = data;
-		} catch (error) {
-			throw new Error(error);
-		}
-
-		this.update(`Waiting for subscriptions to cleanup`);
-		await operationToPromise(this.gcpProject, subOperation);
-
-		let operation;
-		try {
-			const { data } = await dmClient.deployments.delete({
-				project: this.gcpProject,
-				deployment: sanitizeStringForDockerTag(this.stackName),
-				deletePolicy,
-			});
-			operation = data;
-		} catch (error) {
-			throw new Error(error);
-		}
-
-		this.update(`Waiting for infrastructure to cleanup`);
-		await operationToPromise(this.gcpProject, operation);
+		await pulumiStack.destroy({ onOutput: this.update.bind(this) });
 	}
 }

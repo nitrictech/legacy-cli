@@ -7,7 +7,7 @@ import {
 	getTagNameForFunction,
 	dockerodeEvtToString,
 } from '@nitric/cli-common';
-import generateFunctionResources, { generateFunctionOutputs } from './functions';
+import generateFunctionResources from './functions';
 import generateTopicResources from './topics';
 import generateBucketResources from './buckets';
 import generateSubscriptionsForFunction from './subscriptions';
@@ -16,76 +16,18 @@ import Docker from 'dockerode';
 import yaml from 'yaml';
 import { operationToPromise } from '../utils';
 import { getGcrHost } from './regions';
+import { LocalWorkspace } from '@pulumi/pulumi/x/automation';
 
 interface CommonOptions {
 	gcpProject: string;
 }
 
-export class CreateTypeProviders extends Task<void> {
-	private gcpProject: string;
+const PROJECT_NAME = 'nitric-gcp';
 
-	constructor({ gcpProject }: CommonOptions) {
-		super('Configuring project for Nitric');
-		this.gcpProject = gcpProject;
-	}
-
-	async do(): Promise<void> {
-		// TODO: Make re-usable singleton module
-		const auth = new google.auth.GoogleAuth({
-			scopes: ['https://www.googleapis.com/auth/cloud-platform'],
-		});
-
-		const authClient = await auth.getClient();
-		const dmClient = new deploymentmanager_v2beta.Deploymentmanager({
-			auth: authClient,
-		});
-
-		this.update('Retrieving existing deployment provider list');
-		const {
-			data: { typeProviders },
-		} = await dmClient.typeProviders.list({
-			project: this.gcpProject,
-		});
-
-		const typeProvider = {
-			description: 'Type provider for deploying service to cloud run',
-			descriptorUrl: 'https://run.googleapis.com/$discovery/rest?version=v1',
-			name: 'nitric-cloud-run',
-			options: {
-				inputMappings: [
-					{
-						fieldName: 'Authorization',
-						location: 'HEADER',
-						value: '$.concat("Bearer ", $.googleOauth2AccessToken())',
-					},
-					{
-						fieldName: 'name',
-						location: 'PATH',
-						// methodMatch: '^delete$',
-						value: '$.concat($.resource.properties.parent, "/services/", $.resource.properties.metadata.name)',
-					},
-				],
-			},
-		};
-
-		// see if our type provider has already been installed
-		// TODO: Needs more work in order to get update/delete working
-		if (typeProviders?.map(({ name }) => name).includes('nitric-cloud-run')) {
-			this.update('Updating existing type provider');
-			await dmClient.typeProviders.update({
-				project: this.gcpProject,
-				typeProvider: 'nitric-cloud-run',
-				requestBody: typeProvider,
-			});
-		} else {
-			this.update('Create new type provider nitric-cloud-run');
-			await dmClient.typeProviders.insert({
-				project: this.gcpProject,
-				requestBody: typeProvider,
-			});
-		}
-	}
-}
+const ensurePlugins = async (): Promise<void> => {
+	const ws = await LocalWorkspace.create({});
+	await ws.installPlugin('gcp', 'v4.2.1');
+};
 
 interface PushImageOptions extends CommonOptions {
 	stackName: string;
@@ -172,115 +114,69 @@ export class Deploy extends Task<void> {
 	}
 
 	async do(): Promise<void> {
-		const auth = new google.auth.GoogleAuth({
-			scopes: ['https://www.googleapis.com/auth/cloud-platform'],
-		});
-		const authClient = await auth.getClient();
-
-		const dmClient = new deploymentmanager_v2beta.Deploymentmanager({
-			auth: authClient,
-		});
+		this.update('Checking plugins');
+		await ensurePlugins();
 
 		this.update('Describing functions for Google Deployment Manager');
-		let resources: any[] = [];
-		let outputs: any[] = [];
+		let resources: { [key: string]: any } = {};
 
 		const { stack, gcpProject, region } = this;
 
 		// Finally functions and subscriptions
-		if (stack.functions) {
-			resources = [
-				...resources,
-				...stack.functions.reduce(
-					(acc, func) => [...acc, ...generateFunctionResources(gcpProject, stack.name, func, region)],
-					[] as any[],
-				),
-			];
-
-			outputs = [
-				...outputs,
-				...stack.functions.reduce((acc, func) => [...acc, ...generateFunctionOutputs(func)], [] as any[]),
-			];
-		}
-
-		if (stack.buckets) {
-			this.emit('update', 'Compiling buckets');
-			// Build topics from stack
-			resources = [
-				...resources,
-				...stack.buckets.reduce((acc, bucket) => [...acc, ...generateBucketResources(stack.name, bucket)], [] as any[]),
-			];
-		}
-
-		if (stack.topics) {
-			this.emit('update', 'Compiling topics');
-			// Build topics from stack
-			resources = [
-				...resources,
-				...stack.topics.reduce((acc, topic) => [...acc, ...generateTopicResources(topic)], [] as any[]),
-			];
-		}
 
 		this.update('Checking if deployment already exists');
-		let existingDeployment: deploymentmanager_v2beta.Schema$Deployment | undefined = undefined;
-
 		try {
-			const { data } = await dmClient.deployments.get({
-				project: gcpProject,
-				deployment: sanitizeStringForDockerTag(stack.name),
+			const pulumiStack = await LocalWorkspace.createOrSelectStack({
+				projectName: PROJECT_NAME,
+				stackName: stack.name,
+
+				program: async () => {
+					if (stack.functions) {
+						resources = {
+							...resources,
+							...stack.functions.reduce(
+								(acc, func) => ({
+									...acc,
+									...generateFunctionResources(gcpProject, stack.name, func, region),
+								}),
+								{},
+							),
+						};
+					}
+
+					if (stack.buckets) {
+						this.emit('update', 'Compiling buckets');
+						// Build topics from stack
+						resources = {
+							...resources,
+							...stack.buckets.reduce(
+								(acc, bucket) => ({ ...acc, ...generateBucketResources(stack.name, bucket) }),
+								{},
+							),
+						};
+					}
+
+					if (stack.topics) {
+						this.emit('update', 'Compiling topics');
+						// Build topics from stack
+						resources = {
+							...resources,
+							...stack.topics.reduce((acc, topic) => ({ ...acc, ...generateTopicResources(topic) }), {}),
+						};
+					}
+				},
 			});
-			existingDeployment = data;
+
+			await pulumiStack.setAllConfig({
+				'gcp:project': { value: gcpProject },
+				'gcp:region': { value: region },
+			});
+
+			await pulumiStack.up({ onOutput: this.update.bind(this) });
 		} catch (error) {
-			this.update('Stack does not already exist');
+			throw new Error(`Error: ${JSON.stringify(error)}`);
 		}
 
-		let operation: deploymentmanager_v2beta.Schema$Operation;
-
-		if (existingDeployment) {
-			this.update(`Updating existing stack ${stack.name}`);
-			operation = (
-				await dmClient.deployments.update({
-					project: gcpProject,
-					deployment: sanitizeStringForDockerTag(stack.name),
-					deletePolicy: 'DELETE',
-					requestBody: {
-						name: sanitizeStringForDockerTag(stack.name),
-						fingerprint: existingDeployment.fingerprint,
-						target: {
-							config: {
-								content: yaml.stringify({
-									resources,
-									outputs,
-								}),
-							},
-						},
-					},
-				})
-			).data;
-		} else {
-			this.update('Pushing stack to Google Cloud Deployment Manager');
-			operation = (
-				await dmClient.deployments.insert({
-					project: gcpProject,
-					requestBody: {
-						name: sanitizeStringForDockerTag(stack.name),
-						target: {
-							config: {
-								content: yaml.stringify({
-									resources,
-									outputs,
-								}),
-							},
-						},
-					},
-				})
-			).data;
-		}
-
-		this.update(`Waiting for deployment to finish`);
-		await operationToPromise(gcpProject, operation);
-
-		// TODO: Check deployment status
 		this.update(`Deployment finished`);
 	}
 }

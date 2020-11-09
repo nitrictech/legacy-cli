@@ -1,20 +1,14 @@
 import { NitricBucket } from '@nitric/cli-common';
 
-export default function (stackName: string, bucket: NitricBucket): any[] {
-	let resources = [] as any[];
+import { storage } from '@pulumi/gcp';
 
-	resources = [
-		{
-			type: 'gcp-types/storage-v1:buckets',
-			name: `${stackName}-${bucket.name}`,
-			// TODO: Define storage classes
-			// storageClass: 'STANDARD',
-			// TODO: Define storage locations
-			// location: 'US',
-			// TODO: Define storage projections
-			// projection: 'full',
-		},
-	];
+export default function (stackName: string, bucket: NitricBucket): { [key: string]: any } {
+	let resources: { [key: string]: any } = {};
+
+	resources = {
+		...resources,
+		[bucket.name]: new storage.Bucket(`${stackName}-${bucket.name}`),
+	};
 
 	return resources;
 }
