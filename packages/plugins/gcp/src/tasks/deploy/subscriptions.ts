@@ -1,6 +1,6 @@
-import { NitricFunction, sanitizeStringForDockerTag } from '@nitric/cli-common';
+import { NitricFunction } from '@nitric/cli-common';
 // import { google, run_v1 } from 'googleapis';
-import { iam, pubsub, cloudrun, serviceaccount } from '@pulumi/gcp';
+import { pubsub, cloudrun, serviceaccount } from '@pulumi/gcp';
 
 /**
  * Create deploy time subscription resources
@@ -27,7 +27,8 @@ export default function (project: string, func: NitricFunction, service: cloudru
 
 		new cloudrun.IamBinding(`${func.name}-invoker-binding`, {
 			service: service.name,
-			members: [`serviceAccount:${functionServiceAccount.email}`],
+			location: service.location,
+			members: [functionServiceAccount.email.apply((email) => `serviceAccount:${email}`)],
 			role: 'roles/run.invoker',
 		});
 
@@ -39,8 +40,6 @@ export default function (project: string, func: NitricFunction, service: cloudru
 						oidcToken: {
 							serviceAccountEmail: functionServiceAccount.email,
 						},
-						// TODO: Function resource reference here...
-						// pushEndpoint: `$(ref.${funcResourceName}.status.url)`
 						pushEndpoint: url,
 					},
 				}),
