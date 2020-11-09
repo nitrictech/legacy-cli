@@ -2,9 +2,7 @@ import { Task } from '@nitric/cli-common';
 import { LocalWorkspace } from '@pulumi/pulumi/x/automation';
 
 interface DownOptions {
-	gcpProject: string;
 	stackName: string;
-	keepResources: boolean;
 }
 
 const PROJECT_NAME = 'nitric-gcp';
@@ -14,14 +12,10 @@ const PROJECT_NAME = 'nitric-gcp';
  */
 export class Down extends Task<void> {
 	private stackName: string;
-	private gcpProject: string;
-	private keepResources: boolean;
 
-	constructor({ stackName, gcpProject, keepResources }: DownOptions) {
+	constructor({ stackName }: DownOptions) {
 		super(`Tearing Down Stack: ${stackName}`);
 		this.stackName = stackName;
-		this.gcpProject = gcpProject;
-		this.keepResources = keepResources;
 	}
 
 	async do(): Promise<void> {

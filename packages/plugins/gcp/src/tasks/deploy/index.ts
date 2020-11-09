@@ -1,4 +1,4 @@
-import { deploymentmanager_v2beta, google } from 'googleapis';
+import { google } from 'googleapis';
 import {
 	Task,
 	NitricFunction,
@@ -11,10 +11,7 @@ import generateFunctionResources from './functions';
 import generateTopicResources from './topics';
 import generateBucketResources from './buckets';
 import generateSubscriptionsForFunction from './subscriptions';
-import generateIamServiceAccounts from './invoker';
 import Docker from 'dockerode';
-import yaml from 'yaml';
-import { operationToPromise } from '../utils';
 import { getGcrHost } from './regions';
 import { LocalWorkspace, UpResult } from '@pulumi/pulumi/x/automation';
 
@@ -122,7 +119,6 @@ export class Deploy extends Task<UpResult> {
 		const { stack, gcpProject, region } = this;
 
 		// Finally functions and subscriptions
-
 		this.update('Checking if deployment already exists');
 		try {
 			const pulumiStack = await LocalWorkspace.createOrSelectStack({
@@ -182,59 +178,5 @@ export class Deploy extends Task<UpResult> {
 		} catch (error) {
 			throw new Error(`Error: ${JSON.stringify(error)}`);
 		}
-	}
-}
-
-/**
- * Deploy Subscriptions
- */
-export class DeploySubscriptions extends Task<void> {
-	private stack: NitricStack;
-	private project: string;
-	private region: string;
-
-	constructor({ gcpProject, region, stack }: DeployOptions) {
-		super('Deploying Topic Subscriptions');
-		this.stack = stack;
-		this.project = gcpProject;
-		this.region = region;
-	}
-
-	async do(): Promise<void> {
-		const { stack, project, region } = this;
-		const auth = new google.auth.GoogleAuth({
-			scopes: ['https://www.googleapis.com/auth/cloud-platform'],
-		});
-		const authClient = await auth.getClient();
-
-		const dmClient = new deploymentmanager_v2beta.Deploymentmanager({
-			auth: authClient,
-		});
-
-		this.update('Describing internal service accounts');
-		const iam = await generateIamServiceAccounts(project, stack.name);
-
-		this.update('Describing topic subscriptions');
-		const subscriptions = (
-			await Promise.all(stack.functions!.map((func) => generateSubscriptionsForFunction(project, region, func)))
-		).reduce((acc, subs) => [...acc, ...subs], [] as any[]);
-
-		this.update('Deploying subscriptions');
-		let { data: operation } = await dmClient.deployments.insert({
-			project,
-			requestBody: {
-				name: `${sanitizeStringForDockerTag(stack.name)}-subscriptions`,
-				target: {
-					config: {
-						content: yaml.stringify({
-							resources: [...iam, ...subscriptions],
-						}),
-					},
-				},
-			},
-		});
-
-		this.update(`Waiting for deployment to finish`);
-		await operationToPromise(project, operation);
 	}
 }

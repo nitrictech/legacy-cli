@@ -1,24 +1,13 @@
 import { Down } from '../src/tasks/down';
-import { deploymentmanager_v2beta, google } from 'googleapis';
+import { LocalWorkspace } from '@pulumi/pulumi/x/automation';
 
 describe('nitric down:gcp tests', () => {
-	describe('Given a call to DeploymentManager.delete() rejects', () => {
+	describe('Given a call to LocalWorkspace.selectStack rejects', () => {
 		beforeAll(() => {
-			const authMock = jest.spyOn(google.auth, 'GoogleAuth');
-			authMock.mockImplementation(
-				() =>
-					({
-						getClient: () => ({} as any),
-					} as any),
-			);
-
-			const gcpMock = jest.spyOn(deploymentmanager_v2beta, 'Deploymentmanager');
-			gcpMock.mockImplementation(() => {
-				return {
-					deployments: {
-						delete: (): Promise<any> => Promise.reject(),
-					},
-				} as any;
+			const selectStackMock = jest.spyOn(LocalWorkspace, 'selectStack');
+			selectStackMock.mockImplementation(async () => {
+				// TODO: Mock genuine error for missing stack
+				throw new Error('Some error occurred');
 			});
 		});
 
@@ -30,9 +19,7 @@ describe('nitric down:gcp tests', () => {
 			expect(
 				async () =>
 					await new Down({
-						gcpProject: 'mock-project',
 						stackName: 'test',
-						keepResources: false,
 					}).do(),
 			).rejects.toThrowError();
 		});
