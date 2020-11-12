@@ -4,22 +4,28 @@ import Build, { createBuildTasks } from './build';
 import { readNitricDescriptor, wrapTaskForListr, NitricImage, NitricStack } from '@nitric/cli-common';
 import Listr from 'listr';
 import path from 'path';
-import Docker, { Network, Container } from 'dockerode';
+import Docker, { Network, Container, Volume } from 'dockerode';
 import getPort from 'get-port';
-import { RunFunctionTask, RunFunctionTaskOptions, CreateNetworkTask } from '../tasks/run';
+import { RunFunctionTask, RunFunctionTaskOptions, CreateNetworkTask, CreateVolumeTask } from '../tasks/run';
 
 import keypress from 'keypress';
 import clear from 'clear';
 
 const docker = new Docker(/*{host: '127.0.0.1', port: 3000}*/);
 
-export function createRunTasks(functions: RunFunctionTaskOptions[], docker?: Docker): Listr {
-	return new Listr([
-		wrapTaskForListr(new CreateNetworkTask({ name: 'run-network', docker }), 'network'),
+interface KnownListrCtx {
+	network: Network;
+	volume: Volume;
+}
+type ListrCtx = { [key: string]: any } & KnownListrCtx & Listr.ListrContext;
+
+export function createRunTasks(stackName: string, functions: RunFunctionTaskOptions[], docker?: Docker): Listr {
+	return new Listr<ListrCtx>([
+		wrapTaskForListr(new CreateNetworkTask({ name: `${stackName}-net`, docker }), 'network'),
+		wrapTaskForListr(new CreateVolumeTask({ volumeName: `${stackName}-vol`, dockerClient: docker }), 'volume'),
 		{
 			title: 'Running Functions',
 			task: (ctx): Listr => {
-				console.log('CTX: ', ctx);
 				return new Listr(
 					functions.map((func) =>
 						wrapTaskForListr(
@@ -27,6 +33,7 @@ export function createRunTasks(functions: RunFunctionTaskOptions[], docker?: Doc
 								{
 									...func,
 									network: ctx.network,
+									volume: ctx.volume,
 								},
 								docker,
 							),
@@ -51,6 +58,11 @@ function getRunResults(): { [key: string]: Docker.Container } | undefined {
 let network: Network | undefined = undefined;
 function getCurrentNetwork(): Network | undefined {
 	return network;
+}
+
+let volume: Volume | undefined = undefined;
+function getCurrentVolume(): Volume | undefined {
+	return volume;
 }
 
 /**
@@ -98,11 +110,17 @@ async function runContainers(stack: NitricStack, portStart: number, directory: s
 		}),
 	);
 
-	const { network: newNetwork, ...results }: { [key: string]: Container } & { network: Network } = await createRunTasks(
+	const {
+		network: newNetwork,
+		volume: newVolume,
+		...results
+	}: { [key: string]: Container } & { network: Network; volume: Volume } = await createRunTasks(
+		stack.name,
 		runTaskOptions,
 		docker,
 	).run();
 
+	volume = newVolume;
 	network = newNetwork;
 	runResults = results;
 
@@ -161,6 +179,10 @@ export default class Run extends Command {
 
 						if (network) {
 							await network.remove();
+						}
+
+						if (volume) {
+							await volume.remove();
 						}
 
 						cli.action.stop();
