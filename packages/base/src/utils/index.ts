@@ -1,5 +1,5 @@
 import fs from 'fs';
-import { TEMPLATE_DIR } from '../common/paths';
+import { TEMPLATE_DIR, LOG_DIR } from '../common/paths';
 import path from 'path';
 
 /**
@@ -8,4 +8,14 @@ import path from 'path';
 export function isTemplateAvailable(templateName: string): boolean {
 	const templateDirectory = path.join(TEMPLATE_DIR, templateName);
 	return fs.existsSync(templateDirectory);
+}
+
+export function createNitricLogDir(): void {
+	if (!fs.existsSync(LOG_DIR)) {
+		fs.mkdirSync(LOG_DIR);
+	}
+}
+
+export function functionLogFilePath(name: string): string {
+	return `${LOG_DIR}/${name}.txt`;
 }

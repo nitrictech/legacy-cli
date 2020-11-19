@@ -5,7 +5,9 @@ import { Task } from './task';
 import { ListrTask } from 'listr';
 import * as fs from 'fs';
 
-export function wrapTaskForListr<T>(task: Task<T>, ...args: any[]): ListrTask<{ [key: string]: T }> {
+export function wrapTaskForListr<T>(task: Task<T>, ctxKey?: string, ...args: any[]): ListrTask<{ [key: string]: T }> {
+	const contextKey = ctxKey || task.name;
+
 	return {
 		title: task.name,
 		task: (ctx): Observable<any> =>
@@ -13,7 +15,7 @@ export function wrapTaskForListr<T>(task: Task<T>, ...args: any[]): ListrTask<{ 
 				task.on('update', (message) => obs.next(message));
 				task.on('error', (error) => obs.error(error));
 				task.on('done', (result: T) => {
-					ctx[task.name] = result;
+					ctx[contextKey] = result;
 					obs.complete();
 				});
 				task.run(...args);
