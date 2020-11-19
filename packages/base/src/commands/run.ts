@@ -70,7 +70,7 @@ function getCurrentVolume(): Volume | undefined {
  */
 async function runContainers(stack: NitricStack, portStart: number, directory: string): Promise<void> {
 	cli.action.stop();
-	// clear();
+	clear();
 
 	const currentRunResults = getRunResults();
 	const currentNetwork = getCurrentNetwork();
