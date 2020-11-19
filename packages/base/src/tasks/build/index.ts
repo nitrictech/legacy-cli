@@ -38,6 +38,17 @@ export function createStagingDirectory(): void {
 	}
 }
 
+function getDockerIgnoreFiles(dir: string): string[] {
+	const dockerIgnoreFile = path.join(dir, '.dockerignore');
+
+	if (fs.existsSync(dockerIgnoreFile)) {
+		// Read the file and return its contents split by new line
+		return fs.readFileSync(dockerIgnoreFile).toString().split('\n');
+	}
+
+	return [];
+}
+
 /**
  * Stage application resources ready for building
  * @param {NitricStack} stack
@@ -87,6 +98,7 @@ export class BuildFunctionTask extends Task<NitricImage> {
 	async do(): Promise<NitricImage> {
 		const docker = new Docker();
 		const functionStagingDirectory = path.join(STAGING_DIR, this.stackName, this.func.name);
+		const excludeFiles = this.func.excludes || [];
 
 		// Setup template staging dir
 		const templatePipe = tar.extract(functionStagingDirectory);
@@ -114,14 +126,16 @@ export class BuildFunctionTask extends Task<NitricImage> {
 			});
 		}
 
+		const excludes = [...excludeFiles, ...getDockerIgnoreFiles(`${TEMPLATE_DIR}/${this.func.runtime}`)];
+
 		// Copy runtime template and /function to staging dir
 		tar.pack(`${TEMPLATE_DIR}/${this.func.runtime}`).pipe(templatePipe);
 		await streamToPromise(templatePipe);
 		let packOptions = {};
-		if (this.func.excludes) {
+		if (excludes.length) {
 			packOptions = {
 				...packOptions,
-				ignore: (entry: string): boolean => multimatch(entry, this.func.excludes!).length > 0,
+				ignore: (entry: string): boolean => multimatch(entry, excludes).length > 0,
 			};
 		}
 
