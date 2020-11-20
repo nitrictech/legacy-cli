@@ -4,28 +4,48 @@ import Build, { createBuildTasks } from './build';
 import { readNitricDescriptor, wrapTaskForListr, NitricImage, NitricStack } from '@nitric/cli-common';
 import Listr from 'listr';
 import path from 'path';
-import Docker from 'dockerode';
+import Docker, { Network, Container, Volume } from 'dockerode';
 import getPort from 'get-port';
-import { RunFunctionTask, RunFunctionTaskOptions } from '../tasks/run';
+import { RunFunctionTask, RunFunctionTaskOptions, CreateNetworkTask, CreateVolumeTask } from '../tasks/run';
 
 import keypress from 'keypress';
 import clear from 'clear';
 
 const docker = new Docker(/*{host: '127.0.0.1', port: 3000}*/);
 
-export function createRunTasks(functions: RunFunctionTaskOptions[], docker?: Docker): Listr {
-	return new Listr([
+interface KnownListrCtx {
+	network: Network;
+	volume: Volume;
+}
+type ListrCtx = { [key: string]: any } & KnownListrCtx & Listr.ListrContext;
+
+export function createRunTasks(stackName: string, functions: RunFunctionTaskOptions[], docker?: Docker): Listr {
+	return new Listr<ListrCtx>([
+		wrapTaskForListr(new CreateNetworkTask({ name: `${stackName}-net`, docker }), 'network'),
+		wrapTaskForListr(new CreateVolumeTask({ volumeName: `${stackName}-vol`, dockerClient: docker }), 'volume'),
 		{
 			title: 'Running Functions',
-			task: (): Listr =>
-				new Listr(
-					functions.map((func) => wrapTaskForListr(new RunFunctionTask(func, docker))),
+			task: (ctx): Listr => {
+				return new Listr(
+					functions.map((func) =>
+						wrapTaskForListr(
+							new RunFunctionTask(
+								{
+									...func,
+									network: ctx.network,
+									volume: ctx.volume,
+								},
+								docker,
+							),
+						),
+					),
 					{
 						concurrent: true,
 						// Don't fail all on a single function failure...
 						exitOnError: false,
 					},
-				),
+				);
+			},
 		},
 	]);
 }
@@ -33,6 +53,16 @@ export function createRunTasks(functions: RunFunctionTaskOptions[], docker?: Doc
 let runResults: { [key: string]: Docker.Container } | undefined = undefined;
 function getRunResults(): { [key: string]: Docker.Container } | undefined {
 	return runResults;
+}
+
+let network: Network | undefined = undefined;
+function getCurrentNetwork(): Network | undefined {
+	return network;
+}
+
+let volume: Volume | undefined = undefined;
+function getCurrentVolume(): Volume | undefined {
+	return volume;
 }
 
 /**
@@ -43,16 +73,22 @@ async function runContainers(stack: NitricStack, portStart: number, directory: s
 	clear();
 
 	const currentRunResults = getRunResults();
+	const currentNetwork = getCurrentNetwork();
 	const builtImages = await createBuildTasks(stack, directory).run();
 	const images = Object.values(builtImages) as NitricImage[];
 
 	if (currentRunResults) {
 		await Promise.all(
-			Object.values(currentRunResults).map((container) => {
+			Object.values(currentRunResults).map(async (container) => {
 				// FIXME: only attempt to stop if currently running
-				return container.stop();
+				await container.stop();
+				return container.remove();
 			}),
 		);
+	}
+
+	if (currentNetwork) {
+		await currentNetwork.remove();
 	}
 
 	const rangeLength = images.length * 2;
@@ -63,11 +99,31 @@ async function runContainers(stack: NitricStack, portStart: number, directory: s
 			return {
 				image,
 				port: await getPort({ port: portRange }),
+				subscriptions: stack.functions?.reduce((subs, func) => {
+					func.subs?.forEach(({ topic }) => {
+						subs[topic] = subs[topic] || [];
+						subs[topic].push(`http://${func.name}:9001`);
+					});
+					return subs;
+				}, {} as Record<string, string[]>),
 			} as RunFunctionTaskOptions;
 		}),
 	);
 
-	runResults = await createRunTasks(runTaskOptions, docker).run();
+	const {
+		network: newNetwork,
+		volume: newVolume,
+		...results
+	}: { [key: string]: Container } & { network: Network; volume: Volume } = await createRunTasks(
+		stack.name,
+		runTaskOptions,
+		docker,
+	).run();
+
+	volume = newVolume;
+	network = newNetwork;
+	runResults = results;
+
 	cli.table(runTaskOptions, {
 		function: {
 			get: (row): string => row.image && row.image.func.name,
@@ -114,11 +170,21 @@ export default class Run extends Command {
 					try {
 						if (runResults) {
 							await Promise.all(
-								Object.values(runResults).map((container) => {
-									return container.stop();
+								Object.values(runResults).map(async (container) => {
+									await container.stop();
+									return container.remove();
 								}),
 							);
 						}
+
+						if (network) {
+							await network.remove();
+						}
+
+						if (volume) {
+							await volume.remove();
+						}
+
 						cli.action.stop();
 						// As we have stdin set to raw mode pausing will cause the process to gracefully exit
 						process.stdin.pause();

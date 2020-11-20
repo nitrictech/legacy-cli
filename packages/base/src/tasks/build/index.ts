@@ -9,7 +9,7 @@ import {
 	Task,
 	getTagNameForFunction,
 } from '@nitric/cli-common';
-import { isTemplateAvailable, getLocalIp } from '../../utils';
+import { isTemplateAvailable } from '../../utils';
 import tar from 'tar-fs';
 import Docker from 'dockerode';
 import streamToPromise from 'stream-to-promise';
@@ -36,6 +36,17 @@ export function createStagingDirectory(): void {
 	if (!fs.existsSync(STAGING_DIR)) {
 		fs.mkdirSync(STAGING_DIR);
 	}
+}
+
+function getDockerIgnoreFiles(dir: string): string[] {
+	const dockerIgnoreFile = path.join(dir, '.dockerignore');
+
+	if (fs.existsSync(dockerIgnoreFile)) {
+		// Read the file and return its contents split by new line
+		return fs.readFileSync(dockerIgnoreFile).toString().split('\n');
+	}
+
+	return [];
 }
 
 /**
@@ -85,9 +96,9 @@ export class BuildFunctionTask extends Task<NitricImage> {
 	}
 
 	async do(): Promise<NitricImage> {
-		const myIp = await getLocalIp();
 		const docker = new Docker();
 		const functionStagingDirectory = path.join(STAGING_DIR, this.stackName, this.func.name);
+		const excludeFiles = this.func.excludes || [];
 
 		// Setup template staging dir
 		const templatePipe = tar.extract(functionStagingDirectory);
@@ -115,14 +126,16 @@ export class BuildFunctionTask extends Task<NitricImage> {
 			});
 		}
 
+		const excludes = [...excludeFiles, ...getDockerIgnoreFiles(`${TEMPLATE_DIR}/${this.func.runtime}`)];
+
 		// Copy runtime template and /function to staging dir
 		tar.pack(`${TEMPLATE_DIR}/${this.func.runtime}`).pipe(templatePipe);
 		await streamToPromise(templatePipe);
 		let packOptions = {};
-		if (this.func.excludes) {
+		if (excludes.length) {
 			packOptions = {
 				...packOptions,
-				ignore: (entry: string): boolean => multimatch(entry, this.func.excludes!).length > 0,
+				ignore: (entry: string): boolean => multimatch(entry, excludes).length > 0,
 			};
 		}
 
@@ -134,7 +147,6 @@ export class BuildFunctionTask extends Task<NitricImage> {
 
 		const options = {
 			buildargs: {
-				GATEWAY_HOST: `${myIp}:5000`,
 				PROVIDER: this.provider,
 			},
 			t: getTagNameForFunction(this.stackName, this.func),
@@ -168,7 +180,7 @@ export class BuildFunctionTask extends Task<NitricImage> {
 
 		const filteredResults = buildResults.filter((obj) => 'aux' in obj && 'ID' in obj['aux']);
 		if (filteredResults.length > 0) {
-			const imageId = filteredResults[0]['aux'].ID.split(':').pop() as string;
+			const imageId = filteredResults[filteredResults.length - 1]['aux'].ID.split(':').pop() as string;
 			return { id: imageId, func: this.func } as NitricImage;
 		} else {
 			const {
