@@ -320,7 +320,7 @@ export class DeploySubscriptions extends Task<void> {
 		).reduce((acc, subs) => [...acc, ...subs], [] as any[]);
 
 		this.update('Deploying subscriptions');
-		let { data: operation } = await dmClient.deployments.insert({
+		const { data: operation } = await dmClient.deployments.insert({
 			project,
 			requestBody: {
 				name: `${sanitizeStringForDockerTag(stack.name)}-subscriptions`,

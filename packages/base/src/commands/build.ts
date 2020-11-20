@@ -4,7 +4,7 @@ import { BuildFunctionTask } from '../tasks/build';
 import Listr, { ListrTask } from 'listr';
 import path from 'path';
 
-export function createBuildTasks(stack: NitricStack, directory: string, provider: string = 'local'): Listr {
+export function createBuildTasks(stack: NitricStack, directory: string, provider = 'local'): Listr {
 	return new Listr([
 		{
 			title: 'Building Functions',
