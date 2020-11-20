@@ -1,7 +1,7 @@
 {
   "name": "@nitric/plugin-gcp",
   "description": "GCP plugin for Nitric",
-  "version": "0.0.11",
+  "version": "0.0.12",
   "author": "Nitric <https://github.com/nitric-dev>",
   "bugs": "https://github.com/nitric-dev/cli/issues",
   "dependencies": {
