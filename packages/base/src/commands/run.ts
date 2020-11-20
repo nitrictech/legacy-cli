@@ -61,9 +61,6 @@ function getCurrentNetwork(): Network | undefined {
 }
 
 let volume: Volume | undefined = undefined;
-function getCurrentVolume(): Volume | undefined {
-	return volume;
-}
 
 /**
  * Function for running containers
