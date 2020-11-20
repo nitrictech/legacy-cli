@@ -30,7 +30,7 @@ export default class Project extends Command {
 		const { force } = flags;
 		let commands: ListrTask[] = [];
 
-		let { example }: { example: string } = await inquirer.prompt([
+		const { example }: { example: string } = await inquirer.prompt([
 			{
 				name: 'example',
 				message: 'Include an example function?',

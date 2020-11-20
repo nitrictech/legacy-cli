@@ -8,7 +8,7 @@
     "clean": "rimraf ./lib/",
     "build": "yarn run clean && yarn run build:sources",
     "build:sources": "tsc --outDir ./lib/",
-    "test": "jest"
+    "test": "tsc --emitDeclarationOnly && jest"
   },
   "contributors": [
     "Jye Cusch <jye.cusch@gmail.com>",
