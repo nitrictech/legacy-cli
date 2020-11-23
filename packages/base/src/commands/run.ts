@@ -78,8 +78,15 @@ async function runContainers(stack: NitricStack, portStart: number, directory: s
 		await Promise.all(
 			Object.values(currentRunResults).map(async (container) => {
 				// FIXME: only attempt to stop if currently running
-				await container.stop();
-				return container.remove();
+				if (container && container.stop) {
+					try {
+						await container.stop();
+					} catch (error) {
+						// TODO: Possibly log error for the container
+					} finally {
+						await container.remove();
+					}
+				}
 			}),
 		);
 	}
@@ -168,8 +175,15 @@ export default class Run extends Command {
 						if (runResults) {
 							await Promise.all(
 								Object.values(runResults).map(async (container) => {
-									await container.stop();
-									return container.remove();
+									if (container && container.stop) {
+										try {
+											await container.stop();
+										} catch (error) {
+											// console.log("there was an error stopping this container");
+										} finally {
+											await container.remove();
+										}
+									}
 								}),
 							);
 						}
