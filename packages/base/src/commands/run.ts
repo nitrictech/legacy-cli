@@ -91,6 +91,17 @@ async function runContainers(stack: NitricStack, portStart: number, directory: s
 	const rangeLength = images.length * 2;
 	const portRange = getPort.makeRange(portStart, portStart + rangeLength);
 
+	// Sort the images by the names of their functions, to ensure a more predicatable order between reloads.
+	images.sort(({ func: { name: nameA } }, { func: { name: nameB } }) => {
+		if (nameA < nameB) {
+			return -1;
+		}
+		if (nameA > nameB) {
+			return 1;
+		}
+		return 0;
+	});
+
 	const runTaskOptions = await Promise.all(
 		images.map(async (image) => {
 			return {
