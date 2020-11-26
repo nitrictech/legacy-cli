@@ -60,11 +60,6 @@ export class MakeFunctionTask extends Task<void> {
 
 		const { functions = [] } = stack;
 
-		const funcDirName = this.functionName
-			.toLowerCase()
-			.replace(/ /g, '-')
-			.replace(/[^-a-z\d]/g, '');
-
 		if (functions.find((func) => func.name === this.functionName) !== undefined) {
 			throw new Error(`Function ${this.functionName} already defined in ${this.file}`);
 		}
