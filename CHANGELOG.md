@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.15](https://github.com/nitric-dev/cli/compare/v0.0.14...v0.0.15) (2020-11-26)
+
+
+### Bug Fixes
+
+* broken project make, due to new function make ([970253d](https://github.com/nitric-dev/cli/commit/970253df81442127bcbf0e79b4ca6ecbca8770b2))
+
 ### [0.0.14](https://github.com/nitric-dev/cli/compare/v0.0.13...v0.0.14) (2020-11-26)
 
 
