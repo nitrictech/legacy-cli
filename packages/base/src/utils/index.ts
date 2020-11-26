@@ -10,6 +10,15 @@ export function isTemplateAvailable(templateName: string): boolean {
 	return fs.existsSync(templateDirectory);
 }
 
+export function getAvailableTemplates(): string[] {
+	return fs
+		.readdirSync(TEMPLATE_DIR, {
+			withFileTypes: true,
+		})
+		.filter((dirent) => dirent.isDirectory())
+		.map((dirent) => dirent.name);
+}
+
 export function createNitricLogDir(): void {
 	if (!fs.existsSync(LOG_DIR)) {
 		fs.mkdirSync(LOG_DIR);
