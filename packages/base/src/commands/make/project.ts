@@ -58,7 +58,8 @@ export default class Project extends Command {
 				wrapTaskForListr(
 					new MakeFunctionTask({
 						template: example,
-						dir: `./${name}/`,
+						dir: `./${name}/${functionName}/`,
+						file: `./${name}/nitric.yaml`,
 						name: functionName,
 					}),
 				),
