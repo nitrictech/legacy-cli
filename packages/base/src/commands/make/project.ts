@@ -1,6 +1,7 @@
 import { Command, flags } from '@oclif/command';
 import { wrapTaskForListr } from '@nitric/cli-common';
 import { MakeProject, MakeFunctionTask } from '../../tasks/make';
+import { getAvailableTemplates } from '../../utils';
 import Listr, { ListrTask } from 'listr';
 import inquirer from 'inquirer';
 
@@ -35,7 +36,7 @@ export default class Project extends Command {
 				name: 'example',
 				message: 'Include an example function?',
 				type: 'list',
-				choices: [{ name: 'nodejs12' }, { name: 'python37' }, { name: 'none' }],
+				choices: getAvailableTemplates(),
 			},
 		]);
 

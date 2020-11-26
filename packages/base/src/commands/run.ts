@@ -78,8 +78,15 @@ async function runContainers(stack: NitricStack, portStart: number, directory: s
 		await Promise.all(
 			Object.values(currentRunResults).map(async (container) => {
 				// FIXME: only attempt to stop if currently running
-				await container.stop();
-				return container.remove();
+				if (container && container.stop) {
+					try {
+						await container.stop();
+					} catch (error) {
+						// TODO: Possibly log error for the container
+					} finally {
+						await container.remove();
+					}
+				}
 			}),
 		);
 	}
@@ -90,6 +97,17 @@ async function runContainers(stack: NitricStack, portStart: number, directory: s
 
 	const rangeLength = images.length * 2;
 	const portRange = getPort.makeRange(portStart, portStart + rangeLength);
+
+	// Sort the images by the names of their functions, to ensure a more predicatable order between reloads.
+	images.sort(({ func: { name: nameA } }, { func: { name: nameB } }) => {
+		if (nameA < nameB) {
+			return -1;
+		}
+		if (nameA > nameB) {
+			return 1;
+		}
+		return 0;
+	});
 
 	const runTaskOptions = await Promise.all(
 		images.map(async (image) => {
@@ -168,8 +186,15 @@ export default class Run extends Command {
 						if (runResults) {
 							await Promise.all(
 								Object.values(runResults).map(async (container) => {
-									await container.stop();
-									return container.remove();
+									if (container && container.stop) {
+										try {
+											await container.stop();
+										} catch (error) {
+											// console.log("there was an error stopping this container");
+										} finally {
+											await container.remove();
+										}
+									}
 								}),
 							);
 						}
