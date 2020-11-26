@@ -11,12 +11,16 @@ export function isTemplateAvailable(templateName: string): boolean {
 }
 
 export function getAvailableTemplates(): string[] {
-	return fs
-		.readdirSync(TEMPLATE_DIR, {
-			withFileTypes: true,
-		})
-		.filter((dirent) => dirent.isDirectory())
-		.map((dirent) => dirent.name);
+	try {
+		return fs
+			.readdirSync(TEMPLATE_DIR, {
+				withFileTypes: true,
+			})
+			.filter((dirent) => dirent.isDirectory())
+			.map((dirent) => dirent.name);
+	} catch (error) {
+		return ['no available templates'];
+	}
 }
 
 export function createNitricLogDir(): void {
