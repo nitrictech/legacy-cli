@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.14](https://github.com/nitric-dev/cli/compare/v0.0.13...v0.0.14) (2020-11-26)
+
+
+### Bug Fixes
+
+* catch error when no templates installed ([8f7ec46](https://github.com/nitric-dev/cli/commit/8f7ec46da220e8a9e2ae94db0fa7774b7085c1f5))
+
 ### [0.0.13](https://github.com/nitric-dev/cli/compare/v0.0.12...v0.0.13) (2020-11-26)
 
 
