@@ -32,6 +32,7 @@ export default class Function extends Command {
 			name: 'template',
 			required: false,
 			description: 'Function template',
+			// TODO: Handle case where no templates are available. Prompt to install template(s).
 			choices: getAvailableTemplates(),
 		},
 		{
