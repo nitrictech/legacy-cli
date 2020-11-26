@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.13](https://github.com/nitric-dev/cli/compare/v0.0.12...v0.0.13) (2020-11-26)
+
+
+### Features
+
+* add prompts for missing make:function args ([0e07682](https://github.com/nitric-dev/cli/commit/0e07682fff7eb413d6c1c3f34dfd58b37fda65b6))
+* assign function ports by alphabetical name ([bce4ab5](https://github.com/nitric-dev/cli/commit/bce4ab54e3604dbbd278673545684df41e6bbd0c))
+* auto detect function templates on make:project ([71fa07f](https://github.com/nitric-dev/cli/commit/71fa07fd8e5071394c9f14ffb72f9584cd754ae5))
+
+
+### Bug Fixes
+
+* Add try/finally to container stop/remove. ([cea0a7c](https://github.com/nitric-dev/cli/commit/cea0a7c734be284c94155d35c8258415cd1a7281))
+* remove unused variable ([6cd1bef](https://github.com/nitric-dev/cli/commit/6cd1bef5d8a82540369c6eeb08d48fc3a9bc3d8c))
+
 ### [0.0.12](https://github.com/nitric-dev/cli/compare/v0.0.11...v0.0.12) (2020-11-20)
 
 ### [0.0.11](https://github.com/nitric-dev/cli/compare/v0.0.10...v0.0.11) (2020-11-20)
