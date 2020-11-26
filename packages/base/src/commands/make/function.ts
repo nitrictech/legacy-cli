@@ -1,7 +1,14 @@
 import { Command, flags } from '@oclif/command';
 import { wrapTaskForListr } from '@nitric/cli-common';
 import { MakeFunctionTask } from '../../tasks/make';
+import { getAvailableTemplates } from '../../utils';
 import Listr from 'listr';
+import inquirer from 'inquirer';
+
+interface MakeFunctionArgs {
+	template: string;
+	name: string;
+}
 
 export default class Function extends Command {
 	static description = 'Builds a nitric function';
@@ -23,22 +30,40 @@ export default class Function extends Command {
 	static args = [
 		{
 			name: 'template',
-			required: true,
-			description: 'template name to generate function from',
+			required: false,
+			description: 'Function template',
+			choices: getAvailableTemplates(),
 		},
 		{
 			name: 'name',
-			required: true,
-			description: 'the name of the new function to create',
+			required: false,
+			description: 'Function name',
 		},
 	];
 
 	async run(): Promise<void> {
 		const { args, flags } = this.parse(Function);
-		const { template, name } = args;
-		const { directory = '.', file = './nitric.yaml' } = flags;
+		// Prompt for any args that weren't provided in the command
+		const prompts = Function.args
+			.filter((arg) => !args[arg.name])
+			.map((arg) => {
+				const prompt = {
+					name: arg.name,
+					message: arg.description,
+					type: 'string',
+				};
+				if (arg.choices) {
+					prompt.type = 'list';
+					prompt['choices'] = arg.choices;
+				}
+				return prompt;
+			});
+		const promptArgs = await inquirer.prompt(prompts);
 
-		const functionDirectoryName = (name as string)
+		const { template, name } = { ...args, ...promptArgs } as MakeFunctionArgs;
+		const { directory = `./${name}`, file = './nitric.yaml' } = flags;
+
+		const functionName = (name as string)
 			.toLowerCase()
 			.replace(/ /g, '-')
 			.replace(/[^-a-z\d]/g, '');
@@ -48,7 +73,7 @@ export default class Function extends Command {
 				new MakeFunctionTask({
 					template,
 					dir: directory,
-					name: functionDirectoryName,
+					name: functionName,
 					file,
 				}),
 			),

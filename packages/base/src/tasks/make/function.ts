@@ -40,9 +40,9 @@ export class MakeFunctionTask extends Task<void> {
 		const inPath = templateFunctionPath(this.template);
 		//TODO: should probably do something to make sure the file exists
 		// Make a copy of the function template, using the new name in the output directory
-		const outPath = path.join(this.dir, this.functionName);
+		const outPath = path.join(this.dir);
 		if (fs.existsSync(outPath)) {
-			throw new Error(`Function directory already exists: ${this.functionName}`);
+			throw new Error(`Function directory already exists: ${this.dir}`);
 		}
 
 		const outStream = tar.extract(outPath);
@@ -55,7 +55,7 @@ export class MakeFunctionTask extends Task<void> {
 
 	async do(): Promise<void> {
 		this.update('Checking stack descriptor');
-		const nitricFile = path.join(this.dir, this.file);
+		const nitricFile = this.file;
 		const stack = readNitricDescriptor(nitricFile);
 
 		const { functions = [] } = stack;
@@ -74,7 +74,7 @@ export class MakeFunctionTask extends Task<void> {
 		await this.makeFunction();
 		//then
 
-		const functionFolder = path.join(this.dir, funcDirName);
+		const functionFolder = this.dir;
 		const nitricFileDir = path.dirname(nitricFile);
 
 		this.update(`Updating ${this.file}`);
