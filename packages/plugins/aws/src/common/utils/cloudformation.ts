@@ -15,3 +15,11 @@ export function generateEcrRepositoryUri(
 	const imageAlias = getTagNameForFunction(stackName, func);
 	return `${accountId}.dkr.ecr.${region}.amazonaws.com/${imageAlias}`;
 }
+
+export function generateLoadBalancerKey(stackName: string): string {
+	return `${stackName}-LB`;
+}
+
+export function generateLBListenerKey(stackName: string): string {
+	return `${stackName}-LB-Listener`;
+}

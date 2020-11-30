@@ -3,6 +3,8 @@ import { Deploy, PushImage } from '../../tasks/deploy';
 import { wrapTaskForListr, readNitricDescriptor } from '@nitric/cli-common';
 import Listr from 'listr';
 import path from 'path';
+import AWS from 'aws-sdk';
+import inquirer from 'inquirer';
 
 export default class DeployCmd extends Command {
 	static description = 'Deploy a Nitric application to Amazon Web Services (AWS)';
@@ -12,16 +14,46 @@ export default class DeployCmd extends Command {
 	static flags = {
 		account: flags.string({
 			char: 'a',
-			description: 'AWS Account ID to deploy to',
-			required: true,
+			description: 'AWS Account ID to deploy to (default: locally configured account)',
 		}),
-		region: flags.string({
+		region: flags.enum({
 			char: 'r',
 			description: 'AWS Region to deploy to',
-			required: true,
+			options: [
+				'us-east-1',
+				'us-west-1',
+				'us-west-2',
+				'eu-west-1',
+				'eu-central-1',
+				'ap-southeast-1',
+				'ap-northeast-1',
+				'ap-southeast-2',
+				'ap-northeast-2',
+				'sa-east-1',
+				'cn-north-1',
+				'ap-south-1',
+			],
 		}),
-		file: flags.string({ char: 'f' }),
-		help: flags.help({ char: 'h' }),
+		vpc: flags.string({
+			description: 'VPC to deploy in',
+		}),
+		cluster: flags.string({
+			char: 'c',
+			description: 'ECS cluster to use',
+		}),
+		subnets: flags.string({
+			char: 's',
+			description: 'VPC subnets to deploy in, comma separated e.g. subnet-1bbb2222,subnet-2ccc3333',
+		}),
+		file: flags.string({
+			char: 'f',
+			default: 'nitric.yaml' as string,
+			description: 'Nitric descriptor file location',
+		}),
+		help: flags.help({
+			char: 'h',
+			default: false,
+		}),
 	};
 
 	static args = [{ name: 'dir' }];
@@ -29,9 +61,39 @@ export default class DeployCmd extends Command {
 	async run(): Promise<any> {
 		const { args, flags } = this.parse(DeployCmd);
 		const { dir } = args;
-		const { account, region, file = 'nitric.yaml' } = flags;
+		// const sts = new AWS.STS();
+		// const { Account: derivedAccountId } = await sts.getCallerIdentity({}).promise()
 
+		const prompts = Object.keys(DeployCmd.flags)
+			.filter((key) => flags[key] !== undefined && flags[key] !== null)
+			.map((key) => {
+				const flag = DeployCmd.flags[key];
+				const prompt = {
+					name: key,
+					message: flag.description,
+					type: 'string',
+				};
+				if (flag.options) {
+					prompt.type = 'list';
+					prompt['choices'] = flag.options;
+				}
+				return prompt;
+			});
+		const promptFlags = await inquirer.prompt(prompts);
+
+		const { account, region, file, vpc, cluster, subnets: subnetsString } = { ...flags, ...promptFlags } as Record<
+			keyof typeof flags,
+			string
+		>;
+		const subnets = subnetsString.split(',');
+
+		// if (!account && !derivedAccountId) {
+		// 	throw new Error('No account provided or deduced.');
+		// }
+
+		const accountId = account; // || derivedAccountId as string;
 		const stack = readNitricDescriptor(path.join(dir, file));
+		const { functions = [] } = stack;
 
 		try {
 			await new Listr([
@@ -39,10 +101,10 @@ export default class DeployCmd extends Command {
 					title: 'Pushing Images to ECR',
 					task: (): Listr =>
 						new Listr(
-							stack.functions!.map((func) =>
+							functions.map((func) =>
 								wrapTaskForListr(
 									new PushImage({
-										account: account,
+										account: accountId,
 										region: region,
 										stackName: stack.name,
 										func,
@@ -52,7 +114,7 @@ export default class DeployCmd extends Command {
 							{ concurrent: true },
 						),
 				},
-				wrapTaskForListr(new Deploy({ stack, account, region })),
+				wrapTaskForListr(new Deploy({ stack, account: accountId, region, vpc, cluster, subnets })),
 			]).run();
 		} catch (error) {
 			// eat this error to avoid duplicate console output.

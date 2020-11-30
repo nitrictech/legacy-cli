@@ -1,1 +1,1 @@
-export * from './cloudfoundation';
+export * from './cloudformation';
