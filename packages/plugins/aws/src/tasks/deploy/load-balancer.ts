@@ -1,7 +1,7 @@
 import { NitricFunction } from '@nitric/cli-common';
 import { generateLBListenerKey, generateLoadBalancerKey } from '../../common/utils';
 
-export default (stackName: string): Record<string, any> => {
+export default (stackName: string, subnets: string[]): Record<string, any> => {
 	const balancerName = generateLoadBalancerKey(stackName);
 
 	// XXX: For now we'll apply one listener for all functions
@@ -19,7 +19,7 @@ export default (stackName: string): Record<string, any> => {
 				// Scheme: String,
 				// SecurityGroups: [String],
 				// SubnetMappings: [SubnetMapping],
-				// Subnets: [String],
+				Subnets: subnets,
 				// Tags: [Tag],
 				// Type: String,
 			},
@@ -37,12 +37,16 @@ export default (stackName: string): Record<string, any> => {
 			//   }
 			Type: 'AWS::ElasticLoadBalancingV2::Listener',
 			Properties: {
-				// DefaultActions: [
-				// 	{
-				// 		Type: 'forward',
-				// 		TargetGroupArn: { Ref: 'TargetGroup1' },
-				// 	},
-				// ],
+				DefaultActions: [
+					{
+						Type: 'fixed-response',
+						FixedResponseConfig: {
+							StatusCode: '404',
+							ContentType: 'text/plain',
+							MessageBody: 'Not found',
+						},
+					},
+				],
 				LoadBalancerArn: { Ref: balancerName },
 				Port: '8000',
 				Protocol: 'HTTP',

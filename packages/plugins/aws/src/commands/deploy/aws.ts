@@ -5,6 +5,7 @@ import Listr from 'listr';
 import path from 'path';
 import AWS from 'aws-sdk';
 import inquirer from 'inquirer';
+import { assert } from 'console';
 
 export default class DeployCmd extends Command {
 	static description = 'Deploy a Nitric application to Amazon Web Services (AWS)';
@@ -61,11 +62,11 @@ export default class DeployCmd extends Command {
 	async run(): Promise<any> {
 		const { args, flags } = this.parse(DeployCmd);
 		const { dir } = args;
-		// const sts = new AWS.STS();
-		// const { Account: derivedAccountId } = await sts.getCallerIdentity({}).promise()
+		const sts = new AWS.STS();
+		const { Account: derivedAccountId } = await sts.getCallerIdentity({}).promise();
 
 		const prompts = Object.keys(DeployCmd.flags)
-			.filter((key) => flags[key] !== undefined && flags[key] !== null)
+			.filter((key) => flags[key] === undefined || flags[key] === null)
 			.map((key) => {
 				const flag = DeployCmd.flags[key];
 				const prompt = {
@@ -87,11 +88,15 @@ export default class DeployCmd extends Command {
 		>;
 		const subnets = subnetsString.split(',');
 
-		// if (!account && !derivedAccountId) {
-		// 	throw new Error('No account provided or deduced.');
-		// }
+		if (subnets.length < 2) {
+			throw new Error('At least 2 subnets must be provided.');
+		}
 
-		const accountId = account; // || derivedAccountId as string;
+		if (!account && !derivedAccountId) {
+			throw new Error('No account provided or deduced.');
+		}
+
+		const accountId = account || (derivedAccountId as string);
 		const stack = readNitricDescriptor(path.join(dir, file));
 		const { functions = [] } = stack;
 

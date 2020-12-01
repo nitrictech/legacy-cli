@@ -1,5 +1,6 @@
 import { generateEcrRepositoryUri } from '../../common/utils';
-import { NitricFunction, normalizeFunctionName } from '@nitric/cli-common';
+import { NitricFunction, normalizeFunctionName, normalizeTopicName } from '@nitric/cli-common';
+import { integer } from 'aws-sdk/clients/cloudfront';
 
 /**
  * Create resources for to deploy a service to ECS Fargate
@@ -13,6 +14,7 @@ export default (
 	subnets: string[], // ['subnet-1bf84844'],
 	cluster: string, //'nitric-test'
 	loadBalancerKey: string,
+	loadBalancerPriority: integer,
 	listenerKey: string,
 ): Record<string, any> => {
 	const funcName = normalizeFunctionName(func);
@@ -29,8 +31,22 @@ export default (
 		[targetGroupName]: {
 			Type: 'AWS::ElasticLoadBalancingV2::TargetGroup',
 			Properties: {
+				// "HealthCheckEnabled" : Boolean,
+				// "HealthCheckIntervalSeconds" : Integer,
+				// "HealthCheckPath" : String,
+				// "HealthCheckPort" : String,
+				// "HealthCheckProtocol" : String,
+				// "HealthCheckTimeoutSeconds" : Integer,
+				// "HealthyThresholdCount" : Integer,
+				// "Matcher" : Matcher,
+				// "Name" : String,
 				Port: 9001,
 				Protocol: 'HTTP',
+				// "Tags" : [ Tag, ... ],
+				// "TargetGroupAttributes" : [ TargetGroupAttribute, ... ],
+				// "Targets" : [ TargetDescription, ... ],
+				TargetType: 'ip',
+				// "UnhealthyThresholdCount" : Integer,
 				VpcId: vpcId, // { Ref: 'VPC' },
 			},
 		},
@@ -57,7 +73,7 @@ export default (
 					},
 				],
 				ListenerArn: { Ref: listenerKey },
-				Priority: 1,
+				Priority: loadBalancerPriority,
 			},
 		},
 		[taskDefName]: {
@@ -96,6 +112,7 @@ export default (
 		// Define the ECS service for this function
 		[serviceDefName]: {
 			Type: 'AWS::ECS::Service',
+			DependsOn: listenerKey, // Ensure listener is associated with target group, before creating service.
 			Properties: {
 				ServiceName: serviceName,
 				Cluster: cluster, // TODO: generate or pull from config
@@ -113,6 +130,8 @@ export default (
 				LoadBalancers: [
 					{
 						TargetGroupArn: { Ref: targetGroupName },
+						ContainerName: containerName,
+						ContainerPort: 9001,
 					},
 				],
 			},
@@ -121,7 +140,7 @@ export default (
 		...subs.reduce((acc, sub) => {
 			return {
 				...acc,
-				[`${func.name}-${sub.topic}-Subscription`]: {
+				[`${func.name}${sub.topic}Subscription`]: {
 					Type: 'AWS::SNS::Subscription',
 					Properties: {
 						// XXX: Define retries here...
@@ -140,10 +159,11 @@ export default (
 						// RedrivePolicy: Json,
 						// Region: String,
 						// SubscriptionRoleArn: String,
-						TopicArn: { Ref: sub.topic },
+						//TODO: generate/pass in this topic reference name.
+						TopicArn: { Ref: normalizeTopicName({ name: sub.topic }) + 'TopicDef' },
 					},
 				},
 			};
-		}),
+		}, {}),
 	};
 };

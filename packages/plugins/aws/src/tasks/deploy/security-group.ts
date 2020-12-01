@@ -1,11 +1,12 @@
 export default (vpcId: string, stackName: string): Record<string, any> => {
-	const securityGroupId = `${stackName}-sg`; // TODO: generate this specific to the project
+	const securityGroupName = `${stackName}SecurityGroup`; // TODO: generate this specific to the project
+
 	return {
-		[securityGroupId]: {
+		[securityGroupName]: {
 			Type: 'AWS::EC2::SecurityGroup',
 			Properties: {
-				// GroupDescription: String,
-				GroupName: securityGroupId,
+				GroupDescription: `Security group for ${stackName}`,
+				GroupName: securityGroupName,
 				// XXX: Allow access to services
 				SecurityGroupEgress: [
 					{
@@ -14,7 +15,8 @@ export default (vpcId: string, stackName: string): Record<string, any> => {
 						CidrIp: '0.0.0.0/0',
 						Description: 'Allow access to all external services',
 						FromPort: -1,
-						IpProtocol: 'tcp',
+						// IpProtocol: 'tcp',
+						IpProtocol: -1,
 						ToPort: -1,
 					},
 				],
@@ -27,8 +29,8 @@ export default (vpcId: string, stackName: string): Record<string, any> => {
 						FromPort: 443,
 						IpProtocol: 'tcp',
 						// SourcePrefixListId: String,
-						SourceSecurityGroupId: securityGroupId,
-						// SourceSecurityGroupName: String,
+						// SourceSecurityGroupId: { Ref: securityGroupName },
+						SourceSecurityGroupName: securityGroupName,
 						// SourceSecurityGroupOwnerId: String,
 						ToPort: 443,
 					},
