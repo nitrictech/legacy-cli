@@ -43,7 +43,7 @@ export default class DownCmd extends Command {
 		const derivedProject = await auth.getProjectId();
 		const { args, flags } = this.parse(DownCmd);
 		const { guided } = flags;
-		const { dir } = args;
+		const { dir = '.' } = args;
 
 		const prompts = Object.keys(DownCmd.flags)
 			.filter((key) => flags[key] === undefined || flags[key] === null)
