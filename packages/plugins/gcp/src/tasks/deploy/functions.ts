@@ -51,6 +51,17 @@ export default function (project: string, stackName: string, func: NitricFunctio
 					},
 				},
 			},
+			// FIXME: Make contingent on configuration
+			accessControl: {
+				gcpIamPolicy: {
+					bindings: [
+						{
+							role: 'roles/run.invoker',
+							members: ['allUsers'],
+						},
+					],
+				},
+			},
 		},
 	];
 

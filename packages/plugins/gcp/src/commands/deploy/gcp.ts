@@ -47,7 +47,7 @@ export default class DeployCmd extends Command {
 		region: flags.enum({
 			options: SUPPORTED_REGIONS,
 			char: 'r',
-			description: 'gcp region to deploy to, defaults to us-central1',
+			description: 'gcp region to deploy to',
 		}),
 		guided: flags.boolean({ default: false }),
 		file: flags.string({
@@ -63,7 +63,7 @@ export default class DeployCmd extends Command {
 		const auth = new google.auth.GoogleAuth({
 			scopes: ['https://www.googleapis.com/auth/cloud-platform'],
 		});
-		const derivedProject = await auth.getProjectId();
+		const derivedProject = (await auth.getClient()).projectId;
 		const { args, flags } = this.parse(DeployCmd);
 		const { guided } = flags;
 		const { dir = '.' } = args;
@@ -94,6 +94,10 @@ export default class DeployCmd extends Command {
 
 		if (!region) {
 			throw new Error('Region must be provided, for prompts use the --guided flag');
+		}
+
+		if (!project) {
+			throw new Error('Project must be provided, for prompts use the --guided flag');
 		}
 
 		new Listr([
