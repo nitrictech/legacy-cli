@@ -25,6 +25,24 @@ function cleanTitleCase(title: string): string {
 }
 
 /**
+ * Converts a string to lowercase and removes non-word characters
+ * e.g. this is lo/wer cASe8 -> thisislowercase
+ * @param text the string to convert
+ */
+function cleanLowerCase(text: string): string {
+	return text.replace(/\W/g, '').toLowerCase();
+}
+
+/**
+ * Converts a string to camel case and removes non-word characters
+ * e.g. this is ti/tle cASe8 -> thisIsCamelCase
+ * @param title the string to convert
+ */
+function cleanCamelCase(title: string): string {
+	return title.replace(/\w\S*/g, (txt) => txt.charAt(0).toLowerCase() + txt.substr(1).toLowerCase()).replace(/\W/g, '');
+}
+
+/**
  * Returns a normalized function name for a Nitric Function,
  * used for safe creation of names for containers and other deployment assets.
  * @param func the function to retrieve the name for
@@ -48,5 +66,5 @@ export function normalizeStackName(stack: NitricStack): string {
  * @param topic the topic to retrieve the name for
  */
 export function normalizeTopicName(topic: NitricTopic): string {
-	return cleanTitleCase(topic.name);
+	return cleanLowerCase(topic.name);
 }
