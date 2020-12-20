@@ -10,7 +10,20 @@ export default function (project: string, stackName: string, func: NitricFunctio
 	const grcHost = getGcrHost(region);
 
 	// Use reasonable defaults
-	const { minScale = 0, maxScale = 10 } = func;
+	const { minScale = 0, maxScale = 10, external } = func;
+
+	const accessControl = external
+		? {
+				gcpIamPolicy: {
+					bindings: [
+						{
+							role: 'roles/run.invoker',
+							members: ['allUsers'],
+						},
+					],
+				},
+		  }
+		: undefined;
 
 	// Define function as the initial resources...
 	const resources: any[] = [
@@ -51,6 +64,7 @@ export default function (project: string, stackName: string, func: NitricFunctio
 					},
 				},
 			},
+			accessControl,
 		},
 	];
 

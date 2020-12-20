@@ -61,6 +61,10 @@ export default async function (project: string, region: string, func: NitricFunc
 					// probably as some sort of retry deadline
 					// XXX: 0 will set this to 10 seconds in pubsub which is their service level default
 					ackDeadlineSeconds: 0,
+					retryPolicy: {
+						minimumBackoff: '15s',
+						maximumBackoff: '600s',
+					},
 					// TODO: Should turn this into a topic resource reference
 					topic: `projects/${project}/topics/${sub.topic}`,
 				},

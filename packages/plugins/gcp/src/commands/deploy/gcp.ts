@@ -3,6 +3,8 @@ import { Deploy, PushImage, CreateTypeProviders, DeploySubscriptions } from '../
 import { wrapTaskForListr, readNitricDescriptor } from '@nitric/cli-common';
 import Listr, { ListrTask } from 'listr';
 import path from 'path';
+import { google } from 'googleapis';
+import inquirer from 'inquirer';
 
 // XXX: Commented out regions do not support cloud run
 const SUPPORTED_REGIONS = [
@@ -35,31 +37,68 @@ const SUPPORTED_REGIONS = [
 export default class DeployCmd extends Command {
 	static description = 'Deploy a Nitric application to Google Cloud Platform (GCP)';
 
-	static examples = [`$ nitric deploy:gcp . -p my-gcp-project`];
+	static examples = [`$ nitric deploy:gcp`];
 
 	static flags = {
 		project: flags.string({
 			char: 'p',
-			description: 'gcp project to deploy to',
-			required: true,
+			description: 'GCP project ID to deploy to (default: locally configured account)',
 		}),
 		region: flags.enum({
 			options: SUPPORTED_REGIONS,
 			char: 'r',
-			description: 'gcp region to deploy to, defaults to us-central1',
+			description: 'gcp region to deploy to',
 		}),
-		file: flags.string({ char: 'f' }),
-		help: flags.help({ char: 'h' }),
+		guided: flags.boolean({ default: false }),
+		file: flags.string({
+			char: 'f',
+			default: 'nitric.yaml',
+		}),
+		help: flags.help({ char: 'h', default: false }),
 	};
 
 	static args = [{ name: 'dir' }];
 
 	async run(): Promise<void> {
+		const auth = new google.auth.GoogleAuth({
+			scopes: ['https://www.googleapis.com/auth/cloud-platform'],
+		});
+		const derivedProject = (await auth.getClient()).projectId;
 		const { args, flags } = this.parse(DeployCmd);
-		const { dir } = args;
-		const { project, file = 'nitric.yaml', region = 'us-central1' } = flags;
+		const { guided } = flags;
+		const { dir = '.' } = args;
 
+		const prompts = Object.keys(DeployCmd.flags)
+			.filter((key) => flags[key] === undefined || flags[key] === null)
+			.map((key) => {
+				const flag = DeployCmd.flags[key];
+				const prompt = {
+					name: key,
+					message: flag.description,
+					type: 'string',
+				};
+				if (flag.options) {
+					prompt.type = 'list';
+					prompt['choices'] = flag.options;
+				}
+				return prompt;
+			});
+
+		let promptFlags = {};
+		if (guided) {
+			promptFlags = await inquirer.prompt(prompts);
+		}
+
+		const { project = derivedProject, file, region } = { ...flags, ...promptFlags };
 		const stack = readNitricDescriptor(path.join(dir, file));
+
+		if (!region) {
+			throw new Error('Region must be provided, for prompts use the --guided flag');
+		}
+
+		if (!project) {
+			throw new Error('Project must be provided, for prompts use the --guided flag');
+		}
 
 		new Listr([
 			wrapTaskForListr(new CreateTypeProviders({ gcpProject: project })),
