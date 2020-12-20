@@ -33,14 +33,14 @@ function cleanLowerCase(text: string): string {
 	return text.replace(/\W/g, '').toLowerCase();
 }
 
-/**
- * Converts a string to camel case and removes non-word characters
- * e.g. this is ti/tle cASe8 -> thisIsCamelCase
- * @param title the string to convert
- */
-function cleanCamelCase(title: string): string {
-	return title.replace(/\w\S*/g, (txt) => txt.charAt(0).toLowerCase() + txt.substr(1).toLowerCase()).replace(/\W/g, '');
-}
+// /**
+//  * Converts a string to camel case and removes non-word characters
+//  * e.g. this is ti/tle cASe8 -> thisIsCamelCase
+//  * @param title the string to convert
+//  */
+// function cleanCamelCase(title: string): string {
+// 	return title.replace(/\w\S*/g, (txt) => txt.charAt(0).toLowerCase() + txt.substr(1).toLowerCase()).replace(/\W/g, '');
+// }
 
 /**
  * Returns a normalized function name for a Nitric Function,
