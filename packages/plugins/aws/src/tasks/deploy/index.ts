@@ -2,20 +2,24 @@ import {
 	dockerodeEvtToString,
 	NitricStack,
 	getTagNameForFunction,
-	normalizeFunctionName,
+	// normalizeFunctionName,
 	normalizeStackName,
-	normalizeTopicName,
+	// normalizeTopicName,
 	Task,
 	NitricFunction,
 } from '@nitric/cli-common';
 import Docker from 'dockerode';
 import AWS from 'aws-sdk';
 import { CreateStackInput, Stack, UpdateStackInput } from 'aws-sdk/clients/cloudformation';
-import { generateEcrRepositoryUri, generateLBListenerKey, generateLoadBalancerKey } from '../../common/utils';
-import createSecurityGroup from './security-group';
-import createContainer from './container';
+import {
+	generateEcrRepositoryUri,
+	// generateLBListenerKey,
+	// generateLoadBalancerKey
+} from '../../common/utils';
+// import createSecurityGroup from './security-group';
+// import createContainer from './container';
 import createLambda from './lambda';
-import createLoadBalancer from './load-balancer';
+// import createLoadBalancer from './load-balancer';
 import createTopic from './topic';
 import fs from 'fs';
 
@@ -120,9 +124,9 @@ export class PushImage extends Task<void> {
  */
 interface DeployOptions extends CommonOptions {
 	stack: NitricStack;
-	vpc: string;
-	cluster: string;
-	subnets: string[];
+	// vpc: string;
+	// cluster: string;
+	// subnets: string[];
 }
 /**
  * Deploys the given Nitric Stack to AWS as a CloudFormation Stack
@@ -131,9 +135,9 @@ export class Deploy extends Task<void> {
 	private stack: NitricStack;
 	private account: string;
 	private region: string;
-	private vpc: string;
-	private cluster: string;
-	private subnets: string[];
+	// private vpc: string;
+	// private cluster: string;
+	// private subnets: string[];
 
 	constructor({ stack, account, region }: DeployOptions) {
 		super('Deploying Nitric Stack');
@@ -165,7 +169,7 @@ export class Deploy extends Task<void> {
 			// ...createSecurityGroup(vpc, stack.name),
 			// ...createLoadBalancer(stack.name, subnets),
 			...functions.reduce(
-				(defs, func, index) => ({
+				(defs, func) => ({
 					...defs,
 					...createLambda(
 						stack.name,

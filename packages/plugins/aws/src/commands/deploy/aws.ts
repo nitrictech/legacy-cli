@@ -5,7 +5,6 @@ import Listr from 'listr';
 import path from 'path';
 import AWS from 'aws-sdk';
 import inquirer from 'inquirer';
-import { assert } from 'console';
 
 export default class DeployCmd extends Command {
 	static description = 'Deploy a Nitric application to Amazon Web Services (AWS)';

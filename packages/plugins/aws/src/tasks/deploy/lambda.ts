@@ -1,6 +1,6 @@
 import { generateEcrRepositoryUri } from '../../common/utils';
 import { NitricFunction, normalizeFunctionName, normalizeTopicName } from '@nitric/cli-common';
-import { integer } from 'aws-sdk/clients/cloudfront';
+// import { integer } from 'aws-sdk/clients/cloudfront';
 
 /**
  * Create resources to deploy a service to AWS Lambda using Container Image deployment

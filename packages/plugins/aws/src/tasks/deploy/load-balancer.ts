@@ -1,4 +1,4 @@
-import { NitricFunction } from '@nitric/cli-common';
+// import { NitricFunction } from '@nitric/cli-common';
 import { generateLBListenerKey, generateLoadBalancerKey } from '../../common/utils';
 
 export default (stackName: string, subnets: string[]): Record<string, any> => {
