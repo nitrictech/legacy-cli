@@ -2,6 +2,25 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.16](https://github.com/nitric-dev/cli/compare/v0.0.15...v0.0.16) (2020-12-20)
+
+
+### Features
+
+* Add --guided mode to the gcp:down command. ([b60eb51](https://github.com/nitric-dev/cli/commit/b60eb516f639d0ee6a32a30e586927e59161fe25))
+* Add a --guided CLI mode for the gcp:deploy command. ([e05c795](https://github.com/nitric-dev/cli/commit/e05c795948128776b8ea8ad523b1f2872acfedfb))
+* add container health check and scaling ([e8135c8](https://github.com/nitric-dev/cli/commit/e8135c829d641cade6da6513f3ff819e52b30454))
+* Add optional for externally invokable, unauthenticated functions. ([61ee2d0](https://github.com/nitric-dev/cli/commit/61ee2d082b092a20bd135ce6b3744b6ca16f8c23))
+* Add run container policy updates to allow unauthenticated access. ([b3de1a1](https://github.com/nitric-dev/cli/commit/b3de1a1acc8a4f5031625895936b2af5f8ffc1c4))
+* basic aws deploy with load balancer ([bfe88d2](https://github.com/nitric-dev/cli/commit/bfe88d2cb71ae5a1fd48d64bc68af586af1af3bc))
+* run functions on lambda with container ([20f6f61](https://github.com/nitric-dev/cli/commit/20f6f61b55d42f61615273dd5eaa7df8e25a0093))
+
+
+### Bug Fixes
+
+* improve topic name normalization ([c86d2e8](https://github.com/nitric-dev/cli/commit/c86d2e87d756fad9e2d672b7897e0d39aa96947f))
+* incorrect topic property setting ([d23f9e0](https://github.com/nitric-dev/cli/commit/d23f9e0b387a205a311871d9252e08ead40ac161))
+
 ### [0.0.15](https://github.com/nitric-dev/cli/compare/v0.0.14...v0.0.15) (2020-11-26)
 
 
