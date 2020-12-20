@@ -3,7 +3,7 @@ import { NitricFunction, normalizeFunctionName, normalizeTopicName } from '@nitr
 import { integer } from 'aws-sdk/clients/cloudfront';
 
 /**
- * Create resources for to deploy a service to ECS Fargate
+ * Create resources to deploy a service to ECS Fargate
  */
 export default (
 	stackName: string,
@@ -25,21 +25,24 @@ export default (
 	const serviceDefName = serviceName + 'Def';
 	const targetGroupName = `${funcName}TargetGroup`;
 	const listenerRuleName = `${funcName}ListenerRule`;
+	const scalingTargetName = `${funcName}ScalingTarget`;
+	const scalingPolicyName = `${funcName}ScalingPolicy`;
+
 	const { subs = [] } = func;
 
 	return {
 		[targetGroupName]: {
 			Type: 'AWS::ElasticLoadBalancingV2::TargetGroup',
 			Properties: {
-				// "HealthCheckEnabled" : Boolean,
-				// "HealthCheckIntervalSeconds" : Integer,
-				// "HealthCheckPath" : String,
-				// "HealthCheckPort" : String,
-				// "HealthCheckProtocol" : String,
+				HealthCheckEnabled: true,
+				// "HealthCheckIntervalSeconds" : 30,
+				HealthCheckPath: '/',
+				HealthCheckPort: 9002,
+				HealthCheckProtocol: 'HTTP',
 				// "HealthCheckTimeoutSeconds" : Integer,
 				// "HealthyThresholdCount" : Integer,
 				// "Matcher" : Matcher,
-				// "Name" : String,
+				Name: targetGroupName,
 				Port: 9001,
 				Protocol: 'HTTP',
 				// "Tags" : [ Tag, ... ],
@@ -81,9 +84,17 @@ export default (
 			Properties: {
 				NetworkMode: 'awsvpc',
 				ExecutionRoleArn: 'ecsTaskExecutionRole', //TODO: From config or create ourselves
+				TaskRoleArn: 'ecsTaskRole', // TODO: Create this from a set of standard policies (tbd).
 				ContainerDefinitions: [
 					{
 						Name: containerName,
+						HealthCheck: {
+							Command: ['CMD-SHELL', '/healthcheck.sh'],
+							// Interval : Integer, // Default 30 (seconds)
+							// Retries : Integer, // Default 3
+							// StartPeriod : Integer, // Default 0 (seconds)
+							// Timeout : Integer // Default 5 (seconds)
+						},
 						// Cpu: "",
 						// Memory: "",
 						Image: generateEcrRepositoryUri(account, region, stackName, func),
@@ -91,6 +102,10 @@ export default (
 							{
 								ContainerPort: 9001,
 								HostPort: 9001,
+							},
+							{
+								ContainerPort: 9002,
+								HostPort: 9002,
 							},
 						],
 						LogConfiguration: {
@@ -117,10 +132,11 @@ export default (
 				ServiceName: serviceName,
 				Cluster: cluster, // TODO: generate or pull from config
 				LaunchType: 'FARGATE',
-				DesiredCount: func.minScale,
+				DesiredCount: Math.max(func.minScale || 1, 1),
 				NetworkConfiguration: {
 					AwsvpcConfiguration: {
 						AssignPublicIp: 'ENABLED', // TODO: set to disabled and use internal networking only.
+						// SecurityGroups: [], // TODO: set the custom security group.
 						Subnets: subnets, // TODO: generate or pull from config
 					},
 				},
@@ -134,6 +150,63 @@ export default (
 						ContainerPort: 9001,
 					},
 				],
+			},
+		},
+		[scalingTargetName]: {
+			Type: 'AWS::ApplicationAutoScaling::ScalableTarget',
+			DependsOn: serviceDefName,
+			Properties: {
+				//TODO: improve min and max handling. If they're the same or not present, we should use desiredCount on the service and skip the auto-scaling.
+				// Always set the minimum to 1 instance for AWS, since scale to 0 isn't an option in ECS with Load Balancers.
+				MinCapacity: Math.max(func.minScale || 1, 1),
+				MaxCapacity: Math.max(func.maxScale || Math.max(func.minScale || 2, 2), 2),
+				ResourceId: `service/${cluster}/${serviceName}`,
+				// TODO: Fix this nonsense.
+				RoleARN: 'arn:aws:iam::729132059710:role/aws-service-role/ecs.amazonaws.com/AWSServiceRoleForECS',
+				ScalableDimension: 'ecs:service:DesiredCount',
+				//  "ScheduledActions" : [ ScheduledAction, ... ],
+				ServiceNamespace: 'ecs',
+				// SuspendedState: SuspendedState,
+			},
+		},
+		[scalingPolicyName]: {
+			Type: 'AWS::ApplicationAutoScaling::ScalingPolicy',
+			DependsOn: serviceDefName, // Wait for service to attach to target group of load balancer.
+			Properties: {
+				PolicyName: scalingPolicyName,
+				PolicyType: 'TargetTrackingScaling',
+				// FIXME: Get the resourceId of the ECS service
+				// ResourceId : String,
+				ScalableDimension: 'ecs:service:DesiredCount',
+				// FIXME: Need a scalable target
+				ScalingTargetId: { Ref: scalingTargetName },
+				ServiceNamespace: 'ecs',
+				// StepScalingPolicyConfiguration : StepScalingPolicyConfiguration,
+				TargetTrackingScalingPolicyConfiguration: {
+					// CustomizedMetricSpecification: CustomizedMetricSpecification,
+					// DisableScaleIn : false,
+					PredefinedMetricSpecification: {
+						PredefinedMetricType: 'ALBRequestCountPerTarget',
+						ResourceLabel: {
+							'Fn::Sub': [
+								'${lbArn}/${tgArn}',
+								// "app/${lbName}/${lbId}/targetgroup/${tgName}/${tgId}",
+								{
+									lbArn: { 'Fn::GetAtt': [loadBalancerKey, 'LoadBalancerFullName'] },
+									tgArn: { 'Fn::GetAtt': [targetGroupName, 'TargetGroupFullName'] },
+									// "lbName": {"Fn::GetAtt": [loadBalancerKey, "Name"]},
+									// "lbId": {"Fn::GetAtt": [loadBalancerKey, "Id"]},
+									// "tgName": {"Fn::GetAtt": [targetGroupName, "Name"]},
+									// "tgId": {"Fn::GetAtt": [targetGroupName, "Id"]}
+								},
+							],
+						},
+					},
+					ScaleInCooldown: 60,
+					ScaleOutCooldown: 300,
+					// FIXME: Set this from nitric.yaml
+					TargetValue: 1,
+				},
 			},
 		},
 		// Setup topic subscriptions
