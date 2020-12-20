@@ -20,4 +20,8 @@ export interface NitricFunction {
 	maxScale?: number;
 	// The most requests a single function instance should handle
 	maxRequests?: number;
+	// Simple configuration to determine if the function should be directly
+	// invokable without authentication
+	// would use public, but its reserved by typescript
+	external?: boolean;
 }

@@ -2,16 +2,26 @@ import {
 	dockerodeEvtToString,
 	NitricStack,
 	getTagNameForFunction,
-	normalizeFunctionName,
+	// normalizeFunctionName,
 	normalizeStackName,
-	normalizeTopicName,
+	// normalizeTopicName,
 	Task,
 	NitricFunction,
 } from '@nitric/cli-common';
 import Docker from 'dockerode';
 import AWS from 'aws-sdk';
 import { CreateStackInput, Stack, UpdateStackInput } from 'aws-sdk/clients/cloudformation';
-import { generateEcrRepositoryUri } from '../../common/utils';
+import {
+	generateEcrRepositoryUri,
+	// generateLBListenerKey,
+	// generateLoadBalancerKey
+} from '../../common/utils';
+// import createSecurityGroup from './security-group';
+// import createContainer from './container';
+import createLambda from './lambda';
+// import createLoadBalancer from './load-balancer';
+import createTopic from './topic';
+import fs from 'fs';
 
 /**
  * Common Task Options
@@ -114,6 +124,9 @@ export class PushImage extends Task<void> {
  */
 interface DeployOptions extends CommonOptions {
 	stack: NitricStack;
+	// vpc: string;
+	// cluster: string;
+	// subnets: string[];
 }
 /**
  * Deploys the given Nitric Stack to AWS as a CloudFormation Stack
@@ -122,17 +135,25 @@ export class Deploy extends Task<void> {
 	private stack: NitricStack;
 	private account: string;
 	private region: string;
+	// private vpc: string;
+	// private cluster: string;
+	// private subnets: string[];
 
 	constructor({ stack, account, region }: DeployOptions) {
 		super('Deploying Nitric Stack');
 		this.stack = stack;
 		this.account = account;
 		this.region = region;
+		//TODO: Just generate the dang VPC and get rid of these three things.
+		// this.vpc = vpc;
+		// this.cluster = cluster;
+		// this.subnets = subnets;
 	}
 
 	async do(): Promise<void> {
 		const { stack, account, region } = this;
-		let resources: any[] = [];
+		// let resources: any[] = [];
+		const { functions = [], topics = [] } = stack;
 
 		AWS.config.update({ region });
 
@@ -142,105 +163,39 @@ export class Deploy extends Task<void> {
 		// TODO: Load Balancer Listener
 		// TODO: Load Balancer Listerner Rule
 		// TODO: Add or Reuse Cluster
-
-		if (stack.functions) {
-			this.update('Defining functions');
-			resources = {
-				...resources,
-				...stack.functions.reduce((taskDefs, func) => {
-					const funcName = normalizeFunctionName(func);
-					const containerName = funcName;
-					const taskName = funcName + 'Task';
-					const taskDefName = taskName + 'Def';
-					const serviceName = funcName + 'Service';
-					const serviceDefName = serviceName + 'Def';
-
-					return {
-						...taskDefs,
-						// Define the ECS task for this function
-						[taskDefName]: {
-							Type: 'AWS::ECS::TaskDefinition',
-							Properties: {
-								NetworkMode: 'awsvpc',
-								ExecutionRoleArn: 'ecsTaskExecutionRole', //TODO: From config or create ourselves
-								ContainerDefinitions: [
-									{
-										Name: containerName,
-										// Cpu: "",
-										// Memory: "",
-										Image: generateEcrRepositoryUri(account, region, stack.name, func),
-										PortMappings: [
-											{
-												ContainerPort: 9001,
-												HostPort: 9001,
-											},
-										],
-										LogConfiguration: {
-											LogDriver: 'awslogs',
-											Options: {
-												// TODO: generate log options from config
-												'awslogs-group': 'nitric-test',
-												'awslogs-region': region,
-												'awslogs-stream-prefix': 'nitric-prefix',
-											},
-										},
-									},
-								],
-								Cpu: '256', //TODO: allocate this from config
-								Memory: '512', //TODO: allocate this from config
-								RequiresCompatibilities: ['FARGATE'],
-							},
-						},
-						// Define the ECS service for this function
-						[serviceDefName]: {
-							Type: 'AWS::ECS::Service',
-							Properties: {
-								ServiceName: serviceName,
-								Cluster: 'nitric-test', // TODO: generate or pull from config
-								LaunchType: 'FARGATE',
-								DesiredCount: 1,
-								NetworkConfiguration: {
-									AwsvpcConfiguration: {
-										AssignPublicIp: 'ENABLED',
-										Subnets: ['subnet-1bf84844'], // TODO: generate or pull from config
-									},
-								},
-								TaskDefinition: {
-									Ref: taskDefName,
-								},
-							},
-						},
-					};
-				}, {}),
-			};
-		}
-
-		if (stack.topics) {
-			this.update('Defining Topics');
-			resources = {
-				...resources,
-				...stack.topics.reduce((topics, topicDef) => {
-					const topicName = normalizeTopicName(topicDef);
-					const topicDefName = topicName + 'Def';
-
-					return {
-						...topics,
-						[topicDefName]: {
-							Type: 'AWS::SNS::Topic',
-							Properties: {
-								DisplayName: topicName,
-								// Subscription: [
-								// 	{
-								// 		Endpoint: "http:example.com",
-								// 		Protocol: "http",
-								// 	},
-								// ],
-							},
-						},
-					};
-				}, {}),
-			};
-		}
+		this.update('Defining functions');
+		const resources = {
+			// ...resources,
+			// ...createSecurityGroup(vpc, stack.name),
+			// ...createLoadBalancer(stack.name, subnets),
+			...functions.reduce(
+				(defs, func) => ({
+					...defs,
+					...createLambda(
+						stack.name,
+						func,
+						account,
+						region,
+						// vpc,
+						// subnets,
+						// cluster,
+						// generateLoadBalancerKey(stack.name),
+						// // Using index of function as load balancer priority.
+						// // none of the rules overlap, so this isn't important, but it's required by AWS.
+						// index + 1,
+						// generateLBListenerKey(stack.name),
+					),
+				}),
+				{},
+			),
+			...topics.reduce(
+				(defs, topic) => ({
+					...defs,
+					...createTopic(topic),
+				}),
+				{},
+			),
+		};
 
 		// TODO: are there types to protect this? i.e. is 'resources' valid
 		const template = {
@@ -248,6 +203,8 @@ export class Deploy extends Task<void> {
 			Description: `Generated by Nitric - ${new Date().toUTCString()}`,
 			Resources: resources,
 		};
+
+		fs.writeFileSync('./cloudformation.json', JSON.stringify(template, null, 2));
 
 		const awsStackName = normalizeStackName(stack); //TODO: validate stack name against regex ^[a-zA-Z][-a-zA-Z0-9]*$
 		if (!/^[a-zA-Z][-a-zA-Z0-9]*$/.test(awsStackName)) {
@@ -268,6 +225,9 @@ export class Deploy extends Task<void> {
 		const params: CreateStackInput | UpdateStackInput = {
 			StackName: awsStackName,
 			TemplateBody: JSON.stringify(template),
+			Capabilities: [
+				'CAPABILITY_IAM', //TODO: Determine whether this is needed for updates too. Also, may want to confirm with CLI user first too.
+			],
 		};
 
 		let completeStatus = 'CREATE_COMPLETE';
@@ -306,5 +266,7 @@ export class Deploy extends Task<void> {
 			}
 		};
 		await new Promise(waitForComplete);
+		const stackOutput = await cloudformation.describeStacks().promise();
+		console.log('Stack Output:', JSON.stringify(stackOutput, null, 2));
 	}
 }

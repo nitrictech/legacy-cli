@@ -64,6 +64,12 @@ export class CreateTypeProviders extends Task<void> {
 						// methodMatch: '^delete$',
 						value: '$.concat($.resource.properties.parent, "/services/", $.resource.properties.metadata.name)',
 					},
+					{
+						fieldName: 'resource',
+						location: 'PATH',
+						// methodMatch: '^delete$',
+						value: '$.concat($.resource.properties.parent, "/services/", $.resource.properties.metadata.name)',
+					},
 				],
 			},
 		};
