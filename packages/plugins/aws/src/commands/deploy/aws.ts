@@ -35,17 +35,17 @@ export default class DeployCmd extends Command {
 				'ap-south-1',
 			],
 		}),
-		vpc: flags.string({
-			description: 'VPC to deploy in',
-		}),
-		cluster: flags.string({
-			char: 'c',
-			description: 'ECS cluster to use',
-		}),
-		subnets: flags.string({
-			char: 's',
-			description: 'VPC subnets to deploy in, comma separated e.g. subnet-1bbb2222,subnet-2ccc3333',
-		}),
+		// vpc: flags.string({
+		// 	description: 'VPC to deploy in',
+		// }),
+		// cluster: flags.string({
+		// 	char: 'c',
+		// 	description: 'ECS cluster to use',
+		// }),
+		// subnets: flags.string({
+		// 	char: 's',
+		// 	description: 'VPC subnets to deploy in, comma separated e.g. subnet-1bbb2222,subnet-2ccc3333',
+		// }),
 		file: flags.string({
 			char: 'f',
 			default: 'nitric.yaml' as string,
@@ -82,15 +82,12 @@ export default class DeployCmd extends Command {
 			});
 		const promptFlags = await inquirer.prompt(prompts);
 
-		const { account, region, file, vpc, cluster, subnets: subnetsString } = { ...flags, ...promptFlags } as Record<
-			keyof typeof flags,
-			string
-		>;
-		const subnets = subnetsString.split(',');
+		const { account, region, file } = { ...flags, ...promptFlags } as Record<keyof typeof flags, string>;
+		// const subnets = subnetsString.split(',');
 
-		if (subnets.length < 2) {
-			throw new Error('At least 2 subnets must be provided.');
-		}
+		// if (subnets.length < 2) {
+		// 	throw new Error('At least 2 subnets must be provided.');
+		// }
 
 		if (!account && !derivedAccountId) {
 			throw new Error('No account provided or deduced.');
@@ -119,7 +116,7 @@ export default class DeployCmd extends Command {
 							{ concurrent: true },
 						),
 				},
-				wrapTaskForListr(new Deploy({ stack, account: accountId, region, vpc, cluster, subnets })),
+				wrapTaskForListr(new Deploy({ stack, account: accountId, region })),
 			]).run();
 		} catch (error) {
 			// eat this error to avoid duplicate console output.

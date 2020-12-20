@@ -14,6 +14,7 @@ import { CreateStackInput, Stack, UpdateStackInput } from 'aws-sdk/clients/cloud
 import { generateEcrRepositoryUri, generateLBListenerKey, generateLoadBalancerKey } from '../../common/utils';
 import createSecurityGroup from './security-group';
 import createContainer from './container';
+import createLambda from './lambda';
 import createLoadBalancer from './load-balancer';
 import createTopic from './topic';
 import fs from 'fs';
@@ -134,19 +135,19 @@ export class Deploy extends Task<void> {
 	private cluster: string;
 	private subnets: string[];
 
-	constructor({ stack, account, region, vpc, cluster, subnets }: DeployOptions) {
+	constructor({ stack, account, region }: DeployOptions) {
 		super('Deploying Nitric Stack');
 		this.stack = stack;
 		this.account = account;
 		this.region = region;
 		//TODO: Just generate the dang VPC and get rid of these three things.
-		this.vpc = vpc;
-		this.cluster = cluster;
-		this.subnets = subnets;
+		// this.vpc = vpc;
+		// this.cluster = cluster;
+		// this.subnets = subnets;
 	}
 
 	async do(): Promise<void> {
-		const { stack, account, region, vpc, cluster, subnets } = this;
+		const { stack, account, region } = this;
 		// let resources: any[] = [];
 		const { functions = [], topics = [] } = stack;
 
@@ -161,24 +162,24 @@ export class Deploy extends Task<void> {
 		this.update('Defining functions');
 		const resources = {
 			// ...resources,
-			...createLoadBalancer(stack.name, subnets),
-			...createSecurityGroup(vpc, stack.name),
+			// ...createSecurityGroup(vpc, stack.name),
+			// ...createLoadBalancer(stack.name, subnets),
 			...functions.reduce(
 				(defs, func, index) => ({
 					...defs,
-					...createContainer(
+					...createLambda(
 						stack.name,
 						func,
 						account,
 						region,
-						vpc,
-						subnets,
-						cluster,
-						generateLoadBalancerKey(stack.name),
-						// Using index of function as load balancer priority.
-						// none of the rules overlap, so this isn't important, but it's required by AWS.
-						index + 1,
-						generateLBListenerKey(stack.name),
+						// vpc,
+						// subnets,
+						// cluster,
+						// generateLoadBalancerKey(stack.name),
+						// // Using index of function as load balancer priority.
+						// // none of the rules overlap, so this isn't important, but it's required by AWS.
+						// index + 1,
+						// generateLBListenerKey(stack.name),
 					),
 				}),
 				{},
@@ -220,6 +221,9 @@ export class Deploy extends Task<void> {
 		const params: CreateStackInput | UpdateStackInput = {
 			StackName: awsStackName,
 			TemplateBody: JSON.stringify(template),
+			Capabilities: [
+				'CAPABILITY_IAM', //TODO: Determine whether this is needed for updates too. Also, may want to confirm with CLI user first too.
+			],
 		};
 
 		let completeStatus = 'CREATE_COMPLETE';
@@ -258,5 +262,7 @@ export class Deploy extends Task<void> {
 			}
 		};
 		await new Promise(waitForComplete);
+		const stackOutput = await cloudformation.describeStacks().promise();
+		console.log('Stack Output:', JSON.stringify(stackOutput, null, 2));
 	}
 }
