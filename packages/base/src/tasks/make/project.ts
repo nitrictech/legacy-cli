@@ -2,7 +2,7 @@ import { Task } from '@nitric/cli-common';
 import fs from 'fs';
 import YAML from 'yaml';
 
-export class MakeProject extends Task<void> {
+export class MakeProjectTask extends Task<void> {
 	private projectName: string;
 	private force: boolean;
 

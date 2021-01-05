@@ -1,6 +1,6 @@
 import { Command, flags } from '@oclif/command';
 import { wrapTaskForListr } from '@nitric/cli-common';
-import { MakeProject, MakeFunctionTask } from '../../tasks/make';
+import { MakeProjectTask, MakeFunctionTask } from '../../tasks/make';
 import { getAvailableTemplates } from '../../utils';
 import Listr, { ListrTask } from 'listr';
 import inquirer from 'inquirer';
@@ -66,6 +66,6 @@ export default class Project extends Command {
 			];
 		}
 
-		await new Listr([wrapTaskForListr(new MakeProject(name, force)), ...commands]).run();
+		await new Listr([wrapTaskForListr(new MakeProjectTask(name, force)), ...commands]).run();
 	}
 }
