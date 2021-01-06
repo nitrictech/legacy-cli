@@ -63,9 +63,9 @@ jobs:
     
     # Signal the releases repostory to prepare a release
     - name: Prepare Release
-        uses: peter-evans/repository-dispatch@v1
-        with:
-          token: ${{ secrets.RELEASE_TOKEN }}
-          repository: nitric-dev/cli-releases
-          event-type: prepare-release
-          client-payload: '{"tag": "${{ steps.bump_tag.outputs.TAG_REF }}"}'
+      uses: peter-evans/repository-dispatch@v1
+      with:
+        token: ${{ secrets.RELEASE_TOKEN }}
+        repository: nitric-dev/cli-releases
+        event-type: prepare-release
+        client-payload: '{"tag": "${{ steps.bump_tag.outputs.TAG_REF }}"}'
