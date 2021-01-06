@@ -17,7 +17,7 @@ describe('Given executing nitric make:function', () => {
 		});
 
 		test('An error should be thrown', () => {
-			expect(async () => {
+			return expect(async () => {
 				await new MakeFunctionTask({
 					template: 'dummy',
 					dir: 'any',
