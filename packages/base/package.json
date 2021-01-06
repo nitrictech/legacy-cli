@@ -33,6 +33,7 @@
     "yaml": "^1.10.0"
   },
   "devDependencies": {
+    "@oclif/dev-cli": "1.26.0",
     "@types/dockerode": "^2.5.34",
     "@types/jest": "^26.0.15",
     "@types/listr": "latest",
@@ -86,9 +87,13 @@
   },
   "repository": "packages/cli",
   "scripts": {
-    "package": "pkg . --out-path ./dist/",
     "prepackage": "rm -rf lib && tsc -b && oclif-dev manifest && oclif-dev readme",
     "postpackage": "rm -f oclif.manifest.json",
+    "package:linux": "pkg . --output ./dist/nitric-linux-x64 -t node12-linux-x64",
+    "package:macos": "pkg . --output ./dist/nitric-macos-x64 -t node12-macos-x64",
+    "package:win": "pkg . --output ./dist/nitric-win-x64.exe -t node12-win-x64",
+    "package:all": "yarn run package:linux && yarn run package:macos && yarn run package:win",
+    "package": "yarn run prepackage && yarn run package:all && yarn run postpackage",
     "postpack": "rm -f oclif.manifest.json",
     "prepack": "rm -rf lib && tsc -b && oclif-dev manifest && oclif-dev readme",
     "test": "tsc --emitDeclarationOnly && jest",
