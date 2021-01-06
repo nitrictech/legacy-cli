@@ -15,6 +15,12 @@ export class MakeProjectTask extends Task<void> {
 	async do(): Promise<void> {
 		const { projectName } = this;
 
+		// Validate the project name, to ensure it's safe as a directory name and for various naming convention on the cloud services.
+		const safeNamePattern = /^(?!-)([a-zA-Z0-9-](?!-($|-)))*$/;
+		if (!safeNamePattern.test(projectName)) {
+			throw new Error('Invalid project name, only letters, numbers and dashes are supported.');
+		}
+
 		// 1: Create new folder relative to current directory for the new project
 		try {
 			fs.mkdirSync(`./${projectName}`);
