@@ -39,6 +39,24 @@ describe('Given executing nitric make:project', () => {
 		});
 	});
 
+	describe(`When an unexpected error occurs writing the project folder`, () => {
+		let spy;
+		beforeAll(() => {
+			spy = jest.spyOn(fs, 'mkdirSync').mockImplementation(() => {
+				throw new Error('test error');
+			});
+		});
+
+		afterAll(() => {
+			spy.mockRestore();
+		});
+
+		test('The unexpected error is re-thrown', async () => {
+			// Set 'force' parameter to false.
+			await expect(new MakeProjectTask('test-project', false).do()).rejects.toThrowError('test error');
+		});
+	});
+
 	describe(`When a valid project name is provided`, () => {
 		test('the project is created when letters, numbers and dashes are used in the name', async () => {
 			await expect(new MakeProjectTask('test-project42', false).do()).resolves.toBe(undefined);
