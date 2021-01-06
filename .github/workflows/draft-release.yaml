@@ -32,19 +32,23 @@ jobs:
         git remote set-url origin https://x-access-token:${GITHUB_TOKEN}@github.com/$GITHUB_REPOSITORY
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
     - name: Install Dependencies
       run: yarn --immutable
+
     - name: Bump and Tag
       run: |
         yarn bump
         echo "::set-output name=TAG_REF::`git describe --abbrev=0`"
       id: bump_tag
+
     - name: Merge Master -> Develop
       run: |
         git fetch
         git checkout develop
         git merge --no-ff master -m "Merge version bump into develop"
         git push origin master develop --follow-tags
+
     - name: Create Draft Release
       id: create_release
       uses: actions/create-release@v1
@@ -56,37 +60,12 @@ jobs:
         body: See CHANGELOG.md for changes
         draft: true
         prerelease: false
-    - name: Build Binaries
-      id: build_binaries
-      run: yarn workspace @nitric/cli package:all
-
-    - name: Upload Linux Binary
-      id: upload-linux-binary
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./packages/base/dist/nitric-linux-x64
-        asset_name: nitric-linux-x64
-        asset_content_type:  application/octet-stream
-    - name: Upload MacOS Binary
-      id: upload-macos-binary
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./packages/base/dist/nitric-macos-x64
-        asset_name: nitric-macos-x64
-        asset_content_type: application/octet-stream
-    - name: Upload Windows Binary
-      id: upload-windows-binary
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./packages/base/dist/nitric-windows-x64.exe
-        asset_name: nitric-windows-x64
-        asset_content_type: application/octet-stream
+    
+    # Signal the releases repostory to prepare a release
+    - name: Prepare Release
+        uses: peter-evans/repository-dispatch@v1
+        with:
+          token: ${{ secrets.RELEASE_TOKEN }}
+          repository: nitric-dev/cli-releases
+          event-type: prepare-release
+          client-payload: '{"tag": "${{ steps.bump_tag.outputs.TAG_REF }}"}'
