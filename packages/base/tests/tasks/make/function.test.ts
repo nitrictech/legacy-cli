@@ -2,13 +2,11 @@ import 'jest';
 import fs from 'fs';
 import tar from 'tar-fs';
 import * as clicommon from '@nitric/cli-common';
-import { MakeFunctionTask } from '../src/tasks/make';
-// import tar from 'tar-fs';
+import { MakeFunctionTask } from '../../../src/tasks/make';
+
 jest.mock('fs');
 jest.mock('tar-fs');
 jest.mock('stream-to-promise');
-
-// import { NitricStack } from '@nitric/cli-common';
 
 describe('Given executing nitric make:function', () => {
 	let spyReadNitricDescriptor;
