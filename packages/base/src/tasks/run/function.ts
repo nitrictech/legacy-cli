@@ -8,7 +8,7 @@ const GATEWAY_PORT = 9001;
 
 export interface RunFunctionTaskOptions {
 	image: NitricImage;
-	port: number | undefined;
+	port?: number | undefined;
 	subscriptions?: Record<string, string[]>;
 	network?: Network;
 	volume?: Volume;
