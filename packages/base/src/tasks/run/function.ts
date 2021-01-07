@@ -120,13 +120,16 @@ export class RunFunctionTask extends Task<Container> {
 		);
 
 		const container: Container = await new Promise((res, rej) => {
+			// Only wait 2 seconds for the container.
+			const rejectTimeout = setTimeout(() => {
+				rej(new Error(`Container for image ${this.image.id} not started after 2 seconds.`));
+			}, 2000);
+
 			runResult.on('container', (container: Container) => {
+				clearTimeout(rejectTimeout);
 				this.update(`Container ${container.id.substring(0, 12)} listening on: ${this.port}`);
 				res(container);
 			});
-			setTimeout(() => {
-				rej(new Error(`Container for image ${this.image.id} not started after 2 seconds.`));
-			}, 2000);
 		});
 
 		return container;
