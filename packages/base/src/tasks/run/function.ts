@@ -40,10 +40,13 @@ export class RunFunctionTask extends Task<Container> {
 			this.port = await getPort();
 		}
 
-		const networkName = network ? ((await network?.inspect()) as NetworkInspectInfo).Name : 'bridge';
-
-		if (networkName === 'bridge' && network) {
-			console.warn('Failed to set custom docker network on containers, defaulting to bridge network.');
+		let networkName = 'bridge';
+		if (network) {
+			try {
+				networkName = ((await network?.inspect()) as NetworkInspectInfo).Name;
+			} catch (error) {
+				console.warn(`Failed to set custom docker network, defaulting to bridge network`);
+			}
 		}
 
 		const dockerOptions = {
