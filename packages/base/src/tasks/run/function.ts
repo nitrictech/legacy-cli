@@ -55,7 +55,7 @@ export class RunFunctionTask extends Task<Container> {
 				[`${GATEWAY_PORT}/tcp`]: {},
 			},
 			Volumes: {},
-			Hostconfig: {
+			HostConfig: {
 				NetworkMode: networkName,
 				PortBindings: {
 					[`${GATEWAY_PORT}/tcp`]: [
