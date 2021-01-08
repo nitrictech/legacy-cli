@@ -23,7 +23,7 @@ export default class ListTemplates extends Command {
 			templates[key].forEach(template => repoTree.insert(template))
 
 			root.insert(key, repoTree)
-		})
+		});
 
 		root.display()
 	}

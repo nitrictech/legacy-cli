@@ -1,6 +1,7 @@
 import { Task } from '@nitric/cli-common';
 import fs from 'fs';
 import { TEMPLATE_DIR } from '../../common/paths';
+import { loadRepositoryManifest } from '../../utils';
 
 interface ListTemplatesResult {
   [repositoryName: string]: string[]
@@ -26,16 +27,10 @@ export class ListTemplatesTask extends Task<ListTemplatesResult> {
         .map((dirent) => dirent.name);
 
       return repoDirectories.reduce((acc, repo) => {
-        const innerDir = `${TEMPLATE_DIR}/${repo}`;
-
+        const repoManifest = loadRepositoryManifest(repo);
         return {
           ...acc,
-          [repo]: fs
-            .readdirSync(innerDir, {
-              withFileTypes: true,
-            })
-            .filter((dirent) => dirent.isDirectory())
-            .map((dirent) => dirent.name)
+          [repo]: repoManifest.templates.map(template => template.name)
         }
       }, {} as ListTemplatesResult);
     } catch (error) {

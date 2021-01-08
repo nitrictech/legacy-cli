@@ -27,6 +27,7 @@
     "os": "^0.1.1",
     "rimraf": "^3.0.2",
     "rxjs": "^6.6.3",
+    "simple-git": "^2.31.0",
     "stream-to-promise": "^3.0.0",
     "tar-fs": "^2.1.0",
     "tslib": "^1",
@@ -69,6 +70,12 @@
   "oclif": {
     "commands": "./lib/commands",
     "topics": {
+      "templates": {
+        "description": "Commands for template management"
+      },
+      "templates:repos": {
+        "description": "Commands for managing template repositories"
+      },
       "make": {
         "description": "Commands to make new projects and assets."
       },

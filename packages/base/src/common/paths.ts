@@ -7,6 +7,11 @@ export const STAGING_DIR = path.join(NITRIC_HOME, 'staging');
 export const TEMPLATE_DIR = path.join(NITRIC_HOME, 'templates');
 export const LOG_DIR = path.join(NITRIC_HOME, 'logs');
 
+// Location of the nitric template store manifests
+export const NITRIC_STORE_DIR = path.join(NITRIC_HOME, 'store');
+export const NITRIC_REPOSITORIES_FILE = path.join(NITRIC_STORE_DIR, "repositories.yaml");
+export const NITRIC_TEMPLATE_DIR = path.join(TEMPLATE_DIR, "official");
+
 const REL_FUNC_TEMPLATE_DIR = '/function';
 
 /**
