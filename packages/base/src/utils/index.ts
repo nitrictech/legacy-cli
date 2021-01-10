@@ -1,15 +1,37 @@
 import fs from 'fs';
-import { TEMPLATE_DIR, LOG_DIR, NITRIC_STORE_DIR, NITRIC_REPOSITORIES_FILE } from '../common/paths';
+import { TEMPLATE_DIR, LOG_DIR, NITRIC_REPOSITORIES_FILE } from '../common/paths';
 import path from 'path';
 import { NitricRepositories, NitricTemplateRepository } from '../common/types';
 import YAML from "yaml";
 
 /**
- * Checks if a specified template is available in the template install directory
+ * Returns if a given template exists
+ * @param templateName structured as <repoName>:<templateName>
  */
 export function isTemplateAvailable(templateName: string): boolean {
-	const templateDirectory = path.join(TEMPLATE_DIR, templateName);
-	return fs.existsSync(templateDirectory);
+	try {
+		const templateDirectory = getTemplateLocation(templateName)
+		return fs.existsSync(templateDirectory);
+	} catch (error) {
+		return false;
+	}
+}
+
+/**
+ * Return the full path of the given template
+ * @param templateName structured as <repoName>:<templateName>
+ */
+export function getTemplateLocation(templateName: string): string {
+	const [repoName, tmplName] = templateName.split("/");
+	const repoManifest = loadRepositoryManifest(repoName)
+
+	const template = repoManifest.templates.find(template => template.name === tmplName);
+
+	if (!template) {
+		throw new Error(`${templateName} does not exist in repository ${repoName}`);
+	}
+
+	return `${TEMPLATE_DIR}/${repoName}/${template.path}`;
 }
 
 export function getAvailableRepositories(): string[][] {
