@@ -12,14 +12,38 @@ export function isTemplateAvailable(templateName: string): boolean {
 	return fs.existsSync(templateDirectory);
 }
 
+export function getAvailableRepositories(): string[][] {
+	return fs
+		.readdirSync(TEMPLATE_DIR, {
+			withFileTypes: true,
+		})
+		.filter((dirent) => dirent.isDirectory())
+		.map((dirent) => [dirent.name, `${TEMPLATE_DIR}/${dirent.name}/repository.yaml`]);
+}
+
 export function getAvailableTemplates(): string[] {
 	try {
-		return fs
-			.readdirSync(TEMPLATE_DIR, {
-				withFileTypes: true,
-			})
-			.filter((dirent) => dirent.isDirectory())
-			.map((dirent) => dirent.name);
+		// Read the metadata files of all the available templates
+		const repositories = getAvailableRepositories()
+
+		// Read each of the files and compile their list of templates...
+		const templateRepositories = repositories.map(repo => {
+			const [name, metaFile] = repo;
+
+			const tmp = YAML.parse(fs.readFileSync(metaFile).toString('utf-8')) as NitricTemplateRepository;
+
+			return {
+				...tmp,
+				name
+			} as NitricTemplateRepository
+		});
+
+		return templateRepositories.reduce((acc, repo) => {
+			return [
+				...acc,
+				...repo.templates.map(template => `${repo.name}/${template.name}`)
+			];
+		}, [] as string[]);
 	} catch (error) {
 		return [];
 	}
