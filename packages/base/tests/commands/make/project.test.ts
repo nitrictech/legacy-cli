@@ -8,7 +8,7 @@ jest.mock('../../../src/utils');
 jest.mock('inquirer');
 jest.mock('listr');
 
-describe('Given executing nitric make:function', () => {
+describe('Given executing nitric make:project', () => {
 	let result;
 
 	beforeEach(() => {
