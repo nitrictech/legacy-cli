@@ -19,7 +19,7 @@ export function getAvailableTemplates(): string[] {
 			.filter((dirent) => dirent.isDirectory())
 			.map((dirent) => dirent.name);
 	} catch (error) {
-		return ['no available templates'];
+		return [];
 	}
 }
 
@@ -30,5 +30,5 @@ export function createNitricLogDir(): void {
 }
 
 export function functionLogFilePath(name: string): string {
-	return `${LOG_DIR}/${name}.txt`;
+	return path.join(LOG_DIR, `${name}.txt`);
 }
