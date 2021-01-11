@@ -36,6 +36,7 @@ describe('Given executing nitric make:function', () => {
 
 	describe("When required args aren't provided", () => {
 		beforeEach(() => {
+			// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 			Function.args.find((arg) => arg.name == 'template')!.choices = ['dummy-template'];
 			jest.spyOn(utils, 'getAvailableTemplates').mockReturnValue(['dummy-template']);
 			// Return something from the prompt so the rest of the code doesn't error
