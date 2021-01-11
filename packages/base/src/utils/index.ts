@@ -17,9 +17,31 @@ export function isTemplateAvailable(templateName: string): boolean {
 	}
 }
 
+const DEFAULT_CODE_TEMPLATE_DIR = './function';
+
+/**
+ * Return the full path of a templates relative userland code directory
+ * This will be used for creating new functions and projects
+ * @param templateName
+ */
+export function getTemplateCodePath(templateName: string): string {
+	const [repoName, tmplName] = templateName.split("/");
+	const repoManifest = loadRepositoryManifest(repoName)
+
+	const template = repoManifest.templates.find(template => template.name === tmplName);
+
+	if (!template) {
+		throw new Error(`${templateName} does not exist in repository ${repoName}`);
+	}
+
+	const { codeDir = DEFAULT_CODE_TEMPLATE_DIR } = template;
+
+	return path.join(`${TEMPLATE_DIR}/${repoName}`, template.path, codeDir);
+}
+
 /**
  * Return the full path of the given template
- * @param templateName structured as <repoName>:<templateName>
+ * @param templateName structured as <repoName>/<templateName>
  */
 export function getTemplateLocation(templateName: string): string {
 	const [repoName, tmplName] = templateName.split("/");
@@ -31,7 +53,7 @@ export function getTemplateLocation(templateName: string): string {
 		throw new Error(`${templateName} does not exist in repository ${repoName}`);
 	}
 
-	return `${TEMPLATE_DIR}/${repoName}/${template.path}`;
+	return path.join(`${TEMPLATE_DIR}/${repoName}`, template.path);
 }
 
 export function getAvailableRepositories(): string[][] {

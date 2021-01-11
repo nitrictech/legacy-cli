@@ -3,6 +3,8 @@ export interface NitricTemplate {
   name: string;
   lang: string;
   path: string;
+  // Relative to template path
+  codeDir: string;
 }
 
 export interface NitricTemplateRepository {

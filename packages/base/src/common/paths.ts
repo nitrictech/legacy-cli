@@ -12,14 +12,4 @@ export const NITRIC_STORE_DIR = path.join(NITRIC_HOME, 'store');
 export const NITRIC_REPOSITORIES_FILE = path.join(NITRIC_STORE_DIR, "repositories.yaml");
 export const NITRIC_TEMPLATE_DIR = path.join(TEMPLATE_DIR, "official");
 
-const REL_FUNC_TEMPLATE_DIR = '/function';
-
-/**
- * Given an template name, returns the path to that template's function template.
- * Used to generate new functions based on that template.
- * @param {string} template name of the template
- * @returns {string} the full template path
- */
-export const templateFunctionPath = (template: string): string => {
-	return path.join(TEMPLATE_DIR, template, REL_FUNC_TEMPLATE_DIR);
-};
+const DEFAULT_CODE_TEMPLATE_DIR = '/function';
