@@ -31,6 +31,10 @@ export default class Project extends Command {
 		const { force } = flags;
 		let commands: ListrTask[] = [];
 
+		if (!name.match(projectNameRegex)) {
+			throw new Error(`project name must be lowercase letters and dashes only. e.g. example-project-name`);
+		}
+
 		const { example }: { example: string } = await inquirer.prompt([
 			{
 				name: 'example',
@@ -39,10 +43,6 @@ export default class Project extends Command {
 				choices: getAvailableTemplates(),
 			},
 		]);
-
-		if (!name.match(projectNameRegex)) {
-			throw new Error(`project name must be formatted as ${projectNameRegex}`);
-		}
 
 		if (example !== 'none') {
 			const { functionName } = await inquirer.prompt([
