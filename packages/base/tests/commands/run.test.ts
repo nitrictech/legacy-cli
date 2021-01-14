@@ -1,10 +1,11 @@
 import 'jest';
 import { mocked } from 'ts-jest/utils';
-import Run, { MIN_PORT, MAX_PORT, getPortRange } from '../../src/commands/run';
+import Run, { MIN_PORT, MAX_PORT, getPortRange, getContainerSubscriptions, sortImages } from '../../src/commands/run';
 import { RunFunctionTask } from '../../src/tasks/run';
 import * as getPort from 'get-port';
 import * as clicommon from '@nitric/cli-common';
 import Listr from 'listr';
+import { NitricImage, NitricStack } from '@nitric/cli-common';
 
 jest.mock('clear');
 jest.mock('dockerode');
@@ -194,6 +195,151 @@ describe('Given executing nitric run', () => {
 			it('Should execute the RunFunctionTask', async () => {
 				expect(RunFunctionTask).toBeCalled();
 			});
+		});
+	});
+
+	describe('Given a nitric stack with multiple functions', () => {
+		const multiFunctionStack: NitricStack = {
+			name: 'test-stack',
+			functions: [
+				{
+					name: 'dummy-func1',
+					runtime: 'custom',
+					path: 'dummy-func1',
+				},
+				{
+					name: 'dummy-func2',
+					runtime: 'custom',
+					path: 'dummy-func2',
+				},
+			],
+		};
+
+		describe('Given an event topic', () => {
+			const eventTopicStack: NitricStack = {
+				...multiFunctionStack,
+				// add the topic
+				topics: [
+					{
+						name: 'test-topic',
+					},
+				],
+			};
+
+			describe('When one function has a subscription', () => {
+				const subscribedStack: NitricStack = {
+					name: eventTopicStack.name,
+					functions: [
+						{
+							...eventTopicStack.functions![0],
+							// add the subscription
+							subs: [
+								{
+									topic: 'test-topic',
+								},
+							],
+						},
+						eventTopicStack.functions![1],
+					],
+					topics: eventTopicStack.topics,
+				};
+
+				it('Should subscribe the function', () => {
+					const subscriptions = getContainerSubscriptions(subscribedStack);
+					expect(subscriptions).toEqual({
+						'test-topic': ['http://dummy-func1:9001'],
+					});
+				});
+			});
+		});
+	});
+
+	describe('Given multiple nitric images', () => {
+		it('Should sort the images by name their function alphabetical function names', () => {
+			const unsortedImages: NitricImage[] = [
+				{
+					id: '1111',
+					func: {
+						name: 'a-function',
+						path: './some-path',
+						runtime: 'custom',
+					},
+				},
+				{
+					id: '1111',
+					func: {
+						name: 'c-function',
+						path: './some-path',
+						runtime: 'custom',
+					},
+				},
+				{
+					id: '1111',
+					func: {
+						name: 'same-name',
+						path: './some-path',
+						runtime: 'custom',
+					},
+				},
+				{
+					id: '1111',
+					func: {
+						name: 'same-name',
+						path: './some-path',
+						runtime: 'custom',
+					},
+				},
+				{
+					id: '1111',
+					func: {
+						name: 'b-function',
+						path: './some-path',
+						runtime: 'custom',
+					},
+				},
+			];
+			expect(sortImages(unsortedImages)).toEqual([
+				{
+					id: '1111',
+					func: {
+						name: 'a-function',
+						path: './some-path',
+						runtime: 'custom',
+					},
+				},
+				{
+					id: '1111',
+					func: {
+						name: 'b-function',
+						path: './some-path',
+						runtime: 'custom',
+					},
+				},
+				{
+					id: '1111',
+					func: {
+						name: 'c-function',
+						path: './some-path',
+						runtime: 'custom',
+					},
+				},
+				{
+					id: '1111',
+					func: {
+						name: 'same-name',
+						path: './some-path',
+						runtime: 'custom',
+					},
+				},
+				{
+					id: '1111',
+					func: {
+						name: 'same-name',
+						path: './some-path',
+						runtime: 'custom',
+					},
+				},
+			]);
 		});
 	});
 });
