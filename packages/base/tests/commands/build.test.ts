@@ -4,8 +4,6 @@ import { BuildFunctionTask } from '../../src/tasks/build';
 import Build from '../../src/commands/build';
 import Listr from 'listr';
 import { mocked } from 'ts-jest/utils';
-// import * as build from '../../src/commands/build';
-// import * as utils from '../../src/utils';
 
 jest.mock('@nitric/cli-common');
 jest.mock('../../src/tasks/build');
@@ -51,7 +49,9 @@ describe('Given executing nitric build', () => {
 		});
 
 		test('The user should be notified that something went wrong', () => {
-			return expect(Build.run([])).rejects.toEqual(new Error('Something went wrong, see error details inline above.'));
+			return expect(Build.run([])).rejects.toEqual(
+				new Error('Something went wrong, see error details inline above.\n Error: test error'),
+			);
 		});
 	});
 
