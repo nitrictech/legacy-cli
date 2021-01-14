@@ -150,7 +150,7 @@ export class BuildFunctionTask extends Task<NitricImage> {
 			buildargs: {
 				PROVIDER: this.provider,
 			},
-			t: getTagNameForFunction(this.stackName, this.func),
+			t: getTagNameForFunction(this.stackName, this.provider, this.func),
 		};
 
 		let stream: NodeJS.ReadableStream;

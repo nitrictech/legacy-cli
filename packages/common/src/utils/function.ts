@@ -9,10 +9,10 @@ export function sanitizeStringForDockerTag(str: string): string {
  * @param stackName
  * @param func
  */
-export function getTagNameForFunction(stackName: string, func: NitricFunction): string {
+export function getTagNameForFunction(stackName: string, provider: string, func: NitricFunction): string {
 	const { tag = `${sanitizeStringForDockerTag(stackName)}-${sanitizeStringForDockerTag(func.name)}` } = func;
 
-	return tag;
+	return `${tag}-${sanitizeStringForDockerTag(provider)}`;
 }
 
 /**
