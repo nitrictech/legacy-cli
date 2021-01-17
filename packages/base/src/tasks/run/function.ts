@@ -8,7 +8,7 @@ const GATEWAY_PORT = 9001;
 
 export interface RunFunctionTaskOptions {
 	image: NitricImage;
-	port: number | undefined;
+	port?: number | undefined;
 	subscriptions?: Record<string, string[]>;
 	network?: Network;
 	volume?: Volume;
@@ -40,10 +40,13 @@ export class RunFunctionTask extends Task<Container> {
 			this.port = await getPort();
 		}
 
-		const networkName = network ? ((await network?.inspect()) as NetworkInspectInfo).Name : 'bridge';
-
-		if (networkName === 'bridge') {
-			console.warn('Failed to set custom docker network on containers, defaulting to bridge network.');
+		let networkName = 'bridge';
+		if (network) {
+			try {
+				networkName = ((await network?.inspect()) as NetworkInspectInfo).Name;
+			} catch (error) {
+				console.warn(`Failed to set custom docker network, defaulting to bridge network`);
+			}
 		}
 
 		const dockerOptions = {
@@ -52,7 +55,7 @@ export class RunFunctionTask extends Task<Container> {
 				[`${GATEWAY_PORT}/tcp`]: {},
 			},
 			Volumes: {},
-			Hostconfig: {
+			HostConfig: {
 				NetworkMode: networkName,
 				PortBindings: {
 					[`${GATEWAY_PORT}/tcp`]: [
@@ -120,13 +123,16 @@ export class RunFunctionTask extends Task<Container> {
 		);
 
 		const container: Container = await new Promise((res, rej) => {
+			// Only wait 2 seconds for the container.
+			const rejectTimeout = setTimeout(() => {
+				rej(new Error(`Container for image ${this.image.id} not started after 2 seconds.`));
+			}, 2000);
+
 			runResult.on('container', (container: Container) => {
+				clearTimeout(rejectTimeout);
 				this.update(`Container ${container.id.substring(0, 12)} listening on: ${this.port}`);
 				res(container);
 			});
-			setTimeout(() => {
-				rej(new Error(`Container for image ${this.image.id} not started after 2 seconds.`));
-			}, 2000);
 		});
 
 		return container;

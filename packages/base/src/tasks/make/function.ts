@@ -33,7 +33,7 @@ export class MakeFunctionTask extends Task<void> {
 		// Validate template is installed/exists
 		//TODO: in future, we should attempt to download/install the template if possible
 		if (!isTemplateAvailable(this.template)) {
-			throw new Error(`Template ${this.template} is not available.`);
+			throw new Error(`Template ${this.template} is not available`);
 		}
 		this.update(`${this.template} template available locally`);
 

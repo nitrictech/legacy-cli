@@ -65,7 +65,8 @@ export default class Build extends Command {
 		try {
 			return await createBuildTasks(stack, directory, provider).run();
 		} catch (error) {
-			throw new Error('Something went wrong, see error details inline above.');
+			const origErrs = error.errors && error.errors.length ? error.errors : error;
+			throw new Error(`Something went wrong, see error details inline above.\n ${origErrs}`);
 		}
 	}
 }

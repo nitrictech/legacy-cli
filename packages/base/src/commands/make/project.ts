@@ -1,6 +1,6 @@
 import { Command, flags } from '@oclif/command';
 import { wrapTaskForListr } from '@nitric/cli-common';
-import { MakeProject, MakeFunctionTask } from '../../tasks/make';
+import { MakeProjectTask, MakeFunctionTask } from '../../tasks/make';
 import { getAvailableTemplates } from '../../utils';
 import Listr, { ListrTask } from 'listr';
 import inquirer from 'inquirer';
@@ -31,6 +31,10 @@ export default class Project extends Command {
 		const { force } = flags;
 		let commands: ListrTask[] = [];
 
+		if (!name.match(projectNameRegex)) {
+			throw new Error(`project name must be lowercase letters and dashes only. e.g. example-project-name`);
+		}
+
 		const { example }: { example: string } = await inquirer.prompt([
 			{
 				name: 'example',
@@ -39,10 +43,6 @@ export default class Project extends Command {
 				choices: getAvailableTemplates(),
 			},
 		]);
-
-		if (!name.match(projectNameRegex)) {
-			throw new Error(`project name must be formatted as ${projectNameRegex}`);
-		}
 
 		if (example !== 'none') {
 			const { functionName } = await inquirer.prompt([
@@ -66,6 +66,6 @@ export default class Project extends Command {
 			];
 		}
 
-		await new Listr([wrapTaskForListr(new MakeProject(name, force)), ...commands]).run();
+		await new Listr([wrapTaskForListr(new MakeProjectTask(name, force)), ...commands]).run();
 	}
 }
