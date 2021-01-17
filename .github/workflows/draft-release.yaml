@@ -32,19 +32,23 @@ jobs:
         git remote set-url origin https://x-access-token:${GITHUB_TOKEN}@github.com/$GITHUB_REPOSITORY
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
     - name: Install Dependencies
       run: yarn --immutable
+
     - name: Bump and Tag
       run: |
         yarn bump
         echo "::set-output name=TAG_REF::`git describe --abbrev=0`"
       id: bump_tag
+
     - name: Merge Master -> Develop
       run: |
         git fetch
         git checkout develop
         git merge --no-ff master -m "Merge version bump into develop"
         git push origin master develop --follow-tags
+
     - name: Create Draft Release
       id: create_release
       uses: actions/create-release@v1
@@ -56,3 +60,12 @@ jobs:
         body: See CHANGELOG.md for changes
         draft: true
         prerelease: false
+    
+    # Signal the releases repostory to prepare a release
+    - name: Prepare Release
+      uses: peter-evans/repository-dispatch@v1
+      with:
+        token: ${{ secrets.RELEASE_TOKEN }}
+        repository: nitric-dev/cli-releases
+        event-type: prepare-release
+        client-payload: '{"tag": "${{ steps.bump_tag.outputs.TAG_REF }}"}'
