@@ -11,7 +11,6 @@ import YAML from 'yaml';
 export function isTemplateAvailable(templateName: string): boolean {
 	try {
 		const templateDirectory = getTemplateLocation(templateName);
-		console.log("LOCATION", templateDirectory);
 		return fs.existsSync(templateDirectory);
 	} catch (error) {
 		return false;
