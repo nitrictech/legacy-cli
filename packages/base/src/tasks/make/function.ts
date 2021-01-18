@@ -1,4 +1,4 @@
-import { templateFunctionPath } from '../../common/paths';
+// import { templateFunctionPath } from '../../common/paths';
 import { NitricRuntime, readNitricDescriptor, writeNitricDescriptor, Task } from '@nitric/cli-common';
 import { getTemplateCodePath, isTemplateAvailable } from '../../utils';
 

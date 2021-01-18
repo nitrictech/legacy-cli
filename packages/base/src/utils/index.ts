@@ -2,7 +2,7 @@ import fs from 'fs';
 import { TEMPLATE_DIR, LOG_DIR, NITRIC_REPOSITORIES_FILE } from '../common/paths';
 import path from 'path';
 import { NitricRepositories, NitricTemplateRepository } from '../common/types';
-import YAML from "yaml";
+import YAML from 'yaml';
 
 /**
  * Returns if a given template exists
@@ -10,7 +10,8 @@ import YAML from "yaml";
  */
 export function isTemplateAvailable(templateName: string): boolean {
 	try {
-		const templateDirectory = getTemplateLocation(templateName)
+		const templateDirectory = getTemplateLocation(templateName);
+		console.log("LOCATION", templateDirectory);
 		return fs.existsSync(templateDirectory);
 	} catch (error) {
 		return false;
@@ -25,10 +26,10 @@ const DEFAULT_CODE_TEMPLATE_DIR = './function';
  * @param templateName
  */
 export function getTemplateCodePath(templateName: string): string {
-	const [repoName, tmplName] = templateName.split("/");
-	const repoManifest = loadRepositoryManifest(repoName)
+	const [repoName, tmplName] = templateName.split('/');
+	const repoManifest = loadRepositoryManifest(repoName);
 
-	const template = repoManifest.templates.find(template => template.name === tmplName);
+	const template = repoManifest.templates.find((template) => template.name === tmplName);
 
 	if (!template) {
 		throw new Error(`${templateName} does not exist in repository ${repoName}`);
@@ -44,10 +45,10 @@ export function getTemplateCodePath(templateName: string): string {
  * @param templateName structured as <repoName>/<templateName>
  */
 export function getTemplateLocation(templateName: string): string {
-	const [repoName, tmplName] = templateName.split("/");
-	const repoManifest = loadRepositoryManifest(repoName)
+	const [repoName, tmplName] = templateName.split('/');
+	const repoManifest = loadRepositoryManifest(repoName);
 
-	const template = repoManifest.templates.find(template => template.name === tmplName);
+	const template = repoManifest.templates.find((template) => template.name === tmplName);
 
 	if (!template) {
 		throw new Error(`${templateName} does not exist in repository ${repoName}`);
@@ -68,25 +69,22 @@ export function getAvailableRepositories(): string[][] {
 export function getAvailableTemplates(): string[] {
 	try {
 		// Read the metadata files of all the available templates
-		const repositories = getAvailableRepositories()
+		const repositories = getAvailableRepositories();
 
 		// Read each of the files and compile their list of templates...
-		const templateRepositories = repositories.map(repo => {
+		const templateRepositories = repositories.map((repo) => {
 			const [name, metaFile] = repo;
 
 			const tmp = YAML.parse(fs.readFileSync(metaFile).toString('utf-8')) as NitricTemplateRepository;
 
 			return {
 				...tmp,
-				name
-			} as NitricTemplateRepository
+				name,
+			} as NitricTemplateRepository;
 		});
 
 		return templateRepositories.reduce((acc, repo) => {
-			return [
-				...acc,
-				...repo.templates.map(template => `${repo.name}/${template.name}`)
-			];
+			return [...acc, ...repo.templates.map((template) => `${repo.name}/${template.name}`)];
 		}, [] as string[]);
 	} catch (error) {
 		return [];
@@ -98,17 +96,17 @@ export function loadRepositoriesManifest(): NitricRepositories {
 		return YAML.parse(fs.readFileSync(NITRIC_REPOSITORIES_FILE).toString('utf-8')) as NitricRepositories;
 	}
 
-	throw new Error("Error loading the nitric repository manifest");
+	throw new Error('Error loading the nitric repository manifest');
 }
 
 export function loadRepositoryManifest(repoName: string): NitricTemplateRepository {
-	const repositoryManifestPath = path.join(TEMPLATE_DIR, `./${repoName}`, "./repository.yaml");
+	const repositoryManifestPath = path.join(TEMPLATE_DIR, `./${repoName}`, './repository.yaml');
 
 	if (fs.existsSync(repositoryManifestPath)) {
 		return YAML.parse(fs.readFileSync(repositoryManifestPath).toString('utf-8')) as NitricTemplateRepository;
 	}
 
-	throw new Error("Error loading the nitric repository manifest");
+	throw new Error('Error loading the nitric repository manifest');
 }
 
 export function createNitricLogDir(): void {

@@ -52,7 +52,7 @@ export default function (project: string, stackName: string, func: NitricFunctio
 						spec: {
 							containers: [
 								{
-									image: `${grcHost}/${project}/${getTagNameForFunction(stackName, "gcp", func)}`,
+									image: `${grcHost}/${project}/${getTagNameForFunction(stackName, 'gcp', func)}`,
 									ports: [
 										{
 											containerPort: 9001,

@@ -12,7 +12,7 @@ export function generateEcrRepositoryUri(
 	stackName: string,
 	func: NitricFunction,
 ): string {
-	const imageAlias = getTagNameForFunction(stackName, "aws", func);
+	const imageAlias = getTagNameForFunction(stackName, 'aws', func);
 	return `${accountId}.dkr.ecr.${region}.amazonaws.com/${imageAlias}`;
 }
 

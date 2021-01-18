@@ -126,7 +126,7 @@ export class PushImage extends Task<void> {
 
 		const docker = new Docker();
 		const authClient = await auth.getClient();
-		const tag = getTagNameForFunction(this.stackName, "gcp", this.func);
+		const tag = getTagNameForFunction(this.stackName, 'gcp', this.func);
 		const image = docker.getImage(tag);
 		// TODO: Enable different region storage
 		const gcrTag = `${gcrRegion}/${this.gcpProject}/${tag}`;
