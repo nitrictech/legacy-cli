@@ -6,7 +6,7 @@ import Listr from 'listr';
 import { mocked } from 'ts-jest/utils';
 
 jest.mock('@nitric/cli-common');
-jest.mock('../../tasks/build');
+jest.mock('../tasks/build');
 jest.mock('listr');
 
 describe('Given executing nitric build', () => {

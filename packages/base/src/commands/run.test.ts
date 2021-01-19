@@ -12,8 +12,8 @@ jest.mock('dockerode');
 jest.mock('keypress');
 jest.mock('get-port');
 jest.mock('listr');
-jest.mock('../../tasks/run');
-jest.mock('../../tasks/build');
+jest.mock('../tasks/run');
+jest.mock('../tasks/build');
 
 // We want to ensure tests fail if these constant values are unintentionally changed
 describe('Given MIN_PORT is constant', () => {
