@@ -1,6 +1,6 @@
 import 'jest';
 import { mocked } from 'ts-jest/utils';
-import { CreateNetworkTask } from '../../../src/tasks/run';
+import { CreateNetworkTask } from '.';
 import Docker from 'dockerode';
 
 jest.mock('dockerode');

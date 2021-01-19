@@ -1,6 +1,6 @@
 import 'jest';
 import { mocked } from 'ts-jest/utils';
-import { CreateVolumeTask } from '../../../src/tasks/run';
+import { CreateVolumeTask } from '.';
 import Docker from 'dockerode';
 
 jest.mock('dockerode');
