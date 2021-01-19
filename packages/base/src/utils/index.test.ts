@@ -1,9 +1,7 @@
 import 'jest';
-// import * as os from 'os';
-import * as utils from '../../src/utils';
-// import { createNitricLogDir, getAvailableTemplates, isTemplateAvailable } from '../../src/utils';
+import * as utils from '.';
 import fs from 'fs';
-import { NitricTemplateRepository } from '../../src/common/types';
+import { NitricTemplateRepository } from '../common/types';
 import YAML from 'yaml';
 
 jest.mock('fs');

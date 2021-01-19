@@ -1,6 +1,6 @@
 import 'jest';
 import fs from 'fs';
-import { MakeProjectTask } from '../../../src/tasks/make';
+import { MakeProjectTask } from '../../tasks/make';
 
 jest.mock('fs');
 

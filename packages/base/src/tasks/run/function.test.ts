@@ -1,12 +1,12 @@
 import 'jest';
 import { mocked } from 'ts-jest/utils';
-import { RunFunctionTask, Cleanup } from '../../../src/tasks/run';
+import { RunFunctionTask, Cleanup } from '.';
 import Docker, { Network } from 'dockerode';
 
 jest.mock('get-port');
 jest.mock('fs');
 jest.mock('dockerode');
-jest.mock('../../../src/utils');
+jest.mock('../../utils');
 
 describe('Given a Nitric function is being run locally as a container', () => {
 	afterEach(() => {

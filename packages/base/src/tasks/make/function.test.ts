@@ -2,8 +2,7 @@ import 'jest';
 import fs from 'fs';
 import tar from 'tar-fs';
 import * as clicommon from '@nitric/cli-common';
-// import * as utils from '../../../src/utils';
-import { MakeFunctionTask } from '../../../src/tasks/make';
+import { MakeFunctionTask } from '../../tasks/make';
 import YAML from "yaml";
 
 jest.mock('fs');
