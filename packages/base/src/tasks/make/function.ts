@@ -1,6 +1,6 @@
-import { templateFunctionPath } from '../../common/paths';
+// import { templateFunctionPath } from '../../common/paths';
 import { NitricRuntime, readNitricDescriptor, writeNitricDescriptor, Task } from '@nitric/cli-common';
-import { isTemplateAvailable } from '../../utils';
+import { getTemplateCodePath, isTemplateAvailable } from '../../utils';
 
 import tar from 'tar-fs';
 import path from 'path';
@@ -37,7 +37,7 @@ export class MakeFunctionTask extends Task<void> {
 		}
 		this.update(`${this.template} template available locally`);
 
-		const inPath = templateFunctionPath(this.template);
+		const inPath = getTemplateCodePath(this.template);
 		//TODO: should probably do something to make sure the file exists
 		// Make a copy of the function template, using the new name in the output directory
 		const outPath = path.join(this.dir);

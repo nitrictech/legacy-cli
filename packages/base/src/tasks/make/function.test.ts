@@ -2,7 +2,8 @@ import 'jest';
 import fs from 'fs';
 import tar from 'tar-fs';
 import * as clicommon from '@nitric/cli-common';
-import { MakeFunctionTask } from '../../../src/tasks/make';
+import { MakeFunctionTask } from '../../tasks/make';
+import YAML from "yaml";
 
 jest.mock('fs');
 jest.mock('tar-fs');
@@ -14,36 +15,63 @@ describe('Given executing nitric make:function', () => {
 		spyReadNitricDescriptor = jest.spyOn(clicommon, 'readNitricDescriptor').mockReturnValue({
 			name: 'test-project',
 		});
+
+		jest.spyOn(fs, 'existsSync').mockImplementation(path => {
+			// return true if it's related to the template and template paths
+			if (path.toString().includes("dummy") || path.toString().includes("repository.yaml")) {
+				return true;
+			} else {
+				// return false for anything else
+				return false;
+			}
+		});
+
+		jest.spyOn(tar, 'pack').mockImplementation(() => {
+			return { pipe: jest.fn() } as any
+		});
+		
+		jest.spyOn(fs, 'readFileSync').mockImplementation(path => {
+			const pathString = path.toString();
+			// return a mock version of the template repository in the case where it is requests
+			if (pathString.includes('repository.yaml')) {
+				return Buffer.from(YAML.stringify({
+					name: 'test',
+					templates: [
+						{
+							name: 'dummy',
+							path: '/templates/dummy',
+							lang: 'dummy',
+							codeDir: '/function',
+						},
+					],
+				}));
+			}
+
+			throw new Error("ENOENT: No such file");
+		});
 	});
 
 	afterEach(() => {
 		jest.resetAllMocks();
 	});
 
+	afterAll(() => {
+		jest.restoreAllMocks()
+	})
+
 	describe('When the make:function inputs are all valid', () => {
-		let spyExistsSync;
 		let spyWriteNitricDesc;
 		beforeAll(() => {
-			spyExistsSync = jest
-				.spyOn(fs, 'existsSync')
-				.mockReturnValueOnce(true) // template exists
-				.mockReturnValueOnce(false); // function dir doesn't
-
 			spyWriteNitricDesc = jest.spyOn(clicommon, 'writeNitricDescriptor');
-
-			jest.spyOn(tar, 'pack').mockReturnValue({ pipe: jest.fn() } as any);
 		});
 
 		test('The function is created', async () => {
-			expect.assertions(2);
-
 			await new MakeFunctionTask({
-				template: 'dummy',
+				template: 'test/dummy',
 				dir: 'test',
 				name: 'test',
 			}).do();
 
-			expect(spyExistsSync).toBeCalledTimes(2);
 			expect(spyWriteNitricDesc).toBeCalledWith(
 				{
 					name: 'test-project',
@@ -52,7 +80,7 @@ describe('Given executing nitric make:function', () => {
 						{
 							name: 'test',
 							path: 'test',
-							runtime: 'dummy',
+							runtime: 'test/dummy',
 						},
 					],
 				},
@@ -64,29 +92,22 @@ describe('Given executing nitric make:function', () => {
 	describe('When the make:function is provided an alternate nitric.yaml filename', () => {
 		let spyWriteNitricDesc;
 		beforeEach(() => {
-			jest
-				.spyOn(fs, 'existsSync')
-				.mockReturnValueOnce(true) // template exists
-				.mockReturnValueOnce(false); // function dir doesn't
 			spyWriteNitricDesc = jest.spyOn(clicommon, 'writeNitricDescriptor');
-			jest.spyOn(tar, 'pack').mockReturnValue({ pipe: jest.fn() } as any);
 		});
 
 		const altNameInput = {
-			template: 'dummy',
+			template: 'test/dummy',
 			dir: 'test',
 			name: 'test',
 			file: 'another-name.yaml',
 		};
 
 		test('The custom filename is used to load the existing configuration', async () => {
-			expect.assertions(1);
 			await new MakeFunctionTask(altNameInput).do();
 			expect(spyReadNitricDescriptor).toBeCalledWith('another-name.yaml');
 		});
 
 		test('The custom filename is used to save the new configuration', async () => {
-			expect.assertions(1);
 			await new MakeFunctionTask(altNameInput).do();
 			expect(spyWriteNitricDesc).toBeCalledWith(expect.any(Object), 'another-name.yaml');
 		});
@@ -111,17 +132,17 @@ describe('Given executing nitric make:function', () => {
 	describe('When the function directory already exists', () => {
 		let spy;
 
-		beforeAll(() => {
+		beforeEach(() => {
 			spy = jest.spyOn(fs, 'existsSync').mockReturnValue(true);
 		});
-		afterAll(() => {
+		afterEach(() => {
 			spy.mockRestore();
 		});
 
 		test('An error should be thrown', () => {
 			return expect(async () => {
 				await new MakeFunctionTask({
-					template: 'dummy',
+					template: 'test/dummy',
 					dir: 'any',
 					name: 'test',
 				}).do();
@@ -132,28 +153,28 @@ describe('Given executing nitric make:function', () => {
 	describe('When the function name already exists in the YAML file', () => {
 		// let spyExistsSync;
 
-		beforeAll(() => {
+		beforeEach(() => {
 			spyReadNitricDescriptor.mockReturnValueOnce({
 				name: 'test-project',
 				functions: [
 					{
 						name: 'existingfunction',
 						path: 'existingfunction',
-						runtime: 'dummy' as any,
+						runtime: 'test/dummy' as any,
 					},
 				],
 			});
 
-			jest
-				.spyOn(fs, 'existsSync')
-				.mockReturnValueOnce(true) // template exists
-				.mockReturnValueOnce(false); // function dir doesn't
+			// jest
+			// 	.spyOn(fs, 'existsSync')
+			// 	.mockReturnValueOnce(true) // template exists
+			// 	.mockReturnValueOnce(false); // function dir doesn't
 		});
 
 		test('An error should be thrown', () => {
 			return expect(async () => {
 				await new MakeFunctionTask({
-					template: 'dummy',
+					template: 'test/dummy',
 					dir: 'any',
 					name: 'existingfunction',
 				}).do();

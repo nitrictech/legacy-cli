@@ -9,7 +9,7 @@ import {
 	Task,
 	getTagNameForFunction,
 } from '@nitric/cli-common';
-import { isTemplateAvailable } from '../../utils';
+import { getTemplateLocation, isTemplateAvailable } from '../../utils';
 import tar from 'tar-fs';
 import Docker from 'dockerode';
 import streamToPromise from 'stream-to-promise';
@@ -112,6 +112,7 @@ export class BuildFunctionTask extends Task<NitricImage> {
 		}
 
 		const functionDirectory = path.join(this.baseDir, this.func.path);
+		const templateDirectory = getTemplateLocation(this.func.runtime);
 
 		// Run provdided build scripts if any relative to
 		// the function project
@@ -126,10 +127,10 @@ export class BuildFunctionTask extends Task<NitricImage> {
 			});
 		}
 
-		const excludes = [...excludeFiles, ...getDockerIgnoreFiles(`${TEMPLATE_DIR}/${this.func.runtime}`)];
+		const excludes = [...excludeFiles, ...getDockerIgnoreFiles(templateDirectory)];
 
 		// Copy runtime template and /function to staging dir
-		tar.pack(`${TEMPLATE_DIR}/${this.func.runtime}`).pipe(templatePipe);
+		tar.pack(templateDirectory).pipe(templatePipe);
 		await streamToPromise(templatePipe);
 		let packOptions = {};
 		if (excludes.length) {
@@ -149,7 +150,7 @@ export class BuildFunctionTask extends Task<NitricImage> {
 			buildargs: {
 				PROVIDER: this.provider,
 			},
-			t: getTagNameForFunction(this.stackName, this.func),
+			t: getTagNameForFunction(this.stackName, this.provider, this.func),
 		};
 
 		let stream: NodeJS.ReadableStream;

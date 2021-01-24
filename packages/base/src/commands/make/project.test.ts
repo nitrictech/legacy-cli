@@ -1,10 +1,10 @@
 import 'jest';
-import Project from '../../../src/commands/make/project';
-import * as utils from '../../../src/utils';
+import Project from './project';
+import * as utils from '../../utils';
 import inquirer from 'inquirer';
 
-jest.mock('../../../src/tasks/make');
-jest.mock('../../../src/utils');
+jest.mock('../../tasks/make');
+jest.mock('../../utils');
 jest.mock('inquirer');
 jest.mock('listr');
 

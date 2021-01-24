@@ -1,11 +1,11 @@
 import 'jest';
-import Function from '../../../src/commands/make/function';
-import { MakeFunctionTask } from '../../../src/tasks/make';
+import Function from './function';
+import { MakeFunctionTask } from '../../tasks/make';
 import inquirer from 'inquirer';
-import * as utils from '../../../src/utils';
+import * as utils from '../../utils';
 
-jest.mock('../../../src/tasks/make');
-jest.mock('../../../src/utils');
+jest.mock('../../tasks/make');
+jest.mock('../../utils');
 jest.mock('inquirer');
 jest.mock('listr');
 

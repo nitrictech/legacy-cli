@@ -85,6 +85,7 @@ export class RunFunctionTask extends Task<Container> {
 				[MOUNT_POINT]: {},
 			};
 			dockerOptions['HostConfig'] = {
+				...(dockerOptions['HostConfig'] || {}),
 				Mounts: [
 					{
 						Target: MOUNT_POINT,

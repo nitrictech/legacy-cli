@@ -1,7 +1,7 @@
 import 'jest';
 import { mocked } from 'ts-jest/utils';
-import Run, { MIN_PORT, MAX_PORT, getPortRange, getContainerSubscriptions, sortImages } from '../../src/commands/run';
-import { RunFunctionTask } from '../../src/tasks/run';
+import Run, { MIN_PORT, MAX_PORT, getPortRange, getContainerSubscriptions, sortImages } from './run';
+import { RunFunctionTask } from '../tasks/run';
 import * as getPort from 'get-port';
 import * as clicommon from '@nitric/cli-common';
 import Listr from 'listr';
@@ -12,8 +12,8 @@ jest.mock('dockerode');
 jest.mock('keypress');
 jest.mock('get-port');
 jest.mock('listr');
-jest.mock('../../src/tasks/run');
-jest.mock('../../src/tasks/build');
+jest.mock('../tasks/run');
+jest.mock('../tasks/build');
 
 // We want to ensure tests fail if these constant values are unintentionally changed
 describe('Given MIN_PORT is constant', () => {

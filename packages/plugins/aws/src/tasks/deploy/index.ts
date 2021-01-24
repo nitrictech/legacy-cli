@@ -63,7 +63,7 @@ export class PushImage extends Task<void> {
 		const ecr = new AWS.ECR();
 		// TODO: Consider moving this to a common module, it's a duplicate of the GCP
 		const docker = new Docker();
-		const imageAlias = getTagNameForFunction(stackName, func);
+		const imageAlias = getTagNameForFunction(stackName, 'aws', func);
 		const image = docker.getImage(imageAlias); //TODO: this assumes [imageAlias]:latest should we support other tags?
 
 		const repoUri = generateEcrRepositoryUri(account, region, stackName, func);
