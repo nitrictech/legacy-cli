@@ -75,32 +75,6 @@ export class CreateTypeProviders extends Task<void> {
 					],
 				},
 			},
-			// "nitric-cloud-scheduler": {
-			// 	description: 'Type provider for deploying schedlues to cloud scheduler',
-			// 	descriptorUrl: 'https://cloudscheduler.googleapis.com/$discovery/rest?version=v1',
-			// 	name: 'nitric-cloud-scheduler',
-			// 	options: {
-			// 		inputMappings: [
-			// 			{
-			// 				fieldName: 'Authorization',
-			// 				location: 'HEADER',
-			// 				value: '$.concat("Bearer ", $.googleOauth2AccessToken())',
-			// 			},
-			// 			{
-			// 				fieldName: 'name',
-			// 				location: 'PATH',
-			// 				// methodMatch: '^delete$',
-			// 				value: '$.concat($.resource.properties.parent, "/jobs/", $.resource.properties.name)',
-			// 			},
-			// 			{
-			// 				fieldName: 'parent',
-			// 				location: 'PATH',
-			// 				// methodMatch: '^delete$',
-			// 				value: '$.resource.properties.parent',
-			// 			},
-			// 		],
-			// 	},
-			// }
 		}
 
 		const existingTypeProviderNames = (typeProviders || []).map(({ name }) => name as string);
