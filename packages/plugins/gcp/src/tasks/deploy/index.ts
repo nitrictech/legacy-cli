@@ -102,22 +102,23 @@ export class CreateTypeProviders extends Task<void> {
 			}
 		}
 
-		// see if our type provider has already been installed
-		// TODO: Needs more work in order to get update/delete working
-		if (typeProviders?.map(({ name }) => name).includes('nitric-cloud-run')) {
-			this.update('Updating existing type provider');
-			await dmClient.typeProviders.update({
-				project: this.gcpProject,
-				typeProvider: 'nitric-cloud-run',
-				requestBody: tps['nitric-cloud-run'],
-			});
-		} else {
-			this.update('Create new type provider nitric-cloud-run');
-			await dmClient.typeProviders.insert({
-				project: this.gcpProject,
-				requestBody: tps['nitric-cloud-run'],
-			});
-		}
+		const existingTypeProviderNames = (typeProviders || []).map(({ name }) => name as string);
+
+		await Promise.all(Object.keys(tps).map(async (tp) => {
+			if (existingTypeProviderNames.includes(tp)) {
+				this.update(`Updating existing type provider ${tp}`);
+				await dmClient.typeProviders.update({
+					project: this.gcpProject,
+					typeProvider: tp,
+					requestBody: tps[tp],
+				});
+			} else {
+				await dmClient.typeProviders.insert({
+					project: this.gcpProject,
+					requestBody: tps[tp],
+				});
+			}
+		}));
 	}
 }
 
