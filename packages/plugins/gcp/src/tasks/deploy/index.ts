@@ -47,32 +47,60 @@ export class CreateTypeProviders extends Task<void> {
 			project: this.gcpProject,
 		});
 
-		const typeProvider = {
-			description: 'Type provider for deploying service to cloud run',
-			descriptorUrl: 'https://run.googleapis.com/$discovery/rest?version=v1',
-			name: 'nitric-cloud-run',
-			options: {
-				inputMappings: [
-					{
-						fieldName: 'Authorization',
-						location: 'HEADER',
-						value: '$.concat("Bearer ", $.googleOauth2AccessToken())',
-					},
-					{
-						fieldName: 'name',
-						location: 'PATH',
-						// methodMatch: '^delete$',
-						value: '$.concat($.resource.properties.parent, "/services/", $.resource.properties.metadata.name)',
-					},
-					{
-						fieldName: 'resource',
-						location: 'PATH',
-						// methodMatch: '^delete$',
-						value: '$.concat($.resource.properties.parent, "/services/", $.resource.properties.metadata.name)',
-					},
-				],
+		const tps = {
+			"nitric-cloud-run": {
+				description: 'Type provider for deploying service to cloud run',
+				descriptorUrl: 'https://run.googleapis.com/$discovery/rest?version=v1',
+				name: 'nitric-cloud-run',
+				options: {
+					inputMappings: [
+						{
+							fieldName: 'Authorization',
+							location: 'HEADER',
+							value: '$.concat("Bearer ", $.googleOauth2AccessToken())',
+						},
+						{
+							fieldName: 'name',
+							location: 'PATH',
+							// methodMatch: '^delete$',
+							value: '$.concat($.resource.properties.parent, "/services/", $.resource.properties.metadata.name)',
+						},
+						{
+							fieldName: 'resource',
+							location: 'PATH',
+							// methodMatch: '^delete$',
+							value: '$.concat($.resource.properties.parent, "/services/", $.resource.properties.metadata.name)',
+						},
+					],
+				},
 			},
-		};
+			"nitric-cloud-scheduler": {
+				description: 'Type provider for deploying schedlues to cloud scheduler',
+				descriptorUrl: 'https://cloudscheduler.googleapis.com/$discovery/rest?version=v1',
+				name: 'nitric-cloud-scheduler',
+				options: {
+					inputMappings: [
+						{
+							fieldName: 'Authorization',
+							location: 'HEADER',
+							value: '$.concat("Bearer ", $.googleOauth2AccessToken())',
+						},
+						{
+							fieldName: 'name',
+							location: 'PATH',
+							// methodMatch: '^delete$',
+							value: '$.concat($.resource.properties.parent, "/jobs/", $.resource.properties.metadata.name)',
+						},
+						{
+							fieldName: 'parent',
+							location: 'PATH',
+							// methodMatch: '^delete$',
+							value: '$.resource.properties.parent',
+						},
+					],
+				},
+			}
+		}
 
 		// see if our type provider has already been installed
 		// TODO: Needs more work in order to get update/delete working
@@ -81,13 +109,13 @@ export class CreateTypeProviders extends Task<void> {
 			await dmClient.typeProviders.update({
 				project: this.gcpProject,
 				typeProvider: 'nitric-cloud-run',
-				requestBody: typeProvider,
+				requestBody: tps['nitric-cloud-run'],
 			});
 		} else {
 			this.update('Create new type provider nitric-cloud-run');
 			await dmClient.typeProviders.insert({
 				project: this.gcpProject,
-				requestBody: typeProvider,
+				requestBody: tps['nitric-cloud-run'],
 			});
 		}
 	}
