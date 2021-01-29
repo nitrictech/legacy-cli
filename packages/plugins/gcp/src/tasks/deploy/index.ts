@@ -12,6 +12,7 @@ import generateTopicResources from './topics';
 import generateBucketResources from './buckets';
 import generateSubscriptionsForFunction from './subscriptions';
 import generateIamServiceAccounts from './invoker';
+import generateShedules from './schedule';
 import Docker from 'dockerode';
 import yaml from 'yaml';
 import { operationToPromise } from '../utils';
@@ -74,32 +75,32 @@ export class CreateTypeProviders extends Task<void> {
 					],
 				},
 			},
-			"nitric-cloud-scheduler": {
-				description: 'Type provider for deploying schedlues to cloud scheduler',
-				descriptorUrl: 'https://cloudscheduler.googleapis.com/$discovery/rest?version=v1',
-				name: 'nitric-cloud-scheduler',
-				options: {
-					inputMappings: [
-						{
-							fieldName: 'Authorization',
-							location: 'HEADER',
-							value: '$.concat("Bearer ", $.googleOauth2AccessToken())',
-						},
-						{
-							fieldName: 'name',
-							location: 'PATH',
-							// methodMatch: '^delete$',
-							value: '$.concat($.resource.properties.parent, "/jobs/", $.resource.properties.metadata.name)',
-						},
-						{
-							fieldName: 'parent',
-							location: 'PATH',
-							// methodMatch: '^delete$',
-							value: '$.resource.properties.parent',
-						},
-					],
-				},
-			}
+			// "nitric-cloud-scheduler": {
+			// 	description: 'Type provider for deploying schedlues to cloud scheduler',
+			// 	descriptorUrl: 'https://cloudscheduler.googleapis.com/$discovery/rest?version=v1',
+			// 	name: 'nitric-cloud-scheduler',
+			// 	options: {
+			// 		inputMappings: [
+			// 			{
+			// 				fieldName: 'Authorization',
+			// 				location: 'HEADER',
+			// 				value: '$.concat("Bearer ", $.googleOauth2AccessToken())',
+			// 			},
+			// 			{
+			// 				fieldName: 'name',
+			// 				location: 'PATH',
+			// 				// methodMatch: '^delete$',
+			// 				value: '$.concat($.resource.properties.parent, "/jobs/", $.resource.properties.name)',
+			// 			},
+			// 			{
+			// 				fieldName: 'parent',
+			// 				location: 'PATH',
+			// 				// methodMatch: '^delete$',
+			// 				value: '$.resource.properties.parent',
+			// 			},
+			// 		],
+			// 	},
+			// }
 		}
 
 		const existingTypeProviderNames = (typeProviders || []).map(({ name }) => name as string);
@@ -253,6 +254,15 @@ export class Deploy extends Task<void> {
 			resources = [
 				...resources,
 				...stack.topics.reduce((acc, topic) => [...acc, ...generateTopicResources(topic)], [] as any[]),
+			];
+		}
+
+		if (stack.schedules) {
+			this.emit('update', 'Compiling schedules');
+			// Build schedules from stack
+			resources = [
+				...resources,
+				...stack.schedules.reduce((acc, schedule) => [...acc, ...generateShedules(gcpProject,  schedule, region)], [] as any[]),
 			];
 		}
 
