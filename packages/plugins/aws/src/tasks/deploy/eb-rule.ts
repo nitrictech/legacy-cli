@@ -6,14 +6,15 @@ export default function(schedule: NitricSchedule): Record<string, any> {
   // FIXME: Need to set these as constants with normalisation...
   // TODO: Need to add support for additional target types
   const targetDefName = `${schedule.target.name}TopicDef`;
+  const scheduleDefName = `${schedule.name}ScheduleDef`
 
   return {
-    [`${schedule.name}ScheduleDef`]: {
+    [scheduleDefName]: {
       Type: "AWS::Events::Rule",
       Properties: {
         Description: `Nitric schedule trigger for ${schedule.name}`,
         Name: schedule.name,
-        ScheduleExpression: schedule.expression,
+        ScheduleExpression: `cron(${schedule.expression})`,
         State: "ENABLED",
         Targets: [{
           // Name the schedule target here...
