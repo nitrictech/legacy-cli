@@ -19,7 +19,7 @@ export default function(schedule: NitricSchedule): Record<string, any> {
         Targets: [{
           // Name the schedule target here...
           Arn: {
-            'Fn::GetAtt': [targetDefName, 'Arn'],
+            'Ref': targetDefName,
           },
           Id: schedule.name,
           Input: JSON.stringify(schedule.event),
