@@ -12,4 +12,5 @@ export interface NitricStack {
 	buckets?: NitricBucket[];
 	topics?: NitricTopic[];
 	schedules?: NitricSchedule[];
+	apis?: NitricAPI[];
 }
