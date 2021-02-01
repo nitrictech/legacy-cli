@@ -12,6 +12,7 @@ import generateTopicResources from './topics';
 import generateBucketResources from './buckets';
 import generateSubscriptionsForFunction from './subscriptions';
 import generateIamServiceAccounts from './invoker';
+import generateSchedules from './schedule';
 import Docker from 'dockerode';
 import yaml from 'yaml';
 import { operationToPromise } from '../utils';
@@ -47,49 +48,52 @@ export class CreateTypeProviders extends Task<void> {
 			project: this.gcpProject,
 		});
 
-		const typeProvider = {
-			description: 'Type provider for deploying service to cloud run',
-			descriptorUrl: 'https://run.googleapis.com/$discovery/rest?version=v1',
-			name: 'nitric-cloud-run',
-			options: {
-				inputMappings: [
-					{
-						fieldName: 'Authorization',
-						location: 'HEADER',
-						value: '$.concat("Bearer ", $.googleOauth2AccessToken())',
-					},
-					{
-						fieldName: 'name',
-						location: 'PATH',
-						// methodMatch: '^delete$',
-						value: '$.concat($.resource.properties.parent, "/services/", $.resource.properties.metadata.name)',
-					},
-					{
-						fieldName: 'resource',
-						location: 'PATH',
-						// methodMatch: '^delete$',
-						value: '$.concat($.resource.properties.parent, "/services/", $.resource.properties.metadata.name)',
-					},
-				],
+		const tps = {
+			"nitric-cloud-run": {
+				description: 'Type provider for deploying service to cloud run',
+				descriptorUrl: 'https://run.googleapis.com/$discovery/rest?version=v1',
+				name: 'nitric-cloud-run',
+				options: {
+					inputMappings: [
+						{
+							fieldName: 'Authorization',
+							location: 'HEADER',
+							value: '$.concat("Bearer ", $.googleOauth2AccessToken())',
+						},
+						{
+							fieldName: 'name',
+							location: 'PATH',
+							// methodMatch: '^delete$',
+							value: '$.concat($.resource.properties.parent, "/services/", $.resource.properties.metadata.name)',
+						},
+						{
+							fieldName: 'resource',
+							location: 'PATH',
+							// methodMatch: '^delete$',
+							value: '$.concat($.resource.properties.parent, "/services/", $.resource.properties.metadata.name)',
+						},
+					],
+				},
 			},
-		};
-
-		// see if our type provider has already been installed
-		// TODO: Needs more work in order to get update/delete working
-		if (typeProviders?.map(({ name }) => name).includes('nitric-cloud-run')) {
-			this.update('Updating existing type provider');
-			await dmClient.typeProviders.update({
-				project: this.gcpProject,
-				typeProvider: 'nitric-cloud-run',
-				requestBody: typeProvider,
-			});
-		} else {
-			this.update('Create new type provider nitric-cloud-run');
-			await dmClient.typeProviders.insert({
-				project: this.gcpProject,
-				requestBody: typeProvider,
-			});
 		}
+
+		const existingTypeProviderNames = (typeProviders || []).map(({ name }) => name as string);
+
+		await Promise.all(Object.keys(tps).map(async (tp) => {
+			if (existingTypeProviderNames.includes(tp)) {
+				this.update(`Updating existing type provider ${tp}`);
+				await dmClient.typeProviders.update({
+					project: this.gcpProject,
+					typeProvider: tp,
+					requestBody: tps[tp],
+				});
+			} else {
+				await dmClient.typeProviders.insert({
+					project: this.gcpProject,
+					requestBody: tps[tp],
+				});
+			}
+		}));
 	}
 }
 
@@ -224,6 +228,15 @@ export class Deploy extends Task<void> {
 			resources = [
 				...resources,
 				...stack.topics.reduce((acc, topic) => [...acc, ...generateTopicResources(topic)], [] as any[]),
+			];
+		}
+
+		if (stack.schedules) {
+			this.emit('update', 'Compiling schedules');
+			// Build schedules from stack
+			resources = [
+				...resources,
+				...stack.schedules.reduce((acc, schedule) => [...acc, ...generateSchedules(gcpProject,  schedule, region)], [] as any[]),
 			];
 		}
 

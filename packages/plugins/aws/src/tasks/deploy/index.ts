@@ -19,6 +19,7 @@ import {
 // import createSecurityGroup from './security-group';
 // import createContainer from './container';
 import createLambda from './lambda';
+import createEventRule from './eb-rule';
 // import createLoadBalancer from './load-balancer';
 import createTopic from './topic';
 import fs from 'fs';
@@ -153,7 +154,7 @@ export class Deploy extends Task<void> {
 	async do(): Promise<void> {
 		const { stack, account, region } = this;
 		// let resources: any[] = [];
-		const { functions = [], topics = [] } = stack;
+		const { functions = [], topics = [], schedules = [], } = stack;
 
 		AWS.config.update({ region });
 
@@ -195,6 +196,13 @@ export class Deploy extends Task<void> {
 				}),
 				{},
 			),
+			...schedules.reduce(
+				(defs, schedule) => ({
+					...defs,
+					...createEventRule(schedule),
+				}),
+				{},
+			)
 		};
 
 		// TODO: are there types to protect this? i.e. is 'resources' valid
