@@ -12,7 +12,7 @@ import generateTopicResources from './topics';
 import generateBucketResources from './buckets';
 import generateSubscriptionsForFunction from './subscriptions';
 import generateIamServiceAccounts from './invoker';
-import generateShedules from './schedule';
+import generateSchedules from './schedule';
 import Docker from 'dockerode';
 import yaml from 'yaml';
 import { operationToPromise } from '../utils';
@@ -236,7 +236,7 @@ export class Deploy extends Task<void> {
 			// Build schedules from stack
 			resources = [
 				...resources,
-				...stack.schedules.reduce((acc, schedule) => [...acc, ...generateShedules(gcpProject,  schedule, region)], [] as any[]),
+				...stack.schedules.reduce((acc, schedule) => [...acc, ...generateSchedules(gcpProject,  schedule, region)], [] as any[]),
 			];
 		}
 
