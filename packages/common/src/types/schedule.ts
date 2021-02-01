@@ -10,7 +10,7 @@ export interface NitricScheduleEvent {
 
 export interface NitricScheduleTarget {
   type: "topic"; // ; | "queue"
-  name: string;
+  id: string;
 }
 
 /**

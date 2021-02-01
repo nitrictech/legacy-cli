@@ -12,8 +12,8 @@ export default function(schedule: NitricSchedule): Record<string, any> {
     [scheduleDefName]: {
       Type: "AWS::Events::Rule",
       Properties: {
-        Description: `Nitric schedule trigger for ${schedule.name}`,
-        Name: schedule.name,
+        Description: `Nitric schedule trigger for ${schedule.id}`,
+        Name: schedule.id,
         ScheduleExpression: `cron(${schedule.expression})`,
         State: "ENABLED",
         Targets: [{
@@ -21,7 +21,7 @@ export default function(schedule: NitricSchedule): Record<string, any> {
           Arn: {
             'Ref': targetDefName,
           },
-          Id: schedule.name,
+          Id: schedule.id,
           Input: JSON.stringify(schedule.event),
         }]
       }
