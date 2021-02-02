@@ -651,6 +651,7 @@ __metadata:
     "@types/node": ^10
     eventemitter3: ^4.0.7
     jest: ^26.6.1
+    openapi-types: ^7.2.3
     rimraf: 3.0.2
     rxjs: ^6.6.3
     ts-jest: ^26.4.3
@@ -7525,6 +7526,13 @@ fsevents@^2.1.2:
   dependencies:
     mimic-fn: ^2.1.0
   checksum: e425f6caeb20cf2598ffece94be5663932e34d074f1631b682b13d5f01cc1e0712a7dc711eff1706bb5a5aaab8a52e37bd5edcf560334e3222219d7e8b09c21c
+  languageName: node
+  linkType: hard
+
+"openapi-types@npm:^7.2.3":
+  version: 7.2.3
+  resolution: "openapi-types@npm:7.2.3"
+  checksum: 294a5269a37f389822040699460d25d74d3962837e5e9686f65be60f1002e13f7d1500063c3a26bfa4a3ce668e58343cd3ddc185813c615b9624f689f032b0aa
   languageName: node
   linkType: hard
 

@@ -75,6 +75,32 @@ export class CreateTypeProviders extends Task<void> {
 					],
 				},
 			},
+			"nitric-cloud-apigateway": {
+				description: 'Type provider for deploying service to api gateway',
+				descriptorUrl: 'https://apigateway.googleapis.com/$discovery/rest?version=v1',
+				name: 'nitric-cloud-apigateway',
+				options: {
+					inputMappings: [
+						{
+							fieldName: 'Authorization',
+							location: 'HEADER',
+							value: '$.concat("Bearer ", $.googleOauth2AccessToken())',
+						},
+						{
+							fieldName: 'name',
+							location: 'PATH',
+							// methodMatch: '^delete$',
+							value: '$.concat($.resource.properties.parent, "/services/", $.resource.properties.metadata.name)',
+						},
+						{
+							fieldName: 'parent',
+							location: 'PATH',
+							// methodMatch: '^delete$',
+							value: '$.resource.properties.parent',
+						},
+					],
+				},
+			}
 		}
 
 		const existingTypeProviderNames = (typeProviders || []).map(({ name }) => name as string);
