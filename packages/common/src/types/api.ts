@@ -4,7 +4,7 @@ import { OpenAPIV3 } from "openapi-types";
 // This will extend at the point of an operations object...
 // Using this we can find the appropriate backend reference
 // in each of the cloud plugins during deployment
-interface NitricAPITarget {
+export interface NitricAPITarget {
   "x-nitric-target": {
     name: string;
     type: "function";

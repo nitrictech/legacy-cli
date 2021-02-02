@@ -1,4 +1,4 @@
-import { deploymentmanager_v2beta, google } from 'googleapis';
+import { deploymentmanager_v2beta, google, run_v1 } from 'googleapis';
 import {
 	Task,
 	NitricFunction,
@@ -7,12 +7,14 @@ import {
 	getTagNameForFunction,
 	dockerodeEvtToString,
 } from '@nitric/cli-common';
+import { DeployedFunction } from './types';
 import generateFunctionResources, { generateFunctionOutputs } from './functions';
 import generateTopicResources from './topics';
 import generateBucketResources from './buckets';
 import generateSubscriptionsForFunction from './subscriptions';
 import generateIamServiceAccounts from './invoker';
 import generateSchedules from './schedule';
+import generateAPIGatewayResources from './apis';
 import Docker from 'dockerode';
 import yaml from 'yaml';
 import { operationToPromise } from '../utils';
@@ -330,6 +332,45 @@ export class Deploy extends Task<void> {
 	}
 }
 
+// 
+async function getDeployedFunctions(project: string, region: string, funcs: NitricFunction[]): Promise<DeployedFunction[]> {
+	const auth = new google.auth.GoogleAuth({
+		scopes: ['https://www.googleapis.com/auth/cloud-platform'],
+	});
+	const authClient = await auth.getClient();
+
+	const runClient = new run_v1.Run({
+		auth: authClient,
+	});
+
+	const deployedFunctions = await Promise.all(funcs.map(async f => {
+		let endpoint = null as string | null | undefined;
+
+		// TODO: Add retry limit...
+		while (!endpoint) {
+			const service = (
+				await runClient.projects.locations.services.get({
+					name: `projects/${project}/locations/${region}/services/${sanitizeStringForDockerTag(f.name)}`,
+				})
+			).data;
+
+			endpoint = service.status ? service.status.url : undefined;
+
+			if (!endpoint) {
+				// wait a bit and try again
+				await new Promise((resolve) => setTimeout(resolve, 1000));
+			}
+		}
+
+		return {
+			...f,
+			endpoint,
+		} as DeployedFunction;
+	}));
+
+	return deployedFunctions;
+}
+
 /**
  * Deploy Subscriptions
  */
@@ -356,23 +397,32 @@ export class DeploySubscriptions extends Task<void> {
 			auth: authClient,
 		});
 
+		const deployedFunctions = await getDeployedFunctions(project, region, stack.functions!)
+
 		this.update('Describing internal service accounts');
-		const iam = await generateIamServiceAccounts(project, stack.name);
+		const iam = generateIamServiceAccounts(project, stack.name);
 
 		this.update('Describing topic subscriptions');
 		const subscriptions = (
-			await Promise.all(stack.functions!.map((func) => generateSubscriptionsForFunction(project, region, func)))
+			deployedFunctions.map((func) => generateSubscriptionsForFunction(project, func))
 		).reduce((acc, subs) => [...acc, ...subs], [] as any[]);
+
+		this.update('Describing API Gateway');
+		let apiResources = [] as any[];
+		if (stack.apis) {
+			apiResources = await generateAPIGatewayResources(stack.name, project, region, stack.apis, deployedFunctions);
+		}
+		
 
 		this.update('Deploying subscriptions');
 		const { data: operation } = await dmClient.deployments.insert({
 			project,
 			requestBody: {
-				name: `${sanitizeStringForDockerTag(stack.name)}-subscriptions`,
+				name: `${sanitizeStringForDockerTag(stack.name)}-interfaces`,
 				target: {
 					config: {
 						content: yaml.stringify({
-							resources: [...iam, ...subscriptions],
+							resources: [...iam, ...subscriptions, ...apiResources],
 						}),
 					},
 				},
