@@ -14,10 +14,35 @@ interface GoogleExtensions {
 }
 
 /**
+ * Creates the API container that will be used to store and manage the API Gateway and Configs
+ * NOTE: We create this as a seperate action as we must wait for the APIs full creation before we can begin
+ * creating resources related to it.
+ */
+export function createAPI(stackName: string, gcpProject: string): any[] {
+  const apiParent = `projects/${gcpProject}/locations/global`;
+  const apiId = `${stackName}-api`;
+  // const apiName = `${apiParent}/apis/${apiId}`;
+  // First we create the API for the stack (We cannot store configs without it)
+  const api = {
+    type: `${gcpProject}/nitric-cloud-apigateway:projects.locations.apis`,
+    name: apiId,
+    properties: {
+      parent: apiParent,
+      displayName: apiId,
+      apiId: apiId,
+    }
+  };
+
+  return [
+    api
+  ];
+}
+
+/**
  * Creates a template for a new API in Google Cloud API Gateway
  * from a nitric stack definition
  */
-export default async function(stackName: string, gcpProject: string, region: string, apis: NitricAPI[], funcs: DeployedFunction[]): Promise<any[]> {
+export async function createAPIGateway(stackName: string, region: string, gcpProject: string, apiName: string, apis: NitricAPI[], funcs: DeployedFunction[]): Promise<any[]> {
   let resources = [] as any[];
 
   if (apis.length > 0) {
@@ -36,7 +61,7 @@ export default async function(stackName: string, gcpProject: string, region: str
           const deployedFunction = funcs.find(f => f.name === p["x-nitric-target"].name)
 
           if (!deployedFunction) {
-            throw new Error("Misconfiguration error: defined function target that does not exist!");
+            throw new Error(`Misconfiguration error: defined function target ${JSON.stringify(p["x-nitric-target"])} that does not exist in: ${JSON.stringify(funcs)}`);
           }
 
           // Discard the old key on the transformed API
@@ -68,16 +93,6 @@ export default async function(stackName: string, gcpProject: string, region: str
       } as OpenAPIV3.Document<GoogleExtensions>;
     });
 
-    // First we create the API for the stack (We cannot store configs without it)
-    const api = {
-      type: `${gcpProject}/nitric-cloud-apigateway:projects.locations.apis`,
-      name: `${stackName}-api`,
-      properties: {
-        parent: `projects/${gcpProject}/locations/${region}`,
-        displayName: `${stackName}-api`
-      }
-    };
-
     const translatedApis = await Promise.all(transformedAPIs.map(api => {
       return Converter.convert({
         from: "openapi_3",
@@ -91,12 +106,18 @@ export default async function(stackName: string, gcpProject: string, region: str
     // Also to do this we will need to URLs of the cloud run functions
     // We can actually create a single gateway for the entire stack that contains all
     // of the defined API files together under one endpoint...
+    // FIXME: looks like we'll need to use a polling solution for this
+    // As the API does not create in time...
+    const apiConfigParent = apiName;
+    const apiConfigId = `${stackName}-apiconfig`;
+    const apiConfigName = `${apiConfigParent}/configs/${apiConfigId}`;
     const openApiConfig = {
       type: `${gcpProject}/nitric-cloud-apigateway:projects.locations.apis.configs`,
-      name: `${stackName}-apiConfig`,
+      name: `${stackName}-apiconfig`,
       properties: {
-        parent: `$(ref.${stackName}-api.name)`,
-        displayName: `${stackName}-apiConfig`,
+        parent: apiConfigParent,
+        displayName: apiConfigId,
+        apiConfigId: apiConfigId,
         // TODO: Get the run invoker account details here (same as used for the subscription services...)
         // XXX: Can possibly use a single invoker for all functions here in our API gateway...
         // i.e. create a dedicated api gateway invoker
@@ -106,7 +127,8 @@ export default async function(stackName: string, gcpProject: string, region: str
         openapiDocuments: translatedApis.map(tapi => {
           return {
             document: {
-              contents: Buffer.from(JSON.stringify(tapi)).toString('base64')
+              path: `${stackName}.json`,
+              contents: Buffer.from(JSON.stringify(tapi.spec)).toString('base64'),
             }
           }
         }),
@@ -115,16 +137,20 @@ export default async function(stackName: string, gcpProject: string, region: str
     
     // Now we create the API gateway references the created config above
     const apiGateway = {
-      type: `${gcpProject}/nitric-cloud-apigateway:projects.locations.gateway`,
+      type: `${gcpProject}/nitric-cloud-apigateway:projects.locations.gateways`,
       name: `${stackName}-gateway`,
       properties: {
+        gatewayId: `${stackName}-gateway`,
+        parent: `projects/${gcpProject}/locations/${region}`,
         displayName: `${stackName}-gateway`,
-        apiConfig: `$(ref.${stackName}-apiConfig.name)`
+        apiConfig: apiConfigName
+      },
+      metadata: {
+        dependsOn: [apiConfigId]
       }
     };
 
     resources = [
-      api,
       openApiConfig,
       apiGateway,
     ] as any[];

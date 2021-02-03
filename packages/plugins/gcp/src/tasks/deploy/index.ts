@@ -1,4 +1,4 @@
-import { deploymentmanager_v2beta, google, run_v1 } from 'googleapis';
+import { apigateway_v1beta, deploymentmanager_v2beta, google, run_v1 } from 'googleapis';
 import {
 	Task,
 	NitricFunction,
@@ -14,11 +14,12 @@ import generateBucketResources from './buckets';
 import generateSubscriptionsForFunction from './subscriptions';
 import generateIamServiceAccounts from './invoker';
 import generateSchedules from './schedule';
-import generateAPIGatewayResources from './apis';
+import { createAPI, createAPIGateway } from './apis';
 import Docker from 'dockerode';
 import yaml from 'yaml';
 import { operationToPromise } from '../utils';
 import { getGcrHost } from './regions';
+import { apigateway } from 'googleapis/build/src/apis/apigateway';
 
 interface CommonOptions {
 	gcpProject: string;
@@ -88,18 +89,18 @@ export class CreateTypeProviders extends Task<void> {
 							location: 'HEADER',
 							value: '$.concat("Bearer ", $.googleOauth2AccessToken())',
 						},
-						{
-							fieldName: 'name',
-							location: 'PATH',
-							// methodMatch: '^delete$',
-							value: '$.concat($.resource.properties.parent, "/services/", $.resource.properties.metadata.name)',
-						},
-						{
-							fieldName: 'parent',
-							location: 'PATH',
-							// methodMatch: '^delete$',
-							value: '$.resource.properties.parent',
-						},
+						// {
+						// 	fieldName: 'name',
+						// 	location: 'PATH',
+						// 	// methodMatch: '^delete$',
+						// 	value: '$.concat($.resource.properties.parent, "/services/", $.resource.properties.metadata.name)',
+						// },
+						// {
+						// 	fieldName: 'parent',
+						// 	location: 'PATH',
+						// 	// methodMatch: '^delete$',
+						// 	value: '$.resource.properties.parent',
+						// },
 					],
 				},
 			}
@@ -268,6 +269,14 @@ export class Deploy extends Task<void> {
 			];
 		}
 
+		if (stack.apis) {
+			this.update('Compiling API');
+			resources = [
+				...resources,
+				...createAPI(stack.name, this.gcpProject)
+			];
+		}
+
 		this.update('Checking if deployment already exists');
 		let existingDeployment: deploymentmanager_v2beta.Schema$Deployment | undefined = undefined;
 
@@ -332,6 +341,51 @@ export class Deploy extends Task<void> {
 	}
 }
 
+async function getStackAPI(stackName: string, project: string): Promise<apigateway_v1beta.Schema$ApigatewayApi> {
+	const auth = new google.auth.GoogleAuth({
+		scopes: ['https://www.googleapis.com/auth/cloud-platform'],
+	});
+	const authClient = await auth.getClient();
+
+	const apiClient = new apigateway_v1beta.Apigateway({
+		auth: authClient,
+	});
+
+	let data = {
+		state: "UNSPECIFIED"
+	} as apigateway_v1beta.Schema$ApigatewayApi;
+	while (data.state !== "ACTIVE") {
+		try {
+			const { data: tmpData } = await apiClient.projects.locations.apis.get({
+				name: `projects/${project}/locations/global/apis/${stackName}-api`
+			});
+
+			// apiClient.projects.locations.apis.configs.create({
+			// 	apiConfigId: "",
+			// 	requestBody: {
+			// 		openapiDocuments: [{
+			// 			document: {
+			// 				path: "",
+			// 				contents: ""
+			// 			}
+			// 		}]
+			// 	}
+			// })
+	
+			data = tmpData;
+	
+			if (data.state !== "ACTIVE") {
+				// wait a bit and try again
+				await new Promise((resolve) => setTimeout(resolve, 1000));
+			}
+		} catch (e) {
+			console.log("There was an error... continuing...")
+		}
+	}
+
+	return data;
+}
+
 // 
 async function getDeployedFunctions(project: string, region: string, funcs: NitricFunction[]): Promise<DeployedFunction[]> {
 	const auth = new google.auth.GoogleAuth({
@@ -380,7 +434,7 @@ export class DeploySubscriptions extends Task<void> {
 	private region: string;
 
 	constructor({ gcpProject, region, stack }: DeployOptions) {
-		super('Deploying Topic Subscriptions');
+		super('Deploying Interfaces');
 		this.stack = stack;
 		this.project = gcpProject;
 		this.region = region;
@@ -397,7 +451,12 @@ export class DeploySubscriptions extends Task<void> {
 			auth: authClient,
 		});
 
-		const deployedFunctions = await getDeployedFunctions(project, region, stack.functions!)
+
+		this.update('Waiting for functions and API to deploy');
+		const [deployedFunctions, api] = await Promise.all([getDeployedFunctions(project, region, stack.functions!), getStackAPI(stack.name, project)]);
+
+		// const deployedFunctions = await getDeployedFunctions(project, region, stack.functions!);
+		// const api = await getStackAPI(stack.name, project)
 
 		this.update('Describing internal service accounts');
 		const iam = generateIamServiceAccounts(project, stack.name);
@@ -410,7 +469,7 @@ export class DeploySubscriptions extends Task<void> {
 		this.update('Describing API Gateway');
 		let apiResources = [] as any[];
 		if (stack.apis) {
-			apiResources = await generateAPIGatewayResources(stack.name, project, region, stack.apis, deployedFunctions);
+			apiResources = await createAPIGateway(stack.name, region, project, api.name!, stack.apis, deployedFunctions);
 		}
 		
 
