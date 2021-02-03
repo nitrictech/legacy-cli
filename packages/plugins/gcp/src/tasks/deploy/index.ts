@@ -482,9 +482,6 @@ export class DeploySubscriptions extends Task<void> {
 		this.update('Waiting for functions and API to deploy');
 		const [deployedFunctions, api] = await Promise.all(resourceWaitPromises);
 
-		// const deployedFunctions = await getDeployedFunctions(project, region, stack.functions!);
-		// const api = await getStackAPI(stack.name, project)
-
 		this.update('Describing internal service accounts');
 		const iam = generateIamServiceAccounts(project, stack.name);
 
