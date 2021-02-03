@@ -19,7 +19,6 @@ import Docker from 'dockerode';
 import yaml from 'yaml';
 import { operationToPromise } from '../utils';
 import { getGcrHost } from './regions';
-import { apigateway } from 'googleapis/build/src/apis/apigateway';
 
 interface CommonOptions {
 	gcpProject: string;
@@ -89,20 +88,46 @@ export class CreateTypeProviders extends Task<void> {
 							location: 'HEADER',
 							value: '$.concat("Bearer ", $.googleOauth2AccessToken())',
 						},
-						// {
-						// 	fieldName: 'name',
-						// 	location: 'PATH',
-						// 	// methodMatch: '^delete$',
-						// 	value: '$.concat($.resource.properties.parent, "/services/", $.resource.properties.metadata.name)',
-						// },
-						// {
-						// 	fieldName: 'parent',
-						// 	location: 'PATH',
-						// 	// methodMatch: '^delete$',
-						// 	value: '$.resource.properties.parent',
-						// },
 					],
 				},
+				collectionOverrides: [
+					{
+						collection: "projects.locations.apis",
+						options: {
+							inputMappings: [
+								{
+									fieldName: 'name',
+									location: 'PATH',
+									value: '$.concat($.resource.properties.parent, "/apis/", $.resource.properties.apiId)',
+								},
+							]
+						}
+					},
+					{
+						collection: "projects.locations.apis.configs",
+						options: {
+							inputMappings: [
+								{
+									fieldName: 'name',
+									location: 'PATH',
+									value: '$.concat($.resource.properties.parent, "/configs/", $.resource.properties.apiConfigId)',
+								},
+							]
+						}
+					},
+					{
+						collection: "projects.locations.gateways",
+						options: {
+							inputMappings: [
+								{
+									fieldName: 'name',
+									location: 'PATH',
+									value: '$.concat($.resource.properties.parent, "/gateways/", $.resource.properties.gatewayId)',
+								},
+							]
+						}
+					}
+				]
 			}
 		}
 
@@ -359,18 +384,6 @@ async function getStackAPI(stackName: string, project: string): Promise<apigatew
 			const { data: tmpData } = await apiClient.projects.locations.apis.get({
 				name: `projects/${project}/locations/global/apis/${stackName}-api`
 			});
-
-			// apiClient.projects.locations.apis.configs.create({
-			// 	apiConfigId: "",
-			// 	requestBody: {
-			// 		openapiDocuments: [{
-			// 			document: {
-			// 				path: "",
-			// 				contents: ""
-			// 			}
-			// 		}]
-			// 	}
-			// })
 	
 			data = tmpData;
 	
@@ -451,9 +464,23 @@ export class DeploySubscriptions extends Task<void> {
 			auth: authClient,
 		});
 
+		let resourceWaitPromises = [] as Promise<any>[];
+		if (stack.functions) {
+			resourceWaitPromises = [
+				...resourceWaitPromises,
+				getDeployedFunctions(project, region, stack.functions!),
+			]
+		}
+
+		if (stack.apis) {
+			resourceWaitPromises = [
+				...resourceWaitPromises,
+				getStackAPI(stack.name, project),
+			]
+		}
 
 		this.update('Waiting for functions and API to deploy');
-		const [deployedFunctions, api] = await Promise.all([getDeployedFunctions(project, region, stack.functions!), getStackAPI(stack.name, project)]);
+		const [deployedFunctions, api] = await Promise.all(resourceWaitPromises);
 
 		// const deployedFunctions = await getDeployedFunctions(project, region, stack.functions!);
 		// const api = await getStackAPI(stack.name, project)
