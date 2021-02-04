@@ -36,9 +36,6 @@ export default function(api: NitricAPI, funcs: NitricFunction[]) {
       const path = api.paths[pathKey]!;
       const newMethods = Object.keys(path).filter(k => METHOD_KEYS.includes(k as method)).reduce((acc, method) => {
         const p = path[method];
-        // Get the target deployed method
-        // TODO: Throw error if not found
-        // const deployedFunction = funcs.find(f => f.name === p["x-nitric-target"].name)
 
         // The name of the function we want to target with this APIGateway
         const targetName = p["x-nitric-target"].name;
