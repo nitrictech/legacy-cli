@@ -155,79 +155,79 @@ export default (
 			},
 		},
 		// Enable API Gateway to call the Lambda Function.
-		[lambdaPermissionDefName]: {
-			Type: 'AWS::Lambda::Permission',
-			Properties: {
-				Action: 'lambda:InvokeFunction',
-				FunctionName: {
-					Ref: lambdaDefName,
-				},
-				Principal: 'apigateway.amazonaws.com',
-				SourceArn: {
-					'Fn::Sub': [
-						'arn:${AWS::Partition}:execute-api:${AWS::Region}:${AWS::AccountId}:${__ApiId__}/${__Stage__}/*',
-						{
-							__ApiId__: {
-								Ref: apiGatewayDefName,
-							},
-							__Stage__: '*',
-						},
-					],
-				},
-			},
-		},
-		[apiGatewayDefName]: {
-			Type: 'AWS::ApiGatewayV2::Api',
-			Properties: {
-				Body: {
-					openapi: '3.0.1',
-					info: {
-						version: '1.0',
-						title: {
-							Ref: 'AWS::StackName',
-						},
-					},
-					paths: {
-						$default: {
-							'x-amazon-apigateway-any-method': {
-								'x-amazon-apigateway-integration': {
-									type: 'aws_proxy',
-									httpMethod: 'POST',
-									payloadFormatVersion: '2.0',
-									uri: {
-										'Fn::Sub':
-											'arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${' +
-											lambdaDefName +
-											'.Arn}/invocations',
-									},
-								},
-								isDefaultRoute: true,
-								responses: {},
-							},
-						},
-					},
-					tags: [
-						{
-							name: 'httpapi:createdBy',
-							'x-amazon-apigateway-tag-value': 'Nitric',
-						},
-					],
-				},
-			},
-		},
-		[apiStageDefName]: {
-			Type: 'AWS::ApiGatewayV2::Stage',
-			Properties: {
-				ApiId: {
-					Ref: apiGatewayDefName,
-				},
-				StageName: '$default',
-				Tags: {
-					'httpapi:createdBy': 'Nitric',
-				},
-				AutoDeploy: true,
-			},
-		},
+		// [lambdaPermissionDefName]: {
+		// 	Type: 'AWS::Lambda::Permission',
+		// 	Properties: {
+		// 		Action: 'lambda:InvokeFunction',
+		// 		FunctionName: {
+		// 			Ref: lambdaDefName,
+		// 		},
+		// 		Principal: 'apigateway.amazonaws.com',
+		// 		SourceArn: {
+		// 			'Fn::Sub': [
+		// 				'arn:${AWS::Partition}:execute-api:${AWS::Region}:${AWS::AccountId}:${__ApiId__}/${__Stage__}/*',
+		// 				{
+		// 					__ApiId__: {
+		// 						Ref: apiGatewayDefName,
+		// 					},
+		// 					__Stage__: '*',
+		// 				},
+		// 			],
+		// 		},
+		// 	},
+		// },
+		// [apiGatewayDefName]: {
+		// 	Type: 'AWS::ApiGatewayV2::Api',
+		// 	Properties: {
+		// 		Body: {
+		// 			openapi: '3.0.1',
+		// 			info: {
+		// 				version: '1.0',
+		// 				title: {
+		// 					Ref: 'AWS::StackName',
+		// 				},
+		// 			},
+		// 			paths: {
+		// 				$default: {
+		// 					'x-amazon-apigateway-any-method': {
+		// 						'x-amazon-apigateway-integration': {
+		// 							type: 'aws_proxy',
+		// 							httpMethod: 'POST',
+		// 							payloadFormatVersion: '2.0',
+		// 							uri: {
+		// 								'Fn::Sub':
+		// 									'arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${' +
+		// 									lambdaDefName +
+		// 									'.Arn}/invocations',
+		// 							},
+		// 						},
+		// 						isDefaultRoute: true,
+		// 						responses: {},
+		// 					},
+		// 				},
+		// 			},
+		// 			tags: [
+		// 				{
+		// 					name: 'httpapi:createdBy',
+		// 					'x-amazon-apigateway-tag-value': 'Nitric',
+		// 				},
+		// 			],
+		// 		},
+		// 	},
+		// },
+		// [apiStageDefName]: {
+		// 	Type: 'AWS::ApiGatewayV2::Stage',
+		// 	Properties: {
+		// 		ApiId: {
+		// 			Ref: apiGatewayDefName,
+		// 		},
+		// 		StageName: '$default',
+		// 		Tags: {
+		// 			'httpapi:createdBy': 'Nitric',
+		// 		},
+		// 		AutoDeploy: true,
+		// 	},
+		// },
 
 		//TODO: Handle subscriptions
 		// Setup topic subscriptions
