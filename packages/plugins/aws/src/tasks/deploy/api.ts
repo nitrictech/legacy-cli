@@ -1,5 +1,6 @@
-import { NitricAPI, normalizeFunctionName } from "@nitric/cli-common";
+import { NitricAPI, NitricFunction, normalizeFunctionName } from "@nitric/cli-common";
 import { OpenAPIV3 } from "openapi-types";
+import { uniq } from "lodash";
 
 type method = "get" | "post" | "put" | "patch" | "delete";
 const METHOD_KEYS: method[] = ["get", "post", "put", "patch", "delete"]
@@ -24,27 +25,10 @@ interface AwsExtentions {
 /**
  * Creates a new API Gateway definition for a nitric stack
  */
-export default function(region: string, api: NitricAPI) {
-
-  // One API per deployment
-
-  //
-
-  // Add metadata
-  // Below is what we need to inject into the open API spec in order to achieve lambda intergration
-  // x-amazon-apigateway-integration:
-  //       uri:
-  // Need to get the lambda ARNs of each deployed lambda...
-  //         arn:aws:apigateway:${region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${region}:${accountId}:function:LambdaFunctionName/invocations
-  //       responses:
-  //         default:
-  //           statusCode: "200"
-  //       passthroughBehavior: "when_no_match"
-  //       httpMethod: "POST"
-  //       contentHandling: "CONVERT_TO_TEXT"
-  //       type: "aws_proxy"
-
+export default function(api: NitricAPI, funcs: NitricFunction[]) {
   const { name, ...rest } = api;
+
+  const functionNames = funcs.map(f => f.name);
   
   const transformedApi = {
     ...rest,
@@ -58,6 +42,11 @@ export default function(region: string, api: NitricAPI) {
 
         // The name of the function we want to target with this APIGateway
         const targetName = p["x-nitric-target"].name;
+
+        if (!(functionNames.includes(targetName))) {
+          throw new Error(`Invalid nitric target ${targetName} defined in api: ${api.name}`);
+        }
+
         const lambdaName = normalizeFunctionName({ name: targetName } as any) + 'LambdaDef';
         // Reconcile the AWS Lambda URN for functions here...
 
@@ -91,6 +80,48 @@ export default function(region: string, api: NitricAPI) {
     }, {} as OpenAPIV3.PathsObject<AwsExtentions>)
   }
 
+  const targets = uniq(Object.keys(api.paths).reduce((acc, key) => {
+    const path = api.paths[key]!;
+
+    const pathTargets = Object.keys(path).filter(k => METHOD_KEYS.includes(k as method)).reduce((acc, m) => {
+      const p = path[m];
+      return [ ...acc, p["x-nitric-target"].name ];
+      
+    }, [] as string[]);
+
+    return [
+      ...acc,
+      ...pathTargets,
+    ];
+  }, [] as string[]));
+
+  const lambdaPermissions = targets.reduce((acc, t) => {
+    return {
+      [`${t}LambdaPermissionDef`]: {
+        Type: 'AWS::Lambda::Permission',
+        Properties: {
+        Action: 'lambda:InvokeFunction',
+        FunctionName: {
+          Ref: normalizeFunctionName({ name: t } as any) + 'LambdaDef',
+        },
+          Principal: 'apigateway.amazonaws.com',
+          SourceArn: {
+            'Fn::Sub': [
+              'arn:${AWS::Partition}:execute-api:${AWS::Region}:${AWS::AccountId}:${__ApiId__}/${__Stage__}/*',
+              {
+                __ApiId__: {
+                  Ref: `${name}API`,
+                },
+                __Stage__: '*',
+              },
+            ],
+          },
+        },
+      },
+      ...acc,
+    };
+  }, {});
+
   return {
     [`${name}API`]: {
       Type : "AWS::ApiGatewayV2::Api",
@@ -111,27 +142,7 @@ export default function(region: string, api: NitricAPI) {
         // Tags : [ Tag, ... ]
       }
     },
-    [lambdaPermissionDefName]: {
-      Type: 'AWS::Lambda::Permission',
-      Properties: {
-        Action: 'lambda:InvokeFunction',
-        FunctionName: {
-          Ref: lambdaDefName,
-        },
-        Principal: 'apigateway.amazonaws.com',
-        SourceArn: {
-          'Fn::Sub': [
-            'arn:${AWS::Partition}:execute-api:${AWS::Region}:${AWS::AccountId}:${__ApiId__}/${__Stage__}/*',
-            {
-              __ApiId__: {
-                Ref: apiGatewayDefName,
-              },
-              __Stage__: '*',
-            },
-          ],
-        },
-      },
-    },
+    ...lambdaPermissions,
     [`${name}APIDeployment`]: {
       Type: 'AWS::ApiGatewayV2::Stage',
 			Properties: {

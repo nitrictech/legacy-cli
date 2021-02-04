@@ -720,6 +720,7 @@ __metadata:
     "@oclif/config": ^1
     "@oclif/dev-cli": ^1
     "@oclif/plugin-help": ^3
+    "@types/lodash": ^4.14.168
     "@types/node": ^10
     aws-sdk: ^2.589.0
     dockerode: ^3.2.1
@@ -730,6 +731,7 @@ __metadata:
     inquirer: ^7.3.3
     jest: ^26.6.1
     listr: ^0.14.3
+    lodash: ^4.17.20
     ts-jest: ^26.4.3
     ts-node: ^8
     tslib: ^1
@@ -1146,6 +1148,13 @@ __metadata:
     "@types/node": "*"
     rxjs: ^6.5.1
   checksum: 0143d8b25f65c57dd30b77e1a634b60f0494962669cb547c9e9683487e09407298c66ab109492e28afdd8ead2d43647beec6471bb9000e8f0801d14af61d05c2
+  languageName: node
+  linkType: hard
+
+"@types/lodash@npm:^4.14.168":
+  version: 4.14.168
+  resolution: "@types/lodash@npm:4.14.168"
+  checksum: 9a4e25f89fc035b9f0388f1f7be85e5eff49f9e6db0d93432c9a89fce0916f8a89db4e8290415f7ea02de6b00d3573826378dcb655b7b2d20530a6e8d6dd6fd0
   languageName: node
   linkType: hard
 
