@@ -7,10 +7,15 @@ import * as clicommon from '@nitric/cli-common';
 import Listr from 'listr';
 import { NitricImage, NitricStack } from '@nitric/cli-common';
 
-jest.mock('clear');
 jest.mock('dockerode');
-jest.mock('keypress');
 jest.mock('get-port');
+jest.mock('cli-ux', () => ({
+	action: {
+		start: () => {},
+		stop: () => {}
+	},
+	table: () => {}
+}));
 jest.mock('listr');
 jest.mock('../tasks/run');
 jest.mock('../tasks/build');
