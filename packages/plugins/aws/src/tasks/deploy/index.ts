@@ -207,7 +207,7 @@ export class Deploy extends Task<void> {
 			...apis.reduce(
 				(defs, api) => ({
 					...defs,
-					...createApi(api),
+					...createApi(api, functions),
 				}),
 				{}
 			)
