@@ -42,14 +42,14 @@ export function createAPI(stackName: string, gcpProject: string): any[] {
  * Creates a template for a new API in Google Cloud API Gateway
  * from a nitric stack definition
  */
-export async function createAPIGateway(stackName: string, region: string, gcpProject: string, apiName: string, apis: NitricAPI[], funcs: DeployedFunction[]): Promise<any[]> {
+export async function createAPIGateways(stackName: string, region: string, gcpProject: string, apiName: string, apis: NitricAPI[], funcs: DeployedFunction[]): Promise<any[]> {
   let resources = [] as any[];
 
   if (apis.length > 0) {
     // Step 0: Interpolate the given document
     // We need to inject given backend target values into the document
     // in this case it will be CloudRun URLs from our previous core service deployment
-    const transformedAPIs = apis.map((api) => {
+    const deployeableApis = await Promise.all(apis.map(async (api) => {
       // TODO: Interpolate target values here...
       const newPaths = Object.keys(api.paths).reduce((acc, pathKey) => {
         const path = api.paths[pathKey]!;
@@ -87,19 +87,64 @@ export async function createAPIGateway(stackName: string, region: string, gcpPro
         };
       }, {} as OpenAPIV3.PathsObject<GoogleExtensions>);
 
-      return {
-        ...api,
-        paths: newPaths,
-      } as OpenAPIV3.Document<GoogleExtensions>;
-    });
-
-    const translatedApis = await Promise.all(transformedAPIs.map(api => {
-      return Converter.convert({
+      const translatedApi = await Converter.convert({
         from: "openapi_3",
         to: "swagger_2",
-        source: api
+        source: {
+          ...api,
+          paths: newPaths,
+        } as OpenAPIV3.Document<GoogleExtensions>
       });
+
+      return translatedApi.spec;
     }));
+
+    // Create one config and gateway per api defintion
+    resources = [
+      ...resources,
+      ...deployeableApis.reduce((acc, {name, ...api}) => {
+        const apiConfigParent = apiName;
+        const apiConfigId = `${stackName}-${name}-apiconfig`;
+        const apiConfigName = `${apiConfigParent}/configs/${apiConfigId}`;
+        return [
+          ...acc,
+          {
+            type: `${gcpProject}/nitric-cloud-apigateway:projects.locations.apis.configs`,
+            name: apiConfigId,
+            properties: {
+              parent: apiConfigParent,
+              displayName: apiConfigId,
+              apiConfigId: apiConfigId,
+              // TODO: Get the run invoker account details here (same as used for the subscription services...)
+              // XXX: Can possibly use a single invoker for all functions here in our API gateway...
+              // i.e. create a dedicated api gateway invoker
+              gatewayServiceAccount: '$(ref.nitric-invoker.email)',
+              // We can actually specify everything here
+              // Map them into base64 encoded documents
+              openapiDocuments: [{
+                document: {
+                  path: `${stackName}-${name}.json`,
+                  contents: Buffer.from(JSON.stringify(api)).toString('base64'),
+                }
+              }],
+            }
+          }, {
+            type: `${gcpProject}/nitric-cloud-apigateway:projects.locations.gateways`,
+            name: `${stackName}-${name}-gateway`,
+            properties: {
+              gatewayId: `${stackName}-${name}-gateway`,
+              parent: `projects/${gcpProject}/locations/${region}`,
+              displayName: `${stackName}-${name}-gateway`,
+              apiConfig: apiConfigName
+            },
+            metadata: {
+              dependsOn: [apiConfigId]
+            }
+          }
+        ]
+      }, [] as any[])
+    ];
+    
 
     // Step 1: Create the API config
     // To do this we need to upload the API gateway config seperately
@@ -108,52 +153,52 @@ export async function createAPIGateway(stackName: string, region: string, gcpPro
     // of the defined API files together under one endpoint...
     // FIXME: looks like we'll need to use a polling solution for this
     // As the API does not create in time...
-    const apiConfigParent = apiName;
-    const apiConfigId = `${stackName}-apiconfig`;
-    const apiConfigName = `${apiConfigParent}/configs/${apiConfigId}`;
-    const openApiConfig = {
-      type: `${gcpProject}/nitric-cloud-apigateway:projects.locations.apis.configs`,
-      name: `${stackName}-apiconfig`,
-      properties: {
-        parent: apiConfigParent,
-        displayName: apiConfigId,
-        apiConfigId: apiConfigId,
-        // TODO: Get the run invoker account details here (same as used for the subscription services...)
-        // XXX: Can possibly use a single invoker for all functions here in our API gateway...
-        // i.e. create a dedicated api gateway invoker
-        gatewayServiceAccount: '$(ref.nitric-invoker.email)',
-        // We can actually specify everything here
-        // Map them into base64 encoded documents
-        openapiDocuments: translatedApis.map(tapi => {
-          return {
-            document: {
-              path: `${stackName}.json`,
-              contents: Buffer.from(JSON.stringify(tapi.spec)).toString('base64'),
-            }
-          }
-        }),
-      }
-    };
+    // const apiConfigParent = apiName;
+    // const apiConfigId = `${stackName}-apiconfig`;
+    // const apiConfigName = `${apiConfigParent}/configs/${apiConfigId}`;
+    // const openApiConfig = {
+    //   type: `${gcpProject}/nitric-cloud-apigateway:projects.locations.apis.configs`,
+    //   name: `${stackName}-apiconfig`,
+    //   properties: {
+    //     parent: apiConfigParent,
+    //     displayName: apiConfigId,
+    //     apiConfigId: apiConfigId,
+    //     // TODO: Get the run invoker account details here (same as used for the subscription services...)
+    //     // XXX: Can possibly use a single invoker for all functions here in our API gateway...
+    //     // i.e. create a dedicated api gateway invoker
+    //     gatewayServiceAccount: '$(ref.nitric-invoker.email)',
+    //     // We can actually specify everything here
+    //     // Map them into base64 encoded documents
+    //     openapiDocuments: translatedApis.map(tapi => {
+    //       return {
+    //         document: {
+    //           path: `${stackName}.json`,
+    //           contents: Buffer.from(JSON.stringify(tapi.spec)).toString('base64'),
+    //         }
+    //       }
+    //     }),
+    //   }
+    // };
     
-    // Now we create the API gateway references the created config above
-    const apiGateway = {
-      type: `${gcpProject}/nitric-cloud-apigateway:projects.locations.gateways`,
-      name: `${stackName}-gateway`,
-      properties: {
-        gatewayId: `${stackName}-gateway`,
-        parent: `projects/${gcpProject}/locations/${region}`,
-        displayName: `${stackName}-gateway`,
-        apiConfig: apiConfigName
-      },
-      metadata: {
-        dependsOn: [apiConfigId]
-      }
-    };
+    // // Now we create the API gateway references the created config above
+    // const apiGateway = {
+    //   type: `${gcpProject}/nitric-cloud-apigateway:projects.locations.gateways`,
+    //   name: `${stackName}-gateway`,
+    //   properties: {
+    //     gatewayId: `${stackName}-gateway`,
+    //     parent: `projects/${gcpProject}/locations/${region}`,
+    //     displayName: `${stackName}-gateway`,
+    //     apiConfig: apiConfigName
+    //   },
+    //   metadata: {
+    //     dependsOn: [apiConfigId]
+    //   }
+    // };
 
-    resources = [
-      openApiConfig,
-      apiGateway,
-    ] as any[];
+    // resources = [
+    //   openApiConfig,
+    //   apiGateway,
+    // ] as any[];
   }
 
   // Step 2: Create

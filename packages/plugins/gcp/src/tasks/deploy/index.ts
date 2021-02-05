@@ -14,7 +14,7 @@ import generateBucketResources from './buckets';
 import generateSubscriptionsForFunction from './subscriptions';
 import generateIamServiceAccounts from './invoker';
 import generateSchedules from './schedule';
-import { createAPI, createAPIGateway } from './apis';
+import { createAPI, createAPIGateways } from './apis';
 import Docker from 'dockerode';
 import yaml from 'yaml';
 import { operationToPromise } from '../utils';
@@ -392,7 +392,7 @@ async function getStackAPI(stackName: string, project: string): Promise<apigatew
 				await new Promise((resolve) => setTimeout(resolve, 1000));
 			}
 		} catch (e) {
-			console.log("There was an error... continuing...")
+			console.log("There was an error... continuing...", e)
 		}
 	}
 
@@ -493,7 +493,7 @@ export class DeploySubscriptions extends Task<void> {
 		this.update('Describing API Gateway');
 		let apiResources = [] as any[];
 		if (stack.apis) {
-			apiResources = await createAPIGateway(stack.name, region, project, api.name!, stack.apis, deployedFunctions);
+			apiResources = await createAPIGateways(stack.name, region, project, api.name!, stack.apis, deployedFunctions);
 		}
 		
 
