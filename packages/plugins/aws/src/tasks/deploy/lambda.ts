@@ -23,9 +23,9 @@ export default (
 	const lambdaName = funcName + 'Lambda';
 	const lambdaDefName = lambdaName + 'Def';
 	const lambdaRoleDefName = lambdaName + 'RoleDef';
-	const lambdaPermissionDefName = lambdaName + 'PermissionDef';
-	const apiGatewayName = funcName + 'Api';
-	const apiGatewayDefName = apiGatewayName + 'Def';
+	// const lambdaPermissionDefName = lambdaName + 'PermissionDef';
+	// const apiGatewayName = funcName + 'Api';
+	// const apiGatewayDefName = apiGatewayName + 'Def';
 	// const apiDeploymentName = apiGatewayName + 'Deployment';
 	// const apiDeploymentDefName = apiDeploymentName + 'Def';
 	// const serviceName = funcName + 'Service';
