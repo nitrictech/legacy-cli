@@ -100,7 +100,7 @@ export function createGatewayTasks(
 
 export function createGatewayContainerRunTasks(stackName: string, apis: NitricAPI[], docker: Docker): (ctx) => Listr {
 	return (ctx): Listr => {
-		return new Listr(createGatewayTasks(stackName, apis, docker, ctx.Network), {
+		return new Listr(createGatewayTasks(stackName, apis, docker, ctx.network), {
 			concurrent: true,
 			// Don't fail all on a single function failure...
 			exitOnError: false,
