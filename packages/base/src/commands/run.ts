@@ -1,7 +1,7 @@
 import { Command } from '@oclif/command';
 import cli from 'cli-ux';
 import Build, { createBuildTasks } from './build';
-import { readNitricDescriptor, wrapTaskForListr, NitricImage, NitricStack, NitricAPI } from '@nitric/cli-common';
+import { readNitricDescriptor, wrapTaskForListr, NitricImage, NitricStack } from '@nitric/cli-common';
 import Listr from 'listr';
 import path from 'path';
 import Docker, { Network, Container, Volume } from 'dockerode';
@@ -86,19 +86,23 @@ export function createGatewayTasks(
 	docker: Docker,
 	network: Docker.Network,
 ): Array<Listr.ListrTask> {
-	return apis.map((api) => 
+	return apis.map((api) =>
 		wrapTaskForListr(
 			new RunGatewayTask({
 				...api,
 				stackName,
 				docker,
 				network,
-			})
-		)
+			}),
+		),
 	);
 }
 
-export function createGatewayContainerRunTasks(stackName: string, apis: RunGatewayTaskOptions[], docker: Docker): (ctx) => Listr {
+export function createGatewayContainerRunTasks(
+	stackName: string,
+	apis: RunGatewayTaskOptions[],
+	docker: Docker,
+): (ctx) => Listr {
 	return (ctx): Listr => {
 		return new Listr(createGatewayTasks(stackName, apis, docker, ctx.network), {
 			concurrent: true,
@@ -126,7 +130,12 @@ export function createFunctionContainerRunTasks(functions: RunFunctionTaskOption
  * Top level listr run task displayed to the user
  * Will display tasks for creating docker resources
  */
-export function createRunTasks(stackName: string, functions: RunFunctionTaskOptions[], apis: RunGatewayTaskOptions[], docker: Docker): Listr {
+export function createRunTasks(
+	stackName: string,
+	functions: RunFunctionTaskOptions[],
+	apis: RunGatewayTaskOptions[],
+	docker: Docker,
+): Listr {
 	return new Listr<ListrCtx>([
 		wrapTaskForListr(new CreateNetworkTask({ name: `${stackName}-net`, docker }), 'network'),
 		wrapTaskForListr(new CreateVolumeTask({ volumeName: `${stackName}-vol`, dockerClient: docker }), 'volume'),
@@ -191,7 +200,7 @@ export default class Run extends Command {
 	 * Runs a container for each function in the Nitric Stack
 	 */
 	runContainers = async (stack: NitricStack, directory: string): Promise<void> => {
-		const { apis = [] } = stack
+		const { apis = [] } = stack;
 		cli.action.stop();
 
 		// Build the container images for each function in the Nitric Stack
@@ -209,8 +218,8 @@ export default class Run extends Command {
 				return {
 					stackName: stack.name,
 					api,
-					port?: await getPort({ port: portRange }),
-				} as RunGatewayTaskOptions
+					port: await getPort({ port: portRange }),
+				} as RunGatewayTaskOptions;
 			}),
 		);
 
