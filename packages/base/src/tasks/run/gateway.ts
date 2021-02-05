@@ -5,7 +5,7 @@ import fs from "fs";
 import getPort from 'get-port';
 import tar from 'tar-fs';
 
-interface RunGatewayTaskOptions {
+export interface RunGatewayTaskOptions {
   stackName: string;
   api: NitricAPI;
   port?: number;

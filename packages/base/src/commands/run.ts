@@ -7,7 +7,7 @@ import path from 'path';
 import Docker, { Network, Container, Volume } from 'dockerode';
 import getPort from 'get-port';
 import { RunFunctionTask, RunFunctionTaskOptions, CreateNetworkTask, CreateVolumeTask } from '../tasks/run';
-import { RunGatewayTask } from '../tasks/run/gateway';
+import { RunGatewayTask, RunGatewayTaskOptions } from '../tasks/run/gateway';
 
 interface KnownListrCtx {
 	network: Network;
@@ -82,15 +82,15 @@ export function createFunctionTasks(
 
 export function createGatewayTasks(
 	stackName: string,
-	apis: NitricAPI[],
+	apis: RunGatewayTaskOptions[],
 	docker: Docker,
 	network: Docker.Network,
 ): Array<Listr.ListrTask> {
 	return apis.map((api) => 
 		wrapTaskForListr(
 			new RunGatewayTask({
+				...api,
 				stackName,
-				api,
 				docker,
 				network,
 			})
@@ -98,7 +98,7 @@ export function createGatewayTasks(
 	);
 }
 
-export function createGatewayContainerRunTasks(stackName: string, apis: NitricAPI[], docker: Docker): (ctx) => Listr {
+export function createGatewayContainerRunTasks(stackName: string, apis: RunGatewayTaskOptions[], docker: Docker): (ctx) => Listr {
 	return (ctx): Listr => {
 		return new Listr(createGatewayTasks(stackName, apis, docker, ctx.network), {
 			concurrent: true,
@@ -126,7 +126,7 @@ export function createFunctionContainerRunTasks(functions: RunFunctionTaskOption
  * Top level listr run task displayed to the user
  * Will display tasks for creating docker resources
  */
-export function createRunTasks(stackName: string, functions: RunFunctionTaskOptions[], apis: NitricAPI[], docker: Docker): Listr {
+export function createRunTasks(stackName: string, functions: RunFunctionTaskOptions[], apis: RunGatewayTaskOptions[], docker: Docker): Listr {
 	return new Listr<ListrCtx>([
 		wrapTaskForListr(new CreateNetworkTask({ name: `${stackName}-net`, docker }), 'network'),
 		wrapTaskForListr(new CreateVolumeTask({ volumeName: `${stackName}-vol`, dockerClient: docker }), 'volume'),
@@ -204,6 +204,16 @@ export default class Run extends Command {
 		// Images are sorted to ensure they're typically assigned the same port between reloads.
 		images = sortImages(images);
 
+		const runGatewayOptions = await Promise.all(
+			apis.map(async (api) => {
+				return {
+					stackName: stack.name,
+					api,
+					port?: await getPort({ port: portRange }),
+				} as RunGatewayTaskOptions
+			}),
+		);
+
 		const runTaskOptions = await Promise.all(
 			images.map(async (image) => {
 				return {
@@ -215,7 +225,7 @@ export default class Run extends Command {
 		);
 
 		// Capture the results of running tasks to setup docker network, volume and function containers
-		const runTaskResults = await createRunTasks(stack.name, runTaskOptions, apis, this.docker).run();
+		const runTaskResults = await createRunTasks(stack.name, runTaskOptions, runGatewayOptions, this.docker).run();
 
 		// Capture created docker resources for cleanup on run termination (see cleanup())
 		const {
@@ -232,6 +242,13 @@ export default class Run extends Command {
 		cli.table(runTaskOptions, {
 			function: {
 				get: (row): string => row.image && row.image.func.name,
+			},
+			port: {},
+		});
+
+		cli.table(runGatewayOptions, {
+			api: {
+				get: (row): string => row.api && row.api.name,
 			},
 			port: {},
 		});
