@@ -144,61 +144,6 @@ export async function createAPIGateways(stackName: string, region: string, gcpPr
         ]
       }, [] as any[])
     ];
-    
-
-    // Step 1: Create the API config
-    // To do this we need to upload the API gateway config seperately
-    // Also to do this we will need to URLs of the cloud run functions
-    // We can actually create a single gateway for the entire stack that contains all
-    // of the defined API files together under one endpoint...
-    // FIXME: looks like we'll need to use a polling solution for this
-    // As the API does not create in time...
-    // const apiConfigParent = apiName;
-    // const apiConfigId = `${stackName}-apiconfig`;
-    // const apiConfigName = `${apiConfigParent}/configs/${apiConfigId}`;
-    // const openApiConfig = {
-    //   type: `${gcpProject}/nitric-cloud-apigateway:projects.locations.apis.configs`,
-    //   name: `${stackName}-apiconfig`,
-    //   properties: {
-    //     parent: apiConfigParent,
-    //     displayName: apiConfigId,
-    //     apiConfigId: apiConfigId,
-    //     // TODO: Get the run invoker account details here (same as used for the subscription services...)
-    //     // XXX: Can possibly use a single invoker for all functions here in our API gateway...
-    //     // i.e. create a dedicated api gateway invoker
-    //     gatewayServiceAccount: '$(ref.nitric-invoker.email)',
-    //     // We can actually specify everything here
-    //     // Map them into base64 encoded documents
-    //     openapiDocuments: translatedApis.map(tapi => {
-    //       return {
-    //         document: {
-    //           path: `${stackName}.json`,
-    //           contents: Buffer.from(JSON.stringify(tapi.spec)).toString('base64'),
-    //         }
-    //       }
-    //     }),
-    //   }
-    // };
-    
-    // // Now we create the API gateway references the created config above
-    // const apiGateway = {
-    //   type: `${gcpProject}/nitric-cloud-apigateway:projects.locations.gateways`,
-    //   name: `${stackName}-gateway`,
-    //   properties: {
-    //     gatewayId: `${stackName}-gateway`,
-    //     parent: `projects/${gcpProject}/locations/${region}`,
-    //     displayName: `${stackName}-gateway`,
-    //     apiConfig: apiConfigName
-    //   },
-    //   metadata: {
-    //     dependsOn: [apiConfigId]
-    //   }
-    // };
-
-    // resources = [
-    //   openApiConfig,
-    //   apiGateway,
-    // ] as any[];
   }
 
   // Step 2: Create
