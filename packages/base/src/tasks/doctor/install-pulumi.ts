@@ -28,6 +28,7 @@ export class InstallPulumi extends Task<void> {
       : UNIX_INSTALL;
 
     try {
+      this.update("Installing pulumi from https://get.pulumi.com")
       await execa.command(installCommand, { shell: true });
     } catch (e) {
       throw new Error(`Failed to install pulumi: ${e}`);

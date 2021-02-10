@@ -74,15 +74,16 @@ export default class Doctor extends Command {
 
 	async run(): Promise<void> {
 		// const { args, flags } = this.parse(Doctor);
-  
     const statuses = PREREQUISITE_SOFTWARE.map(software => ({
       ...software,
       installed: !!which.sync(software.name, {nothrow: true})
     }));
 
     cli.table(statuses, {
-      status: {
-        get: ({ name, icon, installed }) => installed ? chalk.greenBright(emoji.emojify(`${icon} ${name}`)) : chalk.redBright(emoji.emojify(`${icon} ${name}`))
+      'installed?': {
+        get: ({ name, icon, installed }) => installed 
+          ? chalk.greenBright(emoji.emojify(`${icon} ${name}`)) 
+          : chalk.redBright(emoji.emojify(`${icon} ${name}`))
       },
     });
     const uninstalledSoftware = statuses.filter(({installed}) => !installed);
@@ -96,9 +97,16 @@ export default class Doctor extends Command {
         await new Listr(tasks.map(task => wrapTaskForListr(new task()))).run()
       } else {
         cli.info("No worries, installation instructions for missing pre-requisites can be found below:");
+
+        uninstalledSoftware.forEach(({name, icon, installDocs}) => {
+          const string = emoji.emojify(`${icon} ${name}`)
+          cli.url(string, installDocs);
+        });
+
+        return;
       }
     }
 
-    cli.info("Good to go 👍 Enjoy using nitric 🎉");
+    cli.info("Good to go 👍 Enjoy using Nitric 🎉");
 	}
 }
