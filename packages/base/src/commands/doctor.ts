@@ -1,39 +1,11 @@
 import { Command, flags } from '@oclif/command';
-import { readNitricDescriptor, wrapTaskForListr, NitricStack, NitricImage, Task } from '@nitric/cli-common';
-import { BuildFunctionTask } from '../tasks/build';
-import Listr, { ListrTask } from 'listr';
+import {  wrapTaskForListr, Task } from '@nitric/cli-common';
+import Listr from 'listr';
 import which from "which";
 import cli from "cli-ux";
 import emoji from 'node-emoji';
 import chalk from "chalk";
 import { InstallPulumi, InstallDocker } from '../tasks/doctor';
-
-export function createBuildTasks(stack: NitricStack, directory: string, provider = 'local'): Listr {
-	return new Listr([
-		{
-			title: 'Building Functions',
-			task: (): Listr =>
-				new Listr(
-					stack.functions!.map(
-						(func): ListrTask =>
-							wrapTaskForListr(
-								new BuildFunctionTask({
-									func,
-									baseDir: directory,
-									stackName: stack.name,
-									provider,
-								}),
-							),
-					),
-					{
-						concurrent: true,
-						// Don't fail all on a single function failure...
-						exitOnError: false,
-					},
-				),
-		},
-	]);
-}
 
 interface Software {
   name: string;
