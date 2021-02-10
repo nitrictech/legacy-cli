@@ -676,11 +676,14 @@ __metadata:
     "@types/jest": ^26.0.15
     "@types/listr": latest
     "@types/node": ^10
+    "@types/node-emoji": ^1.8.1
     "@types/rimraf": ^3.0.0
     "@types/stream-to-promise": ^2.2.1
     "@types/tar-fs": ^2.0.0
+    chalk: ^4.1.0
     clear: ^0.1.0
     cli-ux: ^5.5.0
+    common-tags: ^1.8.0
     dockerode: ^3.2.1
     eslint: ^5.13
     eslint-config-oclif: ^3.1
@@ -694,6 +697,7 @@ __metadata:
     keypress: ^0.2.1
     listr: ^0.14.3
     multimatch: ^5.0.0
+    node-emoji: ^1.10.0
     os: ^0.1.1
     pkg: ^4.4.9
     rimraf: ^3.0.2
@@ -705,6 +709,7 @@ __metadata:
     ts-node: ^8
     tslib: ^1
     typescript: ^3.3
+    which: ^2.0.2
     yaml: ^1.10.0
   bin:
     nitric: ./bin/run
@@ -1169,6 +1174,13 @@ __metadata:
   version: 1.2.0
   resolution: "@types/minimist@npm:1.2.0"
   checksum: 098945c2c29df019cae250dfe614e50dab8120f4e359bd034190f931a63a23f3058764eec0d8cea3757eedd5b308ed28e4357ece9510a99380da08762f5f6635
+  languageName: node
+  linkType: hard
+
+"@types/node-emoji@npm:^1.8.1":
+  version: 1.8.1
+  resolution: "@types/node-emoji@npm:1.8.1"
+  checksum: 66678006be9399a7c848167233e651f88a3391e5648995625d539db2d0c68da922c43ab329bd1262dd55e3674cb08ec0e8a9971358cabb0b5076398e64d1aa7e
   languageName: node
   linkType: hard
 
@@ -2668,6 +2680,13 @@ __metadata:
   version: 1.1.0
   resolution: "common-prefix@npm:1.1.0"
   checksum: af30c34a95899adc4c4587791724ae08e70ea5e64d20bb5a0759e76a70f2808a10f619debff1c36ddda3b4657ef9fe8ee8f78478804edb3ebda7894a05d399d0
+  languageName: node
+  linkType: hard
+
+"common-tags@npm:^1.8.0":
+  version: 1.8.0
+  resolution: "common-tags@npm:1.8.0"
+  checksum: f37a868d868929cf345fe49c4122efde693f9b06bf5764df36c3bdf5d3c271a24bb3fb6fbfaeec1f29768e60ad648cc11a4092c91bac05a8bde90ddbf5aae1a8
   languageName: node
   linkType: hard
 
@@ -7380,6 +7399,13 @@ fsevents@^2.1.2:
   languageName: node
   linkType: hard
 
+"lodash.toarray@npm:^4.4.0":
+  version: 4.4.0
+  resolution: "lodash.toarray@npm:4.4.0"
+  checksum: f2b8de1812789321335dd5f4cb60625c4b8874cb3b300367d8a22990072459b76eb893feacd243686493393cccd035115cc149563f7aa5123d06d9a3b2825bf1
+  languageName: node
+  linkType: hard
+
 "lodash.upperfirst@npm:^4.2.0":
   version: 4.3.1
   resolution: "lodash.upperfirst@npm:4.3.1"
@@ -7972,6 +7998,15 @@ fsevents@^2.1.2:
     ultra-runner: ^3.5.0
   languageName: unknown
   linkType: soft
+
+"node-emoji@npm:^1.10.0":
+  version: 1.10.0
+  resolution: "node-emoji@npm:1.10.0"
+  dependencies:
+    lodash.toarray: ^4.4.0
+  checksum: 9c73cd0af03965131225c388339ec5cb3b7239f9d63f15c7755540d265b20a4ecac855fd270af216fb14cdf8232ec4687ab5a52b4b475a681ee1bd74f7562ced
+  languageName: node
+  linkType: hard
 
 "node-fetch@npm:^1.6.3":
   version: 1.7.3
