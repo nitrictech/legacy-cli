@@ -5,6 +5,7 @@ import { DeployedFunction } from "../types";
 import { apigatewayv2, lambda } from "@pulumi/aws";
 import * as pulumi from "@pulumi/pulumi";
 
+
 type method = "get" | "post" | "put" | "patch" | "delete";
 const METHOD_KEYS: method[] = ["get", "post", "put", "patch", "delete"]
 
@@ -40,7 +41,7 @@ export function createApi(api: NitricAPI, funcs: DeployedFunction[]) {
     ];
   }, [] as string[]));
 
-  const transformedDoc = pulumi.all(funcs.map(f => f.awsLambda.invokeArn.apply(arn => `${f.name}:${arn}`))).apply(nameArnPairs => {
+  const transformedDoc = pulumi.all(funcs.map(f => f.awsLambda.invokeArn.apply(arn => `${f.name}||${arn}`))).apply(nameArnPairs => {
     const transformedApi = {
       ...rest,
       paths: Object.keys(api.paths).reduce((acc, pathKey) => {
@@ -51,15 +52,17 @@ export function createApi(api: NitricAPI, funcs: DeployedFunction[]) {
           // The name of the function we want to target with this APIGateway
           const targetName = p["x-nitric-target"].name;
   
-          const invokeArnPair = nameArnPairs.find(f => f.split(":")[0] === targetName);
+          const invokeArnPair = nameArnPairs.find(f => f.split("||")[0] === targetName);
   
           if (!invokeArnPair) {
             throw new Error(`Invalid nitric target ${targetName} defined in api: ${api.name}`);
           }
 
-          const [name, invokeArn] = invokeArnPair.split(":");
+          const [name, invokeArn] = invokeArnPair.split("||");
           // Discard the old key on the transformed API
           const { "x-nitric-target": _, ...rest } = p;
+
+          // console.log("invokeArn:", invokeArn);
   
           return {
             ...acc,
@@ -99,8 +102,9 @@ export function createApi(api: NitricAPI, funcs: DeployedFunction[]) {
   // stage
   const deployedStage = new apigatewayv2.Stage(`${api.name}DefaultStage`, {
     apiId: deployedApi.id,
-    name: '$default'
-  })
+    name: '$default',
+    autoDeploy: true,
+  });
 
   // generate lambda permissions
   funcs.filter(f => targetNames.includes(f.name)).forEach(f => {
