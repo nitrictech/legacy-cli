@@ -1,4 +1,13 @@
 import { normalizeTopicName, NitricTopic } from '@nitric/cli-common';
+import { sns } from "@pulumi/aws";
+import { DeployedTopic } from '../types';
+
+export function createTopic(topic: NitricTopic): DeployedTopic {
+	return {
+		...topic,
+		awsTopic: new sns.Topic(topic.name)
+	};
+}
 
 // TODO: We'll also need to get the IPs of the NitricFunction resources
 export default (topic: NitricTopic): Record<string, any> => {
