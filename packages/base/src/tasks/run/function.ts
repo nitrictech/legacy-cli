@@ -50,6 +50,7 @@ export class RunFunctionTask extends Task<Container> {
 		}
 
 		const dockerOptions = {
+			name: this.image.func.name,
 			Env: [`LOCAL_SUBSCRIPTIONS=${JSON.stringify(subscriptions)}`],
 			ExposedPorts: {
 				[`${GATEWAY_PORT}/tcp`]: {},

@@ -8,6 +8,7 @@
     "@nitric/cli-common": "workspace:*",
     "@oclif/command": "^1",
     "@oclif/config": "^1",
+    "api-spec-converter": "^2.11.4",
     "dockerode": "^3.2.1",
     "googleapis": "^61.0.0",
     "listr": "^0.14.3",
@@ -23,6 +24,7 @@
     "eslint-config-oclif-typescript": "^0.1",
     "globby": "^10",
     "jest": "^26.6.1",
+    "openapi-types": "^7.2.3",
     "ts-jest": "^26.4.3",
     "ts-node": "^8",
     "typescript": "^3.3"

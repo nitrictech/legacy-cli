@@ -20,6 +20,7 @@ import {
 // import createContainer from './container';
 import createLambda from './lambda';
 import createEventRule from './eb-rule';
+import createApi from './api';
 // import createLoadBalancer from './load-balancer';
 import createTopic from './topic';
 import fs from 'fs';
@@ -154,7 +155,7 @@ export class Deploy extends Task<void> {
 	async do(): Promise<void> {
 		const { stack, account, region } = this;
 		// let resources: any[] = [];
-		const { functions = [], topics = [], schedules = [], } = stack;
+		const { functions = [], topics = [], schedules = [], apis = []} = stack;
 
 		AWS.config.update({ region });
 
@@ -202,6 +203,13 @@ export class Deploy extends Task<void> {
 					...createEventRule(schedule),
 				}),
 				{},
+			),
+			...apis.reduce(
+				(defs, api) => ({
+					...defs,
+					...createApi(api, functions),
+				}),
+				{}
 			)
 		};
 

@@ -40,7 +40,7 @@ export class Down extends Task<void> {
 		try {
 			const { data } = await dmClient.deployments.delete({
 				project: this.gcpProject,
-				deployment: `${sanitizeStringForDockerTag(this.stackName)}-subscriptions`,
+				deployment: `${sanitizeStringForDockerTag(this.stackName)}-interfaces`,
 				deletePolicy,
 			});
 			subOperation = data;
@@ -48,7 +48,7 @@ export class Down extends Task<void> {
 			throw new Error(error);
 		}
 
-		this.update(`Waiting for subscriptions to cleanup`);
+		this.update(`Waiting for interfaces to cleanup`);
 		await operationToPromise(this.gcpProject, subOperation);
 
 		let operation;

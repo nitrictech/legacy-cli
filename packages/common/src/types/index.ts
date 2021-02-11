@@ -6,3 +6,4 @@ export * from './bucket';
 export * from './topic';
 export * from './subscription';
 export * from './schedule';
+export * from './api';

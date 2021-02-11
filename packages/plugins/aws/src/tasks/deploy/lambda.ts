@@ -1,6 +1,5 @@
 import { generateEcrRepositoryUri } from '../../common/utils';
 import { NitricFunction, normalizeFunctionName, normalizeTopicName } from '@nitric/cli-common';
-// import { integer } from 'aws-sdk/clients/cloudfront';
 
 /**
  * Create resources to deploy a service to AWS Lambda using Container Image deployment
@@ -24,13 +23,11 @@ export default (
 	const lambdaName = funcName + 'Lambda';
 	const lambdaDefName = lambdaName + 'Def';
 	const lambdaRoleDefName = lambdaName + 'RoleDef';
-	const lambdaPermissionDefName = lambdaName + 'PermissionDef';
-	const apiGatewayName = funcName + 'Api';
-	const apiGatewayDefName = apiGatewayName + 'Def';
+	// const lambdaPermissionDefName = lambdaName + 'PermissionDef';
+	// const apiGatewayName = funcName + 'Api';
+	// const apiGatewayDefName = apiGatewayName + 'Def';
 	// const apiDeploymentName = apiGatewayName + 'Deployment';
 	// const apiDeploymentDefName = apiDeploymentName + 'Def';
-	const apiStageName = apiGatewayName + 'Stage';
-	const apiStageDefName = apiStageName + 'Def';
 	// const serviceName = funcName + 'Service';
 	// const serviceDefName = serviceName + 'Def';
 	// const targetGroupName = `${funcName}TargetGroup`;
@@ -154,83 +151,6 @@ export default (
 				],
 			},
 		},
-		// Enable API Gateway to call the Lambda Function.
-		[lambdaPermissionDefName]: {
-			Type: 'AWS::Lambda::Permission',
-			Properties: {
-				Action: 'lambda:InvokeFunction',
-				FunctionName: {
-					Ref: lambdaDefName,
-				},
-				Principal: 'apigateway.amazonaws.com',
-				SourceArn: {
-					'Fn::Sub': [
-						'arn:${AWS::Partition}:execute-api:${AWS::Region}:${AWS::AccountId}:${__ApiId__}/${__Stage__}/*',
-						{
-							__ApiId__: {
-								Ref: apiGatewayDefName,
-							},
-							__Stage__: '*',
-						},
-					],
-				},
-			},
-		},
-		[apiGatewayDefName]: {
-			Type: 'AWS::ApiGatewayV2::Api',
-			Properties: {
-				Body: {
-					openapi: '3.0.1',
-					info: {
-						version: '1.0',
-						title: {
-							Ref: 'AWS::StackName',
-						},
-					},
-					paths: {
-						$default: {
-							'x-amazon-apigateway-any-method': {
-								'x-amazon-apigateway-integration': {
-									type: 'aws_proxy',
-									httpMethod: 'POST',
-									payloadFormatVersion: '2.0',
-									uri: {
-										'Fn::Sub':
-											'arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${' +
-											lambdaDefName +
-											'.Arn}/invocations',
-									},
-								},
-								isDefaultRoute: true,
-								responses: {},
-							},
-						},
-					},
-					tags: [
-						{
-							name: 'httpapi:createdBy',
-							'x-amazon-apigateway-tag-value': 'Nitric',
-						},
-					],
-				},
-			},
-		},
-		[apiStageDefName]: {
-			Type: 'AWS::ApiGatewayV2::Stage',
-			Properties: {
-				ApiId: {
-					Ref: apiGatewayDefName,
-				},
-				StageName: '$default',
-				Tags: {
-					'httpapi:createdBy': 'Nitric',
-				},
-				AutoDeploy: true,
-			},
-		},
-
-		//TODO: Handle subscriptions
-		// Setup topic subscriptions
 		...subs.reduce((acc, sub) => {
 			return {
 				...acc,
