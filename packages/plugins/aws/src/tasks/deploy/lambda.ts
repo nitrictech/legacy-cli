@@ -11,70 +11,56 @@ export function createLambdaFunction(
 	account: string, 
 	region: string
 ): DeployedFunction {
-	const testRole = new iam.Role(`${func.name}Role`, {
+	const lambdaRole = new iam.Role(`${func.name}LambdaRole`, {
     assumeRolePolicy: iam.assumeRolePolicyForPrincipal(iam.Principals.LambdaPrincipal),
 	});
 
 	// TODO: Lock this SNS topics for which this function has pub definitions
 	new iam.RolePolicy(`${func.name}SNSAccess`, {
-		role: testRole.id,
-		policy: `
-			{
-				PolicyName: 'SNSAccess',
-				PolicyDocument: {
-					Version: '2012-10-17',
-					Statement: [{
-						Effect: 'Allow',
-						Action: ['sns:Publish', 'sns:GetTopicAttributes', 'sns:Subscribe', 'sns:ConfirmSubscription', 'sns:ListTopics', 'sns:Unsubscribe'],
-						Resource: '*',
-					}],
-				},
-			}
-		`
+		role: lambdaRole.id,
+		policy: JSON.stringify({
+			Version: '2012-10-17',
+			Statement: [
+				{
+					Effect: 'Allow',
+					Action: ['sns:Publish', 'sns:GetTopicAttributes', 'sns:Subscribe', 'sns:ConfirmSubscription', 'sns:ListTopics', 'sns:Unsubscribe'],
+					Resource: '*',
+				}
+			],
+		})
 	});
 
 	new iam.RolePolicy(`${func.name}DynamoDBAccess`, {
-		role: testRole.id,
-		policy: `
-		{
-			PolicyName: 'DynamoDBAccess',
-			PolicyDocument: {
-				Version: '2012-10-17',
-				Statement: [
-					{
-						Effect: 'Allow',
-						Action: [
-							'dynamodb:CreateTable',
-							'dynamodb:BatchGetItem',
-							'dynamodb:BatchWriteItem',
-							'dynamodb:PutItem',
-							'dynamodb:DescribeTable',
-							'dynamodb:DeleteItem',
-							'dynamodb:GetItem',
-							'dynamodb:Query',
-							'dynamodb:UpdateItem',
-							'dynamodb:UpdateTable',
-							'dynamodb:ListTables',
-						],
-						Resource: '*',
-					},
-				],
-			},
-		},
-		`
-	});
-
-	// Create lambda role
-	const lambdaRole = new iam.Role(`${func.name}Role`, {
-		assumeRolePolicy: iam.assumeRolePolicyForPrincipal(
-			iam.Principals.LambdaPrincipal
-		),
+		role: lambdaRole.id,
+		policy: JSON.stringify({
+			Version: '2012-10-17',
+			Statement: [
+				{
+					Effect: 'Allow',
+					Action: [
+						'dynamodb:CreateTable',
+						'dynamodb:BatchGetItem',
+						'dynamodb:BatchWriteItem',
+						'dynamodb:PutItem',
+						'dynamodb:DescribeTable',
+						'dynamodb:DeleteItem',
+						'dynamodb:GetItem',
+						'dynamodb:Query',
+						'dynamodb:UpdateItem',
+						'dynamodb:UpdateTable',
+						'dynamodb:ListTables'
+					],
+					Resource: '*'
+				}
+			]
+		})
 	});
 
 	const lfunction = new lambda.Function(func.name, {
 		imageUri: generateEcrRepositoryUri(account, region, stackName, func) + ':latest',
 		memorySize: 128,
 		timeout: 15,
+		packageType: 'Image',
 		role: lambdaRole.arn
 	});
 

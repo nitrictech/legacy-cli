@@ -2,7 +2,7 @@ import { wrapTaskForListr } from '@nitric/cli-common';
 import { Command, flags } from '@oclif/command';
 import cli from "cli-ux";
 import Listr from 'listr';
-import { CheckPulumiPlugins } from '../../tasks/doctor';
+import { CheckPulumiPlugins, InstallAWSPulumiPlugin } from '../../tasks/doctor';
 
 // interface Software {
 //   name: string;
@@ -48,7 +48,7 @@ export default class Doctor extends Command {
 			wrapTaskForListr(new CheckPulumiPlugins(), "installed"),
 			wrapTaskForListr({ 
 				name: "Install AWS Plugin", 
-				factory: () => new InstallAWSPlugin(),
+				factory: () => new InstallAWSPulumiPlugin(),
 				skip: (ctx) => ctx.installed,
 			}),
     ]).run();

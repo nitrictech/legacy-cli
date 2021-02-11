@@ -3,7 +3,7 @@ import { OpenAPIV3 } from "openapi-types";
 import { uniq } from "lodash";
 import { DeployedFunction } from "../types";
 import { apigatewayv2, lambda } from "@pulumi/aws";
-import pulumi from "@pulumi/pulumi";
+import * as pulumi from "@pulumi/pulumi";
 
 type method = "get" | "post" | "put" | "patch" | "delete";
 const METHOD_KEYS: method[] = ["get", "post", "put", "patch", "delete"]
@@ -28,12 +28,19 @@ interface AwsExtentions {
 export function createApi(api: NitricAPI, funcs: DeployedFunction[]) {
   const { name, ...rest } = api;
 
-  const targetNames = uniq(Object.keys(api.paths).map((p) => {
+  const targetNames = uniq(Object.keys(api.paths).reduce((acc, p) => {
     const path = api.paths[p]!;
-    return path['x-nitric-target'].name;
-  }));
+    
+    return [
+      ...acc,
+      ...Object.keys(path).filter(k => METHOD_KEYS.includes(k as method)).map(m => {
+        const method = path[m as method]!;
+        return method['x-nitric-target'].name
+      })
+    ];
+  }, [] as string[]));
 
-  const transformedDoc = pulumi.all(funcs.map(f => `${f.name}:${f.awsLambda.invokeArn}`)).apply(nameArnPairs => {
+  const transformedDoc = pulumi.all(funcs.map(f => f.awsLambda.invokeArn.apply(arn => `${f.name}:${arn}`))).apply(nameArnPairs => {
     const transformedApi = {
       ...rest,
       paths: Object.keys(api.paths).reduce((acc, pathKey) => {
