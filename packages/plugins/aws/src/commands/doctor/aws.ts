@@ -1,6 +1,6 @@
 import { wrapTaskForListr } from '@nitric/cli-common';
 import { Command, flags } from '@oclif/command';
-import cli from "cli-ux";
+import cli from 'cli-ux';
 import Listr from 'listr';
 import { CheckPulumiPlugins, InstallAWSPulumiPlugin } from '../../tasks/doctor';
 
@@ -39,21 +39,20 @@ export default class Doctor extends Command {
 		help: flags.help({ char: 'h' }),
 	};
 
-  static args = [];
+	static args = [];
 
 	async run(): Promise<void> {
-    // const { args, flags } = this.parse(Doctor);
-    
-    await new Listr<any>([
-			wrapTaskForListr(new CheckPulumiPlugins(), "installed"),
-			wrapTaskForListr({ 
-				name: "Install AWS Plugin", 
+		// const { args, flags } = this.parse(Doctor);
+
+		await new Listr<any>([
+			wrapTaskForListr(new CheckPulumiPlugins(), 'installed'),
+			wrapTaskForListr({
+				name: 'Install AWS Plugin',
 				factory: () => new InstallAWSPulumiPlugin(),
 				skip: (ctx) => ctx.installed,
 			}),
-    ]).run();
-    
+		]).run();
 
-    cli.info("Good to go 👍 You're ready to deploy to AWS with Nitric 🎉");
+		cli.info("Good to go 👍 You're ready to deploy to AWS with Nitric 🎉");
 	}
 }

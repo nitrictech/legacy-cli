@@ -19,7 +19,7 @@ import {
 // import createSecurityGroup from './security-group';
 // import createContainer from './container';
 import createLambda, { createLambdaFunction } from './lambda';
-import createEventRule, { createSchedule } from './eb-rule';
+import { createSchedule } from './eb-rule';
 import { createApi } from './api';
 // import createLoadBalancer from './load-balancer';
 import { createTopic } from './topic';
@@ -29,8 +29,8 @@ import {
 	LocalWorkspace,
 	ConcurrentUpdateError,
 	StackAlreadyExistsError,
-	StackNotFoundError
-} from "@pulumi/pulumi/x/automation";
+	StackNotFoundError,
+} from '@pulumi/pulumi/x/automation';
 
 /**
  * Common Task Options
@@ -154,7 +154,7 @@ export class Deploy extends Task<void> {
 		this.stack = stack;
 		this.account = account;
 		this.region = region;
-		//TODO: Just generate the dang VPC and get rid of these three things.
+		// TODO: Just generate the dang VPC and get rid of these three things.
 		// this.vpc = vpc;
 		// this.cluster = cluster;
 		// this.subnets = subnets;
@@ -169,36 +169,37 @@ export class Deploy extends Task<void> {
 		try {
 			// Upload the stack to AWS
 			const pulumiStack = await LocalWorkspace.createOrSelectStack({
-					stackName: stack.name,
-					projectName: stack.name,
-					// generate our pulumi program on the fly from the POST body
-					program: async () => {
-						// Now we can start deploying with Pulumi
-						try {
-							// Create topics
-							// There are a few dependencies on this
-							const deployedTopics = topics.map(createTopic);
+				stackName: stack.name,
+				projectName: stack.name,
+				// generate our pulumi program on the fly from the POST body
+				program: async () => {
+					// Now we can start deploying with Pulumi
+					try {
+						// Create topics
+						// There are a few dependencies on this
+						const deployedTopics = topics.map(createTopic);
 
-							// Deploy schedules
-							schedules.map(schedule => createSchedule(schedule, deployedTopics));
+						// Deploy schedules
+						schedules.forEach((schedule) => createSchedule(schedule, deployedTopics));
 
-							const deployedFunctions = functions.map(func => 
-								createLambdaFunction(stack.name, func, deployedTopics, account, region)
-							);
-			
-							// Deploy APIs
-							apis.map(api => createApi(api, deployedFunctions));
-						} catch (e) {
-							throw e;
-						}
-					},
+						const deployedFunctions = functions.map((func) =>
+							createLambdaFunction(stack.name, func, deployedTopics, account, region),
+						);
+
+						// Deploy APIs
+						apis.map((api) => createApi(api, deployedFunctions));
+					} catch (e) {
+						console.error(e);
+						throw e;
+					}
+				},
 			});
-			await pulumiStack.setConfig("aws:region", { value: region });
+			await pulumiStack.setConfig('aws:region', { value: region });
 			// deploy the stack, tailing the logs to console
 			const upRes = await pulumiStack.up({ onOutput: this.update.bind(this) });
 
 			console.log(upRes);
-		} catch(e) {
+		} catch (e) {
 			console.log(e);
 		}
 	}
