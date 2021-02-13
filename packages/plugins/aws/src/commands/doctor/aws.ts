@@ -4,31 +4,9 @@ import cli from 'cli-ux';
 import Listr from 'listr';
 import { CheckPulumiPlugins, InstallAWSPulumiPlugin } from '../../tasks/doctor';
 
-// interface Software {
-//   name: string;
-//   icon: string;
-//   installDocs: string;
-// }
-
-// const PREREQUISITE_SOFTWARE: Software[] = [{
-//   name: "pulumi",
-//   icon: ":cloud: ",
-//   installDocs: 'https://www.pulumi.com/docs/get-started/install/',
-// }, {
-//   name: "docker",
-//   icon: ":whale:",
-//   installDocs: 'https://www.docker.com/get-started',
-// }];
-
-// const INSTALL_TASK_MAP: Record<string, { new (): Task<void> }> = {
-//   "pulumi": InstallPulumi,
-//   "docker": InstallDocker
-// };
-
 /**
- * Nitric CLI build command
- * Will use docker to build the users application as a docker image
- * ready to be executed on a CaaS
+ * Nitric AWS Doctor command
+ * Will Check pre-requisite software and configurations for deploying to AWS
  */
 export default class Doctor extends Command {
 	static description = 'Checks environment for configuration for deployment to AWS';
@@ -42,8 +20,6 @@ export default class Doctor extends Command {
 	static args = [];
 
 	async run(): Promise<void> {
-		// const { args, flags } = this.parse(Doctor);
-
 		await new Listr<any>([
 			wrapTaskForListr(new CheckPulumiPlugins(), 'installed'),
 			wrapTaskForListr({
