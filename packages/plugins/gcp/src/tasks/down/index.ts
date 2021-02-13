@@ -1,11 +1,8 @@
-import { Task, sanitizeStringForDockerTag } from '@nitric/cli-common';
-import { deploymentmanager_v2beta, google } from 'googleapis';
-import { operationToPromise } from '../utils';
+import { Task } from '@nitric/cli-common';
+import { LocalWorkspace } from '@pulumi/pulumi/x/automation';
 
 interface DownOptions {
-	gcpProject: string;
 	stackName: string;
-	keepResources: boolean;
 }
 
 /**
@@ -13,57 +10,29 @@ interface DownOptions {
  */
 export class Down extends Task<void> {
 	private stackName: string;
-	private gcpProject: string;
-	private keepResources: boolean;
 
-	constructor({ stackName, gcpProject, keepResources }: DownOptions) {
+	constructor({ stackName }: DownOptions) {
 		super(`Tearing Down Stack: ${stackName}`);
 		this.stackName = stackName;
-		this.gcpProject = gcpProject;
-		this.keepResources = keepResources;
 	}
 
 	async do(): Promise<void> {
-		const auth = new google.auth.GoogleAuth({
-			scopes: ['https://www.googleapis.com/auth/cloud-platform'],
-		});
-		const authClient = await auth.getClient();
+		const { stackName } = this;
 
-		const dmClient = new deploymentmanager_v2beta.Deploymentmanager({
-			auth: authClient,
-		});
-
-		const deletePolicy = this.keepResources ? 'ABANDON' : 'DELETE';
-
-		this.update('Deleting Deployment');
-		let subOperation;
 		try {
-			const { data } = await dmClient.deployments.delete({
-				project: this.gcpProject,
-				deployment: `${sanitizeStringForDockerTag(this.stackName)}-interfaces`,
-				deletePolicy,
+			const pulumiStack = await LocalWorkspace.selectStack({
+				projectName: stackName,
+				stackName: stackName,
+				// generate our pulumi program on the fly from the POST body
+				program: async () => {},
 			});
-			subOperation = data;
-		} catch (error) {
-			throw new Error(error);
+
+			// await pulumiStack.setConfig("gcp:region", { value: region });
+			const res = await pulumiStack.destroy({ onOutput: this.update.bind(this) });
+			console.log(res);
+		} catch (e) {
+			console.log(e);
+			throw e;
 		}
-
-		this.update(`Waiting for interfaces to cleanup`);
-		await operationToPromise(this.gcpProject, subOperation);
-
-		let operation;
-		try {
-			const { data } = await dmClient.deployments.delete({
-				project: this.gcpProject,
-				deployment: sanitizeStringForDockerTag(this.stackName),
-				deletePolicy,
-			});
-			operation = data;
-		} catch (error) {
-			throw new Error(error);
-		}
-
-		this.update(`Waiting for infrastructure to cleanup`);
-		await operationToPromise(this.gcpProject, operation);
 	}
 }

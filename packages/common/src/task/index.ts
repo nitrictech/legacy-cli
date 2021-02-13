@@ -19,7 +19,7 @@ export abstract class Task<T> extends EventEmitter {
 		this.emit('update', message);
 	}
 
-	protected abstract async do(...args: any[]): Promise<T>;
+	protected abstract do(...args: any[]): Promise<T>;
 
 	/**
 	 * Execute the task, typically following the setup of event listeners

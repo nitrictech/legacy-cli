@@ -3,7 +3,7 @@ import fs from 'fs';
 import tar from 'tar-fs';
 import * as clicommon from '@nitric/cli-common';
 import { MakeFunctionTask } from '../../tasks/make';
-import YAML from "yaml";
+import YAML from 'yaml';
 
 jest.mock('fs');
 jest.mock('tar-fs');
@@ -16,9 +16,9 @@ describe('Given executing nitric make:function', () => {
 			name: 'test-project',
 		});
 
-		jest.spyOn(fs, 'existsSync').mockImplementation(path => {
+		jest.spyOn(fs, 'existsSync').mockImplementation((path) => {
 			// return true if it's related to the template and template paths
-			if (path.toString().includes("dummy") || path.toString().includes("repository.yaml")) {
+			if (path.toString().includes('dummy') || path.toString().includes('repository.yaml')) {
 				return true;
 			} else {
 				// return false for anything else
@@ -27,27 +27,29 @@ describe('Given executing nitric make:function', () => {
 		});
 
 		jest.spyOn(tar, 'pack').mockImplementation(() => {
-			return { pipe: jest.fn() } as any
+			return { pipe: jest.fn() } as any;
 		});
-		
-		jest.spyOn(fs, 'readFileSync').mockImplementation(path => {
+
+		jest.spyOn(fs, 'readFileSync').mockImplementation((path) => {
 			const pathString = path.toString();
 			// return a mock version of the template repository in the case where it is requests
 			if (pathString.includes('repository.yaml')) {
-				return Buffer.from(YAML.stringify({
-					name: 'test',
-					templates: [
-						{
-							name: 'dummy',
-							path: '/templates/dummy',
-							lang: 'dummy',
-							codeDir: '/function',
-						},
-					],
-				}));
+				return Buffer.from(
+					YAML.stringify({
+						name: 'test',
+						templates: [
+							{
+								name: 'dummy',
+								path: '/templates/dummy',
+								lang: 'dummy',
+								codeDir: '/function',
+							},
+						],
+					}),
+				);
 			}
 
-			throw new Error("ENOENT: No such file");
+			throw new Error('ENOENT: No such file');
 		});
 	});
 
@@ -56,8 +58,8 @@ describe('Given executing nitric make:function', () => {
 	});
 
 	afterAll(() => {
-		jest.restoreAllMocks()
-	})
+		jest.restoreAllMocks();
+	});
 
 	describe('When the make:function inputs are all valid', () => {
 		let spyWriteNitricDesc;

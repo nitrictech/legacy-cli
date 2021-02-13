@@ -8,14 +8,16 @@ CLI tool for nitric applications
 [![License](https://img.shields.io/npm/l/@nitric/cli.svg)](https://github.com/packages/cli/blob/master/package.json)
 
 <!-- toc -->
-* [@nitric/cli](#nitriccli)
-* [Usage](#usage)
-* [Commands](#commands)
+
+- [@nitric/cli](#nitriccli)
+- [Usage](#usage)
+- [Commands](#commands)
 <!-- tocstop -->
 
 # Usage
 
 <!-- usage -->
+
 ```sh-session
 $ npm install -g @nitric/cli
 $ nitric COMMAND
@@ -27,22 +29,24 @@ USAGE
   $ nitric COMMAND
 ...
 ```
+
 <!-- usagestop -->
 
 # Commands
 
 <!-- commands -->
-* [`nitric build [DIRECTORY]`](#nitric-build-directory)
-* [`nitric create [NAME]`](#nitric-create-name)
-* [`nitric help [COMMAND]`](#nitric-help-command)
-* [`nitric make:function [TEMPLATE] [NAME]`](#nitric-makefunction-template-name)
-* [`nitric make:project NAME`](#nitric-makeproject-name)
-* [`nitric plugins`](#nitric-plugins)
-* [`nitric plugins:install PLUGIN...`](#nitric-pluginsinstall-plugin)
-* [`nitric plugins:link PLUGIN`](#nitric-pluginslink-plugin)
-* [`nitric plugins:uninstall PLUGIN...`](#nitric-pluginsuninstall-plugin)
-* [`nitric plugins:update`](#nitric-pluginsupdate)
-* [`nitric run [DIRECTORY]`](#nitric-run-directory)
+
+- [`nitric build [DIRECTORY]`](#nitric-build-directory)
+- [`nitric create [NAME]`](#nitric-create-name)
+- [`nitric help [COMMAND]`](#nitric-help-command)
+- [`nitric make:function [TEMPLATE] [NAME]`](#nitric-makefunction-template-name)
+- [`nitric make:project NAME`](#nitric-makeproject-name)
+- [`nitric plugins`](#nitric-plugins)
+- [`nitric plugins:install PLUGIN...`](#nitric-pluginsinstall-plugin)
+- [`nitric plugins:link PLUGIN`](#nitric-pluginslink-plugin)
+- [`nitric plugins:uninstall PLUGIN...`](#nitric-pluginsuninstall-plugin)
+- [`nitric plugins:update`](#nitric-pluginsupdate)
+- [`nitric run [DIRECTORY]`](#nitric-run-directory)
 
 ## `nitric build [DIRECTORY]`
 
@@ -179,15 +183,15 @@ DESCRIPTION
 
   Installation of a user-installed plugin will override a core plugin.
 
-  e.g. If you have a core plugin that has a 'hello' command, installing a user-installed plugin with a 'hello' command 
-  will override the core plugin implementation. This is useful if a user needs to update core plugin functionality in 
+  e.g. If you have a core plugin that has a 'hello' command, installing a user-installed plugin with a 'hello' command
+  will override the core plugin implementation. This is useful if a user needs to update core plugin functionality in
   the CLI without the need to patch and update the whole CLI.
 
 ALIASES
   $ nitric plugins:add
 
 EXAMPLES
-  $ nitric plugins:install myplugin 
+  $ nitric plugins:install myplugin
   $ nitric plugins:install https://github.com/someuser/someplugin
   $ nitric plugins:install someuser/someplugin
 ```
@@ -212,7 +216,7 @@ OPTIONS
 DESCRIPTION
   Installation of a linked plugin will override a user-installed or core plugin.
 
-  e.g. If you have a user-installed or core plugin that has a 'hello' command, installing a linked plugin with a 'hello' 
+  e.g. If you have a user-installed or core plugin that has a 'hello' command, installing a linked plugin with a 'hello'
   command will override the user-installed or core plugin implementation. This is useful for development work.
 
 EXAMPLE
@@ -277,4 +281,5 @@ EXAMPLE
 ```
 
 _See code: [src/commands/run.ts](https://github.com/packages/cli/blob/v0.0.16/src/commands/run.ts)_
+
 <!-- commandsstop -->

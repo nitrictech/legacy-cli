@@ -1,20 +1,15 @@
-import { normalizeTopicName, NitricTopic } from '@nitric/cli-common';
+import { NitricTopic } from '@nitric/cli-common';
+import { sns } from '@pulumi/aws';
+import { DeployedTopic } from '../types';
 
-// TODO: We'll also need to get the IPs of the NitricFunction resources
-export default (topic: NitricTopic): Record<string, any> => {
-	const topicName = normalizeTopicName(topic);
-	const topicDefName = topicName + 'TopicDef';
-
+export function createTopic(topic: NitricTopic): DeployedTopic {
 	return {
-		[topicDefName]: {
-			Type: 'AWS::SNS::Topic',
-			Properties: {
-				TopicName: topicName,
-			},
-		},
+		...topic,
+		awsTopic: new sns.Topic(topic.name, {
+			name: topic.name,
+		}),
 	};
-};
-
+}
 // TopicName
 // The name of the topic you want to create. Topic names must include only uppercase and lowercase ASCII letters, numbers, underscores, and hyphens, and must be between 1 and 256 characters long. FIFO topic names must end with .fifo.
 

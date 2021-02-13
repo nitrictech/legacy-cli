@@ -14,21 +14,26 @@ describe('Given templates are available in the template directory', () => {
 	beforeEach(() => {
 		jest.spyOn(fs, 'readFileSync').mockImplementation((path) => {
 			// Return the mocked file...
-			if (path.toString().includes("dummyrepo")) {
-				return Buffer.from(YAML.stringify({
-					name: "dummyrepo",
-					templates: [{
-						name: "dummytemplate",
-						path: "templates/dummtemplate"
-					}, {
-						name: "seconddummytemplate",
-						path: "templates/seconddummytemplate"
-					}]
-				} as NitricTemplateRepository))
+			if (path.toString().includes('dummyrepo')) {
+				return Buffer.from(
+					YAML.stringify({
+						name: 'dummyrepo',
+						templates: [
+							{
+								name: 'dummytemplate',
+								path: 'templates/dummtemplate',
+							},
+							{
+								name: 'seconddummytemplate',
+								path: 'templates/seconddummytemplate',
+							},
+						],
+					} as NitricTemplateRepository),
+				);
 			}
 
-			throw new Error("ENOENT: No such file");
-		})
+			throw new Error('ENOENT: No such file');
+		});
 
 		jest.spyOn(fs, 'readdirSync').mockReturnValue([
 			{

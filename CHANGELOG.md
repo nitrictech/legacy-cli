@@ -4,97 +4,85 @@ All notable changes to this project will be documented in this file. See [standa
 
 ### [0.0.16](https://github.com/nitric-dev/cli/compare/v0.0.15...v0.0.16) (2020-12-20)
 
-
 ### Features
 
-* Add --guided mode to the gcp:down command. ([b60eb51](https://github.com/nitric-dev/cli/commit/b60eb516f639d0ee6a32a30e586927e59161fe25))
-* Add a --guided CLI mode for the gcp:deploy command. ([e05c795](https://github.com/nitric-dev/cli/commit/e05c795948128776b8ea8ad523b1f2872acfedfb))
-* add container health check and scaling ([e8135c8](https://github.com/nitric-dev/cli/commit/e8135c829d641cade6da6513f3ff819e52b30454))
-* Add optional for externally invokable, unauthenticated functions. ([61ee2d0](https://github.com/nitric-dev/cli/commit/61ee2d082b092a20bd135ce6b3744b6ca16f8c23))
-* Add run container policy updates to allow unauthenticated access. ([b3de1a1](https://github.com/nitric-dev/cli/commit/b3de1a1acc8a4f5031625895936b2af5f8ffc1c4))
-* basic aws deploy with load balancer ([bfe88d2](https://github.com/nitric-dev/cli/commit/bfe88d2cb71ae5a1fd48d64bc68af586af1af3bc))
-* run functions on lambda with container ([20f6f61](https://github.com/nitric-dev/cli/commit/20f6f61b55d42f61615273dd5eaa7df8e25a0093))
-
+- Add --guided mode to the gcp:down command. ([b60eb51](https://github.com/nitric-dev/cli/commit/b60eb516f639d0ee6a32a30e586927e59161fe25))
+- Add a --guided CLI mode for the gcp:deploy command. ([e05c795](https://github.com/nitric-dev/cli/commit/e05c795948128776b8ea8ad523b1f2872acfedfb))
+- add container health check and scaling ([e8135c8](https://github.com/nitric-dev/cli/commit/e8135c829d641cade6da6513f3ff819e52b30454))
+- Add optional for externally invokable, unauthenticated functions. ([61ee2d0](https://github.com/nitric-dev/cli/commit/61ee2d082b092a20bd135ce6b3744b6ca16f8c23))
+- Add run container policy updates to allow unauthenticated access. ([b3de1a1](https://github.com/nitric-dev/cli/commit/b3de1a1acc8a4f5031625895936b2af5f8ffc1c4))
+- basic aws deploy with load balancer ([bfe88d2](https://github.com/nitric-dev/cli/commit/bfe88d2cb71ae5a1fd48d64bc68af586af1af3bc))
+- run functions on lambda with container ([20f6f61](https://github.com/nitric-dev/cli/commit/20f6f61b55d42f61615273dd5eaa7df8e25a0093))
 
 ### Bug Fixes
 
-* improve topic name normalization ([c86d2e8](https://github.com/nitric-dev/cli/commit/c86d2e87d756fad9e2d672b7897e0d39aa96947f))
-* incorrect topic property setting ([d23f9e0](https://github.com/nitric-dev/cli/commit/d23f9e0b387a205a311871d9252e08ead40ac161))
+- improve topic name normalization ([c86d2e8](https://github.com/nitric-dev/cli/commit/c86d2e87d756fad9e2d672b7897e0d39aa96947f))
+- incorrect topic property setting ([d23f9e0](https://github.com/nitric-dev/cli/commit/d23f9e0b387a205a311871d9252e08ead40ac161))
 
 ### [0.0.15](https://github.com/nitric-dev/cli/compare/v0.0.14...v0.0.15) (2020-11-26)
 
-
 ### Bug Fixes
 
-* broken project make, due to new function make ([970253d](https://github.com/nitric-dev/cli/commit/970253df81442127bcbf0e79b4ca6ecbca8770b2))
+- broken project make, due to new function make ([970253d](https://github.com/nitric-dev/cli/commit/970253df81442127bcbf0e79b4ca6ecbca8770b2))
 
 ### [0.0.14](https://github.com/nitric-dev/cli/compare/v0.0.13...v0.0.14) (2020-11-26)
 
-
 ### Bug Fixes
 
-* catch error when no templates installed ([8f7ec46](https://github.com/nitric-dev/cli/commit/8f7ec46da220e8a9e2ae94db0fa7774b7085c1f5))
+- catch error when no templates installed ([8f7ec46](https://github.com/nitric-dev/cli/commit/8f7ec46da220e8a9e2ae94db0fa7774b7085c1f5))
 
 ### [0.0.13](https://github.com/nitric-dev/cli/compare/v0.0.12...v0.0.13) (2020-11-26)
 
-
 ### Features
 
-* add prompts for missing make:function args ([0e07682](https://github.com/nitric-dev/cli/commit/0e07682fff7eb413d6c1c3f34dfd58b37fda65b6))
-* assign function ports by alphabetical name ([bce4ab5](https://github.com/nitric-dev/cli/commit/bce4ab54e3604dbbd278673545684df41e6bbd0c))
-* auto detect function templates on make:project ([71fa07f](https://github.com/nitric-dev/cli/commit/71fa07fd8e5071394c9f14ffb72f9584cd754ae5))
-
+- add prompts for missing make:function args ([0e07682](https://github.com/nitric-dev/cli/commit/0e07682fff7eb413d6c1c3f34dfd58b37fda65b6))
+- assign function ports by alphabetical name ([bce4ab5](https://github.com/nitric-dev/cli/commit/bce4ab54e3604dbbd278673545684df41e6bbd0c))
+- auto detect function templates on make:project ([71fa07f](https://github.com/nitric-dev/cli/commit/71fa07fd8e5071394c9f14ffb72f9584cd754ae5))
 
 ### Bug Fixes
 
-* Add try/finally to container stop/remove. ([cea0a7c](https://github.com/nitric-dev/cli/commit/cea0a7c734be284c94155d35c8258415cd1a7281))
-* remove unused variable ([6cd1bef](https://github.com/nitric-dev/cli/commit/6cd1bef5d8a82540369c6eeb08d48fc3a9bc3d8c))
+- Add try/finally to container stop/remove. ([cea0a7c](https://github.com/nitric-dev/cli/commit/cea0a7c734be284c94155d35c8258415cd1a7281))
+- remove unused variable ([6cd1bef](https://github.com/nitric-dev/cli/commit/6cd1bef5d8a82540369c6eeb08d48fc3a9bc3d8c))
 
 ### [0.0.12](https://github.com/nitric-dev/cli/compare/v0.0.11...v0.0.12) (2020-11-20)
 
 ### [0.0.11](https://github.com/nitric-dev/cli/compare/v0.0.10...v0.0.11) (2020-11-20)
 
-
 ### Features
 
-* add local dev volumes ([d17c4dc](https://github.com/nitric-dev/cli/commit/d17c4dc59f16ddbfbd8ab30d2328d2cf755b488a))
-* add local run networking ([c461368](https://github.com/nitric-dev/cli/commit/c461368d89d05a6665399b3fcbddae27ded8a3e1))
-
+- add local dev volumes ([d17c4dc](https://github.com/nitric-dev/cli/commit/d17c4dc59f16ddbfbd8ab30d2328d2cf755b488a))
+- add local run networking ([c461368](https://github.com/nitric-dev/cli/commit/c461368d89d05a6665399b3fcbddae27ded8a3e1))
 
 ### Bug Fixes
 
-* add basic error handling to container run ([5523411](https://github.com/nitric-dev/cli/commit/552341126cd2d1d340f428189b1da3027dc20118))
-* failing gcp plugin test ([5466225](https://github.com/nitric-dev/cli/commit/5466225bf6d6b4f11094c91a39b53035f0ed186c))
-* handle image id better ([eefb510](https://github.com/nitric-dev/cli/commit/eefb510702e72610d5f2d50be088acbf3e37354b))
-* remove gateway host requirement ([8a32e56](https://github.com/nitric-dev/cli/commit/8a32e567c1863b07131cf116cbde38269bf003a3))
-* respect template .dockerignore. ([dcf03aa](https://github.com/nitric-dev/cli/commit/dcf03aa0ddbae2c57b03f755d33390ab9082fd10))
+- add basic error handling to container run ([5523411](https://github.com/nitric-dev/cli/commit/552341126cd2d1d340f428189b1da3027dc20118))
+- failing gcp plugin test ([5466225](https://github.com/nitric-dev/cli/commit/5466225bf6d6b4f11094c91a39b53035f0ed186c))
+- handle image id better ([eefb510](https://github.com/nitric-dev/cli/commit/eefb510702e72610d5f2d50be088acbf3e37354b))
+- remove gateway host requirement ([8a32e56](https://github.com/nitric-dev/cli/commit/8a32e567c1863b07131cf116cbde38269bf003a3))
+- respect template .dockerignore. ([dcf03aa](https://github.com/nitric-dev/cli/commit/dcf03aa0ddbae2c57b03f755d33390ab9082fd10))
 
 ### [0.0.10](https://github.com/nitric-dev/cli/compare/v0.0.9...v0.0.10) (2020-11-19)
 
 ### [0.0.9](https://github.com/nitric-dev/cli/compare/v0.0.8...v0.0.9) (2020-10-29)
 
-
 ### Bug Fixes
 
-* Fix incorrect MakeFunctionOpts key from refactor. ([990f2df](https://github.com/nitric-dev/cli/commit/990f2df085a8a1563f8a5cebbf2d3580ff7641f8))
+- Fix incorrect MakeFunctionOpts key from refactor. ([990f2df](https://github.com/nitric-dev/cli/commit/990f2df085a8a1563f8a5cebbf2d3580ff7641f8))
 
 ### [0.0.8](https://github.com/nitric-dev/cli/compare/v0.0.7...v0.0.8) (2020-10-29)
 
-
 ### Features
 
-* Allow forcing project creation if dir already exists. ([57d4b3f](https://github.com/nitric-dev/cli/commit/57d4b3f4a0aa2b6f0e084b97c26072dc5d9d1528))
-* **cli:** Add a make:project functionality. ([f1c47f6](https://github.com/nitric-dev/cli/commit/f1c47f6a0f7f46c80aa696ffda3e732ae742e6d0))
-
+- Allow forcing project creation if dir already exists. ([57d4b3f](https://github.com/nitric-dev/cli/commit/57d4b3f4a0aa2b6f0e084b97c26072dc5d9d1528))
+- **cli:** Add a make:project functionality. ([f1c47f6](https://github.com/nitric-dev/cli/commit/f1c47f6a0f7f46c80aa696ffda3e732ae742e6d0))
 
 ### Bug Fixes
 
-* improve command descriptions in cli ([17d9f01](https://github.com/nitric-dev/cli/commit/17d9f01e8eaee785462e89a4108fff21a44b0e8e))
+- improve command descriptions in cli ([17d9f01](https://github.com/nitric-dev/cli/commit/17d9f01e8eaee785462e89a4108fff21a44b0e8e))
 
 ### 0.0.7 (2020-10-28)
 
-
 ### Bug Fixes
 
-* minor typing issue ([d6a5d20](https://github.com/nitric-dev/cli/commit/d6a5d203ae02e31a270b48d562788fab133328b6))
-* type error in make function task ([1e83a7b](https://github.com/nitric-dev/cli/commit/1e83a7be57d11cd34fe5c148e9b20fd5e82cbf4a))
+- minor typing issue ([d6a5d20](https://github.com/nitric-dev/cli/commit/d6a5d203ae02e31a270b48d562788fab133328b6))
+- type error in make function task ([1e83a7b](https://github.com/nitric-dev/cli/commit/1e83a7be57d11cd34fe5c148e9b20fd5e82cbf4a))

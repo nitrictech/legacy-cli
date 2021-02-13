@@ -8,6 +8,8 @@
     "@nitric/cli-common": "workspace:*",
     "@oclif/command": "^1",
     "@oclif/config": "^1",
+    "@pulumi/gcp": "^4.11.0",
+    "@pulumi/pulumi": "^2.20.0",
     "api-spec-converter": "^2.11.4",
     "dockerode": "^3.2.1",
     "googleapis": "^61.0.0",
@@ -54,7 +56,7 @@
   "scripts": {
     "postpack": "rm -f oclif.manifest.json",
     "prepack": "rm -rf lib && tsc -b && oclif-dev manifest && oclif-dev readme",
-    "test": "tsc --emitDeclarationOnly && jest",
+    "test": "tsc --emitDeclarationOnly && jest --passWithNoTests",
     "version": "oclif-dev readme && git add README.md"
   }
 }
