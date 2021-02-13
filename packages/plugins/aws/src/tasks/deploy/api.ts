@@ -68,7 +68,7 @@ export function createApi(api: NitricAPI, funcs: DeployedFunction[]): void {
 								throw new Error(`Invalid nitric target ${targetName} defined in api: ${api.name}`);
 							}
 
-							const [name, invokeArn] = invokeArnPair.split('||');
+							const invokeArn = invokeArnPair.split('||')[1];
 							// Discard the old key on the transformed API
 							const { 'x-nitric-target': _, ...rest } = p;
 

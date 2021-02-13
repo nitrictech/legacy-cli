@@ -7,12 +7,12 @@ export function createBucket(bucket: NitricBucket): DeployedBucket {
 		// TODO: Determine this configuration
 		// storageClass: "MULTI_REGIONAL"
 		labels: {
-			'x-nitric-name': bucket.name
-		}
+			'x-nitric-name': bucket.name,
+		},
 	});
 
 	return {
 		...bucket,
-		storage: gcloudBucket
-	}
+		storage: gcloudBucket,
+	};
 }

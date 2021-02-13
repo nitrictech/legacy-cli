@@ -12,9 +12,9 @@ jest.mock('get-port');
 jest.mock('cli-ux', () => ({
 	action: {
 		start: () => {},
-		stop: () => {}
+		stop: () => {},
 	},
-	table: () => {}
+	table: () => {},
 }));
 jest.mock('listr');
 jest.mock('../tasks/run');

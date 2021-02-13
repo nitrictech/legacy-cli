@@ -1,9 +1,15 @@
 import { NitricFunction, getTagNameForFunction } from '@nitric/cli-common';
 import { getGcrHost } from './regions';
 import { DeployedFunction, DeployedTopic } from './types';
-import { cloudrun, serviceaccount, pubsub } from "@pulumi/gcp";
+import { cloudrun, serviceaccount, pubsub } from '@pulumi/gcp';
 
-export function createFunction(project: string, stackName: string, region: string, func: NitricFunction, topics: DeployedTopic[]): DeployedFunction {
+export function createFunction(
+	project: string,
+	stackName: string,
+	region: string,
+	func: NitricFunction,
+	topics: DeployedTopic[],
+): DeployedFunction {
 	const { minScale = 0, maxScale = 10 } = func;
 
 	const grcHost = getGcrHost(region);
@@ -16,17 +22,21 @@ export function createFunction(project: string, stackName: string, region: strin
 				annotations: {
 					'autoscaling.knative.dev/minScale': `${minScale}`,
 					'autoscaling.knative.dev/maxScale': `${maxScale}`,
-				}
+				},
 			},
 			spec: {
-				containers: [{
-					image: `${grcHost}/${project}/${getTagNameForFunction(stackName, 'gcp', func)}`,
-					ports: [{
-						containerPort: 9001,
-					}],
-				}]
-			}
-		}
+				containers: [
+					{
+						image: `${grcHost}/${project}/${getTagNameForFunction(stackName, 'gcp', func)}`,
+						ports: [
+							{
+								containerPort: 9001,
+							},
+						],
+					},
+				],
+			},
+		},
 	});
 
 	// wire up its subscriptions
@@ -38,8 +48,8 @@ export function createFunction(project: string, stackName: string, region: strin
 			accountId: `${func.name}-subscription-invoker`,
 		});
 
-		func.subs.forEach(sub => {
-			const topic = topics.find(t => t.name === sub.topic);
+		func.subs.forEach((sub) => {
+			const topic = topics.find((t) => t.name === sub.topic);
 			if (topic) {
 				new pubsub.Subscription(`${func.name}-${sub.topic}-subscription`, {
 					topic: topic.pubsub.name,
@@ -57,8 +67,8 @@ export function createFunction(project: string, stackName: string, region: strin
 							serviceAccountEmail: invokerAccount.email,
 						},
 						// Assume the 0th status contains the URL of the service
-						pushEndpoint: deployedFunction.statuses.apply(statuses => statuses[0].url)
-					}
+						pushEndpoint: deployedFunction.statuses.apply((statuses) => statuses[0].url),
+					},
 				});
 			} else {
 				// TODO: Throw new error here about misconfiguration???

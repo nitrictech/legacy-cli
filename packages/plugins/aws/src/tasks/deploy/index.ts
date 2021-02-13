@@ -1,10 +1,4 @@
-import {
-	dockerodeEvtToString,
-	NitricStack,
-	getTagNameForFunction,
-	Task,
-	NitricFunction,
-} from '@nitric/cli-common';
+import { dockerodeEvtToString, NitricStack, getTagNameForFunction, Task, NitricFunction } from '@nitric/cli-common';
 import Docker from 'dockerode';
 import AWS from 'aws-sdk';
 import {
@@ -20,9 +14,7 @@ import { createApi } from './api';
 // import createLoadBalancer from './load-balancer';
 import { createTopic } from './topic';
 
-import {
-	LocalWorkspace,
-} from '@pulumi/pulumi/x/automation';
+import { LocalWorkspace } from '@pulumi/pulumi/x/automation';
 
 /**
  * Common Task Options

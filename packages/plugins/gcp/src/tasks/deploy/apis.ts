@@ -1,41 +1,41 @@
-import { NitricAPI, NitricAPITarget } from "@nitric/cli-common";
-import { DeployedApi, DeployedFunction } from "./types";
-import { OpenAPIV2 } from "openapi-types";
-import Converter from "api-spec-converter";
-import { apigateway } from "@pulumi/gcp";
-import * as pulumi from "@pulumi/pulumi";
+import { NitricAPI, NitricAPITarget } from '@nitric/cli-common';
+import { DeployedApi, DeployedFunction } from './types';
+import { OpenAPIV2 } from 'openapi-types';
+import Converter from 'api-spec-converter';
+import { apigateway } from '@pulumi/gcp';
+import * as pulumi from '@pulumi/pulumi';
 
-type method = "get" | "post" | "put" | "patch" | "delete";
+type method = 'get' | 'post' | 'put' | 'patch' | 'delete';
 
-const METHOD_KEYS: method[] = ["get", "post", "put", "patch", "delete"];
+const METHOD_KEYS: method[] = ['get', 'post', 'put', 'patch', 'delete'];
 
 interface GoogleExtensions {
-  'x-google-backend': {
-    address: string
-  }
+	'x-google-backend': {
+		address: string;
+	};
 }
 
 async function transformOpenApiSpec(api: NitricAPI, funcs: DeployedFunction[]): Promise<pulumi.Output<string>> {
-  const { name, ...spec } = api;
+	const { name, ...spec } = api;
 
-  // Convert to swagger
-  const { spec: translatedApi }: { spec: OpenAPIV2.Document<NitricAPITarget> } = await Converter.convert({
-    from: "openapi_3",
-    to: "swagger_2",
-    source: spec,
-  });
+	// Convert to swagger
+	const { spec: translatedApi }: { spec: OpenAPIV2.Document<NitricAPITarget> } = await Converter.convert({
+		from: 'openapi_3',
+		to: 'swagger_2',
+		source: spec,
+	});
 
-  // Transform the spec and base64 encode
-  const transformedDoc = pulumi
+	// Transform the spec and base64 encode
+	const transformedDoc = pulumi
 		.all(funcs.map((f) => f.cloudRun.statuses.apply(([s]) => `${f.name}||${s.url}`)))
 		.apply((nameUrlPairs) => {
 			const transformedApi = {
-        ...translatedApi,
-        // Update the spec paths
+				...translatedApi,
+				// Update the spec paths
 				paths: Object.keys(translatedApi.paths).reduce((acc, pathKey) => {
-          const path: OpenAPIV2.PathItemObject<NitricAPITarget> = translatedApi.paths[pathKey]!;
-          
-          // Interpolate the new methods
+					const path: OpenAPIV2.PathItemObject<NitricAPITarget> = translatedApi.paths[pathKey]!;
+
+					// Interpolate the new methods
 					const newMethods = Object.keys(path)
 						.filter((k) => METHOD_KEYS.includes(k as method))
 						.reduce((acc, method) => {
@@ -50,20 +50,20 @@ async function transformOpenApiSpec(api: NitricAPI, funcs: DeployedFunction[]): 
 								throw new Error(`Invalid nitric target ${targetName} defined in api: ${api.name}`);
 							}
 
-							const [name, url] = invokeUrlPair.split('||');
+							const url = invokeUrlPair.split('||')[1];
 							// Discard the old key on the transformed API
 							const { 'x-nitric-target': _, ...rest } = p;
 
 							// console.log("invokeArn:", invokeArn);
 
 							return {
-                ...acc,
-                // Inject the new method with translated nitric target
+								...acc,
+								// Inject the new method with translated nitric target
 								[method]: {
-                  ...(rest as OpenAPIV2.OperationObject),
-                  'x-google-backend': {
-                    address: url
-                  },
+									...(rest as OpenAPIV2.OperationObject),
+									'x-google-backend': {
+										address: url,
+									},
 								} as any,
 							};
 						}, {} as { [key: string]: OpenAPIV2.OperationObject<GoogleExtensions> });
@@ -78,45 +78,47 @@ async function transformOpenApiSpec(api: NitricAPI, funcs: DeployedFunction[]): 
 				}, {} as OpenAPIV2.PathsObject<GoogleExtensions>),
 			};
 
-      // Base64 encode here as well
-      return Buffer.from(JSON.stringify(transformedApi)).toString('base64')
-    });
+			// Base64 encode here as well
+			return Buffer.from(JSON.stringify(transformedApi)).toString('base64');
+		});
 
-  return transformedDoc;
+	return transformedDoc;
 }
 
 export async function createApi(api: NitricAPI, funcs: DeployedFunction[]): Promise<DeployedApi> {
-  const b64Spec = await transformOpenApiSpec(api, funcs)
+	const b64Spec = await transformOpenApiSpec(api, funcs);
 
-  // Deploy the API
-  const deployedApi = new apigateway.Api(api.name, {
-    apiId: api.name,
-  });
+	// Deploy the API
+	const deployedApi = new apigateway.Api(api.name, {
+		apiId: api.name,
+	});
 
-  // Now we need to create the document provided and interpolate the deployed function targets
-  // i.e. their Urls...
-  // Deploy the config
-  const deployedConfig = new apigateway.ApiConfig(`${api.name}-config`, {
-    api: deployedApi.apiId,
-    displayName: `${api.name}-config`,
-    apiConfigId: `${api.name}-config`,
-    openapiDocuments: [{
-      document: {
-        path: "openapi.json",
-        contents: b64Spec,
-      }
-    }]
-  });
+	// Now we need to create the document provided and interpolate the deployed function targets
+	// i.e. their Urls...
+	// Deploy the config
+	const deployedConfig = new apigateway.ApiConfig(`${api.name}-config`, {
+		api: deployedApi.apiId,
+		displayName: `${api.name}-config`,
+		apiConfigId: `${api.name}-config`,
+		openapiDocuments: [
+			{
+				document: {
+					path: 'openapi.json',
+					contents: b64Spec,
+				},
+			},
+		],
+	});
 
-  // Deploy the gateway
-  const deployedGateway = new apigateway.Gateway(`${api.name}-gateway`, {
-    displayName: `${api.name}-gateway`,
-    gatewayId: `${api.name}-gateway`,
-    apiConfig: deployedConfig.id,
-  });
+	// Deploy the gateway
+	const deployedGateway = new apigateway.Gateway(`${api.name}-gateway`, {
+		displayName: `${api.name}-gateway`,
+		gatewayId: `${api.name}-gateway`,
+		apiConfig: deployedConfig.id,
+	});
 
-  return {
-    ...api,
-    gateway: deployedGateway
-  };
-};
+	return {
+		...api,
+		gateway: deployedGateway,
+	};
+}

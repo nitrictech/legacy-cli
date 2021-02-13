@@ -6,7 +6,7 @@ export function createSchedule(schedule: NitricSchedule, topics: DeployedTopic[]
 	// Find our target topic
 
 	// Currently we only support topic targets for schedules
-	const topic = topics.find(t => t.name === schedule.target.id)
+	const topic = topics.find((t) => t.name === schedule.target.id);
 
 	if (topic) {
 		const job = new cloudscheduler.Job(schedule.name, {
@@ -24,6 +24,6 @@ export function createSchedule(schedule: NitricSchedule, topics: DeployedTopic[]
 			job,
 		};
 	}
-	
+
 	throw new Error(`Miconfiguration error ${schedule.target.id} does not exist in stack`);
 }

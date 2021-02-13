@@ -1,5 +1,5 @@
 import { NitricStack, Task } from '@nitric/cli-common';
-import { LocalWorkspace } from "@pulumi/pulumi/x/automation";
+import { LocalWorkspace } from '@pulumi/pulumi/x/automation';
 
 interface DownOptions {
 	region: string;
@@ -28,10 +28,10 @@ export class Down extends Task<void> {
 				program: async () => {},
 			});
 
-			await pulumiStack.setConfig("aws:region", { value: region });
+			await pulumiStack.setConfig('aws:region', { value: region });
 			const res = await pulumiStack.destroy({ onOutput: this.update.bind(this) });
 			console.log(res);
-		} catch(e) {
+		} catch (e) {
 			console.log(e);
 			throw e;
 		}

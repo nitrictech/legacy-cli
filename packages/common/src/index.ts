@@ -5,17 +5,19 @@ import { Task } from './task';
 import { ListrTask } from 'listr';
 import * as fs from 'fs';
 
-
-
 interface TaskFactory<T> {
 	name: string;
-	factory:  ((ctx: any) => Task<T>);
-	skip?: ((ctx: any) =>boolean);
+	factory: (ctx: any) => Task<T>;
+	skip?: (ctx: any) => boolean;
 }
 
 type TaskOrTaskFactory<T> = Task<T> | TaskFactory<T>;
 
-export function wrapTaskForListr<T>(taskOrTaskFactory: TaskOrTaskFactory<T>, ctxKey?: string, ...args: any[]): ListrTask<{ [key: string]: T }> {
+export function wrapTaskForListr<T>(
+	taskOrTaskFactory: TaskOrTaskFactory<T>,
+	ctxKey?: string,
+	...args: any[]
+): ListrTask<{ [key: string]: T }> {
 	const contextKey = ctxKey || taskOrTaskFactory.name;
 
 	return {
@@ -25,9 +27,9 @@ export function wrapTaskForListr<T>(taskOrTaskFactory: TaskOrTaskFactory<T>, ctx
 		skip: (taskOrTaskFactory as TaskFactory<any>).skip,
 		task: (ctx): Observable<any> =>
 			new Observable((obs) => {
-				const task = Object.keys(taskOrTaskFactory).includes("factory")
+				const task = Object.keys(taskOrTaskFactory).includes('factory')
 					? (taskOrTaskFactory as TaskFactory<T>).factory(ctx)
-					: taskOrTaskFactory as Task<T>;
+					: (taskOrTaskFactory as Task<T>);
 				task.on('update', (message) => obs.next(message));
 				task.on('error', (error) => obs.error(error));
 				task.on('done', (result: T) => {

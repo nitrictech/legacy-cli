@@ -20,7 +20,7 @@ export default class Doctor extends Command {
 	static args = [];
 
 	async run(): Promise<void> {
-    await new Listr<any>([
+		await new Listr<any>([
 			wrapTaskForListr(new CheckPlugins(), 'installed'),
 			wrapTaskForListr({
 				name: 'Install GCP Plugin',

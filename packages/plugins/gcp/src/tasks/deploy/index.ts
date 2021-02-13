@@ -1,11 +1,5 @@
 import { google } from 'googleapis';
-import {
-	Task,
-	NitricFunction,
-	NitricStack,
-	getTagNameForFunction,
-	dockerodeEvtToString,
-} from '@nitric/cli-common';
+import { Task, NitricFunction, NitricStack, getTagNameForFunction, dockerodeEvtToString } from '@nitric/cli-common';
 import { createFunction } from './functions';
 import { createTopic } from './topics';
 import { createBucket } from './buckets';
@@ -121,18 +115,20 @@ export class Deploy extends Task<void> {
 						// Deploy the topics
 						const deployedTopics = topics.map(createTopic);
 						// deploy the functions
-						const deployedFunctions = functions.map(f => createFunction(gcpProject, stack.name, region, f, deployedTopics));
+						const deployedFunctions = functions.map((f) =>
+							createFunction(gcpProject, stack.name, region, f, deployedTopics),
+						);
 						// deploy the schedules
-						schedules.map(s => createSchedule(s, deployedTopics));
+						schedules.map((s) => createSchedule(s, deployedTopics));
 						// deploy apis
-						apis.map(a => createApi(a, deployedFunctions));
+						apis.map((a) => createApi(a, deployedFunctions));
 					} catch (e) {
 						console.error(e);
 						throw e;
 					}
 				},
 			});
-			await pulumiStack.setConfig('gcp:project', { value: gcpProject })
+			await pulumiStack.setConfig('gcp:project', { value: gcpProject });
 			await pulumiStack.setConfig('gcp:region', { value: region });
 			// deploy the stack, tailing the logs to console
 			const upRes = await pulumiStack.up({ onOutput: this.update.bind(this) });
@@ -142,4 +138,4 @@ export class Deploy extends Task<void> {
 			console.log(e);
 		}
 	}
-};
+}

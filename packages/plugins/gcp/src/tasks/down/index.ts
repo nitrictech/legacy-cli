@@ -30,7 +30,7 @@ export class Down extends Task<void> {
 			// await pulumiStack.setConfig("gcp:region", { value: region });
 			const res = await pulumiStack.destroy({ onOutput: this.update.bind(this) });
 			console.log(res);
-		} catch(e) {
+		} catch (e) {
 			console.log(e);
 			throw e;
 		}
