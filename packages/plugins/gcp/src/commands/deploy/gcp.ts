@@ -1,5 +1,5 @@
 import { Command, flags } from '@oclif/command';
-import { Deploy, PushImage, CreateTypeProviders, DeploySubscriptions } from '../../tasks/deploy';
+import { Deploy, PushImage } from '../../tasks/deploy';
 import { wrapTaskForListr, readNitricDescriptor } from '@nitric/cli-common';
 import Listr, { ListrTask } from 'listr';
 import path from 'path';
@@ -101,7 +101,6 @@ export default class DeployCmd extends Command {
 		}
 
 		new Listr([
-			wrapTaskForListr(new CreateTypeProviders({ gcpProject: project })),
 			{
 				title: 'Pushing Images',
 				task: (): Listr =>
@@ -122,13 +121,6 @@ export default class DeployCmd extends Command {
 			},
 			wrapTaskForListr(
 				new Deploy({
-					gcpProject: project,
-					stack,
-					region,
-				}),
-			),
-			wrapTaskForListr(
-				new DeploySubscriptions({
 					gcpProject: project,
 					stack,
 					region,

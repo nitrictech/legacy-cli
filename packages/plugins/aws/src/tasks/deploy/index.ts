@@ -2,15 +2,11 @@ import {
 	dockerodeEvtToString,
 	NitricStack,
 	getTagNameForFunction,
-	// normalizeFunctionName,
-	normalizeStackName,
-	// normalizeTopicName,
 	Task,
 	NitricFunction,
 } from '@nitric/cli-common';
 import Docker from 'dockerode';
 import AWS from 'aws-sdk';
-import { CreateStackInput, Stack, UpdateStackInput } from 'aws-sdk/clients/cloudformation';
 import {
 	generateEcrRepositoryUri,
 	// generateLBListenerKey,
@@ -18,18 +14,14 @@ import {
 } from '../../common/utils';
 // import createSecurityGroup from './security-group';
 // import createContainer from './container';
-import createLambda, { createLambdaFunction } from './lambda';
+import { createLambdaFunction } from './lambda';
 import { createSchedule } from './eb-rule';
 import { createApi } from './api';
 // import createLoadBalancer from './load-balancer';
 import { createTopic } from './topic';
-import fs from 'fs';
 
 import {
 	LocalWorkspace,
-	ConcurrentUpdateError,
-	StackAlreadyExistsError,
-	StackNotFoundError,
 } from '@pulumi/pulumi/x/automation';
 
 /**

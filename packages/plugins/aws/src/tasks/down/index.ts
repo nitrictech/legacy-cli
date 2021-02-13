@@ -1,6 +1,5 @@
 import { NitricStack, Task } from '@nitric/cli-common';
 // import AWS from 'aws-sdk';
-// import { DeleteStackInput } from 'aws-sdk/clients/cloudformation';
 import { LocalWorkspace } from "@pulumi/pulumi/x/automation";
 
 interface DownOptions {
@@ -31,29 +30,11 @@ export class Down extends Task<void> {
 			});
 
 			await pulumiStack.setConfig("aws:region", { value: region });
-			const res = await pulumiStack.destroy();
+			const res = await pulumiStack.destroy({ onOutput: this.update.bind(this) });
 			console.log(res);
 		} catch(e) {
 			console.log(e);
 			throw e;
 		}
-
-		// const cloudformation = new AWS.CloudFormation();
-
-		// // Get the stack ID so we can watch for when the tear down is complete
-		// try {
-		// 	const description = await cloudformation.describeStacks({ StackName: stackName }).promise();
-		// 	const stackId = description.Stacks![0].StackId;
-
-		// 	const deleteInput: DeleteStackInput = {
-		// 		StackName: stackName,
-		// 	};
-		// 	this.update(`Deleting Stack: ${stackName}`);
-		// 	await cloudformation.deleteStack(deleteInput).promise();
-
-		// 	await cloudformation.waitFor('stackDeleteComplete', { StackName: stackId }).promise();
-		// } catch (error) {
-		// 	throw new Error('Failed to delete stack, this may be because the stack name was not found.');
-		// }
 	}
 }
