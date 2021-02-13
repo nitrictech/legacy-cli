@@ -1,8 +1,8 @@
-import { NitricAPI, NitricFunction, normalizeFunctionName } from '@nitric/cli-common';
+import { NitricAPI } from '@nitric/cli-common';
 import { OpenAPIV3 } from 'openapi-types';
 import { uniq } from 'lodash';
 import { DeployedFunction } from '../types';
-import { apigatewayv2, fsx, lambda } from '@pulumi/aws';
+import { apigatewayv2, lambda } from '@pulumi/aws';
 import * as pulumi from '@pulumi/pulumi';
 import fs from 'fs';
 
@@ -109,7 +109,7 @@ export function createApi(api: NitricAPI, funcs: DeployedFunction[]): void {
 	});
 
 	// stage
-	const deployedStage = new apigatewayv2.Stage(`${api.name}DefaultStage`, {
+	new apigatewayv2.Stage(`${api.name}DefaultStage`, {
 		apiId: deployedApi.id,
 		name: '$default',
 		autoDeploy: true,

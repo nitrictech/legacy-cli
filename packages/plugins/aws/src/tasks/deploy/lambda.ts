@@ -1,5 +1,5 @@
 import { generateEcrRepositoryUri } from '../../common/utils';
-import { NitricFunction, normalizeFunctionName, normalizeTopicName } from '@nitric/cli-common';
+import { NitricFunction } from '@nitric/cli-common';
 import { lambda, iam, sns } from '@pulumi/aws';
 import { DeployedTopic, DeployedFunction } from '../types';
 
@@ -76,7 +76,9 @@ export function createLambdaFunction(
 		role: lambdaRole.arn,
 	});
 
-	func.subs?.forEach((sub) => {
+	const { subs = [] } = func;
+
+	subs.forEach((sub) => {
 		const topic = topics.find((t) => t.name === sub.topic);
 
 		// Only apply if the topic exists

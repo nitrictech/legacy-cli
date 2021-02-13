@@ -117,15 +117,15 @@ export class Deploy extends Task<void> {
 					// Now we can start deploying with Pulumi
 					try {
 						// deploy the buckets
-						const deployedBuckets = buckets.map(createBucket);
+						buckets.map(createBucket);
 						// Deploy the topics
 						const deployedTopics = topics.map(createTopic);
 						// deploy the functions
 						const deployedFunctions = functions.map(f => createFunction(gcpProject, stack.name, region, f, deployedTopics));
 						// deploy the schedules
-						const deployedSchedules = schedules.map(s => createSchedule(s, deployedTopics));
+						schedules.map(s => createSchedule(s, deployedTopics));
 						// deploy apis
-						const deployedApis = apis.map(a => createApi(a, deployedFunctions));
+						apis.map(a => createApi(a, deployedFunctions));
 					} catch (e) {
 						console.error(e);
 						throw e;

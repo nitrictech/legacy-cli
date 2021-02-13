@@ -1,5 +1,4 @@
 import { NitricStack, Task } from '@nitric/cli-common';
-// import AWS from 'aws-sdk';
 import { LocalWorkspace } from "@pulumi/pulumi/x/automation";
 
 interface DownOptions {

@@ -4,7 +4,6 @@ import Listr from 'listr';
 import path from 'path';
 import { Down } from '../../tasks/down';
 import inquirer from 'inquirer';
-import { google } from 'googleapis';
 
 export default class DownCmd extends Command {
 	static description = 'Delete a Nitric application on Google Cloud Platform (GCP)';
