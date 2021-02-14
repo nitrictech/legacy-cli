@@ -26,7 +26,7 @@ export class AddRepositoryTask extends Task<void> {
 
 	async do(): Promise<void> {
 		const { url, alias } = this;
-		let repositoryPath = path.join(TEMPLATE_DIR, `./${alias}`);
+		const repositoryPath = path.join(TEMPLATE_DIR, `./${alias}`);
 		const repositories = loadRepositoriesManifest();
 
 		// Using one of the official reserved names
@@ -34,15 +34,14 @@ export class AddRepositoryTask extends Task<void> {
 			throw new Error('Alias exists as a reserved name in the nitric store, please use a different name');
 		}
 
-		// attempt to pull a clean version of the repository here...
-		const git = gitP(repositoryPath);
-
 		// Do a fresh checkout every time
 		if (fs.existsSync(repositoryPath)) {
 			rimraf.sync(repositoryPath);
 		}
 
-		fs.mkdirSync(repositoryPath);
+		await fs.promises.mkdir(repositoryPath, { recursive: true });
+
+		const git = gitP(repositoryPath);
 
 		if (!url) {
 			const repository = repositories[alias];
@@ -52,25 +51,16 @@ export class AddRepositoryTask extends Task<void> {
 			}
 			// we're looking for a template-store repository here
 			// we'll assume it already exists (we're running the store update in the cli command)
-			try {
-				await git.clone(repository.location, '.', {
-					'--depth': 1,
-				});
-			} catch (error) {
-				throw error;
-			}
+			await git.clone(repository.location, '.', {
+				'--depth': 1,
+			});
 			// make sure we're up to date on the latest template store...
 		} else {
 			// Assume its a git repository for now
-			try {
-				await git.clone(url, '.', {
-					'--depth': 1,
-				});
-			} catch (error) {
-				throw error;
-			}
+			await git.clone(url, '.', {
+				'--depth': 1,
+			});
 		}
-
 		// Once it's checkout out we should verify that it is actually in fact a nitric repository
 	}
 }

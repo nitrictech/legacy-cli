@@ -17,21 +17,25 @@ export class UpdateStoreTask extends Task<void> {
 	}
 
 	async do(): Promise<void> {
-		const git = gitP(NITRIC_STORE_DIR);
-
 		// Do a fresh checkout every time
 		if (fs.existsSync(NITRIC_STORE_DIR)) {
-			rimraf.sync(NITRIC_STORE_DIR);
-		}
-
-		fs.mkdirSync(NITRIC_STORE_DIR);
-
-		try {
-			await git.clone(NITRIC_TEMPLATE_STORE, '.', {
-				'--depth': 1,
+			await new Promise((res, rej) => {
+				rimraf(NITRIC_STORE_DIR, (error) => {
+					if (error) {
+						rej(error);
+					} else {
+						res();
+					}
+				});
 			});
-		} catch (error) {
-			throw error;
 		}
+
+		await fs.promises.mkdir(NITRIC_STORE_DIR, { recursive: true });
+
+		const git = gitP(NITRIC_STORE_DIR);
+
+		await git.clone(NITRIC_TEMPLATE_STORE, '.', {
+			'--depth': 1,
+		});
 	}
 }

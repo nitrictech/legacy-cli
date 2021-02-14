@@ -2,7 +2,10 @@ import { Command, flags } from '@oclif/command';
 import { wrapTaskForListr } from '@nitric/cli-common';
 import { MakeProjectTask, MakeFunctionTask } from '../../tasks/make';
 import { getAvailableTemplates } from '../../utils';
+import { AddRepositoryTask } from '../../tasks/repository/add';
+import { UpdateStoreTask } from '../../tasks/store/update';
 import Listr, { ListrTask } from 'listr';
+import cli from 'cli-ux';
 import inquirer from 'inquirer';
 
 const projectNameRegex = /^[a-z]+(-[a-z]+)*$/g;
@@ -35,12 +38,34 @@ export default class Project extends Command {
 			throw new Error(`project name must be lowercase letters and dashes only. e.g. example-project-name`);
 		}
 
+		let templates = getAvailableTemplates();
+
+		if (templates.length == 0) {
+			// XXX: Should we offer to fetch the official repository
+			const fetchOfficial = await cli.confirm('No repositories found, install the the official repository? [y/n]');
+			if (!fetchOfficial) {
+				// XXX: Is this true or should we default to none as the template?
+				throw new Error(
+					'You need at least one template repository installed to continue, please run `nitric templates:repos add` to install',
+				);
+			}
+
+			// Update the store and add the official repository
+			await new Listr([
+				wrapTaskForListr(new UpdateStoreTask()),
+				wrapTaskForListr(new AddRepositoryTask({ alias: 'official' })),
+			]).run();
+
+			// Refresh templates
+			templates = getAvailableTemplates();
+		}
+
 		const { example }: { example: string } = await inquirer.prompt([
 			{
 				name: 'example',
 				message: 'Include an example function?',
 				type: 'list',
-				choices: getAvailableTemplates(),
+				choices: [...templates, 'none'],
 			},
 		]);
 
