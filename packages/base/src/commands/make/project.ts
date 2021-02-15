@@ -75,6 +75,7 @@ export default class Project extends Command {
 					name: 'functionName',
 					message: 'Name for the example function?',
 					type: 'input',
+					default: 'example',
 				},
 			]);
 
