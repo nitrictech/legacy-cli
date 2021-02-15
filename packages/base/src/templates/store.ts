@@ -35,6 +35,10 @@ export class Store {
 		return await Repository.checkout(key, repo.location);
 	}
 
+	hasRepostory(name: string): boolean {
+		return !!this.repositories[name];
+	}
+
 	/**
 	 * Load a store manifest from a given file
 	 * @param file

@@ -13,8 +13,6 @@ interface TemplateDescriptor {
 	name: string;
 	lang: string;
 	path: string;
-	// Relative to template path
-	codeDir: string;
 }
 
 /**
@@ -42,12 +40,16 @@ export class Repository {
 		this.templateDescriptors = templates;
 	}
 
+	getName(): string {
+		return this.name;
+	}
+
 	/**
 	 * Get all available templates in this repository
 	 */
 	getTemplates(): Template[] {
 		return this.templateDescriptors.map(
-			(td) => new Template(td.name, td.lang, path.join(this.path, td.path), path.join(this.path, td.codeDir)),
+			(td) => new Template(td.name, td.lang, path.join(this.path, td.path)),
 		);
 	}
 
@@ -66,7 +68,6 @@ export class Repository {
 			descriptor.name,
 			descriptor.lang,
 			path.join(this.path, descriptor.path),
-			path.join(this.path, descriptor.codeDir),
 		);
 	}
 
@@ -85,12 +86,18 @@ export class Repository {
 	 * @param path
 	 */
 	static fromDirectory(path: string): Repository[] {
-		return fs
-			.readdirSync(path, {
-				withFileTypes: true,
-			})
-			.filter((dirent) => dirent.isDirectory() && fs.existsSync(`${TEMPLATE_DIR}/${dirent.name}/repository.yaml`))
-			.map((dirent) => Repository.fromFile(`${TEMPLATE_DIR}/${dirent.name}/repository.yaml`));
+		try {
+			return fs
+				.readdirSync(path, {
+					withFileTypes: true,
+				})
+				.filter((dirent) => dirent.isDirectory() && fs.existsSync(`${TEMPLATE_DIR}/${dirent.name}/repository.yaml`))
+				.map((dirent) => Repository.fromFile(`${TEMPLATE_DIR}/${dirent.name}/repository.yaml`));
+		} catch (e) {
+			// Gracefully fail
+			// We will return a suggestion in the front end if no repositories are found
+			return [];
+		}
 	}
 
 	/**
