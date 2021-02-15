@@ -1,6 +1,4 @@
 import { Task } from '@nitric/cli-common';
-import fs from 'fs';
-import { TEMPLATE_DIR } from '../../common/paths';
 import { getAvailableRepositories, loadRepositoryManifest } from '../../utils';
 
 interface ListTemplatesResult {

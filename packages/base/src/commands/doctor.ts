@@ -1,6 +1,5 @@
 import { Command, flags } from '@oclif/command';
-import { wrapTaskForListr, Task } from '@nitric/cli-common';
-import Listr from 'listr';
+import {Task } from '@nitric/cli-common';
 import which from 'which';
 import cli from 'cli-ux';
 import emoji from 'node-emoji';
