@@ -66,6 +66,6 @@ jobs:
       uses: peter-evans/repository-dispatch@v1
       with:
         token: ${{ secrets.RELEASE_TOKEN }}
-        repository: nitric-tech/cli-releases
+        repository: nitrictech/cli-releases
         event-type: prepare-release
         client-payload: '{"tag": "${{ steps.bump_tag.outputs.TAG_REF }}"}'
