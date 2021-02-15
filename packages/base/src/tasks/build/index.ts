@@ -9,13 +9,13 @@ import {
 	Task,
 	getTagNameForFunction,
 } from '@nitric/cli-common';
-import { getTemplateLocation, isTemplateAvailable } from '../../utils';
 import tar from 'tar-fs';
 import Docker from 'dockerode';
 import streamToPromise from 'stream-to-promise';
 import path from 'path';
 import multimatch from 'multimatch';
 import execa from 'execa';
+import { Repository } from '../../templates';
 
 export function createNitricHome(): void {
 	if (!fs.existsSync(NITRIC_HOME)) {
@@ -97,6 +97,7 @@ export class BuildFunctionTask extends Task<NitricImage> {
 
 	async do(): Promise<NitricImage> {
 		const docker = new Docker();
+		const repos = Repository.fromDefaultDirectory();
 		const functionStagingDirectory = path.join(STAGING_DIR, this.stackName, this.func.name);
 		const excludeFiles = this.func.excludes || [];
 
@@ -105,14 +106,16 @@ export class BuildFunctionTask extends Task<NitricImage> {
 		// Setup user /function staging dir
 		const functionPipe = tar.extract(`${functionStagingDirectory}/function`);
 
+		const templateRepo = repos.find(repo => repo.hasTemplate(this.func.runtime))
+
 		// Validate template is installed/exists
 		// TO DO: in future, we should attempt to download/install the template if possible
-		if (!isTemplateAvailable(this.func.runtime)) {
+		if (!templateRepo) {
 			throw new Error(`Template ${this.func.runtime} is not available.`);
 		}
 
 		const functionDirectory = path.join(this.baseDir, this.func.path);
-		const templateDirectory = getTemplateLocation(this.func.runtime);
+		const templateDirectory = templateRepo.getTemplate(this.func.runtime).getCodePath();
 
 		// Run provdided build scripts if any relative to
 		// the function project

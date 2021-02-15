@@ -1,16 +1,21 @@
+import path from 'path';
+
 /**
  * Class representation of a nitric template
  */
 export class Template {
 	private name: string;
 	private lang: string;
-	// path relative to the parent repository
+	// Absolute path of this template
 	private path: string;
+	// path relative to the template directory
+	private codePath?: string;
 
-	constructor(name: string, lang: string, path: string) {
+	constructor(name: string, lang: string, path: string, codePath?: string) {
 		this.name = name;
 		this.lang = lang;
 		this.path = path;
+		this.codePath = codePath;
 	}
 
 	getName(): string {
@@ -23,5 +28,11 @@ export class Template {
 
 	getPath(): string {
 		return this.path;
+	}
+
+	getCodePath(): string {
+		const codePath = this.codePath || "./function";
+
+		return path.join(this.path, codePath);
 	}
 }

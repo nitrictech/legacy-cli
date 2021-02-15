@@ -30,8 +30,10 @@ export class AddRepositoryTask extends Task<void> {
 		}
 
 		if (url) {
+			// Checkout the repository directly from url
 			await Repository.checkout(alias, url);
 		} else {
+			// checkout the repository via the nitric store
 			await store.checkoutRepository(alias);
 		}
 	}

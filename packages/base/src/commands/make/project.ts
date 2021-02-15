@@ -7,6 +7,7 @@ import { UpdateStoreTask } from '../../tasks/store/update';
 import Listr, { ListrTask } from 'listr';
 import cli from 'cli-ux';
 import inquirer from 'inquirer';
+import { Repository } from '../../templates';
 
 const projectNameRegex = /^[a-z]+(-[a-z]+)*$/g;
 
@@ -33,14 +34,15 @@ export default class Project extends Command {
 		const { name } = args;
 		const { force } = flags;
 		let commands: ListrTask[] = [];
+		
 
 		if (!name.match(projectNameRegex)) {
 			throw new Error(`project name must be lowercase letters and dashes only. e.g. example-project-name`);
 		}
 
-		let templates = getAvailableTemplates();
+		let repos = Repository.fromDefaultDirectory();
 
-		if (templates.length == 0) {
+		if (repos.length == 0) {
 			// XXX: Should we offer to fetch the official repository
 			const fetchOfficial = await cli.confirm('No repositories found, install the the official repository? [y/n]');
 			if (!fetchOfficial) {
@@ -57,8 +59,10 @@ export default class Project extends Command {
 			]).run();
 
 			// Refresh templates
-			templates = getAvailableTemplates();
+			repos = Repository.fromDefaultDirectory();
 		}
+
+		const templates = repos.
 
 		const { example }: { example: string } = await inquirer.prompt([
 			{

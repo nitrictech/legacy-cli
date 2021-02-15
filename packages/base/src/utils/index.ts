@@ -1,10 +1,8 @@
 import fs from 'fs';
-import { TEMPLATE_DIR, LOG_DIR, NITRIC_REPOSITORIES_FILE } from '../common/paths';
+import { TEMPLATE_DIR, LOG_DIR } from '../common/paths';
 import path from 'path';
-import { NitricRepositories, NitricTemplateRepository } from '../common/types';
+import { NitricTemplateRepository } from '../common/types';
 import YAML from 'yaml';
-
-const DEFAULT_CODE_TEMPLATE_DIR = './function';
 
 export function loadRepositoryManifest(repoName: string): NitricTemplateRepository {
 	const repositoryManifestPath = path.join(TEMPLATE_DIR, `./${repoName}`, './repository.yaml');
@@ -14,64 +12,6 @@ export function loadRepositoryManifest(repoName: string): NitricTemplateReposito
 	}
 
 	throw new Error('Error loading the nitric repository manifest');
-}
-
-/**
- * Return the full path of the given template
- * @param templateName structured as <repoName>/<templateName>
- */
-export function getTemplateLocation(templateName: string): string {
-	const [repoName, tmplName] = templateName.split('/');
-	const repoManifest = loadRepositoryManifest(repoName);
-
-	const template = repoManifest.templates.find((template) => template.name === tmplName);
-
-	if (!template) {
-		throw new Error(`${templateName} does not exist in repository ${repoName}`);
-	}
-
-	return path.join(`${TEMPLATE_DIR}/${repoName}`, template.path);
-}
-
-/**
- * Returns if a given template exists
- * @param templateName structured as <repoName>:<templateName>
- */
-export function isTemplateAvailable(templateName: string): boolean {
-	try {
-		const templateDirectory = getTemplateLocation(templateName);
-		return fs.existsSync(templateDirectory);
-	} catch (error) {
-		return false;
-	}
-}
-
-export function loadRepositoriesManifest(): NitricRepositories {
-	if (fs.existsSync(NITRIC_REPOSITORIES_FILE)) {
-		return YAML.parse(fs.readFileSync(NITRIC_REPOSITORIES_FILE).toString('utf-8')) as NitricRepositories;
-	}
-
-	throw new Error('Error loading the nitric store manifest');
-}
-
-/**
- * Return the full path of a templates relative userland code directory
- * This will be used for creating new functions and projects
- * @param templateName
- */
-export function getTemplateCodePath(templateName: string): string {
-	const [repoName, tmplName] = templateName.split('/');
-	const repoManifest = loadRepositoryManifest(repoName);
-
-	const template = repoManifest.templates.find((template) => template.name === tmplName);
-
-	if (!template) {
-		throw new Error(`${templateName} does not exist in repository ${repoName}`);
-	}
-
-	const { codeDir = DEFAULT_CODE_TEMPLATE_DIR } = template;
-
-	return path.join(`${TEMPLATE_DIR}/${repoName}`, template.path, codeDir);
 }
 
 export function getAvailableRepositories(): string[][] {

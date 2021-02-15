@@ -13,6 +13,7 @@ interface TemplateDescriptor {
 	name: string;
 	lang: string;
 	path: string;
+	codeDir?: string;
 }
 
 /**
@@ -49,12 +50,22 @@ export class Repository {
 	 */
 	getTemplates(): Template[] {
 		return this.templateDescriptors.map(
-			(td) => new Template(td.name, td.lang, path.join(this.path, td.path)),
+			(td) => new Template(td.name, td.lang, path.join(this.path, td.path), td.codeDir),
 		);
 	}
 
+	hasTemplate(templateName: string): boolean {
+		const descriptor = this.templateDescriptors.find(({ name }) => name === templateName);
+
+		if (!descriptor) {
+			return false;
+		}
+
+		return true;
+	}
+
 	/**
-	 * Get the absolute path of a template in this repository
+	 * Get a template from this repository
 	 * @param name
 	 */
 	getTemplate(templateName: string): Template {
@@ -68,6 +79,7 @@ export class Repository {
 			descriptor.name,
 			descriptor.lang,
 			path.join(this.path, descriptor.path),
+			descriptor.codeDir
 		);
 	}
 
