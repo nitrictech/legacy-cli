@@ -6,7 +6,7 @@ import { gitP } from 'simple-git';
 import rimraf from 'rimraf';
 
 // The nitric template store location
-const NITRIC_TEMPLATE_STORE = 'https://github.com/nitric-dev/template-store';
+const NITRIC_TEMPLATE_STORE = 'https://github.com/nitrictech/template-store';
 
 /**
  * Pulls the latest official nitric store manifests

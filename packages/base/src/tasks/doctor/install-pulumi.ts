@@ -2,6 +2,7 @@ import { Task } from '@nitric/cli-common';
 import execa from 'execa';
 import { oneLine } from 'common-tags';
 import os from 'os';
+import stream from 'stream';
 
 const WIN32_INSTALL = oneLine`
   "%SystemRoot%\System32\WindowsPowerShell\v1.0\powershell.exe" 
@@ -13,21 +14,31 @@ export const PULUMI_TASK_NAME = 'Installing Pulumi ☁️';
 
 const UNIX_INSTALL = 'curl -sSL https://get.pulumi.com | sh';
 
+interface InstallPulumiOptions {
+	stdin: stream.Readable;
+	stdout: stream.Writable;
+}
+
 /**
  * Installs Pulumi for the user
  */
 export class InstallPulumi extends Task<void> {
-	constructor() {
+	private stdin: stream.Readable;
+	private stdout: stream.Writable;
+
+	constructor({ stdin, stdout }: InstallPulumiOptions) {
 		super(PULUMI_TASK_NAME);
+		this.stdin = stdin;
+		this.stdout = stdout;
 	}
 
-	async do() {
+	async do(): Promise<void> {
 		// Install pulumi
 		const installCommand = os.platform() === 'win32' ? WIN32_INSTALL : UNIX_INSTALL;
 
 		try {
 			this.update('Installing pulumi from https://get.pulumi.com');
-			await execa.command(installCommand, { shell: true });
+			await execa.command(installCommand, { shell: true, stdin: this.stdin, stdout: this.stdout });
 
 			this.update('Installing plugins');
 		} catch (e) {
