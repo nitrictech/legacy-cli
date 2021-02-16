@@ -1,10 +1,9 @@
-import { NitricRuntime } from './runtime';
 import { NitricSubscription } from './subscription';
 
 export interface NitricFunction {
 	name: string;
 	path: string;
-	runtime: NitricRuntime;
+	runtime: string;
 	// Scripts that will be executed by the nitric
 	// build process before begining the docker build
 	buildScripts?: string[];

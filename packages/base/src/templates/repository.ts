@@ -90,7 +90,7 @@ export class Repository {
 	static fromFile(file: string): Repository {
 		const repoFile = YAML.parse(fs.readFileSync(file).toString()) as RepositoryFile;
 		// TODO: Add repo file validation
-		return new Repository(repoFile.name, file, repoFile.templates);
+		return new Repository(repoFile.name, path.join(file, '../'), repoFile.templates);
 	}
 
 	/**
@@ -117,6 +117,18 @@ export class Repository {
 	 */
 	static fromDefaultDirectory(): Repository[] {
 		return Repository.fromDirectory(TEMPLATE_DIR);
+	}
+
+	/**
+	 * Return flat list of available templates from a list of repositories
+	 * @param repos 
+	 */
+	static availableTemplates(repos: Repository[]): string[] {
+		return repos.reduce(
+			(acc, r) => [
+				...acc, 
+				...r.getTemplates().map(t => `${r.getName()}/${t.getName()}`)
+			], [] as string[])
 	}
 
 	/**

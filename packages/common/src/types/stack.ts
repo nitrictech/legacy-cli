@@ -1,6 +1,7 @@
 import { NitricFunction } from './function';
 import { NitricBucket } from './bucket';
 import { NitricTopic } from './topic';
+import { NitricQueue } from './queue';
 import { NitricSchedule } from './schedule';
 import { NitricAPI } from './api';
 import { NitricStaticSite } from './static-site';
@@ -17,6 +18,8 @@ export interface NitricStack {
 	buckets?: NitricBucket[];
 	// Topics that will be created
 	topics?: NitricTopic[];
+	// Queues that will be created
+	queues?: NitricQueue[];
 	// Schedules that will be configured
 	schedules?: NitricSchedule[];
 	// APIs to be deployed

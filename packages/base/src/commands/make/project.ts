@@ -1,7 +1,6 @@
 import { Command, flags } from '@oclif/command';
 import { wrapTaskForListr } from '@nitric/cli-common';
 import { MakeProjectTask, MakeFunctionTask } from '../../tasks/make';
-import { getAvailableTemplates } from '../../utils';
 import { AddRepositoryTask } from '../../tasks/repository/add';
 import { UpdateStoreTask } from '../../tasks/store/update';
 import Listr, { ListrTask } from 'listr';
@@ -62,7 +61,7 @@ export default class Project extends Command {
 			repos = Repository.fromDefaultDirectory();
 		}
 
-		const templates = repos.
+		const templates = Repository.availableTemplates(repos);
 
 		const { example }: { example: string } = await inquirer.prompt([
 			{

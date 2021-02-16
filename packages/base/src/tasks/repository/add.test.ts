@@ -1,9 +1,5 @@
 import { AddRepositoryTask } from './add';
 import { Store, Repository } from '../../templates';
-// Mock out external dependencies
-jest.mock('../../utils');
-jest.mock('fs');
-jest.mock('rimraf');
 
 describe('AddRepositoryTask', () => {
 	describe("Given the nitric default store contains an 'official' repository", () => {
