@@ -21,7 +21,7 @@ export class ListTemplatesTask extends Task<ListTemplatesResult> {
 
 			return {
 				...acc,
-				[repo.getName()]: templates.map(t => t.getName())
+				[repo.getName()]: templates.map((t) => t.getName()),
 			};
 		}, {});
 	}

@@ -33,7 +33,6 @@ export default class Project extends Command {
 		const { name } = args;
 		const { force } = flags;
 		let commands: ListrTask[] = [];
-		
 
 		if (!name.match(projectNameRegex)) {
 			throw new Error(`project name must be lowercase letters and dashes only. e.g. example-project-name`);

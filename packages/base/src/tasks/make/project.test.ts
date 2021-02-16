@@ -4,7 +4,7 @@ import { MakeProjectTask } from '../../tasks/make';
 
 jest.mock('fs');
 
-describe('Given executing nitric make:project', () => {
+describe('MakeProjectTask: ', () => {
 	describe("When the project folder doesn't exist", () => {
 		test('The new project directory is created', async () => {
 			await new MakeProjectTask('test-project', true).do();

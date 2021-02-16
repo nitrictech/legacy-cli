@@ -106,7 +106,7 @@ export class BuildFunctionTask extends Task<NitricImage> {
 		// Setup user /function staging dir
 		const functionPipe = tar.extract(`${functionStagingDirectory}/function`);
 
-		const templateRepo = repos.find(repo => repo.hasTemplate(this.func.runtime))
+		const templateRepo = repos.find((repo) => repo.hasTemplate(this.func.runtime));
 
 		// Validate template is installed/exists
 		// TO DO: in future, we should attempt to download/install the template if possible

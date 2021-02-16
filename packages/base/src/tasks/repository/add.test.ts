@@ -6,11 +6,13 @@ describe('AddRepositoryTask', () => {
 		let defaultStoreSpy: jest.SpyInstance;
 		beforeAll(() => {
 			// Mock the nitric repository stored here...
-			defaultStoreSpy = jest.spyOn(Store, 'fromDefault').mockReturnValue(new Store({
-				official: {
-					location: "https://test-location.test",
-				}
-			}))
+			defaultStoreSpy = jest.spyOn(Store, 'fromDefault').mockReturnValue(
+				new Store({
+					official: {
+						location: 'https://test-location.test',
+					},
+				}),
+			);
 		});
 
 		afterAll(() => {
@@ -31,13 +33,9 @@ describe('AddRepositoryTask', () => {
 		describe('When adding a custom repository under a custom alias', () => {
 			let repositoryCheckoutMock: jest.SpyInstance;
 			beforeAll(() => {
-				repositoryCheckoutMock = jest.spyOn(Repository, 'checkout').mockReturnValue(
-					Promise.resolve(new Repository(
-						"testName", 
-						"testPath",
-						[]
-					))
-				);
+				repositoryCheckoutMock = jest
+					.spyOn(Repository, 'checkout')
+					.mockReturnValue(Promise.resolve(new Repository('testName', 'testPath', [])));
 			});
 
 			afterAll(() => {

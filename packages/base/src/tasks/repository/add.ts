@@ -22,7 +22,7 @@ export class AddRepositoryTask extends Task<void> {
 	async do(): Promise<void> {
 		const { url, alias } = this;
 		// Load the default store
-		const store = Store.fromDefault()
+		const store = Store.fromDefault();
 
 		// Using one of the official reserved names
 		if (url && store.hasRepostory(alias)) {

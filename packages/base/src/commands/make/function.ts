@@ -27,8 +27,8 @@ export default class Function extends Command {
 		}),
 		template: flags.string({
 			char: 't',
-			description: 'template to use'
-		})
+			description: 'template to use',
+		}),
 	};
 
 	static args = [
@@ -41,12 +41,10 @@ export default class Function extends Command {
 				const repos = Repository.fromDefaultDirectory();
 
 				if (repos.length === 0) {
-					throw new Error("No repositories available, try running nitric templates:repos:add")
+					throw new Error('No repositories available, try running nitric templates:repos:add');
 				}
 
-				return Repository.availableTemplates(
-					repos
-				);
+				return Repository.availableTemplates(repos);
 			},
 		},
 		{

@@ -34,15 +34,15 @@ export class Template {
 	}
 
 	getCodePath(): string {
-		const codePath = this.codePath || "./function";
+		const codePath = this.codePath || './function';
 
 		return path.join(this.path, codePath);
 	}
 
 	/**
-	 * 
+	 *
 	 * @param template Copies the code directory of a given template to a given path
-	 * @param path 
+	 * @param path
 	 */
 	static async copyCodeTo(template: Template, path: string): Promise<void> {
 		const inPath = template.getCodePath();
@@ -57,5 +57,5 @@ export class Template {
 		const outStream = tar.extract(outPath);
 		tar.pack(inPath).pipe(outStream);
 		return streamToPromise(outStream);
-	} 
+	}
 }

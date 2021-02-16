@@ -18,12 +18,12 @@ export default class ListTemplates extends Command {
 
 		if (Object.keys(templates).length == 0) {
 			// No templates found
-			cli.log("No templates found, try installing some repositories using nitric templates:repos add");
+			cli.log('No templates found, try installing some repositories using nitric templates:repos add');
 		}
 
 		const root = cli.tree();
 
-		Object.keys(templates).forEach(key => {
+		Object.keys(templates).forEach((key) => {
 			const repoTree = cli.tree();
 			templates[key].forEach((template) => repoTree.insert(template));
 

@@ -1,6 +1,6 @@
 import { Command, flags } from '@oclif/command';
 import { Deploy, PushImage } from '../../tasks/deploy';
-import { wrapTaskForListr, readNitricDescriptor } from '@nitric/cli-common';
+import { wrapTaskForListr, Stack, NitricStack } from '@nitric/cli-common';
 import Listr, { ListrTask } from 'listr';
 import path from 'path';
 import { google } from 'googleapis';
@@ -90,7 +90,8 @@ export default class DeployCmd extends Command {
 		}
 
 		const { project = derivedProject, file, region } = { ...flags, ...promptFlags };
-		const stack = readNitricDescriptor(path.join(dir, file));
+		const stackDefinitionPath = path.join(dir, file);
+		const stack: NitricStack = (await Stack.fromFile(stackDefinitionPath)).asNitricStack();
 
 		if (!region) {
 			throw new Error('Region must be provided, for prompts use the --guided flag');

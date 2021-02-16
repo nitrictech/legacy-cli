@@ -1,5 +1,5 @@
 import { Command, flags } from '@oclif/command';
-import {Task } from '@nitric/cli-common';
+import { Task } from '@nitric/cli-common';
 import which from 'which';
 import cli from 'cli-ux';
 import emoji from 'node-emoji';

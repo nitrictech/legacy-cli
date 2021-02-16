@@ -75,12 +75,7 @@ export class Repository {
 			throw new Error(`Template ${templateName} does not exist is repository ${this.name}`);
 		}
 
-		return new Template(
-			descriptor.name,
-			descriptor.lang,
-			path.join(this.path, descriptor.path),
-			descriptor.codeDir
-		);
+		return new Template(descriptor.name, descriptor.lang, path.join(this.path, descriptor.path), descriptor.codeDir);
 	}
 
 	/**
@@ -121,14 +116,13 @@ export class Repository {
 
 	/**
 	 * Return flat list of available templates from a list of repositories
-	 * @param repos 
+	 * @param repos
 	 */
 	static availableTemplates(repos: Repository[]): string[] {
 		return repos.reduce(
-			(acc, r) => [
-				...acc, 
-				...r.getTemplates().map(t => `${r.getName()}/${t.getName()}`)
-			], [] as string[])
+			(acc, r) => [...acc, ...r.getTemplates().map((t) => `${r.getName()}/${t.getName()}`)],
+			[] as string[],
+		);
 	}
 
 	/**

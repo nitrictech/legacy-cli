@@ -57,12 +57,12 @@ export class MakeFunctionTask extends Task<void> {
 			runtime: this.template,
 		});
 
-		this.update("Scaffolding function code")
+		this.update('Scaffolding function code');
 		await this.makeFunction();
-		
+
 		this.update(`Updating ${this.file}`);
 		await Stack.write(stack);
-		
+
 		this.update(`Updated ${this.file}`);
 	}
 }

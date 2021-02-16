@@ -48,16 +48,13 @@ export class Stack {
 		const { funcs = [] } = this;
 
 		// Name/path compound key, these should both be unique
-		const existingFunction = funcs.find(f => f.name === func.name || f.path === func.path);
+		const existingFunction = funcs.find((f) => f.name === func.name || f.path === func.path);
 
 		if (existingFunction) {
 			throw new Error(`Function ${func.name} already defined in ${this.file}`);
 		}
 
-		this.funcs = [
-			...this.funcs || [],
-			func,
-		]
+		this.funcs = [...(this.funcs || []), func];
 
 		return this;
 	}

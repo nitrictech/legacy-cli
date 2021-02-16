@@ -10,6 +10,6 @@ export class UpdateStoreTask extends Task<void> {
 	}
 
 	async do(): Promise<void> {
-		await Store.checkoutDefault()
+		await Store.checkoutDefault();
 	}
 }
