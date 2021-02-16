@@ -1,66 +1,57 @@
 import { ListTemplatesTask } from './list';
-import fs from 'fs';
-import * as utils from '../../utils';
-
-jest.mock('fs');
-jest.mock('../../utils');
+import { Repository, Template } from '../../templates';
 
 afterAll(() => {
 	jest.restoreAllMocks();
 });
 
-describe('ListTemplatesTask', () => {
-	describe('Given the templates directory does not exist', () => {
-		let readDirSyncSpy: jest.SpyInstance;
-		beforeAll(() => {
-			readDirSyncSpy = jest.spyOn(fs, 'readdirSync').mockImplementation(() => {
-				throw new Error('ENOENT: Directory does not exist');
-			});
-		});
+describe('Given repos are available', () => {
+	beforeAll(() => {
+		Repository.fromDefaultDirectory = jest.fn().mockReturnValueOnce([
+			{
+				getName: (): string => {
+					return 'repo1';
+				},
+				getTemplates: (): Template[] => {
+					return [
+						{
+							getName: (): string => {
+								return 'template1';
+							},
+						} as any,
+					];
+				},
+			},
+		]);
+	});
 
-		afterAll(() => {
-			readDirSyncSpy.mockRestore();
+	it('Should list the repository names', async () => {
+		const result = await new ListTemplatesTask().do();
+		expect(result).toEqual({
+			repo1: ['template1'],
 		});
+	});
+});
 
-		it('Should throw an error', async () => {
-			// FIXME: Fix this test...
-			await expect(new ListTemplatesTask().do()).rejects.toThrow('Could not find templates directory');
+describe("Given repos aren't available", () => {
+	beforeAll(() => {
+		Repository.fromDefaultDirectory = jest.fn().mockReturnValueOnce([]);
+	});
+
+	it('Should return an empty object', async () => {
+		const result = await new ListTemplatesTask().do();
+		expect(result).toEqual({});
+	});
+});
+
+describe('Given retrieving repos returns an error', () => {
+	beforeAll(() => {
+		Repository.fromDefaultDirectory = jest.fn().mockImplementationOnce(() => {
+			throw new Error('mock repos error');
 		});
 	});
 
-	describe('Given there is a template repository', () => {
-		let readDirSyncSpy: jest.SpyInstance;
-		let loadRepositoryManifestSpy: jest.SpyInstance;
-		beforeAll(() => {
-			readDirSyncSpy = jest.spyOn(fs, 'readdirSync').mockReturnValue([
-				{
-					name: 'dummyrepo',
-					isDirectory: () => true,
-				} as any,
-			]);
-
-			loadRepositoryManifestSpy = jest.spyOn(utils, 'loadRepositoryManifest').mockReturnValueOnce({
-				name: 'dummyrepo',
-				templates: [
-					{
-						name: 'test',
-						path: '/templates/dummyrepo',
-						codeDir: '/function',
-						lang: 'dummy',
-					},
-				],
-			});
-		});
-
-		afterAll(() => {
-			loadRepositoryManifestSpy.mockRestore();
-			readDirSyncSpy.mockRestore();
-		});
-
-		it("Should return a single repository with it's templates", async () => {
-			await expect(new ListTemplatesTask().do()).resolves.toEqual({
-				dummyrepo: ['test'],
-			});
-		});
+	it('Should return an empty object', async () => {
+		await expect(new ListTemplatesTask().do()).rejects.toEqual(new Error('mock repos error'));
 	});
 });
