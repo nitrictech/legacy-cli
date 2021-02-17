@@ -20,7 +20,7 @@
   },
   "devDependencies": {
     "@oclif/dev-cli": "^1",
-    "@oclif/plugin-help": "^3",
+    "@oclif/plugin-help": "^3.2.2",
     "@types/lodash": "^4.14.168",
     "@types/node": "^10",
     "eslint": "^5.13",

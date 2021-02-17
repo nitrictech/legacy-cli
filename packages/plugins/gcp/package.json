@@ -18,7 +18,7 @@
   },
   "devDependencies": {
     "@oclif/dev-cli": "^1",
-    "@oclif/plugin-help": "^3",
+    "@oclif/plugin-help": "^3.2.2",
     "@types/jest": "^26.0.15",
     "@types/node": "^10",
     "eslint": "^5.13",
