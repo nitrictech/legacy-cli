@@ -32,10 +32,7 @@ describe('MakeProjectTask: ', () => {
 		test('nitric.yaml is written when forced', async () => {
 			// Set 'force' parameter to true.
 			await expect(new MakeProjectTask('test-project', true).do()).resolves.toBe(undefined);
-			expect(fs.writeFileSync).toBeCalledWith(
-				'./test-project/nitric.yaml',
-				Buffer.from('name: test-project\n', 'utf-8'),
-			);
+			expect(fs.writeFileSync).toBeCalledWith('./test-project/nitric.yaml', Buffer.from('name: test-project\n', 'utf-8'));
 		});
 	});
 
