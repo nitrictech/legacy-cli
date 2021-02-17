@@ -32,8 +32,8 @@ export class InstallDocker extends Task<void> {
 		}
 
 		try {
-			const process = execa.command(UNIX_INSTALL, { shell: true, stdin: this.stdin, stdout: this.stdout });
-			await process;
+			this.update('Installing docker from https://get.docker.com');
+			await execa.command(UNIX_INSTALL, { shell: true, stdin: this.stdin, stdout: this.stdout });
 		} catch (e) {
 			throw new Error(`Failed to install docker: ${e}`);
 		}
