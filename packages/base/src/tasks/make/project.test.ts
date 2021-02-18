@@ -4,7 +4,7 @@ import { MakeProjectTask } from '../../tasks/make';
 
 jest.mock('fs');
 
-describe('Given executing nitric make:project', () => {
+describe('MakeProjectTask: ', () => {
 	describe("When the project folder doesn't exist", () => {
 		test('The new project directory is created', async () => {
 			await new MakeProjectTask('test-project', true).do();
@@ -32,10 +32,7 @@ describe('Given executing nitric make:project', () => {
 		test('nitric.yaml is written when forced', async () => {
 			// Set 'force' parameter to true.
 			await expect(new MakeProjectTask('test-project', true).do()).resolves.toBe(undefined);
-			expect(fs.writeFileSync).toBeCalledWith(
-				'./test-project/nitric.yaml',
-				Buffer.from('name: test-project\n', 'utf-8'),
-			);
+			expect(fs.writeFileSync).toBeCalledWith('./test-project/nitric.yaml', Buffer.from('name: test-project\n', 'utf-8'));
 		});
 	});
 

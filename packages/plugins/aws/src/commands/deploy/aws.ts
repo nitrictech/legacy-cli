@@ -1,6 +1,6 @@
 import { Command, flags } from '@oclif/command';
 import { Deploy, PushImage } from '../../tasks/deploy';
-import { wrapTaskForListr, readNitricDescriptor } from '@nitric/cli-common';
+import { wrapTaskForListr, Stack } from '@nitric/cli-common';
 import Listr from 'listr';
 import path from 'path';
 import AWS from 'aws-sdk';
@@ -93,7 +93,8 @@ export default class DeployCmd extends Command {
 		}
 
 		const accountId = account || (derivedAccountId as string);
-		const stack = readNitricDescriptor(path.join(dir, file));
+		const stackDefinitionPath = path.join(dir, file);
+		const stack = (await Stack.fromFile(stackDefinitionPath)).asNitricStack();
 		const { functions = [] } = stack;
 
 		try {

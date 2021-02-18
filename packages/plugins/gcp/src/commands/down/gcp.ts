@@ -1,5 +1,5 @@
 import { Command, flags } from '@oclif/command';
-import { wrapTaskForListr, readNitricDescriptor } from '@nitric/cli-common';
+import { wrapTaskForListr, Stack, NitricStack } from '@nitric/cli-common';
 import Listr from 'listr';
 import path from 'path';
 import { Down } from '../../tasks/down';
@@ -55,7 +55,8 @@ export default class DownCmd extends Command {
 		}
 
 		const { file } = { ...flags, ...promptFlags };
-		const stack = readNitricDescriptor(path.join(dir, file));
+		const stackDefinitionPath = path.join(dir, file);
+		const stack: NitricStack = await (await Stack.fromFile(stackDefinitionPath)).asNitricStack();
 
 		await new Listr([
 			wrapTaskForListr(

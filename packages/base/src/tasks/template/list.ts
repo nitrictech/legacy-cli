@@ -1,7 +1,5 @@
 import { Task } from '@nitric/cli-common';
-import fs from 'fs';
-import { TEMPLATE_DIR } from '../../common/paths';
-import { loadRepositoryManifest } from '../../utils';
+import { Repository } from '../../templates';
 
 interface ListTemplatesResult {
 	[repositoryName: string]: string[];
@@ -16,24 +14,15 @@ export class ListTemplatesTask extends Task<ListTemplatesResult> {
 	}
 
 	async do(): Promise<ListTemplatesResult> {
-		// First find the nitric home directory
-		try {
-			const repoDirectories = fs
-				.readdirSync(TEMPLATE_DIR, {
-					withFileTypes: true,
-				})
-				.filter((dirent) => dirent.isDirectory())
-				.map((dirent) => dirent.name);
+		const repositories = await Repository.fromDefaultDirectory();
 
-			return repoDirectories.reduce((acc, repo) => {
-				const repoManifest = loadRepositoryManifest(repo);
-				return {
-					...acc,
-					[repo]: repoManifest.templates.map((template) => template.name),
-				};
-			}, {} as ListTemplatesResult);
-		} catch (error) {
-			throw new Error('Could not find templates directory');
-		}
+		return repositories.reduce((acc, repo) => {
+			const templates = repo.getTemplates();
+
+			return {
+				...acc,
+				[repo.getName()]: templates.map((t) => t.getName()),
+			};
+		}, {});
 	}
 }

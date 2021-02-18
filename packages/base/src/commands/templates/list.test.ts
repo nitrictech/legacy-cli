@@ -6,7 +6,9 @@ import List from './list';
 describe('nitric templates:list', () => {
 	let treeCreateSpy: jest.SpyInstance;
 	let treeDisplaySpy: jest.SpyInstance;
+	let logMsgSpy: jest.SpyInstance;
 	let trees: Tree[] = [];
+	let loggedMessages: string[] = [];
 
 	beforeEach(() => {
 		trees = [];
@@ -15,12 +17,39 @@ describe('nitric templates:list', () => {
 			trees.push(tmpTree);
 			return tmpTree;
 		});
-		treeDisplaySpy = jest.spyOn(Tree.prototype, 'display').mockImplementation(() => {});
+		loggedMessages = [];
+		logMsgSpy = jest.spyOn(cli, 'log').mockImplementation((msg: string | undefined) => {
+			loggedMessages.push(msg!);
+		});
+		treeDisplaySpy = jest.spyOn(Tree.prototype, 'display').mockImplementation(() => {
+			return;
+		});
 	});
 
 	afterEach(() => {
+		logMsgSpy.mockRestore();
 		treeCreateSpy.mockRestore();
 		treeDisplaySpy.mockRestore();
+	});
+
+	describe('Given no repositories', () => {
+		let listTemplatesTaskSpy: jest.SpyInstance;
+
+		beforeAll(() => {
+			listTemplatesTaskSpy = jest.spyOn(ListTemplatesTask.prototype, 'do').mockReturnValue(Promise.resolve({}));
+		});
+
+		afterAll(() => {
+			listTemplatesTaskSpy.mockRestore();
+		});
+
+		// Mock the ListRepositoryTask
+		it('Should print a message suggesting a run of repos add', async () => {
+			await List.run([]);
+			expect(loggedMessages).toContain(
+				'No templates found, try installing some repositories using nitric templates:repos add',
+			);
+		});
 	});
 
 	describe('Given a single repository', () => {

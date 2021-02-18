@@ -2,35 +2,40 @@ import { Task } from '@nitric/cli-common';
 import execa from 'execa';
 // import { oneLine } from "common-tags";
 import os from 'os';
-
-// const WIN32_INSTALL = oneLine`
-//   "%SystemRoot%\System32\WindowsPowerShell\v1.0\powershell.exe"
-//   -NoProfile -InputFormat None -ExecutionPolicy Bypass -Command
-//   "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; $version = '<version>'; iex ((New-Object System.Net.WebClient).DownloadString('https://get.pulumi.com/install.ps1')).Replace('\${latestVersion}', $version)" && SET "PATH=%PATH%;%USERPROFILE%\.pulumi\bin
-// `;
+import stream from 'stream';
 
 const UNIX_INSTALL = 'curl -fsSL https://get.docker.com | sh';
 
 export const DOCKER_TASK_NAME = 'Installing Docker 🐋';
 
+interface InstallDockerOptions {
+	stdin: stream.Readable;
+	stdout: stream.Writable;
+}
+
 /**
  * Installs Docker for the user
  */
 export class InstallDocker extends Task<void> {
-	constructor() {
+	private stdin: stream.Readable;
+	private stdout: stream.Writable;
+
+	constructor({ stdin, stdout }: InstallDockerOptions) {
 		super(DOCKER_TASK_NAME);
+		this.stdin = stdin;
+		this.stdout = stdout;
 	}
 
-	async do() {
-		// Install pulumi
+	async do(): Promise<void> {
 		if (os.platform() == 'win32') {
 			throw new Error('Windows not supported for automatic docker install');
 		}
 
 		try {
-			await execa.command(UNIX_INSTALL, { shell: true });
+			this.update('Installing docker from https://get.docker.com');
+			await execa.command(UNIX_INSTALL, { shell: true, stdin: this.stdin, stdout: this.stdout });
 		} catch (e) {
-			throw new Error(`Failed to install pulumi: ${e}`);
+			throw new Error(`Failed to install docker: ${e}`);
 		}
 	}
 }

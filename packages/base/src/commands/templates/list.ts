@@ -16,6 +16,11 @@ export default class ListTemplates extends Command {
 	async run(): Promise<void> {
 		const templates = await new ListTemplatesTask().do();
 
+		if (Object.keys(templates).length == 0) {
+			// No templates found
+			cli.log('No templates found, try installing some repositories using nitric templates:repos add');
+		}
+
 		const root = cli.tree();
 
 		Object.keys(templates).forEach((key) => {

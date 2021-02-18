@@ -1,7 +1,7 @@
 import { Command } from '@oclif/command';
 import cli from 'cli-ux';
 import Build, { createBuildTasks } from './build';
-import { readNitricDescriptor, wrapTaskForListr, NitricImage, NitricStack } from '@nitric/cli-common';
+import { Stack, wrapTaskForListr, NitricImage, NitricStack } from '@nitric/cli-common';
 import Listr from 'listr';
 import path from 'path';
 import Docker, { Network, Container, Volume } from 'dockerode';
@@ -313,11 +313,11 @@ export default class Run extends Command {
 		const { args, flags } = this.parse(Run);
 		const { file = './nitric.yaml' } = flags;
 		const { directory = '.' } = args;
-		const stack = readNitricDescriptor(path.join(directory, file));
+		const stack = await Stack.fromFile(path.join(directory, file));
 
 		// Run the function containers
 		try {
-			await runContainers(stack, directory);
+			await runContainers(stack.asNitricStack(), directory);
 
 			// Cleanup docker resources before exiting
 			process.on('SIGINT', cleanup);

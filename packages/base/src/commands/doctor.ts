@@ -1,10 +1,10 @@
 import { Command, flags } from '@oclif/command';
-import { wrapTaskForListr, Task } from '@nitric/cli-common';
-import Listr from 'listr';
+import { Task } from '@nitric/cli-common';
 import which from 'which';
 import cli from 'cli-ux';
 import emoji from 'node-emoji';
 import chalk from 'chalk';
+import stream from 'stream';
 import { InstallPulumi, InstallDocker } from '../tasks/doctor';
 
 interface Software {
@@ -26,7 +26,12 @@ const PREREQUISITE_SOFTWARE: Software[] = [
 	},
 ];
 
-const INSTALL_TASK_MAP: Record<string, { new (): Task<void> }> = {
+interface InputPassthroughOptions {
+	stdin: stream.Readable;
+	stdout: stream.Writable;
+}
+
+const INSTALL_TASK_MAP: Record<string, { new (opts: InputPassthroughOptions): Task<void> }> = {
 	pulumi: InstallPulumi,
 	docker: InstallDocker,
 };
@@ -65,12 +70,15 @@ export default class Doctor extends Command {
 		const uninstalledSoftware = statuses.filter(({ installed }) => !installed);
 
 		if (uninstalledSoftware.length > 0) {
-			const autoFix = await cli.confirm('Would you like nitric to try installing missing software? (y/n)');
+			const autoFix = await cli.confirm('Would you like nitric to try installing missing software? [y/n]');
 
 			if (autoFix) {
 				// Get install tasks...
 				const tasks = uninstalledSoftware.map((soft) => INSTALL_TASK_MAP[soft.name]);
-				await new Listr(tasks.map((task) => wrapTaskForListr(new task()))).run();
+				// await new Listr(tasks.map((task) => wrapTaskForListr(new task()))).run();
+				for (let i = 0; i < tasks.length; i++) {
+					await new tasks[i]({ stdin: process.stdin, stdout: process.stdout }).run();
+				}
 			} else {
 				cli.info('No worries, installation instructions for missing pre-requisites can be found below:');
 

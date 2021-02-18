@@ -1,9 +1,6 @@
 import { Observable } from 'rxjs';
-import * as YAML from 'yaml';
-import { NitricStack } from './types/';
 import { Task } from './task';
 import { ListrTask } from 'listr';
-import * as fs from 'fs';
 
 interface TaskFactory<T> {
 	name: string;
@@ -46,14 +43,14 @@ export function wrapTaskForListr<T>(
  * @param nitricStack the stack to write out
  * @param nitricFile the YAML file to write to
  */
-export function writeNitricDescriptor(nitricStack: NitricStack, nitricFile = './nitric.yaml'): void {
-	fs.writeFileSync(nitricFile, YAML.stringify(nitricStack));
-}
+//export function writeNitricDescriptor(nitricStack: NitricStack, nitricFile = './nitric.yaml'): void {
+//	fs.writeFileSync(nitricFile, YAML.stringify(nitricStack));
+//}
 
-export function readNitricDescriptor(nitricFile = './nitric.yaml'): NitricStack {
-	// Read the nitric file on the provided nitric file path
-	return YAML.parse(fs.readFileSync(nitricFile).toString('utf-8')) as NitricStack;
-}
+// export function readNitricDescriptor(nitricFile = './nitric.yaml'): NitricStack {
+// 	// Read the nitric file on the provided nitric file path
+// 	return YAML.parse(fs.readFileSync(nitricFile).toString('utf-8')) as NitricStack;
+// }
 
 export function dockerodeEvtToString({ stream, progress, status, errorDetail }): string {
 	if (errorDetail) {
@@ -73,3 +70,4 @@ export function dockerodeEvtToString({ stream, progress, status, errorDetail }):
 export * from './task';
 export * from './types';
 export * from './utils';
+export * from './stack';

@@ -1,26 +1,22 @@
-import { NitricRepositories } from '../../common/types';
-import * as utils from '../../utils';
-import * as git from 'simple-git';
 import { AddRepositoryTask } from './add';
-// Mock out external dependencies
-jest.mock('../../utils');
-jest.mock('fs');
-jest.mock('rimraf');
+import { Store, Repository } from '../../templates';
 
 describe('AddRepositoryTask', () => {
-	describe("Given the nitric template store contains an 'official' repository", () => {
-		let loadRepositoriesManifestSpy: jest.SpyInstance;
+	describe("Given the nitric default store contains an 'official' repository", () => {
+		let defaultStoreSpy: jest.SpyInstance;
 		beforeAll(() => {
 			// Mock the nitric repository stored here...
-			loadRepositoriesManifestSpy = jest.spyOn(utils, 'loadRepositoriesManifest').mockReturnValue({
-				official: {
-					location: 'https://mock.nitric.io/official',
-				},
-			} as NitricRepositories);
+			defaultStoreSpy = jest.spyOn(Store, 'fromDefault').mockReturnValue(
+				new Store({
+					official: {
+						location: 'https://test-location.test',
+					},
+				}),
+			);
 		});
 
 		afterAll(() => {
-			loadRepositoriesManifestSpy.mockRestore();
+			defaultStoreSpy.mockRestore();
 		});
 
 		describe("When adding a custom repository with the alias 'official'", () => {
@@ -35,15 +31,15 @@ describe('AddRepositoryTask', () => {
 		});
 
 		describe('When adding a custom repository under a custom alias', () => {
-			let gitCloneMock: jest.SpyInstance;
+			let repositoryCheckoutMock: jest.SpyInstance;
 			beforeAll(() => {
-				gitCloneMock = jest.spyOn(git, 'gitP').mockReturnValue({
-					clone: jest.fn(),
-				} as any);
+				repositoryCheckoutMock = jest
+					.spyOn(Repository, 'checkout')
+					.mockReturnValue(Promise.resolve(new Repository('testName', 'testPath', [])));
 			});
 
 			afterAll(() => {
-				gitCloneMock.mockRestore();
+				repositoryCheckoutMock.mockRestore();
 			});
 
 			it('Should successfully add the repository', async () => {
@@ -56,37 +52,13 @@ describe('AddRepositoryTask', () => {
 			});
 		});
 
-		describe('When adding a custom repository that errors on clone', () => {
-			let gitCloneMock: jest.SpyInstance;
-			beforeAll(() => {
-				gitCloneMock = jest.spyOn(git, 'gitP').mockReturnValue({
-					clone: async () => {
-						throw new Error('Unable to check out repository');
-					},
-				} as any);
-			});
-
-			afterAll(() => {
-				gitCloneMock.mockRestore();
-			});
-
-			it('Should throw the error provided by gitP.clone', async () => {
-				await expect(
-					new AddRepositoryTask({
-						alias: 'my-repo',
-						url: 'http://my-fake-repo',
-					}).do(),
-				).rejects.toThrowError('Unable to check out repository');
-			});
-		});
-
-		describe('When adding a supported repository for an alias that does not exist', () => {
+		describe('When adding a repository for an alias that does not exist', () => {
 			it('Should throw an error', async () => {
 				await expect(
 					new AddRepositoryTask({
 						alias: 'official2',
 					}).do(),
-				).rejects.toThrowError('No registered repository exists with name: official2');
+				).rejects.toThrowError('Repository official2 not found in store');
 			});
 		});
 	});

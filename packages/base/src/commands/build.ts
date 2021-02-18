@@ -1,5 +1,5 @@
 import { Command, flags } from '@oclif/command';
-import { readNitricDescriptor, wrapTaskForListr, NitricStack, NitricImage } from '@nitric/cli-common';
+import { wrapTaskForListr, NitricStack, Stack, NitricImage } from '@nitric/cli-common';
 import { BuildFunctionTask } from '../tasks/build';
 import Listr, { ListrTask } from 'listr';
 import path from 'path';
@@ -60,10 +60,10 @@ export default class Build extends Command {
 		const { args, flags } = this.parse(Build);
 		const { directory = '.' } = args;
 		const { file = './nitric.yaml', provider = 'local' } = flags;
-		const stack = readNitricDescriptor(path.join(directory, file));
+		const stack = await Stack.fromFile(path.join(directory, file));
 
 		try {
-			return await createBuildTasks(stack, directory, provider).run();
+			return await createBuildTasks(stack.asNitricStack(), directory, provider).run();
 		} catch (error) {
 			const origErrs = error.errors && error.errors.length ? error.errors : error;
 			throw new Error(`Something went wrong, see error details inline above.\n ${origErrs}`);
