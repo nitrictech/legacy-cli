@@ -9,13 +9,13 @@ import {
 	NitricImage,
 	Task,
 	getTagNameForFunction,
+	Repository
 } from '@nitric/cli-common';
 import Docker from 'dockerode';
 import streamToPromise from 'stream-to-promise';
 import path from 'path';
 import multimatch from 'multimatch';
 import execa from 'execa';
-import { Repository } from '../../templates';
 
 export function createNitricHome(): void {
 	if (!fs.existsSync(NITRIC_HOME)) {

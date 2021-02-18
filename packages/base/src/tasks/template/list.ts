@@ -1,5 +1,4 @@
-import { Task } from '@nitric/cli-common';
-import { Repository } from '../../templates';
+import { Task, Repository } from '@nitric/cli-common';
 
 interface ListTemplatesResult {
 	[repositoryName: string]: string[];

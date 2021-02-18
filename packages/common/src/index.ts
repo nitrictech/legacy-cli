@@ -71,3 +71,4 @@ export * from './task';
 export * from './types';
 export * from './utils';
 export * from './stack';
+export * from './templates';

@@ -1,12 +1,11 @@
 import { Command, flags } from '@oclif/command';
-import { wrapTaskForListr } from '@nitric/cli-common';
+import { wrapTaskForListr, Repository } from '@nitric/cli-common';
 import { MakeProjectTask, MakeFunctionTask } from '../../tasks/make';
 import { AddRepositoryTask } from '../../tasks/repository/add';
 import { UpdateStoreTask } from '../../tasks/store/update';
 import Listr, { ListrTask } from 'listr';
 import cli from 'cli-ux';
 import inquirer from 'inquirer';
-import { Repository } from '../../templates';
 
 const projectNameRegex = /^[a-z]+(-[a-z]+)*$/g;
 

@@ -1,6 +1,5 @@
 // import { templateFunctionPath } from '../../common/paths';
-import { Stack, Task } from '@nitric/cli-common';
-import { Repository, Template } from '../../templates';
+import { Stack, Task, Repository, Template } from '@nitric/cli-common';
 import path from 'path';
 
 interface MakeFunctionTaskOpts {
