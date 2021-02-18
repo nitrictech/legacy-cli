@@ -55,24 +55,22 @@ export class Repository {
 	}
 
 	hasTemplate(templateName: string): boolean {
-		const descriptor = this.templateDescriptors.find(({ name }) => name === templateName);
-
-		if (!descriptor) {
-			return false;
-		}
-
-		return true;
+		return !!this.templateDescriptors.find(({ name }) => {
+			return name === templateName;
+		});
 	}
 
 	/**
-	 * Get a template from this repository
-	 * @param name
+	 * Get a template from this repository by its name
+	 * @param name the name of the template within the repository, e.g. 'node12', not 'official/node12'.
 	 */
 	getTemplate(templateName: string): Template {
-		const descriptor = this.templateDescriptors.find(({ name }) => name === templateName);
+		const descriptor = this.templateDescriptors.find(({ name }) => {
+			return name === templateName;
+		});
 
 		if (!descriptor) {
-			throw new Error(`Template ${templateName} does not exist is repository ${this.name}`);
+			throw new Error(`Template ${templateName} does not exist in repository ${this.name}`);
 		}
 
 		return new Template(descriptor.name, descriptor.lang, path.join(this.path, descriptor.path), descriptor.codeDir);

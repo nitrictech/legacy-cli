@@ -101,21 +101,23 @@ export class BuildFunctionTask extends Task<NitricImage> {
 		const functionStagingDirectory = path.join(STAGING_DIR, this.stackName, this.func.name);
 		const excludeFiles = this.func.excludes || [];
 
+		const [repoName, templateName] = this.func.runtime.split('/');
+
 		// Setup template staging dir
 		const templatePipe = tar.extract(functionStagingDirectory);
 		// Setup user /function staging dir
 		const functionPipe = tar.extract(`${functionStagingDirectory}/function`);
 
-		const templateRepo = repos.find((repo) => repo.hasTemplate(this.func.runtime));
+		const templateRepo = repos.find((repo) => repo.getName() === repoName);
 
 		// Validate template is installed/exists
 		// TODO: in future, we should attempt to download/install the template if possible
 		if (!templateRepo) {
-			throw new Error(`Template ${this.func.runtime} is not available.`);
+			throw new Error(`Template repository ${repoName} was not found.`);
 		}
 
 		const functionDirectory = path.join(this.baseDir, this.func.path);
-		const templateDirectory = templateRepo.getTemplate(this.func.runtime).getPath();
+		const templateDirectory = templateRepo.getTemplate(templateName).getPath();
 
 		// Run provdided build scripts if any relative to
 		// the function project
