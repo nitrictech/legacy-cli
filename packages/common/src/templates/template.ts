@@ -52,7 +52,7 @@ export class Template {
 		const codePath = template.codePath || './function';
 		const outStream = tar.extract(outPath, {
 			// Don't incude the code dir
-			ignore: (name) => !name.includes(path.normalize(codePath)),
+			ignore: (name) => name.includes(path.normalize(codePath)),
 		});
 		tar.pack(inPath).pipe(outStream);
 		return streamToPromise(outStream);

@@ -83,70 +83,70 @@ interface BuildFunctionTaskOptions {
 
 export class BuildFunctionTask extends Task<NitricImage> {
 	private func: NitricFunction;
-	private baseDir: string;
+	//private baseDir: string;
 	private stackName: string;
 	private provider: string;
 
-	constructor({ func, baseDir, stackName, provider = 'local' }: BuildFunctionTaskOptions) {
+	constructor({ func, stackName, provider = 'local' }: BuildFunctionTaskOptions) {
 		super(`${func.name}`);
 		this.func = func;
-		this.baseDir = baseDir;
+		//this.baseDir = baseDir;
 		this.stackName = stackName;
 		this.provider = provider;
 	}
 
 	async do(): Promise<NitricImage> {
 		const docker = new Docker();
-		const repos = Repository.fromDefaultDirectory();
+		//const repos = Repository.fromDefaultDirectory();
 		const functionStagingDirectory = path.join(STAGING_DIR, this.stackName, this.func.name);
-		const excludeFiles = this.func.excludes || [];
+		//const excludeFiles = this.func.excludes || [];
 
-		const [repoName, templateName] = this.func.runtime.split('/');
+		//const [repoName, templateName] = this.func.runtime.split('/');
 
 		// Setup template staging dir
-		const templatePipe = tar.extract(functionStagingDirectory);
+		// const templatePipe = tar.extract(functionStagingDirectory);
 		// Setup user /function staging dir
-		const functionPipe = tar.extract(`${functionStagingDirectory}/function`);
+		// const functionPipe = tar.extract(`${functionStagingDirectory}/function`);
 
-		const templateRepo = repos.find((repo) => repo.getName() === repoName);
+		// const templateRepo = repos.find((repo) => repo.getName() === repoName);
 
 		// Validate template is installed/exists
 		// TODO: in future, we should attempt to download/install the template if possible
-		if (!templateRepo) {
-			throw new Error(`Template repository ${repoName} was not found.`);
-		}
+		//if (!templateRepo) {
+		//	throw new Error(`Template repository ${repoName} was not found.`);
+		//}
 
-		const functionDirectory = path.join(this.baseDir, this.func.path);
-		const templateDirectory = templateRepo.getTemplate(templateName).getPath();
+		//const functionDirectory = path.join(this.baseDir, this.func.path);
+		//const templateDirectory = templateRepo.getTemplate(templateName).getPath();
 
-		// Run provdided build scripts if any relative to
-		// the function project
-		if (this.func.buildScripts) {
-			this.update('executing build scripts');
-			// Run build scripts using execa
-			this.func.buildScripts.map((script) => {
-				this.update(`executing build script: ${script}`);
-				return execa.commandSync(script, {
-					cwd: functionDirectory,
-				});
-			});
-		}
+		//// Run provdided build scripts if any relative to
+		//// the function project
+		//if (this.func.buildScripts) {
+		//	this.update('executing build scripts');
+		//	// Run build scripts using execa
+		//	this.func.buildScripts.map((script) => {
+		//		this.update(`executing build script: ${script}`);
+		//		return execa.commandSync(script, {
+		//			cwd: functionDirectory,
+		//		});
+		//	});
+		//}
 
-		const excludes = [...excludeFiles, ...getDockerIgnoreFiles(templateDirectory)];
+		//const excludes = [...excludeFiles, ...getDockerIgnoreFiles(templateDirectory)];
 
-		// Copy runtime template and /function to staging dir
-		tar.pack(templateDirectory).pipe(templatePipe);
-		await streamToPromise(templatePipe);
-		let packOptions = {};
-		if (excludes.length) {
-			packOptions = {
-				...packOptions,
-				ignore: (entry: string): boolean => multimatch(entry, excludes).length > 0,
-			};
-		}
+		//// Copy runtime template and /function to staging dir
+		//tar.pack(templateDirectory).pipe(templatePipe);
+		//await streamToPromise(templatePipe);
+		//let packOptions = {};
+		//if (excludes.length) {
+		//	packOptions = {
+		//		...packOptions,
+		//		ignore: (entry: string): boolean => multimatch(entry, excludes).length > 0,
+		//	};
+		//}
 
-		tar.pack(functionDirectory, packOptions).pipe(functionPipe);
-		await streamToPromise(functionPipe);
+		//tar.pack(functionDirectory, packOptions).pipe(functionPipe);
+		//await streamToPromise(functionPipe);
 
 		// Tarball the required files for the image build
 		const pack = tar.pack(functionStagingDirectory);

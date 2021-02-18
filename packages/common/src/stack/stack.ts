@@ -37,6 +37,10 @@ export class Stack {
 		this.apis = apis;
 	}
 
+	getName(): string {
+		return this.name;
+	}
+
 	asNitricStack(): NitricStack {
 		return {
 			name: this.name,
@@ -148,17 +152,6 @@ export class Stack {
 			const functionPipe = tar.extract(`${functionStagingDir}/function`);
 			// Now we need to copy the actual function code, the the above directory/function directory
 			const functionDirectory = path.join(path.dirname(stack.file), f.path);
-
-			//const dockerIgnoreFiles = await Template.getDockerIgnoreFiles(template);
-			//const excludes = [...f.excludes!, ...dockerIgnoreFiles];
-
-			//let packOptions = {};
-			//if (excludes.length) {
-			//	packOptions = {
-			//		...packOptions,
-			//		ignore: (entry: string): boolean => multimatch(entry, excludes).length > 0,
-			//	};
-			//}
 
 			// tar.pack(functionDirectory, packOptions).pipe(functionPipe);
 			tar.pack(functionDirectory).pipe(functionPipe);
