@@ -10,6 +10,11 @@ import {
 } from '../types';
 import fs from 'fs';
 import YAML from 'yaml';
+import { Repository, Template } from '../templates';
+import { STAGING_DIR } from '../paths';
+import tar from 'tar-fs';
+import streamToPromise from 'stream-to-promise';
+//import multimatch from 'multimatch';
 
 export class Stack {
 	private file: string;
@@ -98,5 +103,67 @@ export class Stack {
 	 */
 	static async fromDirectory(dir: string): Promise<Stack> {
 		return Stack.fromFile(path.join(dir, './nitric.yaml'));
+	}
+
+	/**
+	 * The stack to prepare for staging
+	 * TODO: We'll want to decompose this into more functions
+	 * @param stack
+	 */
+	static async stage(stack: Stack): Promise<void> {
+		const repos = Repository.fromDefaultDirectory();
+
+		const stackStagingDirectory = `${STAGING_DIR}/${stack.name}`;
+
+		// Clean staging directory
+		if (fs.existsSync(stackStagingDirectory)) {
+			await fs.promises.rmdir(stackStagingDirectory);
+		}
+		
+		await fs.promises.mkdir(stackStagingDirectory, { recursive: true });
+		
+		// Stage each function
+		await Promise.all(stack.funcs!.map(async (f) => {
+			const functionStagingDir = path.join(stackStagingDirectory, f.name);
+			const [repoName, tmplName] = f.runtime.split('/');
+
+			const repo = repos.find(r => r.getName() === repoName);
+			if (!repo) {
+				throw new Error(`Repository ${repoName} could not be found`);
+			}
+
+			if (!repo.hasTemplate(tmplName)) {
+				throw new Error(`Repository ${repoName} does not contain template ${tmplName}`);
+			}
+
+			const template = repo.getTemplate(tmplName);
+
+			// TODO: Do we need to do this?
+			await fs.promises.mkdir(functionStagingDir, { recursive: true });
+
+			await Template.copyRuntimeTo(template, functionStagingDir);
+
+			// TODO: Should we rm or exclude the code directory of the Template, to ensure
+			// extra files don't make it through?
+			const functionPipe = tar.extract(`${functionStagingDir}/function`);
+			// Now we need to copy the actual function code, the the above directory/function directory
+			const functionDirectory = path.join(path.dirname(stack.file), f.path);
+
+			//const dockerIgnoreFiles = await Template.getDockerIgnoreFiles(template);
+			//const excludes = [...f.excludes!, ...dockerIgnoreFiles];
+
+			//let packOptions = {};
+			//if (excludes.length) {
+			//	packOptions = {
+			//		...packOptions,
+			//		ignore: (entry: string): boolean => multimatch(entry, excludes).length > 0,
+			//	};
+			//}
+
+			// tar.pack(functionDirectory, packOptions).pipe(functionPipe);
+			tar.pack(functionDirectory).pipe(functionPipe);
+			
+			await streamToPromise(functionPipe);
+		}));
 	}
 }
