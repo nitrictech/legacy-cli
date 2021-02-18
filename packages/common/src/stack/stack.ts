@@ -14,6 +14,7 @@ import { Repository, Template } from '../templates';
 import { STAGING_DIR } from '../paths';
 import tar from 'tar-fs';
 import streamToPromise from 'stream-to-promise';
+import rimraf from 'rimraf';
 //import multimatch from 'multimatch';
 
 export class Stack {
@@ -121,7 +122,15 @@ export class Stack {
 
 		// Clean staging directory
 		if (fs.existsSync(stackStagingDirectory)) {
-			await fs.promises.rmdir(stackStagingDirectory);
+			await new Promise<void>((res, rej) => {
+				rimraf(stackStagingDirectory, (err) => {
+					if (err) {
+						rej(err);
+					} else {
+						res();
+					}
+				})
+			});
 		}
 		
 		await fs.promises.mkdir(stackStagingDirectory, { recursive: true });
