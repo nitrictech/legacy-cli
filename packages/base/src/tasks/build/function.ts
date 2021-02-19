@@ -1,4 +1,3 @@
-import { STAGING_DIR } from '../../common/paths';
 import tar from 'tar-fs';
 import {
 	dockerodeEvtToString,
@@ -6,6 +5,7 @@ import {
 	NitricImage,
 	Task,
 	getTagNameForFunction,
+	STAGING_DIR
 } from '@nitric/cli-common';
 import Docker from 'dockerode';
 import path from 'path';

@@ -5,7 +5,7 @@ describe('BuildFunctionTask:', () => {
 	beforeAll(() => {
 		jest.mock('dockerode');
 		jest.mock('execa');
-		jest.mock('../../templates');
+		jest.mock('@nitric/cli-common');
 	});
 
 	it('placeholder', () => {

@@ -1,5 +1,5 @@
 import { AddRepositoryTask } from './add';
-import { Store, Repository } from '../../templates';
+import { Store, Repository } from '@nitric/cli-common';
 
 describe('AddRepositoryTask', () => {
 	describe("Given the nitric default store contains an 'official' repository", () => {
