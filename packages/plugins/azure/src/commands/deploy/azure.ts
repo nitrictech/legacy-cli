@@ -1,6 +1,8 @@
 import { Command, flags } from '@oclif/command';
 import Listr from 'listr';
 import inquirer from 'inquirer';
+import { Stack, StageStackTask, wrapTaskForListr } from '@nitric/cli-common';
+import path from 'path';
 
 // XXX: Commented out regions do not support cloud run
 const SUPPORTED_REGIONS = [
@@ -54,12 +56,17 @@ export default class DeployCmd extends Command {
 			promptFlags = await inquirer.prompt(prompts);
 		}
 
-		const { file: _, region } = { ...flags, ...promptFlags };
+		const { file, region } = { ...flags, ...promptFlags };
 
 		if (!region) {
 			throw new Error('Region must be provided, for prompts use the --guided flag');
 		}
 
-		new Listr([]).run();
+		const stack = await Stack.fromFile(path.join(dir, file));
+
+		new Listr([
+			wrapTaskForListr(new StageStackTask({ stack })),
+			
+		]).run();
 	}
 }

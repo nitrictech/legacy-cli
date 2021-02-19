@@ -1,6 +1,6 @@
 import { NitricStack, Task } from "@nitric/cli-common";
 import { LocalWorkspace } from "@pulumi/pulumi/x/automation"
-import { core, storage, appservice } from "@pulumi/azure";
+import { core, storage, appservice, containerservice } from "@pulumi/azure";
 import { createBucket } from "./bucket";
 import { createTopic } from "./topic";
 
@@ -35,6 +35,12 @@ export class Deploy extends Task<void> {
 						// Create a new resource group for the nitric stack
 						// This'll be used for basically everything we deploy in this stack
 						const resourceGroup = new core.ResourceGroup(stack.name);
+
+						const registry = new containerservice.Registry("myregistry", {
+							resourceGroupName: resourceGroup.name,
+							adminEnabled: true,
+							sku: "Basic",
+						});
 
 						// Deploy
 						const appServicePlan = new appservice.Plan("examplePlan", {
