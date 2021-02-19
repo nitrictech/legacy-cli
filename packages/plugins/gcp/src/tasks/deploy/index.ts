@@ -54,10 +54,6 @@ export class Deploy extends Task<void> {
 
 						const stackFunctions = stack.getFunctions();
 
-						if (stackFunctions === null) {
-							throw new Error("WTF!!!");
-						}
-
 						const deployedFunctions = stackFunctions.map((f) =>
 							createFunction(region, f, deployedTopics, imageDeploymentToken!, gcpProject),
 						);
