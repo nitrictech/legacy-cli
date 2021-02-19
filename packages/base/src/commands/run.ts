@@ -199,8 +199,9 @@ export default class Run extends Command {
 	/**
 	 * Runs a container for each function in the Nitric Stack
 	 */
-	runContainers = async (stack: NitricStack, directory: string): Promise<void> => {
-		const { apis = [] } = stack;
+	runContainers = async (stack: Stack, directory: string): Promise<void> => {
+		const nitricStack = stack.asNitricStack();
+		const { apis = [] } = nitricStack;
 		cli.action.stop();
 
 		// Build the container images for each function in the Nitric Stack
@@ -216,7 +217,7 @@ export default class Run extends Command {
 		const runGatewayOptions = await Promise.all(
 			apis.map(async (api) => {
 				return {
-					stackName: stack.name,
+					stackName: nitricStack.name,
 					api,
 					port: await getPort({ port: portRange }),
 				} as RunGatewayTaskOptions;
@@ -228,13 +229,13 @@ export default class Run extends Command {
 				return {
 					image,
 					port: await getPort({ port: portRange }),
-					subscriptions: getContainerSubscriptions(stack),
+					subscriptions: getContainerSubscriptions(nitricStack),
 				} as RunFunctionTaskOptions;
 			}),
 		);
 
 		// Capture the results of running tasks to setup docker network, volume and function containers
-		const runTaskResults = await createRunTasks(stack.name, runTaskOptions, runGatewayOptions, this.docker).run();
+		const runTaskResults = await createRunTasks(nitricStack.name, runTaskOptions, runGatewayOptions, this.docker).run();
 
 		// Capture created docker resources for cleanup on run termination (see cleanup())
 		const {
@@ -315,9 +316,11 @@ export default class Run extends Command {
 		const { directory = '.' } = args;
 		const stack = await Stack.fromFile(path.join(directory, file));
 
+		console.log("stack:", stack);
+
 		// Run the function containers
 		try {
-			await runContainers(stack.asNitricStack(), directory);
+			await runContainers(stack, directory);
 
 			// Cleanup docker resources before exiting
 			process.on('SIGINT', cleanup);
