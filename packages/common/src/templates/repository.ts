@@ -72,7 +72,7 @@ export class Repository {
 		const descriptor = this.templateDescriptors.find(({ name }) => name === templateName);
 
 		if (!descriptor) {
-			throw new Error(`Template ${templateName} does not exist is repository ${this.name}`);
+			throw new Error(`Template ${templateName} does not exist in repository ${this.name}`);
 		}
 
 		return new Template(descriptor.name, descriptor.lang, path.join(this.path, descriptor.path), descriptor.codeDir);
