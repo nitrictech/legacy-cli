@@ -1,5 +1,5 @@
 import { Command, flags } from '@oclif/command';
-import { wrapTaskForListr, NitricStack, Stack, NitricImage, StageStackTask } from '@nitric/cli-common';
+import { wrapTaskForListr, Stack, NitricImage, StageStackTask } from '@nitric/cli-common';
 import { BuildFunctionTask } from '../tasks/build';
 import Listr, { ListrTask } from 'listr';
 import path from 'path';
