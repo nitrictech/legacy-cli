@@ -7,28 +7,27 @@ interface DownOptions {
 	stackName?: string;
 }
 
+const NO_OP = async (): Promise<void> => { return; }
+
 export class Down extends Task<void> {
-	private region: string;
 	private stack: NitricStack;
 
-	constructor({ stack, region }: DownOptions) {
+	constructor({ stack }: DownOptions) {
 		super(`Tearing Down Stack: ${stack.name}`);
 		this.stack = stack;
-		this.region = region;
 	}
 
 	async do(): Promise<void> {
-		const { stack, region } = this;
+		const { stack, } = this;
 
 		try {
 			const pulumiStack = await LocalWorkspace.selectStack({
 				projectName: stack.name,
 				stackName: stack.name,
 				// generate our pulumi program on the fly from the POST body
-				program: async () => {},
+				program: NO_OP,
 			});
 
-			await pulumiStack.setConfig('aws:region', { value: region });
 			const res = await pulumiStack.destroy({ onOutput: this.update.bind(this) });
 			console.log(res);
 		} catch (e) {

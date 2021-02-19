@@ -736,6 +736,7 @@ __metadata:
     "@oclif/dev-cli": ^1
     "@oclif/plugin-help": ^3.2.2
     "@pulumi/aws": ^3.28.1
+    "@pulumi/docker": ^2.8.1
     "@pulumi/pulumi": ^2.20.0
     "@types/lodash": ^4.14.168
     "@types/node": ^10

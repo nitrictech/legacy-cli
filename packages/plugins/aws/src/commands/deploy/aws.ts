@@ -1,6 +1,6 @@
 import { Command, flags } from '@oclif/command';
 import { Deploy, PushImage } from '../../tasks/deploy';
-import { wrapTaskForListr, Stack } from '@nitric/cli-common';
+import { wrapTaskForListr, Stack, StageStackTask } from '@nitric/cli-common';
 import Listr from 'listr';
 import path from 'path';
 import AWS from 'aws-sdk';
@@ -94,28 +94,11 @@ export default class DeployCmd extends Command {
 
 		const accountId = account || (derivedAccountId as string);
 		const stackDefinitionPath = path.join(dir, file);
-		const stack = (await Stack.fromFile(stackDefinitionPath)).asNitricStack();
-		const { functions = [] } = stack;
+		const stack = await Stack.fromFile(stackDefinitionPath);
 
 		try {
 			await new Listr([
-				{
-					title: 'Pushing Images to ECR',
-					task: (): Listr =>
-						new Listr(
-							functions.map((func) =>
-								wrapTaskForListr(
-									new PushImage({
-										account: accountId,
-										region: region,
-										stackName: stack.name,
-										func,
-									}),
-								),
-							),
-							{ concurrent: true },
-						),
-				},
+				wrapTaskForListr(new StageStackTask({ stack })),
 				wrapTaskForListr(new Deploy({ stack, account: accountId, region })),
 			]).run();
 		} catch (error) {
