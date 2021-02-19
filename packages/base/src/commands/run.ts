@@ -206,7 +206,8 @@ export default class Run extends Command {
 
 		// Build the container images for each function in the Nitric Stack
 		const builtImages = await createBuildTasks(stack, directory).run();
-		let images = Object.values(builtImages) as NitricImage[];
+		// Filter out undefined and non image results from build tasks
+		let images = Object.values(builtImages).filter((i: any) => i && i.func) as NitricImage[];
 
 		// Generate a range of ports to try to assign to function containers
 		const portRange = getPortRange();
@@ -215,7 +216,7 @@ export default class Run extends Command {
 		images = sortImages(images);
 
 		const runGatewayOptions = await Promise.all(
-			apis.map(async (api) => {
+			(apis || []).map(async (api) => {
 				return {
 					stackName: nitricStack.name,
 					api,
@@ -316,8 +317,6 @@ export default class Run extends Command {
 		const { directory = '.' } = args;
 		const stack = await Stack.fromFile(path.join(directory, file));
 
-		console.log("stack:", stack);
-
 		// Run the function containers
 		try {
 			await runContainers(stack, directory);
@@ -325,7 +324,7 @@ export default class Run extends Command {
 			// Cleanup docker resources before exiting
 			process.on('SIGINT', cleanup);
 		} catch (error) {
-			const origErrs: string[] = error.errors && error.errors.length ? error.errors : [error.message];
+			const origErrs: string[] = error.errors && error.errors.length ? error.errors : [error.stack];
 			throw new Error(`Something went wrong, see error details inline above.\n ${origErrs.join('\n')}`);
 		}
 	};
