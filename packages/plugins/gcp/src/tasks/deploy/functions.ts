@@ -1,20 +1,42 @@
-import { NitricFunction, getTagNameForFunction } from '@nitric/cli-common';
-import { getGcrHost } from './regions';
+import { Function } from '@nitric/cli-common';
 import { DeployedFunction, DeployedTopic } from './types';
 import { cloudrun, serviceaccount, pubsub } from '@pulumi/gcp';
+import * as docker from "@pulumi/docker";
+import * as pulumi from "@pulumi/pulumi";
 
 export function createFunction(
-	project: string,
-	stackName: string,
 	region: string,
-	func: NitricFunction,
+	func: Function,
 	topics: DeployedTopic[],
+	authToken: string,
+	gcpProject: string,
 ): DeployedFunction {
-	const { minScale = 0, maxScale = 10 } = func;
+	const nitricFunc = func.asNitricFunction()
+	const { name, minScale = 0, maxScale = 10, subs = [] } = nitricFunc;
 
-	const grcHost = getGcrHost(region);
+	//const grcHost = getGcrHost(region);
+
+	// build and push the image with docker
+	const deployedImage = new docker.Image(`${name}-gcr-image`, {
+		imageName: pulumi.interpolate`gcr.io/${gcpProject}/${func.getImageTagName()}`,
+		build: {
+			// Staging directory
+			context: func.getStagingDirectory(),
+			args: {
+				provider: 'gcp'
+			},
+		},
+		registry: {
+			server: `https://gcr.io`,
+			username: 'oauth2accesstoken',
+			password: authToken,
+		}
+	});
+
+	//deployedImage.registryServer
+
 	// Deploy the function
-	const deployedFunction = new cloudrun.Service(func.name, {
+	const deployedFunction = new cloudrun.Service(name, {
 		// project: project,
 		location: region,
 		template: {
@@ -27,7 +49,7 @@ export function createFunction(
 			spec: {
 				containers: [
 					{
-						image: `${grcHost}/${project}/${getTagNameForFunction(stackName, 'gcp', func)}`,
+						image: deployedImage.imageName,
 						ports: [
 							{
 								containerPort: 9001,
@@ -40,18 +62,18 @@ export function createFunction(
 	});
 
 	// wire up its subscriptions
-	if (func.subs) {
+	if (subs) {
 		// Create an account for invoking this function via subscriptions
 		// TODO: Do we want to make this one account for subscription in future
 		// TODO: We will likely configure this via eventarc in the future
-		const invokerAccount = new serviceaccount.Account(`${func.name}-subscription-invoker`, {
-			accountId: `${func.name}-subscription-invoker`,
+		const invokerAccount = new serviceaccount.Account(`${name}-subscription-invoker`, {
+			accountId: `${name}-subscription-invoker`,
 		});
 
-		func.subs.forEach((sub) => {
+		subs.forEach((sub) => {
 			const topic = topics.find((t) => t.name === sub.topic);
 			if (topic) {
-				new pubsub.Subscription(`${func.name}-${sub.topic}-subscription`, {
+				new pubsub.Subscription(`${name}-${sub.topic}-subscription`, {
 					topic: topic.pubsub.name,
 					// This is a measure of how much processing time the task really gets for subscriptions
 					// at the moment we rely on them returning to the membrane so it can return the status of the task processing
@@ -79,7 +101,7 @@ export function createFunction(
 
 	// return the new function
 	return {
-		...func,
+		...func.asNitricFunction(),
 		cloudRun: deployedFunction,
 	};
 }
