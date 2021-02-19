@@ -2,9 +2,7 @@ import { NitricStack, Task } from '@nitric/cli-common';
 import { LocalWorkspace } from '@pulumi/pulumi/x/automation';
 
 interface DownOptions {
-	region: string;
 	stack: NitricStack;
-	stackName?: string;
 }
 
 const NO_OP = async (): Promise<void> => { return; }

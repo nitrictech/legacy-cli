@@ -7,19 +7,9 @@ import { Down } from '../../tasks/down';
 export default class DownCmd extends Command {
 	static description = 'Delete a CloudFormation Stack on AWS that was deployed by $ nitric deploy:aws';
 
-	static examples = [`$ nitric down:aws . -s MyCloudFormationStack -r us-east-1`];
+	static examples = [`$ nitric down:aws`];
 
 	static flags = {
-		stackName: flags.string({
-			char: 's',
-			description: 'CloudFormation stack name, defaults to the name in the Nitric file if not provided.',
-			required: false,
-		}),
-		region: flags.string({
-			char: 'r',
-			description: 'AWS Region to tear down the stack in',
-			required: true,
-		}),
 		file: flags.string({ char: 'f' }),
 		help: flags.help({ char: 'h' }),
 	};
@@ -28,14 +18,14 @@ export default class DownCmd extends Command {
 
 	async run(): Promise<any> {
 		const { args, flags } = this.parse(DownCmd);
-		const { dir } = args;
-		const { file = 'nitric.yaml', region, stackName } = flags;
+		const { dir = '.' } = args;
+		const { file = 'nitric.yaml' } = flags;
 
 		const stackDefinitionPath = path.join(dir, file);
 		const stack = (await Stack.fromFile(stackDefinitionPath)).asNitricStack();
 
 		try {
-			await new Listr([wrapTaskForListr(new Down({ stackName, stack, region }))]).run();
+			await new Listr([wrapTaskForListr(new Down({ stack }))]).run();
 		} catch (error) {
 			// eat this error to avoid duplicate console output.
 		}
