@@ -1,9 +1,10 @@
 import { NitricQueue } from "@nitric/cli-common";
-import { storage } from "@pulumi/azure-nextgen";
+import { storage, resources } from "@pulumi/azure-nextgen";
 
-export function createQueue(storageAcct: storage.Account, queue: NitricQueue): storage.Queue {
-	return new storage.Queue(queue.name, {
-		name: queue.name,
-		storageAccountName: storageAcct.name,
+export function createQueue(resourceGroup: resources.latest.ResourceGroup, storageAcct: storage.latest.StorageAccount, queue: NitricQueue): storage.latest.Queue {
+	return new storage.latest.Queue(queue.name, {
+		resourceGroupName: resourceGroup.name,
+		accountName: storageAcct.name,
+		queueName: queue.name,
 	});
 }

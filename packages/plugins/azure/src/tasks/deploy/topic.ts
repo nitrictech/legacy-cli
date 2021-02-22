@@ -1,11 +1,11 @@
 import { NitricTopic } from "@nitric/cli-common";
-import { core, eventgrid } from "@pulumi/azure-nextgen";
+import { resources, eventgrid } from "@pulumi/azure-nextgen";
 import { DeployedTopic } from "../types";
 
 // Create a topic on azure event grid
-export function createTopic(resourceGroup: core.ResourceGroup, topic: NitricTopic): DeployedTopic {
-	const deployedTopic = new eventgrid.Topic(topic.name, {
-		name: topic.name,
+export function createTopic(resourceGroup: resources.latest.ResourceGroup, topic: NitricTopic): DeployedTopic {
+	const deployedTopic = new eventgrid.latest.Topic(topic.name, {
+		topicName: topic.name,
 		resourceGroupName: resourceGroup.name,
 	});
 
