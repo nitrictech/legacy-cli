@@ -1,7 +1,7 @@
 import { Command, flags } from '@oclif/command';
-import { Deploy, PushImage } from '../../tasks/deploy';
-import { wrapTaskForListr, Stack, NitricStack, StageStackTask } from '@nitric/cli-common';
-import Listr, { ListrTask } from 'listr';
+import { Deploy } from '../../tasks/deploy';
+import { wrapTaskForListr, Stack, StageStackTask } from '@nitric/cli-common';
+import Listr from 'listr';
 import path from 'path';
 import { google } from 'googleapis';
 import inquirer from 'inquirer';

@@ -1,5 +1,5 @@
-import { Stack } from "../stack";
-import { Task } from "../task";
+import { Stack } from '../stack';
+import { Task } from '../task';
 
 interface StageStackOptions {
 	stack: Stack;
@@ -9,7 +9,7 @@ export class StageStackTask extends Task<void> {
 	private stack: Stack;
 
 	constructor({ stack }: StageStackOptions) {
-		super(`Staging stack ${stack.getName()}`)
+		super(`Staging stack ${stack.getName()}`);
 		this.stack = stack;
 	}
 

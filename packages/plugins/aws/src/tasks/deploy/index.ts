@@ -8,7 +8,7 @@ import { createApi } from './api';
 import { createTopic } from './topic';
 
 import { LocalWorkspace } from '@pulumi/pulumi/x/automation';
-import { ecr } from "@pulumi/aws";
+import { ecr } from '@pulumi/aws';
 
 /**
  * Common Task Options
@@ -71,9 +71,9 @@ export class Deploy extends Task<void> {
 						// Deploy schedules
 						(schedules || []).forEach((schedule) => createSchedule(schedule, deployedTopics));
 
-						const deployedFunctions = stack.getFunctions().map((func) =>
-							createLambdaFunction(func, deployedTopics, authToken),
-						);
+						const deployedFunctions = stack
+							.getFunctions()
+							.map((func) => createLambdaFunction(func, deployedTopics, authToken));
 
 						// Deploy APIs
 						(apis || []).map((api) => createApi(api, deployedFunctions));

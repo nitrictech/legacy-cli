@@ -73,7 +73,7 @@ export class Stack {
 	}
 
 	getFunction(funcName: string): Function {
-		const func = (this.funcs || []).find(f => f.name === funcName);
+		const func = (this.funcs || []).find((f) => f.name === funcName);
 
 		if (!func) {
 			throw new Error(`Stack ${this.name}, does not containe function ${funcName}`);
@@ -83,11 +83,11 @@ export class Stack {
 	}
 
 	getFunctions(): Function[] {
-		return (this.funcs || []).map(f => new Function(this, f));
+		return (this.funcs || []).map((f) => new Function(this, f));
 	}
 
 	getStagingDirectory(): string {
-		return `${STAGING_DIR}/${this.name}`
+		return `${STAGING_DIR}/${this.name}`;
 	}
 
 	/**
@@ -150,13 +150,13 @@ export class Stack {
 					} else {
 						res();
 					}
-				})
+				});
 			});
 		}
-		
+
 		await fs.promises.mkdir(stackStagingDirectory, { recursive: true });
-		
+
 		// Stage each function
-		await Promise.all(stack.getFunctions().map(async f => Function.stage(f, repos)));
+		await Promise.all(stack.getFunctions().map(async (f) => Function.stage(f, repos)));
 	}
 }

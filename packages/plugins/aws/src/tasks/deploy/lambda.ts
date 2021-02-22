@@ -1,13 +1,13 @@
 import { Function } from '@nitric/cli-common';
 import { lambda, iam, sns, ecr } from '@pulumi/aws';
 import { DeployedTopic, DeployedFunction } from '../types';
-import * as docker from "@pulumi/docker";
+import * as docker from '@pulumi/docker';
 
 // Creates a Lambda Function using pulumi
 export function createLambdaFunction(
 	func: Function,
 	topics: DeployedTopic[],
-	token: ecr.GetAuthorizationTokenResult
+	token: ecr.GetAuthorizationTokenResult,
 ): DeployedFunction {
 	const nitricFunc = func.asNitricFunction();
 	// Ensure an image repository is available
@@ -19,14 +19,14 @@ export function createLambdaFunction(
 			// Staging directory
 			context: func.getStagingDirectory(),
 			args: {
-				provider: 'aws'
+				provider: 'aws',
 			},
 		},
 		registry: {
 			server: token.proxyEndpoint,
 			username: token.userName,
 			password: token.password,
-		}
+		},
 	});
 	//repository.repositoryUrl
 	// Build and deploy container
@@ -34,8 +34,6 @@ export function createLambdaFunction(
 	const lambdaRole = new iam.Role(`${nitricFunc.name}LambdaRole`, {
 		assumeRolePolicy: iam.assumeRolePolicyForPrincipal(iam.Principals.LambdaPrincipal),
 	});
-
-	
 
 	new iam.RolePolicyAttachment(`${nitricFunc.name}LambdaBasicExecution`, {
 		policyArn: iam.ManagedPolicies.AWSLambdaBasicExecutionRole,
@@ -121,7 +119,6 @@ export function createLambdaFunction(
 		// TODO: Should we throw a mis configuration error in the case
 		// where the topic does not exist
 	});
-
 
 	return {
 		...nitricFunc,

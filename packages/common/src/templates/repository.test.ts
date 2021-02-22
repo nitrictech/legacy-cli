@@ -25,7 +25,9 @@ describe('Repository', () => {
 
 		describe('When calling getTemplate', () => {
 			it('Should fail', () => {
-				expect(() => testRepo.getTemplate('any-name')).toThrow('Template any-name does not exist in repository testrepo');
+				expect(() => testRepo.getTemplate('any-name')).toThrow(
+					'Template any-name does not exist in repository testrepo',
+				);
 			});
 		});
 	});

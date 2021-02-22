@@ -1,12 +1,12 @@
-import { NitricFunction } from "../types";
-import { Stack } from "./stack";
+import { NitricFunction } from '../types';
+import { Stack } from './stack';
 import path from 'path';
-import { Repository, Template } from "../templates";
+import { Repository, Template } from '../templates';
 import fs from 'fs';
 import tar from 'tar-fs';
 import streamToPromise from 'stream-to-promise';
 
-type omitMethods = "getFunction" | "getFunctions";
+type omitMethods = 'getFunction' | 'getFunctions';
 
 export class Function {
 	// Back reference to the parent stack
@@ -29,11 +29,11 @@ export class Function {
 	}
 
 	getDirectory(): string {
-		return path.join(this.stack.getDirectory(), this.descriptor.path)
+		return path.join(this.stack.getDirectory(), this.descriptor.path);
 	}
 
 	getStagingDirectory(): string {
-		return  path.join(this.stack.getStagingDirectory(), this.descriptor.name);
+		return path.join(this.stack.getStagingDirectory(), this.descriptor.name);
 	}
 
 	getImageTagName(): string {
@@ -44,7 +44,7 @@ export class Function {
 	static async findTemplateForFunction(f: Function, repos: Repository[]): Promise<Template> {
 		const [repoName, tmplName] = f.descriptor.runtime.split('/');
 
-		const repo = repos.find(r => r.getName() === repoName);
+		const repo = repos.find((r) => r.getName() === repoName);
 		if (!repo) {
 			throw new Error(`Repository ${repoName} could not be found`);
 		}
@@ -74,7 +74,7 @@ export class Function {
 
 		// tar.pack(functionDirectory, packOptions).pipe(functionPipe);
 		tar.pack(functionDirectory).pipe(functionPipe);
-		
+
 		await streamToPromise(functionPipe);
 	}
 }

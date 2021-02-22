@@ -1,5 +1,5 @@
 import { Command, flags } from '@oclif/command';
-import { Deploy, PushImage } from '../../tasks/deploy';
+import { Deploy } from '../../tasks/deploy';
 import { wrapTaskForListr, Stack, StageStackTask } from '@nitric/cli-common';
 import Listr from 'listr';
 import path from 'path';

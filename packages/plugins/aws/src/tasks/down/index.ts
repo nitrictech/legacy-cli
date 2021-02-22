@@ -5,7 +5,9 @@ interface DownOptions {
 	stack: NitricStack;
 }
 
-const NO_OP = async (): Promise<void> => { return; }
+const NO_OP = async (): Promise<void> => {
+	return;
+};
 
 export class Down extends Task<void> {
 	private stack: NitricStack;
@@ -16,7 +18,7 @@ export class Down extends Task<void> {
 	}
 
 	async do(): Promise<void> {
-		const { stack, } = this;
+		const { stack } = this;
 
 		try {
 			const pulumiStack = await LocalWorkspace.selectStack({

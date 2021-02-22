@@ -1,8 +1,8 @@
 import { Function } from '@nitric/cli-common';
 import { DeployedFunction, DeployedTopic } from './types';
 import { cloudrun, serviceaccount, pubsub } from '@pulumi/gcp';
-import * as docker from "@pulumi/docker";
-import * as pulumi from "@pulumi/pulumi";
+import * as docker from '@pulumi/docker';
+import * as pulumi from '@pulumi/pulumi';
 
 export function createFunction(
 	region: string,
@@ -11,7 +11,7 @@ export function createFunction(
 	authToken: string,
 	gcpProject: string,
 ): DeployedFunction {
-	const nitricFunc = func.asNitricFunction()
+	const nitricFunc = func.asNitricFunction();
 	const { name, minScale = 0, maxScale = 10, subs = [] } = nitricFunc;
 
 	//const grcHost = getGcrHost(region);
@@ -23,14 +23,14 @@ export function createFunction(
 			// Staging directory
 			context: func.getStagingDirectory(),
 			args: {
-				provider: 'gcp'
+				provider: 'gcp',
 			},
 		},
 		registry: {
 			server: `https://gcr.io`,
 			username: 'oauth2accesstoken',
 			password: authToken,
-		}
+		},
 	});
 
 	//deployedImage.registryServer
