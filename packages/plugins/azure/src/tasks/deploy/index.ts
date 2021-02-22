@@ -1,10 +1,11 @@
-import { NitricStack, Stack, Task } from "@nitric/cli-common";
+import { Stack, Task } from "@nitric/cli-common";
 import { LocalWorkspace } from "@pulumi/pulumi/x/automation"
-import { core, storage, appservice, containerservice } from "@pulumi/azure";
+import { resources, storage, web, containerregistry } from "@pulumi/azure-nextgen";
 import { createBucket } from "./bucket";
 import { createTopic } from "./topic";
 import { createFunctionAsApp } from "./function";
 import { createQueue } from "./queue";
+import { createAPI } from "./api";
 
 interface DeployOptions {
 	stack: Stack;
@@ -36,16 +37,22 @@ export class Deploy extends Task<void> {
 					try {
 						// Create a new resource group for the nitric stack
 						// This'll be used for basically everything we deploy in this stack
-						const resourceGroup = new core.ResourceGroup(stack.getName());
+						const resourceGroup = new resources.latest.ResourceGroup(stack.getName(), {
+							resourceGroupName: stack.getName(),
+						});
 
-						const registry = new containerservice.Registry("myregistry", {
+						const registry = new containerregistry.latest.Registry(`${stack.getName()}-registry`, {
 							resourceGroupName: resourceGroup.name,
-							adminEnabled: true,
-							sku: "Basic",
+							registryName: `${stack.getName()}-registry`,
+							adminUserEnabled: true,
+							sku: {
+								name: "Basic"
+							},
 						});
 
 						// Deploy
-						const appServicePlan = new appservice.Plan("examplePlan", {
+						const appServicePlan = new web.latest.AppServicePlan(`${stack.getName()}Plan`, {
+							name: `${stack.getName()}Plan`,
 							location: resourceGroup.location,
 							resourceGroupName: resourceGroup.name,
 							kind: "Linux",
@@ -58,10 +65,13 @@ export class Deploy extends Task<void> {
 						});
 
 						// Create a new storage account for this stack
-						const account = new storage.Account(stack.getName(), {
+						const account = new storage.latest.StorageAccount(`${stack.getName()}-storage-account`, {
 							resourceGroupName: resourceGroup.name,
-							accountTier: "Standard",
-							accountReplicationType: "LRS",
+							accountName: `${stack.getName()}-storage-account`,
+							kind: "Storage",
+							sku: {
+								name: "Standard",
+							}
 						});
 
 						// Not using references produced currently,
@@ -78,9 +88,7 @@ export class Deploy extends Task<void> {
 
 						// TODO: Add schedule support
 
-						// TODO: Add API Support
-						apis.map(a => createApi)
-
+						apis.map(a => createAPI(resourceGroup, a, deployedFunctions))
 					} catch (e) {
 						console.error(e);
 						throw e;
