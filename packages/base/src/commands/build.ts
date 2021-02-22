@@ -1,22 +1,25 @@
 import { Command, flags } from '@oclif/command';
-import { wrapTaskForListr, NitricStack, Stack, NitricImage } from '@nitric/cli-common';
+import { wrapTaskForListr, Stack, NitricImage, StageStackTask } from '@nitric/cli-common';
 import { BuildFunctionTask } from '../tasks/build';
 import Listr, { ListrTask } from 'listr';
 import path from 'path';
 
-export function createBuildTasks(stack: NitricStack, directory: string, provider = 'local'): Listr {
+export function createBuildTasks(stack: Stack, directory: string, provider = 'local'): Listr {
+	const nitricStack = stack.asNitricStack();
+
 	return new Listr([
+		wrapTaskForListr(new StageStackTask({ stack })),
 		{
 			title: 'Building Functions',
 			task: (): Listr =>
 				new Listr(
-					stack.functions!.map(
+					nitricStack.functions!.map(
 						(func): ListrTask =>
 							wrapTaskForListr(
 								new BuildFunctionTask({
 									func,
 									baseDir: directory,
-									stackName: stack.name,
+									stackName: nitricStack.name,
 									provider,
 								}),
 							),
@@ -63,7 +66,7 @@ export default class Build extends Command {
 		const stack = await Stack.fromFile(path.join(directory, file));
 
 		try {
-			return await createBuildTasks(stack.asNitricStack(), directory, provider).run();
+			return await createBuildTasks(stack, directory, provider).run();
 		} catch (error) {
 			const origErrs = error.errors && error.errors.length ? error.errors : error;
 			throw new Error(`Something went wrong, see error details inline above.\n ${origErrs}`);

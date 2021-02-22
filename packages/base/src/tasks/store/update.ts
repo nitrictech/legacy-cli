@@ -1,5 +1,4 @@
-import { Task } from '@nitric/cli-common';
-import { Store } from '../../templates';
+import { Task, Store } from '@nitric/cli-common';
 
 /**
  * Pulls the latest official nitric store manifests

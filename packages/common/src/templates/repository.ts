@@ -1,5 +1,5 @@
 import { Template } from './template';
-import { TEMPLATE_DIR } from '../common/paths';
+import { TEMPLATE_DIR } from '../paths';
 import fs from 'fs';
 import path from 'path';
 import YAML from 'yaml';
@@ -55,19 +55,21 @@ export class Repository {
 	}
 
 	hasTemplate(templateName: string): boolean {
-		return !!this.templateDescriptors.find(({ name }) => {
-			return name === templateName;
-		});
+		const descriptor = this.templateDescriptors.find(({ name }) => name === templateName);
+
+		if (!descriptor) {
+			return false;
+		}
+
+		return true;
 	}
 
 	/**
-	 * Get a template from this repository by its name
-	 * @param name the name of the template within the repository, e.g. 'node12', not 'official/node12'.
+	 * Get a template from this repository
+	 * @param name
 	 */
 	getTemplate(templateName: string): Template {
-		const descriptor = this.templateDescriptors.find(({ name }) => {
-			return name === templateName;
-		});
+		const descriptor = this.templateDescriptors.find(({ name }) => name === templateName);
 
 		if (!descriptor) {
 			throw new Error(`Template ${templateName} does not exist in repository ${this.name}`);

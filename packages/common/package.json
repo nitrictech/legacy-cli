@@ -17,6 +17,7 @@
   "license": "UNLICENSED",
   "dependencies": {
     "eventemitter3": "^4.0.7",
+    "multimatch": "^5.0.0",
     "rxjs": "^6.6.3",
     "tslib": "^1",
     "yaml": "^1.10.0"

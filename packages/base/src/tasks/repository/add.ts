@@ -1,5 +1,4 @@
-import { Task } from '@nitric/cli-common';
-import { Repository, Store } from '../../templates';
+import { Task, Repository, Store  } from '@nitric/cli-common';
 
 interface AddRepositoryTaskOptions {
 	url?: string;

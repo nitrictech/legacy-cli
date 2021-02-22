@@ -1,5 +1,4 @@
-import { NitricAPI, Task } from '@nitric/cli-common';
-import { STAGING_API_DIR } from '../../common/paths';
+import { NitricAPI, Task, STAGING_API_DIR } from '@nitric/cli-common';
 import Docker, { Container, ContainerCreateOptions, Network, NetworkInspectInfo } from 'dockerode';
 import fs from 'fs';
 import getPort from 'get-port';

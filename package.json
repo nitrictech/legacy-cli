@@ -48,5 +48,8 @@
   "lint-staged": {
     "./**/*.{ts,js,css,md}": "prettier --write",
     "./**/*.{ts,js}": "eslint --fix-dry-run"
+  },
+  "dependencies": {
+    "rimraf": "^3.0.2"
   }
 }

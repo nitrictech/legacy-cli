@@ -41,6 +41,42 @@ export class Template {
 
 	/**
 	 *
+	 * @param template Copies the wrapper code and dockerfile of the given template
+	 * @param path
+	 */
+	static async copyRuntimeTo(template: Template, toDir: string): Promise<void> {
+		const inPath = template.getPath();
+		//TODO: should probably do something to make sure the file exists
+		// Make a copy of the function template, using the new name in the output directory
+		const outPath = toDir;
+		const codePath = template.codePath || './function';
+		const outStream = tar.extract(outPath, {
+			// Don't incude the code dir
+			ignore: (name) => name.includes(path.normalize(codePath)),
+		});
+		tar.pack(inPath).pipe(outStream);
+		return streamToPromise(outStream);
+	}
+
+	/**
+	 * Get docker ignore entries for the given template
+	 * @param template
+	 */
+	static async getDockerIgnoreFiles(template: Template): Promise<string[]> {
+		const dockerIgnoreFile = path.join(template.path, '.dockerignore');
+
+		if (fs.existsSync(dockerIgnoreFile)) {
+			// Read the file and return its contents split by new line
+			const contents = await fs.promises.readFile(dockerIgnoreFile);
+			const contentString = contents.toString('utf-8');
+			return contentString.split('\n');
+		}
+
+		return [];
+	}
+
+	/**
+	 *
 	 * @param template Copies the code directory of a given template to a given path
 	 * @param path
 	 */

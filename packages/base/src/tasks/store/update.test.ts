@@ -1,5 +1,5 @@
 import { UpdateStoreTask } from './update';
-import { Store } from '../../templates';
+import { Store } from '@nitric/cli-common';
 
 jest.mock('fs');
 jest.mock('rimraf');

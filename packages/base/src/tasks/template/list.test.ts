@@ -1,5 +1,5 @@
 import { ListTemplatesTask } from './list';
-import { Repository, Template } from '../../templates';
+import { Repository, Template } from '@nitric/cli-common';
 
 afterAll(() => {
 	jest.restoreAllMocks();

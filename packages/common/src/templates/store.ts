@@ -1,5 +1,5 @@
 import { Repository } from './repository';
-import { NITRIC_REPOSITORIES_FILE, NITRIC_STORE_DIR } from '../common/paths';
+import { NITRIC_REPOSITORIES_FILE, NITRIC_STORE_DIR } from '../paths';
 import { gitP } from 'simple-git';
 import rimraf from 'rimraf';
 import fs from 'fs';

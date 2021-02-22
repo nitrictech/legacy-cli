@@ -1,5 +1,5 @@
 import fs from 'fs';
-import { LOG_DIR } from '../common/paths';
+import { LOG_DIR } from '@nitric/cli-common';
 import path from 'path';
 
 export function createNitricLogDir(): void {
