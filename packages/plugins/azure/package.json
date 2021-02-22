@@ -9,6 +9,7 @@
     "@oclif/command": "^1",
     "@oclif/config": "^1",
     "@pulumi/azure": "^3.46.0",
+    "@pulumi/azure-nextgen": "^0.6.1",
     "@pulumi/docker": "^2.8.1",
     "@pulumi/pulumi": "^2.20.0",
     "api-spec-converter": "^2.11.4",

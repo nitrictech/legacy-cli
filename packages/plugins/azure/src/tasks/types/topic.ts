@@ -1,6 +1,6 @@
 import { NitricTopic } from "@nitric/cli-common";
-import { eventgrid } from "@pulumi/azure";
+import { eventgrid } from "@pulumi/azure-nextgen";
 
 export interface DeployedTopic extends NitricTopic {
-	eventGridTopic: eventgrid.Topic;
+	eventGridTopic: eventgrid.latest.Topic;
 }

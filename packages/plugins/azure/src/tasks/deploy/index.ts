@@ -1,40 +1,42 @@
-import { NitricStack, Task } from "@nitric/cli-common";
+import { NitricStack, Stack, Task } from "@nitric/cli-common";
 import { LocalWorkspace } from "@pulumi/pulumi/x/automation"
 import { core, storage, appservice, containerservice } from "@pulumi/azure";
 import { createBucket } from "./bucket";
 import { createTopic } from "./topic";
+import { createFunctionAsApp } from "./function";
+import { createQueue } from "./queue";
 
 interface DeployOptions {
-	stack: NitricStack;
+	stack: Stack;
 	region: string;
 }
 
 export class Deploy extends Task<void> {
-	private stack: NitricStack;
-	private region: string;
+	private stack: Stack;
+	// private region: string;
 
-	constructor({ stack, region }: DeployOptions) {
+	constructor({ stack }: DeployOptions) {
 		super('Deploying Infrastructure');
 		this.stack = stack;
-		this.region = region;
+		// this.region = region;
 	}
 
 	async do(): Promise<void> {
-		const { stack, region } = this;
-		const { functions = [], buckets = [], apis = [], topics = [], schedules = [], queues = [] } = stack;
+		const { stack } = this;
+		const { buckets = [], apis = [], topics = [], schedules = [], queues = [] } = stack.asNitricStack();
 
 		try {
 			// Upload the stack to AWS
 			const pulumiStack = await LocalWorkspace.createOrSelectStack({
-				stackName: stack.name,
-				projectName: stack.name,
+				stackName: stack.getName(),
+				projectName: stack.getName(),
 				// generate our pulumi program on the fly from the POST body
 				program: async () => {
 					// Now we can start deploying with Pulumi
 					try {
 						// Create a new resource group for the nitric stack
 						// This'll be used for basically everything we deploy in this stack
-						const resourceGroup = new core.ResourceGroup(stack.name);
+						const resourceGroup = new core.ResourceGroup(stack.getName());
 
 						const registry = new containerservice.Registry("myregistry", {
 							resourceGroupName: resourceGroup.name,
@@ -48,7 +50,7 @@ export class Deploy extends Task<void> {
 							resourceGroupName: resourceGroup.name,
 							kind: "Linux",
 							sku: {
-								// many cheap... for development only
+								// for development only
 								// Will upgrade tiers/elasticity for different stack tiers e.g. dev/test/prod (prefab recipes)
 								tier: "Basic",
 								size: "B1",
@@ -56,23 +58,28 @@ export class Deploy extends Task<void> {
 						});
 
 						// Create a new storage account for this stack
-						const account = new storage.Account(stack.name, {
+						const account = new storage.Account(stack.getName(), {
 							resourceGroupName: resourceGroup.name,
 							accountTier: "Standard",
 							accountReplicationType: "LRS",
 						});
 
-						
-
 						// Not using references produced currently,
 						// but leaving as map in case we need to reference in future
 						buckets.map(b => createBucket(account, b));
-						topics.map(t => createTopic(resourceGroup, t));
+						queues.map(q => createQueue(account, q));
+
+
+						const deployedTopics = topics.map(t => createTopic(resourceGroup, t));
 
 						// Deploy functions here...
 						// need to determine our deployment method for them
-						deployedFunctions = functions.map()
+						const deployedFunctions = stack.getFunctions().map(f => createFunctionAsApp(resourceGroup, registry, appServicePlan, f, deployedTopics));
 
+						// TODO: Add schedule support
+
+						// TODO: Add API Support
+						apis.map(a => createApi)
 
 					} catch (e) {
 						console.error(e);
@@ -80,8 +87,8 @@ export class Deploy extends Task<void> {
 					}
 				},
 			});
-			await pulumiStack.setConfig('gcp:project', { value: gcpProject });
-			await pulumiStack.setConfig('gcp:region', { value: region });
+			//await pulumiStack.setConfig('gcp:project', { value: gcpProject });
+			//await pulumiStack.setConfig('gcp:region', { value: region });
 			// deploy the stack, log to console
 			const upRes = await pulumiStack.up({ onOutput: this.update.bind(this) });
 			console.log(upRes);

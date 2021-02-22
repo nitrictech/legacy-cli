@@ -1,5 +1,5 @@
 import { NitricTopic } from "@nitric/cli-common";
-import { core, eventgrid } from "@pulumi/azure";
+import { core, eventgrid } from "@pulumi/azure-nextgen";
 import { DeployedTopic } from "../types";
 
 // Create a topic on azure event grid

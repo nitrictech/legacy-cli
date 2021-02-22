@@ -842,6 +842,7 @@ __metadata:
     "@oclif/dev-cli": ^1
     "@oclif/plugin-help": ^3
     "@pulumi/azure": ^3.46.0
+    "@pulumi/azure-nextgen": ^0.6.1
     "@pulumi/docker": ^2.8.1
     "@pulumi/pulumi": ^2.20.0
     "@types/jest": ^26.0.15
@@ -1203,6 +1204,15 @@ __metadata:
     read-package-tree: ^5.2.1
     resolve: ^1.7.1
   checksum: 910665a202512a7922b28246f6614aa1015e2775fc25e6ee44b660fdc7cd9b7a460f7c6b7d8f44e925a90efd1c946b16c825aa3314f02f0329caab1ec2d13558
+  languageName: node
+  linkType: hard
+
+"@pulumi/azure-nextgen@npm:^0.6.1":
+  version: 0.6.1
+  resolution: "@pulumi/azure-nextgen@npm:0.6.1"
+  dependencies:
+    "@pulumi/pulumi": ^2.20.0
+  checksum: c8d17a5d0ea213d67fa33a547b8dbaa5661fe76c31904fba5a2ffdc201dc53f4e983ff3687b5c06e18b76c4296be6f2d5f5735622cd06e5d2d884868a7105a7a
   languageName: node
   linkType: hard
 

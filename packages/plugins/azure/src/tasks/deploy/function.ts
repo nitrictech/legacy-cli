@@ -1,5 +1,5 @@
 import { Function } from "@nitric/cli-common";
-import { core, appservice, eventgrid, containerservice } from "@pulumi/azure";
+import { core, appservice, eventgrid, containerservice } from "@pulumi/azure-nextgen";
 import { DeployedFunction, DeployedTopic } from "../types";
 import * as docker from "@pulumi/docker";
 import * as pulumi from "@pulumi/pulumi";
@@ -35,7 +35,7 @@ export function createFunctionAsApp(
 	// https://github.com/Azure/azure-functions-language-worker-protobuf
 	// So hopefully this should be as simple as including a gateway plugin for
 	// Azure that utilizes that contract.
-	//return new appservice.FunctionApp()
+	// return new appservice.FunctionApp()
 
 	
 	const deployedApp = new appservice.AppService(nitricFunction.name, {
@@ -54,7 +54,6 @@ export function createFunctionAsApp(
 		const topic = topics.find(t => t.name === s.topic);
 
 		if (topic) {
-
 			new eventgrid.EventSubscription(`${nitricFunction.name}-${topic.name}-subscription`, {
 				scope: topic.eventGridTopic.id,
 				webhookEndpoint: {

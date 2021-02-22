@@ -1,5 +1,5 @@
 import { NitricBucket } from "@nitric/cli-common";
-import { storage } from "@pulumi/azure";
+import { storage } from "@pulumi/azure-nextgen";
 
 
 /**

@@ -3,6 +3,7 @@ import Listr from 'listr';
 import inquirer from 'inquirer';
 import { Stack, StageStackTask, wrapTaskForListr } from '@nitric/cli-common';
 import path from 'path';
+import { Deploy } from '../../tasks/deploy';
 
 // XXX: Commented out regions do not support cloud run
 const SUPPORTED_REGIONS = [
@@ -66,7 +67,7 @@ export default class DeployCmd extends Command {
 
 		new Listr([
 			wrapTaskForListr(new StageStackTask({ stack })),
-			
+			wrapTaskForListr(new Deploy({ stack, region }))
 		]).run();
 	}
 }
