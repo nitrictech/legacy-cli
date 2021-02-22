@@ -76,8 +76,8 @@ export class Deploy extends Task<void> {
 
 						// Not using references produced currently,
 						// but leaving as map in case we need to reference in future
-						buckets.map(b => createBucket(account, b));
-						queues.map(q => createQueue(account, q));
+						buckets.map(b => createBucket(resourceGroup, account, b));
+						queues.map(q => createQueue(resourceGroup, account, q));
 
 
 						const deployedTopics = topics.map(t => createTopic(resourceGroup, t));
