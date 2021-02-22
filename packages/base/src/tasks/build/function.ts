@@ -5,7 +5,7 @@ import {
 	NitricImage,
 	Task,
 	getTagNameForFunction,
-	STAGING_DIR
+	STAGING_DIR,
 } from '@nitric/cli-common';
 import Docker from 'dockerode';
 import path from 'path';

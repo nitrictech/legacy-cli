@@ -10,11 +10,10 @@ import {
 } from '../types';
 import fs from 'fs';
 import YAML from 'yaml';
-import { Repository, Template } from '../templates';
+import { Repository } from '../templates';
 import { STAGING_DIR } from '../paths';
-import tar from 'tar-fs';
-import streamToPromise from 'stream-to-promise';
 import rimraf from 'rimraf';
+import { Function } from './function';
 //import multimatch from 'multimatch';
 
 export class Stack {
@@ -54,6 +53,10 @@ export class Stack {
 		};
 	}
 
+	getDirectory(): string {
+		return path.dirname(this.file);
+	}
+
 	addFunction(func: NitricFunction): Stack {
 		const { funcs = [] } = this;
 
@@ -67,6 +70,24 @@ export class Stack {
 		this.funcs = [...(this.funcs || []), func];
 
 		return this;
+	}
+
+	getFunction(funcName: string): Function {
+		const func = (this.funcs || []).find((f) => f.name === funcName);
+
+		if (!func) {
+			throw new Error(`Stack ${this.name}, does not containe function ${funcName}`);
+		}
+
+		return new Function(this, func);
+	}
+
+	getFunctions(): Function[] {
+		return (this.funcs || []).map((f) => new Function(this, f));
+	}
+
+	getStagingDirectory(): string {
+		return `${STAGING_DIR}/${this.name}`;
 	}
 
 	/**
@@ -118,7 +139,7 @@ export class Stack {
 	static async stage(stack: Stack): Promise<void> {
 		const repos = Repository.fromDefaultDirectory();
 
-		const stackStagingDirectory = `${STAGING_DIR}/${stack.name}`;
+		const stackStagingDirectory = stack.getStagingDirectory();
 
 		// Clean staging directory
 		if (fs.existsSync(stackStagingDirectory)) {
@@ -129,43 +150,13 @@ export class Stack {
 					} else {
 						res();
 					}
-				})
+				});
 			});
 		}
-		
+
 		await fs.promises.mkdir(stackStagingDirectory, { recursive: true });
-		
+
 		// Stage each function
-		await Promise.all(stack.funcs!.map(async (f) => {
-			const functionStagingDir = path.join(stackStagingDirectory, f.name);
-			const [repoName, tmplName] = f.runtime.split('/');
-
-			const repo = repos.find(r => r.getName() === repoName);
-			if (!repo) {
-				throw new Error(`Repository ${repoName} could not be found`);
-			}
-
-			if (!repo.hasTemplate(tmplName)) {
-				throw new Error(`Repository ${repoName} does not contain template ${tmplName}`);
-			}
-
-			const template = repo.getTemplate(tmplName);
-
-			// TODO: Do we need to do this?
-			await fs.promises.mkdir(functionStagingDir, { recursive: true });
-
-			await Template.copyRuntimeTo(template, functionStagingDir);
-
-			// TODO: Should we rm or exclude the code directory of the Template, to ensure
-			// extra files don't make it through?
-			const functionPipe = tar.extract(`${functionStagingDir}/function`);
-			// Now we need to copy the actual function code, the the above directory/function directory
-			const functionDirectory = path.join(path.dirname(stack.file), f.path);
-
-			// tar.pack(functionDirectory, packOptions).pipe(functionPipe);
-			tar.pack(functionDirectory).pipe(functionPipe);
-			
-			await streamToPromise(functionPipe);
-		}));
+		await Promise.all(stack.getFunctions().map(async (f) => Function.stage(f, repos)));
 	}
 }

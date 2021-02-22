@@ -1,7 +1,7 @@
 import { Command, flags } from '@oclif/command';
-import { Deploy, PushImage } from '../../tasks/deploy';
-import { wrapTaskForListr, Stack, NitricStack } from '@nitric/cli-common';
-import Listr, { ListrTask } from 'listr';
+import { Deploy } from '../../tasks/deploy';
+import { wrapTaskForListr, Stack, StageStackTask } from '@nitric/cli-common';
+import Listr from 'listr';
 import path from 'path';
 import { google } from 'googleapis';
 import inquirer from 'inquirer';
@@ -91,7 +91,9 @@ export default class DeployCmd extends Command {
 
 		const { project = derivedProject, file, region } = { ...flags, ...promptFlags };
 		const stackDefinitionPath = path.join(dir, file);
-		const stack: NitricStack = (await Stack.fromFile(stackDefinitionPath)).asNitricStack();
+		// const stack: NitricStack = (await Stack.fromFile(stackDefinitionPath)).asNitricStack();
+
+		const stack = await Stack.fromFile(stackDefinitionPath);
 
 		if (!region) {
 			throw new Error('Region must be provided, for prompts use the --guided flag');
@@ -101,25 +103,11 @@ export default class DeployCmd extends Command {
 			throw new Error('Project must be provided, for prompts use the --guided flag');
 		}
 
-		new Listr([
-			{
-				title: 'Pushing Images',
-				task: (): Listr =>
-					new Listr(
-						stack.functions!.map(
-							(func): ListrTask =>
-								wrapTaskForListr(
-									new PushImage({
-										gcpProject: project,
-										stackName: stack.name,
-										func,
-										region,
-									}),
-								),
-						),
-						{ concurrent: true },
-					),
-			},
+		new Listr<any>([
+			wrapTaskForListr(
+				// Stage the stak ready for building...
+				new StageStackTask({ stack }),
+			),
 			wrapTaskForListr(
 				new Deploy({
 					gcpProject: project,

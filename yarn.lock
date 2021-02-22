@@ -736,6 +736,7 @@ __metadata:
     "@oclif/dev-cli": ^1
     "@oclif/plugin-help": ^3.2.2
     "@pulumi/aws": ^3.28.1
+    "@pulumi/docker": ^2.8.1
     "@pulumi/pulumi": ^2.20.0
     "@types/lodash": ^4.14.168
     "@types/node": ^10
@@ -766,6 +767,7 @@ __metadata:
     "@oclif/config": ^1
     "@oclif/dev-cli": ^1
     "@oclif/plugin-help": ^3.2.2
+    "@pulumi/docker": ^2.8.1
     "@pulumi/gcp": ^4.11.0
     "@pulumi/pulumi": ^2.20.0
     "@types/jest": ^26.0.15
@@ -1097,6 +1099,16 @@ __metadata:
     read-package-tree: ^5.2.1
     resolve: ^1.7.1
   checksum: 910665a202512a7922b28246f6614aa1015e2775fc25e6ee44b660fdc7cd9b7a460f7c6b7d8f44e925a90efd1c946b16c825aa3314f02f0329caab1ec2d13558
+  languageName: node
+  linkType: hard
+
+"@pulumi/docker@npm:^2.8.1":
+  version: 2.8.1
+  resolution: "@pulumi/docker@npm:2.8.1"
+  dependencies:
+    "@pulumi/pulumi": ^2.15.0
+    semver: ^5.4.0
+  checksum: d1785c71bbe3fadfc4b7bfad3f82240a5a5d78a7afb6420a722d43fb2a40532c578a7c004819899b2c7444d7e5806f2225a642e10a9623280803ad825304816d
   languageName: node
   linkType: hard
 
@@ -10170,7 +10182,7 @@ fsevents@^2.1.2:
   languageName: node
   linkType: hard
 
-"semver@npm:2 || 3 || 4 || 5, semver@npm:^5.4.1, semver@npm:^5.5.0, semver@npm:^5.5.1":
+"semver@npm:2 || 3 || 4 || 5, semver@npm:^5.4.0, semver@npm:^5.4.1, semver@npm:^5.5.0, semver@npm:^5.5.1":
   version: 5.7.1
   resolution: "semver@npm:5.7.1"
   bin:
