@@ -1,29 +1,36 @@
-import { Stack, Task } from "@nitric/cli-common";
-import { LocalWorkspace } from "@pulumi/pulumi/x/automation"
-import { resources, storage, web, containerregistry } from "@pulumi/azure-nextgen";
-import { createBucket } from "./bucket";
-import { createTopic } from "./topic";
-import { createFunctionAsApp } from "./function";
-import { createQueue } from "./queue";
-import { createAPI } from "./api";
+import { Stack, Task } from '@nitric/cli-common';
+import { LocalWorkspace } from '@pulumi/pulumi/x/automation';
+import { resources, storage, web, containerregistry } from '@pulumi/azure-nextgen';
+import { createBucket } from './bucket';
+import { createTopic } from './topic';
+import { createFunctionAsApp } from './function';
+import { createQueue } from './queue';
+import { createAPI } from './api';
+import * as pulumi from '@pulumi/pulumi';
+//import { createSchedule } from './schedule';
 
 interface DeployOptions {
 	stack: Stack;
 	region: string;
+	orgName: string;
+	adminEmail: string;
 }
 
 export class Deploy extends Task<void> {
 	private stack: Stack;
+	private orgName: string;
+	private adminEmail: string;
 	// private region: string;
 
-	constructor({ stack }: DeployOptions) {
+	constructor({ stack, orgName, adminEmail }: DeployOptions) {
 		super('Deploying Infrastructure');
 		this.stack = stack;
-		// this.region = region;
+		this.orgName = orgName;
+		this.adminEmail = adminEmail;
 	}
 
 	async do(): Promise<void> {
-		const { stack } = this;
+		const { stack, orgName, adminEmail } = this;
 		const { buckets = [], apis = [], topics = [], schedules = [], queues = [] } = stack.asNitricStack();
 
 		try {
@@ -46,7 +53,7 @@ export class Deploy extends Task<void> {
 							registryName: `${stack.getName()}-registry`,
 							adminUserEnabled: true,
 							sku: {
-								name: "Basic"
+								name: 'Basic',
 							},
 						});
 
@@ -55,12 +62,12 @@ export class Deploy extends Task<void> {
 							name: `${stack.getName()}Plan`,
 							location: resourceGroup.location,
 							resourceGroupName: resourceGroup.name,
-							kind: "Linux",
+							kind: 'Linux',
 							sku: {
 								// for development only
 								// Will upgrade tiers/elasticity for different stack tiers e.g. dev/test/prod (prefab recipes)
-								tier: "Basic",
-								size: "B1",
+								tier: 'Basic',
+								size: 'B1',
 							},
 						});
 
@@ -68,27 +75,34 @@ export class Deploy extends Task<void> {
 						const account = new storage.latest.StorageAccount(`${stack.getName()}-storage-account`, {
 							resourceGroupName: resourceGroup.name,
 							accountName: `${stack.getName()}-storage-account`,
-							kind: "Storage",
+							kind: 'Storage',
 							sku: {
-								name: "Standard",
-							}
+								name: 'Standard',
+							},
 						});
 
-						// Not using references produced currently,
+						// Not using refeschedulerrences produced currently,
 						// but leaving as map in case we need to reference in future
-						buckets.map(b => createBucket(resourceGroup, account, b));
-						queues.map(q => createQueue(resourceGroup, account, q));
+						buckets.map((b) => createBucket(resourceGroup, account, b));
+						queues.map((q) => createQueue(resourceGroup, account, q));
 
-
-						const deployedTopics = topics.map(t => createTopic(resourceGroup, t));
+						const deployedTopics = topics.map((t) => createTopic(resourceGroup, t));
 
 						// Deploy functions here...
 						// need to determine our deployment method for them
-						const deployedFunctions = stack.getFunctions().map(f => createFunctionAsApp(resourceGroup, registry, appServicePlan, f, deployedTopics));
+						const deployedFunctions = stack
+							.getFunctions()
+							.map((f) => createFunctionAsApp(resourceGroup, registry, appServicePlan, f, deployedTopics));
 
 						// TODO: Add schedule support
+						// NOTE: Currently CRONTAB support is required, we either need to revisit the design of
+						// our scheduled expressions or implement a workaround for request a feature.
+						if (schedules) {
+							pulumi.log.warn('Shedules are not currently supported for Azure deployments');
+							// schedules.map(s => createSchedule(resourceGroup, s))
+						}
 
-						apis.map(a => createAPI(resourceGroup, a, deployedFunctions))
+						apis.map((a) => createAPI(resourceGroup, orgName, adminEmail, a, deployedFunctions));
 					} catch (e) {
 						console.error(e);
 						throw e;

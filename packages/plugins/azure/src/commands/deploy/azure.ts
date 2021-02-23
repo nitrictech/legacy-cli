@@ -26,6 +26,8 @@ export default class DeployCmd extends Command {
 			char: 'f',
 			default: 'nitric.yaml',
 		}),
+		orgName: flags.string({}),
+		adminEmail: flags.string({}),
 		help: flags.help({ char: 'h', default: false }),
 	};
 

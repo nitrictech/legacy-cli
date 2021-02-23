@@ -10,20 +10,21 @@ const METHODS: method[] = ['get', 'post', 'put', 'update', 'delete', 'patch'];
 
 export function createAPI(
 	resourceGroup: resources.latest.ResourceGroup,
+	orgName: string,
+	adminEmail: string,
 	api: NitricAPI,
 	functions: DeployedFunction[],
 ): apimanagement.latest.ApiManagementService {
 	// For API deployments, we will want to
-
 	// create a new API service
+	// One mamagement service per API for now?
 	const service = new apimanagement.latest.ApiManagementService('', {
 		resourceGroupName: resourceGroup.name,
 		// TODO: Extract from API doc?
-		serviceName: '',
-		publisherEmail: '',
-		publisherName: '',
+		serviceName: `${api.name}-service`,
+		publisherEmail: adminEmail,
+		publisherName: orgName,
 		// TODO: Add cloud prefabs to control this
-		// skuName: 'Consumption',
 		sku: {
 			capacity: 0,
 			name: "Consumption",
@@ -50,8 +51,8 @@ export function createAPI(
 
 			// Get the nitric target URL
 
-			const meth = path[m] as OpenAPIV3.OperationObject<NitricAPITarget>;
-			const func = functions.find(f => f.name === meth['x-nitric-target'].name);
+			const pathMethod = path[m] as OpenAPIV3.OperationObject<NitricAPITarget>;
+			const func = functions.find(f => f.name === pathMethod['x-nitric-target'].name);
 
 			if (func) {
 				new apimanagement.latest.ApiOperationPolicy('', {
@@ -59,8 +60,8 @@ export function createAPI(
 					apiId: azureApi.id,
 					serviceName: service.name,
 					// TODO: Need to figure out how this is mapped to a real api operation entity
-					operationId: meth.operationId!,
-					policyId: pulumi.interpolate`${meth.operationId!}Policy`,
+					operationId: pathMethod.operationId!,
+					policyId: pulumi.interpolate`${pathMethod.operationId!}Policy`,
 					value: pulumi.interpolate`
 						<policies> 
 							<inbound /> 

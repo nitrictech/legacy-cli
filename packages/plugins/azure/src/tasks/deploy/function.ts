@@ -70,7 +70,7 @@ export function createFunctionAsApp(
 				destination: {
 					endpointType: 'WebHook',
 					endpointUrl: deployedApp.defaultHostName,
-					// TODO: Reduce chattiness here and handle internally in the Azure AppService HTTP Gateway?
+					// TODO: Reduce event chattiness here and handle internally in the Azure AppService HTTP Gateway?
 					maxEventsPerBatch: 1,
 				},
 			});

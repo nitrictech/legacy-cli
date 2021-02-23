@@ -773,6 +773,7 @@ __metadata:
     "@types/jest": ^26.0.15
     "@types/node": ^10
     api-spec-converter: ^2.11.4
+    cron-parser: ^3.2.0
     dockerode: ^3.2.1
     eslint: ^5.13
     eslint-config-oclif: ^3.1
@@ -3350,6 +3351,16 @@ __metadata:
     path-type: ^4.0.0
     yaml: ^1.10.0
   checksum: 151fcb91773c0ae826fc801eab86f8f818605dbf63c8e5515adf0ff0fec5ede8e614f387f93c088d65527a2ea9021f0cd8c6b6e5c7fef2b77480b5e2c33700dc
+  languageName: node
+  linkType: hard
+
+"cron-parser@npm:^3.2.0":
+  version: 3.2.0
+  resolution: "cron-parser@npm:3.2.0"
+  dependencies:
+    is-nan: ^1.3.0
+    luxon: ^1.25.0
+  checksum: 3bfa7dabeb476fe7feec020e68bc7f13b0870125e2ccf9c8ada56df21a3e00968db6508042ba8807d99d9300da0cfe9040b11f29f5bc58513a7024fbf58797e8
   languageName: node
   linkType: hard
 
@@ -6319,6 +6330,16 @@ fsevents@^2.1.2:
   languageName: node
   linkType: hard
 
+"is-nan@npm:^1.3.0":
+  version: 1.3.2
+  resolution: "is-nan@npm:1.3.2"
+  dependencies:
+    call-bind: ^1.0.0
+    define-properties: ^1.1.3
+  checksum: 258ecdd2c149c4e073a3c7dff0ee1316950509d9a507c6f8e8ccce8c4ef73e9f29cdf7836cc1037bbbada283ac9fe189c0451016a9aca6c27eb12eaa900452f8
+  languageName: node
+  linkType: hard
+
 "is-negative-zero@npm:^2.0.0":
   version: 2.0.0
   resolution: "is-negative-zero@npm:2.0.0"
@@ -7926,6 +7947,13 @@ fsevents@^2.1.2:
   dependencies:
     yallist: ^4.0.0
   checksum: b8b78353d2391c0f135cdc245c4744ad41c2efb1a6d98f31bc57a2cf48ebf02de96e4876657c3026673576bf1f1f61fc3fdd77ab00ad1ead737537bf17d8019d
+  languageName: node
+  linkType: hard
+
+"luxon@npm:^1.25.0":
+  version: 1.26.0
+  resolution: "luxon@npm:1.26.0"
+  checksum: e12bb8bfdd69707f0f3e57b1b2ff39042c67904bdc437602064519f3eb87d3267497bc56cc0b7611faa40e22019991440a8e8e179d4c6a0440e9f226571fce46
   languageName: node
   linkType: hard
 
