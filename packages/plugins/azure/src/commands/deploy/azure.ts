@@ -7,11 +7,74 @@ import { Deploy } from '../../tasks/deploy';
 
 // XXX: Commented out regions do not support cloud run
 const SUPPORTED_REGIONS = [
-	'TODO',
+	'eastus',
+	'eastus2',
+	'southcentralus',
+	'westus2',
+	'australiaeast',
+	'southeastasia',
+	'northeurope',
+	'uksouth',
+	'westeurope',
+	'centralus',
+	'northcentralus',
+	'westus',
+	'southafricanorth',
+	'centralindia',
+	'eastasia',
+	'japaneast',
+	'koreacentral',
+	'canadacentral',
+	'francecentral',
+	'germanywestcentral',
+	'norwayeast',
+	'switzerlandnorth',
+	'uaenorth',
+	'brazilsouth',
+	'centralusstage',
+	'eastusstage',
+	'eastus2stage',
+	'northcentralusstage',
+	'southcentralusstage',
+	'westusstage',
+	'westus2stage',
+	'asia',
+	'asiapacific',
+	'australia',
+	'brazil',
+	'canada',
+	'europe',
+	'global',
+	'india',
+	'japan',
+	'uk',
+	'unitedstates',
+	'eastasiastage',
+	'southeastasiastage',
+	'centraluseuap',
+	'eastus2euap',
+	'westcentralus',
+	'westus3',
+	'southafricawest',
+	'australiacentral',
+	'australiacentral2',
+	'australiasoutheast',
+	'japanwest',
+	'koreasouth',
+	'southindia',
+	'westindia',
+	'canadaeast',
+	'francesouth',
+	'germanynorth',
+	'norwaywest',
+	'switzerlandwest',
+	'ukwest',
+	'uaecentral',
+	'brazilsoutheast',
 ];
 
 export default class DeployCmd extends Command {
-	static description = 'Deploy a Nitric application to Google Cloud Platform (GCP)';
+	static description = 'Deploy a Nitric application to Microsoft Azure';
 
 	static examples = [`$ nitric deploy:gcp`];
 
@@ -67,9 +130,6 @@ export default class DeployCmd extends Command {
 
 		const stack = await Stack.fromFile(path.join(dir, file));
 
-		new Listr([
-			wrapTaskForListr(new StageStackTask({ stack })),
-			wrapTaskForListr(new Deploy({ stack, region }))
-		]).run();
+		new Listr([wrapTaskForListr(new StageStackTask({ stack })), wrapTaskForListr(new Deploy({ stack, region }))]).run();
 	}
 }

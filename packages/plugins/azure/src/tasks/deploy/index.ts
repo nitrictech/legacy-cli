@@ -20,17 +20,18 @@ export class Deploy extends Task<void> {
 	private stack: Stack;
 	private orgName: string;
 	private adminEmail: string;
-	// private region: string;
+	private region: string;
 
-	constructor({ stack, orgName, adminEmail }: DeployOptions) {
+	constructor({ stack, orgName, adminEmail, region }: DeployOptions) {
 		super('Deploying Infrastructure');
 		this.stack = stack;
 		this.orgName = orgName;
 		this.adminEmail = adminEmail;
+		this.region = region;
 	}
 
 	async do(): Promise<void> {
-		const { stack, orgName, adminEmail } = this;
+		const { stack, orgName, adminEmail, region } = this;
 		const { buckets = [], apis = [], topics = [], schedules = [], queues = [] } = stack.asNitricStack();
 
 		try {
@@ -46,6 +47,7 @@ export class Deploy extends Task<void> {
 						// This'll be used for basically everything we deploy in this stack
 						const resourceGroup = new resources.latest.ResourceGroup(stack.getName(), {
 							resourceGroupName: stack.getName(),
+							//location: 
 						});
 
 						const registry = new containerregistry.latest.Registry(`${stack.getName()}-registry`, {
@@ -83,8 +85,8 @@ export class Deploy extends Task<void> {
 
 						// Not using refeschedulerrences produced currently,
 						// but leaving as map in case we need to reference in future
-						buckets.map((b) => createBucket(resourceGroup, account, b));
-						queues.map((q) => createQueue(resourceGroup, account, q));
+						(buckets || []).map((b) => createBucket(resourceGroup, account, b));
+						(queues || []).map((q) => createQueue(resourceGroup, account, q));
 
 						const deployedTopics = topics.map((t) => createTopic(resourceGroup, t));
 
@@ -102,14 +104,14 @@ export class Deploy extends Task<void> {
 							// schedules.map(s => createSchedule(resourceGroup, s))
 						}
 
-						apis.map((a) => createAPI(resourceGroup, orgName, adminEmail, a, deployedFunctions));
+						(apis || []).map((a) => createAPI(resourceGroup, orgName, adminEmail, a, deployedFunctions));
 					} catch (e) {
 						console.error(e);
 						throw e;
 					}
 				},
 			});
-			//await pulumiStack.setConfig('gcp:project', { value: gcpProject });
+			await pulumiStack.setConfig('azure-nextgen:location', { value: region });
 			//await pulumiStack.setConfig('gcp:region', { value: region });
 			// deploy the stack, log to console
 			const upRes = await pulumiStack.up({ onOutput: this.update.bind(this) });
