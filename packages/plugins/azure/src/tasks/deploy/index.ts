@@ -68,12 +68,16 @@ export class Deploy extends Task<void> {
 							location: resourceGroup.location,
 							resourceGroupName: resourceGroup.name,
 							kind: 'Linux',
+							reserved: true,
 							sku: {
 								// for development only
 								// Will upgrade tiers/elasticity for different stack tiers e.g. dev/test/prod (prefab recipes)
-								name: 'B1',
-								tier: 'Basic',
-								size: 'B1',
+								//name: 'B1',
+								//tier: 'Basic',
+								//size: 'B1',
+								name: 'F1',
+								tier: 'Free',
+								size: 'F1',
 							},
 						});
 
