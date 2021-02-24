@@ -51,13 +51,6 @@ export function createFunctionAsApp(
 		serverFarmId: plan.id,
 		name: `${func.getStack().getName()}-${nitricFunction.name}`,
 		resourceGroupName: resourceGroup.name,
-		//appSettings: {
-		//	WEBSITES_ENABLE_APP_SERVICE_STORAGE: 'false',
-		//	DOCKER_REGISTRY_SERVER_URL: pulumi.interpolate`https://${registry.loginServer}`,
-		//	DOCKER_REGISTRY_SERVER_USERNAME: registry.adminUsername,
-		//	DOCKER_REGISTRY_SERVER_PASSWORD: registry.adminPassword,
-		//	WEBSITES_PORT: '80', // Our custom image exposes port 80. Adjust for your app as needed.
-		//},
 		siteConfig: {
 			appSettings: [{
 				name: "WEBSITES_ENABLE_APP_SERVICE_STORAGE",
@@ -75,15 +68,6 @@ export function createFunctionAsApp(
 				name: "WEBSITES_PORT",
 				value: '9001'
 			}],
-			//{
-			//	WEBSITES_ENABLE_APP_SERVICE_STORAGE: 'false',
-			//	DOCKER_REGISTRY_SERVER_URL: pulumi.interpolate`https://${registry.loginServer}`,
-			//	DOCKER_REGISTRY_SERVER_USERNAME: adminUsername,
-			//	DOCKER_REGISTRY_SERVER_PASSWORD: adminPassword,
-			//	WEBSITES_PORT: '9001', // Our custom image exposes port 80. Adjust for your app as needed.
-			//},
-			// TODO: Include our custom docker image here...
-			// XXX: We'll push it to the ACR first
 			// alwaysOn: true,
 			linuxFxVersion: pulumi.interpolate`DOCKER|${image.imageName}`,
 		},
