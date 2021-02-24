@@ -34,6 +34,8 @@ export class Deploy extends Task<void> {
 		const { stack, orgName, adminEmail, region } = this;
 		const { buckets = [], apis = [], topics = [], schedules = [], queues = [] } = stack.asNitricStack();
 
+		const messages: string[] = [];
+
 		try {
 			// Upload the stack to AWS
 			const pulumiStack = await LocalWorkspace.createOrSelectStack({
@@ -47,12 +49,13 @@ export class Deploy extends Task<void> {
 						// This'll be used for basically everything we deploy in this stack
 						const resourceGroup = new resources.latest.ResourceGroup(stack.getName(), {
 							resourceGroupName: stack.getName(),
-							//location: 
+							location: region, 
 						});
 
 						const registry = new containerregistry.latest.Registry(`${stack.getName()}-registry`, {
 							resourceGroupName: resourceGroup.name,
-							registryName: `${stack.getName()}-registry`,
+							location: resourceGroup.location,
+							registryName: `${stack.getName().replace(/-/g,'')}Registry`,
 							adminUserEnabled: true,
 							sku: {
 								name: 'Basic',
@@ -68,6 +71,7 @@ export class Deploy extends Task<void> {
 							sku: {
 								// for development only
 								// Will upgrade tiers/elasticity for different stack tiers e.g. dev/test/prod (prefab recipes)
+								name: 'B1',
 								tier: 'Basic',
 								size: 'B1',
 							},
@@ -76,10 +80,11 @@ export class Deploy extends Task<void> {
 						// Create a new storage account for this stack
 						const account = new storage.latest.StorageAccount(`${stack.getName()}-storage-account`, {
 							resourceGroupName: resourceGroup.name,
-							accountName: `${stack.getName()}-storage-account`,
+							// 24 character limit
+							accountName: `${stack.getName().replace(/-/g, '')}`,
 							kind: 'Storage',
 							sku: {
-								name: 'Standard',
+								name: 'Standard_LRS',
 							},
 						});
 
@@ -88,7 +93,7 @@ export class Deploy extends Task<void> {
 						(buckets || []).map((b) => createBucket(resourceGroup, account, b));
 						(queues || []).map((q) => createQueue(resourceGroup, account, q));
 
-						const deployedTopics = topics.map((t) => createTopic(resourceGroup, t));
+						const deployedTopics = (topics || []).map((t) => createTopic(resourceGroup, t));
 
 						// Deploy functions here...
 						// need to determine our deployment method for them
@@ -100,7 +105,7 @@ export class Deploy extends Task<void> {
 						// NOTE: Currently CRONTAB support is required, we either need to revisit the design of
 						// our scheduled expressions or implement a workaround for request a feature.
 						if (schedules) {
-							pulumi.log.warn('Shedules are not currently supported for Azure deployments');
+							pulumi.log.warn('Schedules are not currently supported for Azure deployments');
 							// schedules.map(s => createSchedule(resourceGroup, s))
 						}
 
@@ -114,10 +119,15 @@ export class Deploy extends Task<void> {
 			await pulumiStack.setConfig('azure-nextgen:location', { value: region });
 			//await pulumiStack.setConfig('gcp:region', { value: region });
 			// deploy the stack, log to console
-			const upRes = await pulumiStack.up({ onOutput: this.update.bind(this) });
+			const update = this.update.bind(this);
+			const upRes = await pulumiStack.up({ onOutput: (out) => { 
+				update(out);
+				messages.push(out);
+			}});
 			console.log(upRes);
 		} catch (e) {
 			console.log(e);
+			console.log(messages);
 		}
 	}
 }
