@@ -98,7 +98,7 @@ export default class DeployCmd extends Command {
 
 	async run(): Promise<void> {
 		const { args, flags } = this.parse(DeployCmd);
-		const { guided, orgName, adminEmail } = flags;
+		const { guided } = flags;
 		const { dir = '.' } = args;
 
 		const prompts = Object.keys(DeployCmd.flags)
@@ -122,7 +122,7 @@ export default class DeployCmd extends Command {
 			promptFlags = await inquirer.prompt(prompts);
 		}
 
-		const { file, region } = { ...flags, ...promptFlags };
+		const { file, region, orgName, adminEmail } = { ...flags, ...promptFlags };
 
 		if (!region) {
 			throw new Error('Region must be provided, for prompts use the --guided flag');
