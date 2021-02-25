@@ -22,13 +22,13 @@ export function createSchedule(
 	// It has a Display Name
 	// It has a Topic Endpoint (the endpoint of the eventgrid topic)
 	// It has an SAS (Share access signature) ("Provide your SAS Key")
-	new web.latest.Connection("", {
+	const connection = new web.latest.Connection("", {
 		connectionName: "",
 		resourceGroupName: resourceGroup.name,
 		properties: {
 
 		}
-	})
+	});
 
 	topics[0].eventGridTopic.endpoint
 	return new logic.latest.Workflow(schedule.name, {
@@ -36,7 +36,6 @@ export function createSchedule(
 		workflowName: schedule.name,
 		definition: {
 			[`$schema`]: 'https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#',
-
 			actions: {
 				// Publish to the given topic
 				Publish_Event: {
@@ -79,11 +78,14 @@ export function createSchedule(
 					// TODO: need to create a logic app connector for this...
 					// See above web.connection example
 					azureeventgridpublish: {
-						connectionId:
-							'/subscriptions/68ac0a02-02c1-4144-a45c-57b3b6f36d2e/resourceGroups/testing/providers/Microsoft.Web/connections/azureeventgridpublish',
-						connectionName: 'azureeventgridpublish',
-						id:
-							'/subscriptions/68ac0a02-02c1-4144-a45c-57b3b6f36d2e/providers/Microsoft.Web/locations/eastus/managedApis/azureeventgridpublish',
+						connectionId: connection.id,
+						connectionName: connection.name,
+						id: connection.id
+						//connectionId:
+						//	'/subscriptions/68ac0a02-02c1-4144-a45c-57b3b6f36d2e/resourceGroups/testing/providers/Microsoft.Web/connections/azureeventgridpublish',
+						//connectionName: 'azureeventgridpublish',
+						//id:
+						//	'/subscriptions/68ac0a02-02c1-4144-a45c-57b3b6f36d2e/providers/Microsoft.Web/locations/eastus/managedApis/azureeventgridpublish',
 					},
 				},
 			},

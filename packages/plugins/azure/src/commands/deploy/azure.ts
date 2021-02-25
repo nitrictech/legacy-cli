@@ -98,7 +98,7 @@ export default class DeployCmd extends Command {
 
 	async run(): Promise<void> {
 		const { args, flags } = this.parse(DeployCmd);
-		const { guided } = flags;
+		const { guided, orgName, adminEmail } = flags;
 		const { dir = '.' } = args;
 
 		const prompts = Object.keys(DeployCmd.flags)
@@ -128,8 +128,16 @@ export default class DeployCmd extends Command {
 			throw new Error('Region must be provided, for prompts use the --guided flag');
 		}
 
+		if (!orgName) {
+			throw new Error('orgName must be provided, for prompts use the --guided flag');
+		}
+
+		if (!adminEmail) {
+			throw new Error('adminEmail must be provided, for prompts use the --guided flag');
+		}
+
 		const stack = await Stack.fromFile(path.join(dir, file));
 
-		new Listr([wrapTaskForListr(new StageStackTask({ stack })), wrapTaskForListr(new Deploy({ stack, region }))]).run();
+		new Listr([wrapTaskForListr(new StageStackTask({ stack })), wrapTaskForListr(new Deploy({ stack, region, orgName, adminEmail }))]).run();
 	}
 }
