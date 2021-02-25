@@ -82,21 +82,23 @@ export class Deploy extends Task<void> {
 						});
 
 						// Create a new storage account for this stack
-						const account = new storage.latest.StorageAccount(`${stack.getName()}-storage-account`, {
-							resourceGroupName: resourceGroup.name,
-							// 24 character limit
-							accountName: `${stack.getName().replace(/-/g, '')}`,
-							kind: 'Storage',
-							sku: {
-								name: 'Standard_LRS',
-							},
-						});
-
-						// Not using refeschedulerrences produced currently,
-						// but leaving as map in case we need to reference in future
-						(buckets || []).map((b) => createBucket(resourceGroup, account, b));
-						(queues || []).map((q) => createQueue(resourceGroup, account, q));
-
+						if (buckets || queues) {
+							const account = new storage.latest.StorageAccount(`${stack.getName()}-storage-account`, {
+								resourceGroupName: resourceGroup.name,
+								// 24 character limit
+								accountName: `${stack.getName().replace(/-/g, '')}`,
+								kind: 'Storage',
+								sku: {
+									name: 'Standard_LRS',
+								},
+							});
+	
+							// Not using refeschedulerrences produced currently,
+							// but leaving as map in case we need to reference in future
+							(buckets || []).map((b) => createBucket(resourceGroup, account, b));
+							(queues || []).map((q) => createQueue(resourceGroup, account, q));
+						}
+						
 						const deployedTopics = (topics || []).map((t) => createTopic(resourceGroup, t));
 
 						// Deploy functions here...
