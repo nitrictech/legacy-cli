@@ -5,7 +5,6 @@ import { Stack, StageStackTask, wrapTaskForListr } from '@nitric/cli-common';
 import path from 'path';
 import { Deploy } from '../../tasks/deploy';
 
-// XXX: Commented out regions do not support cloud run
 const SUPPORTED_REGIONS = [
 	'eastus',
 	'eastus2',
@@ -76,7 +75,7 @@ const SUPPORTED_REGIONS = [
 export default class DeployCmd extends Command {
 	static description = 'Deploy a Nitric application to Microsoft Azure';
 
-	static examples = [`$ nitric deploy:gcp`];
+	static examples = [`$ nitric deploy:azure`];
 
 	static flags = {
 		region: flags.enum({
@@ -138,6 +137,9 @@ export default class DeployCmd extends Command {
 
 		const stack = await Stack.fromFile(path.join(dir, file));
 
-		new Listr([wrapTaskForListr(new StageStackTask({ stack })), wrapTaskForListr(new Deploy({ stack, region, orgName, adminEmail }))]).run();
+		new Listr([
+			wrapTaskForListr(new StageStackTask({ stack })),
+			wrapTaskForListr(new Deploy({ stack, region, orgName, adminEmail })),
+		]).run();
 	}
 }

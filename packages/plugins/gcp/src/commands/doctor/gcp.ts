@@ -6,7 +6,7 @@ import { CheckPlugins, InstallGCPPulumiPlugin } from '../../tasks/doctor';
 
 /**
  * Nitric CLI GCP Doctor command
- * Will check and install pre-requisite software for deploying Nitric applicaitons to GCP
+ * Will check and install pre-requisite software for deploying Nitric applications to GCP
  */
 export default class Doctor extends Command {
 	static description = 'Checks environment for configuration for deployment to GCP';

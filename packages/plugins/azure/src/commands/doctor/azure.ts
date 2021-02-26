@@ -5,13 +5,13 @@ import Listr from 'listr';
 import { CheckPulumiPluginTask, InstallPulumiPluginTask } from '../../tasks/doctor';
 
 /**
- * Nitric CLI GCP Doctor command
- * Will check and install pre-requisite software for deploying Nitric applicaitons to GCP
+ * Nitric CLI Azure Doctor command
+ * Will check and install pre-requisite software for deploying Nitric applications to Azure
  */
 export default class Doctor extends Command {
-	static description = 'Checks environment for configuration for deployment to GCP';
+	static description = 'Checks environment for configuration for deployment to Azure';
 
-	static examples = [`$ nitric doctor:gcp`];
+	static examples = [`$ nitric doctor:azure`];
 
 	static flags = {
 		help: flags.help({ char: 'h' }),

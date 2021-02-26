@@ -49,13 +49,13 @@ export class Deploy extends Task<void> {
 						// This'll be used for basically everything we deploy in this stack
 						const resourceGroup = new resources.latest.ResourceGroup(stack.getName(), {
 							resourceGroupName: stack.getName(),
-							location: region, 
+							location: region,
 						});
 
 						const registry = new containerregistry.latest.Registry(`${stack.getName()}-registry`, {
 							resourceGroupName: resourceGroup.name,
 							location: resourceGroup.location,
-							registryName: `${stack.getName().replace(/-/g,'')}Registry`,
+							registryName: `${stack.getName().replace(/-/g, '')}Registry`,
 							adminUserEnabled: true,
 							sku: {
 								name: 'Basic',
@@ -92,13 +92,13 @@ export class Deploy extends Task<void> {
 									name: 'Standard_LRS',
 								},
 							});
-	
+
 							// Not using refeschedulerrences produced currently,
 							// but leaving as map in case we need to reference in future
 							(buckets || []).map((b) => createBucket(resourceGroup, account, b));
 							(queues || []).map((q) => createQueue(resourceGroup, account, q));
 						}
-						
+
 						const deployedTopics = (topics || []).map((t) => createTopic(resourceGroup, t));
 
 						// Deploy functions here...
@@ -123,13 +123,15 @@ export class Deploy extends Task<void> {
 				},
 			});
 			await pulumiStack.setConfig('azure-nextgen:location', { value: region });
-			//await pulumiStack.setConfig('gcp:region', { value: region });
+
 			// deploy the stack, log to console
 			const update = this.update.bind(this);
-			const upRes = await pulumiStack.up({ onOutput: (out) => { 
-				update(out);
-				messages.push(out);
-			}});
+			const upRes = await pulumiStack.up({
+				onOutput: (out) => {
+					update(out);
+					messages.push(out);
+				},
+			});
 			console.log(upRes);
 		} catch (e) {
 			console.log(e);
