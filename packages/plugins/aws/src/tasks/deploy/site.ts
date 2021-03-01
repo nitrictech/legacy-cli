@@ -2,11 +2,11 @@ import { NitricStaticSite } from '@nitric/cli-common';
 import { s3 } from '@pulumi/aws';
 import fs from 'fs';
 import { DeployedSite } from '../types';
-import * as pulumi from "@pulumi/pulumi";
-import path from "path";
-import * as mime from "mime";
+import * as pulumi from '@pulumi/pulumi';
+import path from 'path';
+import * as mime from 'mime';
 
-// An asynchronous directory crawling function
+// An asynchronous directory crawling functionW
 // Does not currently handle symlinks and cycles
 async function crawlDirectory(dir: string, f: (_: string) => Promise<void>): Promise<void> {
 	const files = await fs.promises.readdir(dir);
@@ -25,29 +25,28 @@ async function crawlDirectory(dir: string, f: (_: string) => Promise<void>): Pro
 /**
  * Create and upload static site content to a bucket
  */
-export async function createSite(projectDir: string, site: NitricStaticSite): Promise<DeployedSite> {
+export async function createSite(site: NitricStaticSite): Promise<DeployedSite> {
 	// Create a Bucket for the static content to reside in
 
 	const siteBucket = new s3.Bucket(site.name, {
-		acl: "public-read",
+		//acl: "public-read",
 		website: {
 			// Assume this for now
-			indexDocument: "index.html"
-		}
+			indexDocument: 'index.html',
+		},
 	});
 
 	await crawlDirectory(
-		// TODO: Path.join this with the core nitric directory?
-		path.join(projectDir, site.path),
+		path.resolve(site.path),
 		async (filePath: string) => {
 			// FIXME: Use path.relative?
-			const relativePath = filePath.replace(site.path + "/", "");
+			const relativePath = path.relative(site.path, filePath);
 			new s3.BucketObject(relativePath, {
-				key: relativePath,
-				acl: 'public-read',
+				//key: relativePath,
+				//acl: 'public-read',
 				bucket: siteBucket,
 				contentType: mime.getType(filePath) || undefined,
-				source: new pulumi.asset.FileAsset(filePath)
+				source: new pulumi.asset.FileAsset(filePath),
 			});
 		},
 	);
