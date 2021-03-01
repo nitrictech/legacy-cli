@@ -132,7 +132,7 @@ export async function createEntrypoint(
 		throw new Error('No default route specified (path /) please specify a default route in your application entrypoints');
 	}
 
-	const oai = new cloudfront.OriginAccessIdentity('')
+	const oai = new cloudfront.OriginAccessIdentity(`${stackName}OAI`)
 	const origins = originsFromEntrypoints(oai, entrypoints, deployedSites, deployedApis);
 	const { defaultCacheBehavior, orderedCacheBehaviors } = entrypointsToBehaviours(entrypoints);
 
