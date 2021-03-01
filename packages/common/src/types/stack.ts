@@ -5,6 +5,7 @@ import { NitricQueue } from './queue';
 import { NitricSchedule } from './schedule';
 import { NitricAPI } from './api';
 import { NitricStaticSite } from './static-site';
+import { NitricEntrypoints } from './entrypoints';
 
 /**
  * A Nitric application stack descriptor
@@ -26,4 +27,6 @@ export interface NitricStack {
 	apis?: NitricAPI[];
 	// Static sites to be deployed
 	sites?: NitricStaticSite[];
+	// Define entrypoints for routing/egress in the nitric application
+	entrypoints?: NitricEntrypoints;
 }
