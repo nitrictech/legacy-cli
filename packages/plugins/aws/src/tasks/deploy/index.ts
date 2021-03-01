@@ -73,7 +73,7 @@ export class Deploy extends Task<void> {
 						// Deploy schedules
 						(schedules || []).forEach((schedule) => createSchedule(schedule, deployedTopics));
 
-						const deployedSites = await Promise.all((sites || []).map(s => createSite(stack.getDirectory(), s)))
+						const deployedSites = await Promise.all((sites || []).map(createSite))
 
 						const deployedFunctions = stack
 							.getFunctions()
