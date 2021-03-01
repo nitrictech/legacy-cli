@@ -9,6 +9,8 @@ import { createTopic } from './topic';
 
 import { LocalWorkspace } from '@pulumi/pulumi/x/automation';
 import { ecr } from '@pulumi/aws';
+import { createSite } from './site';
+import { createEntrypoint } from './entrypoint';
 
 /**
  * Common Task Options
@@ -50,7 +52,7 @@ export class Deploy extends Task<void> {
 
 	async do(): Promise<void> {
 		const { stack, region } = this;
-		const { topics = [], schedules = [], apis = [] } = stack.asNitricStack();
+		const { topics = [], schedules = [], apis = [], sites = [], entrypoints } = stack.asNitricStack();
 
 		this.update('Defining functions');
 
@@ -71,12 +73,19 @@ export class Deploy extends Task<void> {
 						// Deploy schedules
 						(schedules || []).forEach((schedule) => createSchedule(schedule, deployedTopics));
 
+						const deployedSites = await Promise.all((sites || []).map(s => createSite(stack.getDirectory(), s)))
+
 						const deployedFunctions = stack
 							.getFunctions()
 							.map((func) => createLambdaFunction(func, deployedTopics, authToken));
 
 						// Deploy APIs
-						(apis || []).map((api) => createApi(api, deployedFunctions));
+						const deployedApis = (apis || []).map((api) => createApi(api, deployedFunctions));
+
+						if (entrypoints) {
+							// Add cloudfront distributions here...
+							createEntrypoint(stack.getName(), entrypoints, deployedSites, deployedApis);
+						}
 					} catch (e) {
 						console.error(e);
 						throw e;

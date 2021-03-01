@@ -59,8 +59,8 @@ function originsFromEntrypoints(
 
 
 function entrypointsToBehaviours(entrypoints: NitricEntrypoints): {
-	defaultCacheBehavior: types.input.cloudfront.DistributionDefaultCacheBehavior,
-	orderedCacheBehaviors: types.input.cloudfront.DistributionOrderedCacheBehavior[],
+	defaultCacheBehavior: types.input.cloudfront.DistributionDefaultCacheBehavior;
+	orderedCacheBehaviors: types.input.cloudfront.DistributionOrderedCacheBehavior[];
 } {
 
 	const defaultEntrypoint = entrypoints['/'];
@@ -150,7 +150,7 @@ export async function createEntrypoint(
 		restrictions: {
 			geoRestriction: {
 				restrictionType: 'whitelist',
-				locations: ['US', 'CA', 'GB', 'DE'],
+				locations: ['AU'],
 			},
 		},
 	});
