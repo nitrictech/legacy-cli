@@ -7,6 +7,8 @@ import {
 	NitricSchedule,
 	NitricStack,
 	NitricAPI,
+	NitricStaticSite,
+	NitricEntrypoints,
 } from '../types';
 import fs from 'fs';
 import YAML from 'yaml';
@@ -25,8 +27,10 @@ export class Stack {
 	private topics?: NitricTopic[];
 	private schedules?: NitricSchedule[];
 	private apis?: NitricAPI[];
+	private sites?: NitricStaticSite[];
+	private entrypoints?: NitricEntrypoints;
 
-	constructor(file: string, { name, functions, topics, queues, buckets, schedules, apis }: NitricStack) {
+	constructor(file: string, { name, functions, topics, queues, buckets, schedules, apis, sites, entrypoints }: NitricStack) {
 		this.file = file;
 		this.name = name;
 		this.funcs = functions;
@@ -35,6 +39,8 @@ export class Stack {
 		this.buckets = buckets;
 		this.schedules = schedules;
 		this.apis = apis;
+		this.sites = sites;
+		this.entrypoints = entrypoints;
 	}
 
 	getName(): string {
@@ -50,6 +56,8 @@ export class Stack {
 			topics: this.topics,
 			schedules: this.schedules,
 			apis: this.apis,
+			sites: this.sites,
+			entrypoints: this.entrypoints,
 		};
 	}
 
