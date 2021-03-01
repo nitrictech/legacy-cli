@@ -1,7 +1,7 @@
 import { NitricAPI } from '@nitric/cli-common';
 import { OpenAPIV3 } from 'openapi-types';
 import { uniq } from 'lodash';
-import { DeployedFunction } from '../types';
+import { DeployedAPI, DeployedFunction } from '../types';
 import { apigatewayv2, lambda } from '@pulumi/aws';
 import * as pulumi from '@pulumi/pulumi';
 import fs from 'fs';
@@ -26,7 +26,7 @@ interface AwsExtentions {
 	};
 }
 
-export function createApi(api: NitricAPI, funcs: DeployedFunction[]): void {
+export function createApi(api: NitricAPI, funcs: DeployedFunction[]): DeployedAPI {
 	const { name, ...rest } = api;
 
 	const targetNames = uniq(
@@ -109,7 +109,7 @@ export function createApi(api: NitricAPI, funcs: DeployedFunction[]): void {
 	});
 
 	// stage
-	new apigatewayv2.Stage(`${api.name}DefaultStage`, {
+	const stage = new apigatewayv2.Stage(`${api.name}DefaultStage`, {
 		apiId: deployedApi.id,
 		name: '$default',
 		autoDeploy: true,
@@ -126,4 +126,9 @@ export function createApi(api: NitricAPI, funcs: DeployedFunction[]): void {
 				sourceArn: pulumi.interpolate`${deployedApi.executionArn}/*/*/*`,
 			});
 		});
+
+	return {
+		...api,
+		apiGateway: stage,
+	}
 }
