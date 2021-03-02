@@ -7,6 +7,7 @@ export interface NitricStaticSite {
 	// Will be used to execute scripts
 	path: string;
 	// Path to get assets to upload
+	// this will be relative to path
 	assetPath?: string;
 	// Build scripts to execute before upload
 	buildScripts?: string[];
