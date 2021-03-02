@@ -23,7 +23,7 @@ export function createFunction(
 			// Staging directory
 			context: func.getStagingDirectory(),
 			args: {
-				provider: 'gcp',
+				PROVIDER: 'gcp',
 			},
 		},
 		registry: {

@@ -29,7 +29,7 @@ export function createFunctionAsApp(
 			// Staging directory
 			context: func.getStagingDirectory(),
 			args: {
-				provider: 'azure',
+				PROVIDER: 'azure',
 			},
 		},
 		registry: {

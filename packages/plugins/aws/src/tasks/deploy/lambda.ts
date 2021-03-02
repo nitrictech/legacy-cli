@@ -19,7 +19,7 @@ export function createLambdaFunction(
 			// Staging directory
 			context: func.getStagingDirectory(),
 			args: {
-				provider: 'aws',
+				PROVIDER: 'aws',
 			},
 		},
 		registry: {
