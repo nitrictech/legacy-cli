@@ -3,8 +3,11 @@
 export interface NitricStaticSite {
 	// A name for the static site...
 	name: string;
-	// Path to upload to bucket for static hosting
+	// Base path of the site
+	// Will be used to execute scripts
 	path: string;
+	// Path to get assets to upload
+	assetPath?: string;
 	// Build scripts to execute before upload
 	buildScripts?: string[];
 }
