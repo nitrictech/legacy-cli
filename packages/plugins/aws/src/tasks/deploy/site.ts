@@ -29,7 +29,7 @@ export async function createSite(site: NitricStaticSite): Promise<DeployedSite> 
 	// Create a Bucket for the static content to reside in
 
 	const siteBucket = new s3.Bucket(site.name, {
-		//acl: "public-read",
+		acl: "public-read",
 		website: {
 			// Assume this for now
 			indexDocument: 'index.html',
@@ -43,7 +43,7 @@ export async function createSite(site: NitricStaticSite): Promise<DeployedSite> 
 			const relativePath = path.relative(site.path, filePath);
 			new s3.BucketObject(relativePath, {
 				//key: relativePath,
-				//acl: 'public-read',
+				acl: 'public-read',
 				bucket: siteBucket,
 				contentType: mime.getType(filePath) || undefined,
 				source: new pulumi.asset.FileAsset(filePath),

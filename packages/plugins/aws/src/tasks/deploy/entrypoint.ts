@@ -91,7 +91,7 @@ function entrypointsToBehaviours(entrypoints: NitricEntrypoints): {
 			viewerProtocolPolicy: 'allow-all'
 		},
 		orderedCacheBehaviors: otherEntrypoints.map(e => ({
-			pathPattern: `${e.path}/*`,
+			pathPattern: `${e.path}*`,
 			allowedMethods: [
 				"DELETE",
 				"GET",
@@ -109,7 +109,8 @@ function entrypointsToBehaviours(entrypoints: NitricEntrypoints): {
 					forward: 'all'
 				}
 			},
-			viewerProtocolPolicy: 'redirect-to-https'
+			// FIXME: Redirect
+			viewerProtocolPolicy: 'allow-all'
 		})),
 	}
 }
