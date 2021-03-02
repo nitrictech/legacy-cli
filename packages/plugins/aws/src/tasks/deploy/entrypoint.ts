@@ -29,7 +29,7 @@ function originsFromEntrypoints(
 				customOriginConfig: {
 					httpPort: 80,
 					httpsPort: 443,
-					originProtocolPolicy: 'match-viewer',
+					originProtocolPolicy: 'https-only',
 					originSslProtocols: ['TLSv1.2', 'SSLv3']
 				}
 			};
@@ -88,7 +88,7 @@ function entrypointsToBehaviours(entrypoints: NitricEntrypoints): {
 					forward: 'all'
 				}
 			},
-			viewerProtocolPolicy: 'allow-all'
+			viewerProtocolPolicy: 'https-only'
 		},
 		orderedCacheBehaviors: otherEntrypoints.map(e => ({
 			pathPattern: `${e.path}*`,
@@ -109,8 +109,7 @@ function entrypointsToBehaviours(entrypoints: NitricEntrypoints): {
 					forward: 'all'
 				}
 			},
-			// FIXME: Redirect
-			viewerProtocolPolicy: 'allow-all'
+			viewerProtocolPolicy: 'redirect-to-https'
 		})),
 	}
 }
@@ -140,6 +139,9 @@ export async function createEntrypoint(
 	// Create a new cloudfront distribution
 	return new cloudfront.Distribution(`${stackName}Distribution`, {
 		enabled: true,
+		// Assume for now default will be index
+		// TODO: Make this configurable via nitric.yaml
+		defaultRootObject: "index.html",
 		defaultCacheBehavior,
 		orderedCacheBehaviors,
 		origins,

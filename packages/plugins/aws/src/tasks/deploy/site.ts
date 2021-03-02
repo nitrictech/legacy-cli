@@ -1,4 +1,4 @@
-import { NitricStaticSite } from '@nitric/cli-common';
+import { Site } from '@nitric/cli-common';
 import { s3 } from '@pulumi/aws';
 import fs from 'fs';
 import { DeployedSite } from '../types';
@@ -25,10 +25,12 @@ async function crawlDirectory(dir: string, f: (_: string) => Promise<void>): Pro
 /**
  * Create and upload static site content to a bucket
  */
-export async function createSite(site: NitricStaticSite): Promise<DeployedSite> {
-	// Create a Bucket for the static content to reside in
+export async function createSite(site: Site): Promise<DeployedSite> {
+	// Build the sites content
+	await Site.build(site);
 
-	const siteBucket = new s3.Bucket(site.name, {
+	// Create a Bucket for the static content to reside in
+	const siteBucket = new s3.Bucket(site.getName(), {
 		acl: "public-read",
 		website: {
 			// Assume this for now
@@ -37,12 +39,12 @@ export async function createSite(site: NitricStaticSite): Promise<DeployedSite> 
 	});
 
 	await crawlDirectory(
-		path.resolve(site.path),
+		path.resolve(site.getAssetPath()),
 		async (filePath: string) => {
-			// FIXME: Use path.relative?
-			const relativePath = path.relative(site.path, filePath);
+			// Use path.relative to retrieve keyname for each file
+			// This assumes that the asset folder is the root of the bucket
+			const relativePath = path.relative(site.getAssetPath(), filePath);
 			new s3.BucketObject(relativePath, {
-				//key: relativePath,
 				acl: 'public-read',
 				bucket: siteBucket,
 				contentType: mime.getType(filePath) || undefined,
@@ -52,7 +54,7 @@ export async function createSite(site: NitricStaticSite): Promise<DeployedSite> 
 	);
 
 	return {
-		...site,
+		...site.getDesciptor(),
 		s3: siteBucket,
 	};
 }

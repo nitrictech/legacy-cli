@@ -16,6 +16,7 @@ import { Repository } from '../templates';
 import { STAGING_DIR } from '../paths';
 import rimraf from 'rimraf';
 import { Function } from './function';
+import { Site } from './site';
 import { findFileRead } from '../utils';
 //import multimatch from 'multimatch';
 
@@ -93,6 +94,10 @@ export class Stack {
 
 	getFunctions(): Function[] {
 		return (this.funcs || []).map((f) => new Function(this, f));
+	}
+
+	getSites(): Site[] {
+		return (this.sites || []).map(s => new Site(this, s));
 	}
 
 	getStagingDirectory(): string {
