@@ -803,7 +803,9 @@ __metadata:
     "@pulumi/docker": ^2.8.1
     "@pulumi/gcp": ^4.11.0
     "@pulumi/pulumi": ^2.20.0
+    "@pulumi/tls": ^3.2.0
     "@types/jest": ^26.0.15
+    "@types/mime": ^2.0.3
     "@types/node": ^10
     api-spec-converter: ^2.11.4
     dockerode: ^3.2.1
@@ -814,6 +816,7 @@ __metadata:
     googleapis: ^61.0.0
     jest: ^26.6.1
     listr: ^0.14.3
+    mime: ^2.5.2
     openapi-types: ^7.2.3
     ts-jest: ^26.4.3
     ts-node: ^8
@@ -1191,6 +1194,15 @@ __metadata:
   version: 0.3.0
   resolution: "@pulumi/query@npm:0.3.0"
   checksum: d3800398c229712de5f5c85eeac79cc194017d9dbdf8f5a556d7fd863685b08dcca6065b7eb71f40733b310723f7cd8fe7f9bbb90d8a8592ee861839e9651a14
+  languageName: node
+  linkType: hard
+
+"@pulumi/tls@npm:^3.2.0":
+  version: 3.2.0
+  resolution: "@pulumi/tls@npm:3.2.0"
+  dependencies:
+    "@pulumi/pulumi": ^2.15.0
+  checksum: acd55267cedd7bb75574baec36d8f3bdfc4dc74b28d1d603451fa8d9a7074a6f9ccf330cba86ac676ae871e8f0572a2ee39c6e94707bb1c9b7a76c32a9f9350b
   languageName: node
   linkType: hard
 

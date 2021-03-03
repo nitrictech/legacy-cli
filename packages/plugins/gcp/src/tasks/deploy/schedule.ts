@@ -1,6 +1,6 @@
 import { NitricSchedule } from '@nitric/cli-common';
 import { cloudscheduler } from '@pulumi/gcp';
-import { DeployedSchedule, DeployedTopic } from './types';
+import { DeployedSchedule, DeployedTopic } from '../types';
 
 export function createSchedule(schedule: NitricSchedule, topics: DeployedTopic[]): DeployedSchedule {
 	// Find our target topic

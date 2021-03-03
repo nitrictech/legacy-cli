@@ -1,5 +1,5 @@
 import { Function } from '@nitric/cli-common';
-import { DeployedFunction, DeployedTopic } from './types';
+import { DeployedFunction, DeployedTopic } from '../types';
 import { cloudrun, serviceaccount, pubsub } from '@pulumi/gcp';
 import * as docker from '@pulumi/docker';
 import * as pulumi from '@pulumi/pulumi';
