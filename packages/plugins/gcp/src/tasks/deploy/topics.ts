@@ -1,6 +1,6 @@
 import { NitricTopic } from '@nitric/cli-common';
 import { pubsub } from '@pulumi/gcp';
-import { DeployedTopic } from './types';
+import { DeployedTopic } from '../types';
 
 /**
  * Create a new pubsub topic

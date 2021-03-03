@@ -1,5 +1,5 @@
 import { NitricAPI, NitricAPITarget } from '@nitric/cli-common';
-import { DeployedApi, DeployedFunction } from './types';
+import { DeployedApi, DeployedFunction } from '../types';
 import { OpenAPIV2 } from 'openapi-types';
 import Converter from 'api-spec-converter';
 import { apigateway } from '@pulumi/gcp';
