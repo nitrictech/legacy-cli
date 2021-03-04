@@ -43,14 +43,14 @@ function createBackendServices(
 				networkEndpointType: 'INTERNET_FQDN_PORT',
 			});
 
-			const apiGatewayNE = new compute.GlobalNetworkEndpoint(`${ep.name}-ne`, {
+			new compute.GlobalNetworkEndpoint(`${ep.name}-ne`, {
 				globalNetworkEndpointGroup: apiGatewayNEG.name,
 				fqdn: deployedApi.gateway.defaultHostname,
 				port: 443, // HTTPS
 			});
 
 			const backend = new compute.BackendService(`${ep.name}`, {
-				backends: [{ group: apiGatewayNE.id }],
+				backends: [{ group: apiGatewayNEG.id }],
 				// TODO: Determine CDN requirements for API gateways
 				enableCdn: false,
 				protocol: 'HTTPS',

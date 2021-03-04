@@ -34,11 +34,17 @@ export async function createSite(site: Site): Promise<DeployedSite> {
 		},
 	});
 
-	new storage.BucketAccessControl(`${site.getName()}publicRule`, {
+	new storage.BucketIAMBinding(`${site.getName()}publicRule`, {
 		bucket: siteBucket.name,
-		role: 'READER',
-		entity: 'allUsers',
+		members: ['allUsers'],
+		role: 'roles/storage.objectViewer',
 	});
+
+	//new storage.BucketAccessControl(`${site.getName()}publicRule`, {
+	//	bucket: siteBucket.name,
+	//	role: 'READER',
+	//	entity: 'allUsers',
+	//});
 
 	//new storage.BucketACL(`${site.getName()}acl`, {
 	//	bucket: siteBucket.name,
