@@ -177,8 +177,6 @@ export function createEntrypoints(
 	// Connect a front end to the load balancer
 	new compute.GlobalForwardingRule(`${stackName}fwdrule`, {
 		target: httpProxy.id,
-		//allowGlobalAccess: true,
-		//ipProtocol: "TCP",
 		portRange: '443',
 		ipAddress: ipAddress.address
 	});
