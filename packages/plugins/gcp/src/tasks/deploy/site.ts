@@ -2,9 +2,9 @@ import { DeployedSite } from '../types';
 import { storage } from '@pulumi/gcp';
 import fs from 'fs';
 import { Site } from '@nitric/cli-common';
-import path from 'path'
+import path from 'path';
 import * as mime from 'mime';
-import * as pulumi from "@pulumi/pulumi";
+import * as pulumi from '@pulumi/pulumi';
 
 // An asynchronous directory crawling functionW
 // Does not currently handle symlinks and cycles
@@ -28,27 +28,39 @@ export async function createSite(site: Site): Promise<DeployedSite> {
 	await Site.build(site);
 
 	const siteBucket = new storage.Bucket(site.getName(), {
-		//website: {
-		//	mainPageSuffix: '',
-		//	notFoundPage: ''
-		//}
+		// uniformBucketLevelAccess: true,
+		website: {
+			mainPageSuffix: 'index.html',
+		},
 	});
 
-	await crawlDirectory(
-		path.resolve(site.getAssetPath()),
-		async (filePath: string) => {
-			// Use path.relative to retrieve keyname for each file
-			// This assumes that the asset folder is the root of the bucket
-			const relativePath = path.relative(site.getAssetPath(), filePath);
-			new storage.BucketObject(relativePath, {
-				//acl: 'public-read',
-				//bucket: siteBucket,
-				bucket: siteBucket.name,
-				contentType: mime.getType(filePath) || undefined,
-				source: new pulumi.asset.FileAsset(filePath),
-			});
-		},
-	);
+	new storage.BucketAccessControl(`${site.getName()}publicRule`, {
+		bucket: siteBucket.name,
+		role: 'READER',
+		entity: 'allUsers',
+	});
+
+	//new storage.BucketACL(`${site.getName()}acl`, {
+	//	bucket: siteBucket.name,
+	//	//predefinedAcl: "publicRead",
+	//	roleEntities:[
+	//		"READER:allUsers",
+	//	]
+	//});
+
+	await crawlDirectory(path.resolve(site.getAssetPath()), async (filePath: string) => {
+		// Use path.relative to retrieve keyname for each file
+		// This assumes that the asset folder is the root of the bucket
+		const relativePath = path.relative(site.getAssetPath(), filePath);
+		new storage.BucketObject(relativePath, {
+			//acl: 'public-read',
+			//bucket: siteBucket,
+			name: relativePath,
+			bucket: siteBucket.name,
+			contentType: mime.getType(filePath) || undefined,
+			source: new pulumi.asset.FileAsset(filePath),
+		});
+	});
 
 	return {
 		...site.getDesciptor(),

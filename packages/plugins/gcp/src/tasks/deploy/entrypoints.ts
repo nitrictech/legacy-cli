@@ -1,15 +1,16 @@
 import { NitricEntrypoints } from '@nitric/cli-common';
 import { compute } from '@pulumi/gcp';
 import { DeployedApi, DeployedSite } from '../types';
-import * as pulumi from "@pulumi/pulumi";
-import * as tls from "@pulumi/tls";
+import * as pulumi from '@pulumi/pulumi';
+import * as tls from '@pulumi/tls';
+import fs from 'fs';
 
 type Backend = compute.BackendBucket | compute.BackendService;
 
 type BackendItem = {
 	backend: Backend;
 	name: string;
-}
+};
 
 // Loop over entrypoint keys and for each
 // 1: Identify it's type (api/site(bucket))
@@ -32,23 +33,23 @@ function createBackendServices(
 	return normalizedEntrypoints.map((ep) => {
 		switch (ep.type) {
 		case 'api': {
-			const deployedApi = deployedApis.find(a => a.name === ep.name);
+			const deployedApi = deployedApis.find((a) => a.name === ep.name);
 
 			if (!deployedApi) {
 				throw new Error(`Entrypoint: ${ep.path} contained target that does not exist!`);
 			}
 
-			const apiGatewayNEG = new compute.GlobalNetworkEndpointGroup(`${ep.name}-NEG`, {
+			const apiGatewayNEG = new compute.GlobalNetworkEndpointGroup(`${ep.name}-neg`, {
 				networkEndpointType: 'INTERNET_FQDN_PORT',
 			});
 
-			const apiGatewayNE = new compute.GlobalNetworkEndpoint(`${ep.name}-NE`, {
+			const apiGatewayNE = new compute.GlobalNetworkEndpoint(`${ep.name}-ne`, {
 				globalNetworkEndpointGroup: apiGatewayNEG.name,
 				fqdn: deployedApi.gateway.defaultHostname,
 				port: 443, // HTTPS
 			});
 
-			const backend = new compute.BackendService(`${ep.name}`,{
+			const backend = new compute.BackendService(`${ep.name}`, {
 				backends: [{ group: apiGatewayNE.id }],
 				// TODO: Determine CDN requirements for API gateways
 				enableCdn: false,
@@ -61,13 +62,13 @@ function createBackendServices(
 			};
 		}
 		case 'site': {
-			const deployedSite = deployedSites.find(s => s.name === ep.name);
+			const deployedSite = deployedSites.find((s) => s.name === ep.name);
 
 			if (!deployedSite) {
 				throw new Error(`Entrypoint: ${ep.path} contained target that does not exist!`);
 			}
 
-			const backend =  new compute.BackendBucket(`${ep.name}`, {
+			const backend = new compute.BackendBucket(`${ep.name}`, {
 				bucketName: deployedSite.bucket.name,
 				// Enable CDN for sites
 				enableCdn: true,
@@ -84,89 +85,101 @@ function createBackendServices(
 	});
 }
 
-function createURLMap(entrypoints: NitricEntrypoints, backends: BackendItem[]): compute.URLMap {
-	const defaultEntrypoint = entrypoints['/']
+function createURLMap(stackName: string, entrypoints: NitricEntrypoints, backends: BackendItem[]): compute.URLMap {
+	const defaultEntrypoint = entrypoints['/'];
 	const otherEntrypoints = Object.keys(entrypoints)
-		.filter(k => k !== "/")
-		.map(k => ({ path: k, ...entrypoints[k] }));
+		.filter((k) => k !== '/')
+		.map((k) => ({ path: k, ...entrypoints[k] }));
+
+	pulumi.log.info(JSON.stringify(otherEntrypoints));
 
 	if (!defaultEntrypoint) {
 		throw new Error("A default entrypoint '/' is required");
 	}
 
-	const defaultBackend = backends.find(b => b.name === defaultEntrypoint.name)!.backend;
+	const defaultBackend = backends.find((b) => b.name === defaultEntrypoint.name)!.backend;
 
-	return new compute.URLMap(`ep-url-map`, {
+	const pathRules = otherEntrypoints.length > 0
+		?	otherEntrypoints.map((ep) => {
+			const backend = backends.find((b) => b.name === ep.name)!.backend;
+
+			return {
+				paths: [`${ep.path}*`],
+				service: backend.id,
+			};
+		})
+		: undefined;
+
+	return new compute.URLMap(`${stackName}-ep-url-map`, {
 		defaultService: defaultBackend.id,
 		hostRules: [{
-			hosts: ["*"],
-			pathMatcher: "ep-matchers",
+			hosts: ['*'],
+			pathMatcher: 'ep-matchers',
 		}],
-		pathMatchers: [{
-			name: 'ep-matchers',
-			defaultService: defaultBackend.id,
-			pathRules: [{
-				paths: ["/*"],
-				service: defaultBackend.id,
+		pathMatchers: [
+			{
+				name: 'ep-matchers',
+				defaultService: defaultBackend.id,
+				pathRules,
 			},
-			...otherEntrypoints.map(ep => {
-				const backend = backends.find(b => b.name === ep.name)!.backend;
-
-				return {
-					paths: [`${ep.path}*`],
-					service: backend.id,
-				};
-			})],
-		}]
+		],
 	});
 }
 
 /**
  * Setup GCP loadbalances and services as well as CDN configurations
  */
-export function createEntrypoints(stackName: string, entrypoints: NitricEntrypoints, deployedSites: DeployedSite[], deployedApis: DeployedApi[]): void {
+export function createEntrypoints(
+	stackName: string,
+	entrypoints: NitricEntrypoints,
+	deployedSites: DeployedSite[],
+	deployedApis: DeployedApi[],
+): void {
 	// Created backend services
 	const backends = createBackendServices(entrypoints, deployedApis, deployedSites);
 	// Create URLMap
-	const urlMap = createURLMap(entrypoints, backends);
+	const urlMap = createURLMap(stackName, entrypoints, backends);
 	// Create FE HTTPS Proxy
-	
+
+	// Reserve a public IP address with google
+	const ipAddress = new compute.GlobalAddress(`${stackName}address`, {});
 	// Create SSL Certificate
 	// FIXME: This will be for development deployments ONLY
 	// a proper certificate will need ot be configured for production deployments
-	//const privateKey = new tls.PrivateKey(`${stackName}PK`, {
-	//	algorithm: "RSA",
-	//});
-
-	//const certificate = new tls.SelfSignedCert(`${stackName}SSC`, {
-	//	privateKeyPem: privateKey.privateKeyPem,
-	//	keyAlgorithm: "RSA",
-	//	allowedUses: [],
-	//	subjects: [{
-	//		commonName: "nitric.io",
-	//		country: "AU",
-	//		locality: "Sydney",
-	//		organization: "Nitric"
-	//		//organizationalUnit?: pulumi.Input<string>;
-	//		//postalCode?: pulumi.Input<string>;
-	//		//province?: pulumi.Input<string>;
-	//		//serialNumber?: pulumi.Input<string>;
-	//		//streetAddresses?: pulumi.Input<pulumi.Input<string>[]>;
-	//	}],
-	//	validityPeriodHours: 8760,
-	//});
-
-	//const sslCertificate = new compute.SSLCertificate(`${stackName}GCPCert`, {
-	//	certificate: certificate.certPem,
-	//	privateKey: certificate.privateKeyPem,
-	//});
-
-	new compute.TargetHttpProxy(`${stackName}Proxy`, {
-		urlMap: urlMap.id,
+	const privateKey = new tls.PrivateKey(`${stackName}pk`, {
+		algorithm: "RSA",
+		rsaBits: 2048
 	});
 
-	//new compute.TargetHttpsProxy(`${stackName}Proxy`, {
-	//	urlMap: urlMap.id,
-	//	sslCertificates: [sslCertificate.id]
-	//});
+	const certificate = new tls.SelfSignedCert(`${stackName}ssc`, {
+		privateKeyPem: privateKey.privateKeyPem,
+		keyAlgorithm: "RSA",
+		allowedUses: ["nonRepudiation", "digitalSignature", "keyEncipherment"],
+		subjects: [{
+			commonName: ipAddress.address,
+			organization: "Nitric Pty Ltd",
+		}],
+		validityPeriodHours: 8760,
+	});
+
+	const sslCertificate = new compute.SSLCertificate(`${stackName}gcpcert`, {
+		namePrefix: `${stackName}-certificate-`,
+		certificate: certificate.certPem,
+		privateKey: privateKey.privateKeyPem,
+	});
+
+	const httpProxy = new compute.TargetHttpsProxy(`${stackName}proxy`, {
+		description: `Load Balancer for ${stackName}`,
+		urlMap: urlMap.id,
+		sslCertificates: [sslCertificate.id]
+	});
+
+	// Connect a front end to the load balancer
+	new compute.GlobalForwardingRule(`${stackName}fwdrule`, {
+		target: httpProxy.id,
+		//allowGlobalAccess: true,
+		//ipProtocol: "TCP",
+		portRange: '443',
+		ipAddress: ipAddress.address
+	});
 }
