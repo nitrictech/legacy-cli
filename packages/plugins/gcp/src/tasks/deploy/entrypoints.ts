@@ -41,6 +41,7 @@ function createBackendServices(
 
 			const apiGatewayNEG = new compute.GlobalNetworkEndpointGroup(`${ep.name}-neg`, {
 				networkEndpointType: 'INTERNET_FQDN_PORT',
+				//defaultPort: 443,
 			});
 
 			new compute.GlobalNetworkEndpoint(`${ep.name}-ne`, {
@@ -51,6 +52,9 @@ function createBackendServices(
 
 			const backend = new compute.BackendService(`${ep.name}`, {
 				backends: [{ group: apiGatewayNEG.id }],
+				customRequestHeaders: [
+					pulumi.interpolate`Host: ${deployedApi.gateway.defaultHostname}`
+				],
 				// TODO: Determine CDN requirements for API gateways
 				enableCdn: false,
 				protocol: 'HTTPS',
