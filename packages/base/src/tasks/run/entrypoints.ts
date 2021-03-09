@@ -1,4 +1,4 @@
-import { NitricEntrypoints, Site, Stack, Task } from "@nitric/cli-common";
+import { Site, Stack, Task } from "@nitric/cli-common";
 import Docker, { Container, ContainerCreateOptions, Network, NetworkInspectInfo } from 'dockerode';
 import tar from 'tar-fs';
 import fs from 'fs';
@@ -12,7 +12,7 @@ const NGINX_CONFIG_FILE = 'nginx.conf';
 /**
  * Stage the entrypoint with the stack staging directory
  */
-async function stageStackEntrypoint(stack: Stack, nginxConf: string): Promise<void> {
+export async function stageStackEntrypoint(stack: Stack, nginxConf: string): Promise<void> {
 	// Get the staging directory for the stack
 	const configFile = path.join(stack.getStagingDirectory(), NGINX_CONFIG_FILE);
 	await fs.promises.writeFile(configFile, nginxConf);
@@ -23,7 +23,13 @@ async function stageStackEntrypoint(stack: Stack, nginxConf: string): Promise<vo
  * For nitric resources
  * @param entrypoints 
  */
-function createNginxConfig(stack: Stack, entrypoints: NitricEntrypoints): string {
+export function createNginxConfig(stack: Stack): string {
+	const { entrypoints } = stack.asNitricStack();
+
+	if (!entrypoints) {
+		throw new Error('Cannot create nginx config for stack with no entrypoints');
+	}
+
 	const eps = Object.keys(entrypoints).map(e => ({
 		path: e,
 		...entrypoints[e],
@@ -54,7 +60,6 @@ function createNginxConfig(stack: Stack, entrypoints: NitricEntrypoints): string
 }
 
 interface RunEntrypointsTaskOptions {
-	entrypoints: NitricEntrypoints;
 	stack: Stack;
 	network?: Network;
 	docker: Docker;
@@ -66,21 +71,19 @@ interface RunEntrypointsTaskOptions {
  */
 export class RunEntrypointsTask extends Task<Container> {
 	private stack: Stack;
-	private entrypoints: NitricEntrypoints;
 	private network?: Network;
 	private docker: Docker;
 	private port?: number;
 
-	constructor({ entrypoints, stack, docker, network }: RunEntrypointsTaskOptions) {
+	constructor({ stack, docker, network }: RunEntrypointsTaskOptions) {
 		super('Starting Entrypoints');
 		this.stack = stack;
-		this.entrypoints = entrypoints;
 		this.network = network;
 		this.docker = docker;
 	}
 
 	async do(): Promise<Container> {
-		const { stack, network, entrypoints } = this;
+		const { stack, network, docker } = this;
 
 		if (!this.port) {
 			// Find any open port if none provided.
@@ -114,10 +117,10 @@ export class RunEntrypointsTask extends Task<Container> {
 			},
 		} as ContainerCreateOptions;
 		// Create the nginx container first
-		const container = await this.docker.createContainer(dockerOptions);
+		const container = await docker.createContainer(dockerOptions);
 
 		// Get the nginx configuration from our nitric entrypoints
-		const configuration = createNginxConfig(stack, entrypoints);
+		const configuration = createNginxConfig(stack);
 
 		// Stage the file...
 		await stageStackEntrypoint(stack, configuration);
@@ -149,10 +152,10 @@ export class RunEntrypointsTask extends Task<Container> {
 				WorkingDir: '/',
 			});
 
-			await exec.start({});
+			const execStream = await exec.start({});
 
 			await new Promise<void>((res) => {
-				setTimeout(res, 5000);
+				docker.modem.followProgress(execStream, res, this.update);
 			});
 
 			return await container.putArchive(siteTar, {

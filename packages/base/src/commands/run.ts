@@ -148,7 +148,7 @@ export function createRunTasks(
 		? [
 			wrapTaskForListr({
 				name: 'Starting Entrypoints Proxy',
-				factory: (ctx) => new RunEntrypointsTask({ stack, entrypoints, docker, network: ctx.network }),
+				factory: (ctx) => new RunEntrypointsTask({ stack, docker, network: ctx.network }),
 			}),
 		  ]
 		: [];
