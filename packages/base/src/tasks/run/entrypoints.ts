@@ -3,6 +3,7 @@ import Docker, { Container, ContainerCreateOptions, Network, NetworkInspectInfo 
 import tar from 'tar-fs';
 import fs from 'fs';
 import path from 'path';
+import getPort from "get-port";
 
 
 const HTTP_PORT = 80;
@@ -22,7 +23,7 @@ async function stageStackEntrypoint(stack: Stack, nginxConf: string): Promise<vo
  * For nitric resources
  * @param entrypoints 
  */
-function createNginxConfig(entrypoints: NitricEntrypoints): string {
+function createNginxConfig(stack: Stack, entrypoints: NitricEntrypoints): string {
 	const eps = Object.keys(entrypoints).map(e => ({
 		path: e,
 		...entrypoints[e],
@@ -32,19 +33,24 @@ function createNginxConfig(entrypoints: NitricEntrypoints): string {
 	const apis = eps.filter(e => e.type === "api");
 
 	return `
+	events {}
+	http {
+
+
 		server {
 			${sites.map(s => `
-				${s.path} {
-					root /www/${s.name}
+				location ${s.path} {
+					root /www/${s.name};
 				}
 			`).join('\n')}
 
 			${apis.map(a => `
-				${a.path} {
-					proxy_pass http://${a.name}
+				location ${a.path} {
+					proxy_pass http://${stack.getName()}-${a.name}:8080;
 				}
 			`).join('\n')}
 		}
+	}
 	`;
 }
 
@@ -77,6 +83,11 @@ export class RunEntrypointsTask extends Task<Container> {
 	async do(): Promise<Container> {
 		const { stack, network, entrypoints } = this;
 
+		if (!this.port) {
+			// Find any open port if none provided.
+			this.port = await getPort();
+		}
+
 		let networkName = 'bridge';
 		if (network) {
 			try {
@@ -107,7 +118,7 @@ export class RunEntrypointsTask extends Task<Container> {
 		const container = await this.docker.createContainer(dockerOptions);
 
 		// Get the nginx configuration from our nitric entrypoints
-		const configuration = createNginxConfig(entrypoints);
+		const configuration = createNginxConfig(stack, entrypoints);
 
 		// Stage the file...
 		await stageStackEntrypoint(stack, configuration);
@@ -120,19 +131,21 @@ export class RunEntrypointsTask extends Task<Container> {
 		});
 
 		// Copy sites onto the frontend container
-		await Promise.all(stack.getSites().map(async (s) => {
-			await Site.build(s);
-			const siteTar = tar.pack(s.getAssetPath());
+		//await Promise.all(stack.getSites().map(async (s) => {
+		//	await Site.build(s);
+		//	const siteTar = tar.pack(s.getAssetPath());
 
-			return await container.putArchive(siteTar, {
-				path: `/www/${s.getName()}`,
-			});
-		}));
+		//	return await container.putArchive(siteTar, {
+		//		path: `/www/${s.getName()}/`,
+		//		noOverwriteDirNonDir: false,
+		//	});
+		//}));
 
 		// write the nginx configuration to the default nginx directory
 		await container.putArchive(packStream, {
 			// Copy nginx.conf to our nginx container
 			path: '/etc/nginx/',
+			
 		});
 
 		// Start the container...

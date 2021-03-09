@@ -6,12 +6,12 @@ import Listr from 'listr';
 import path from 'path';
 import Docker, { Network, Container, Volume } from 'dockerode';
 import getPort from 'get-port';
-import { 
-	RunFunctionTask, 
-	RunFunctionTaskOptions, 
-	CreateNetworkTask, 
-	CreateVolumeTask, 
-	RunGatewayTask, 
+import {
+	RunFunctionTask,
+	RunFunctionTaskOptions,
+	CreateNetworkTask,
+	CreateVolumeTask,
+	RunGatewayTask,
 	RunGatewayTaskOptions,
 	RunEntrypointsTask,
 } from '../tasks/run';
@@ -141,9 +141,18 @@ export function createRunTasks(
 	stack: Stack,
 	functions: RunFunctionTaskOptions[],
 	apis: RunGatewayTaskOptions[],
-	entrypoints: NitricEntrypoints,
 	docker: Docker,
+	entrypoints?: NitricEntrypoints,
 ): Listr {
+	const entrypointsTask = entrypoints
+		? [
+			wrapTaskForListr({
+				name: 'Starting Entrypoints Proxy',
+				factory: (ctx) => new RunEntrypointsTask({ stack, entrypoints, docker, network: ctx.network }),
+			}),
+		  ]
+		: [];
+
 	return new Listr<ListrCtx>([
 		wrapTaskForListr(new CreateNetworkTask({ name: `${stack.getName()}-net`, docker }), 'network'),
 		wrapTaskForListr(new CreateVolumeTask({ volumeName: `${stack.getName()}-vol`, dockerClient: docker }), 'volume'),
@@ -155,10 +164,7 @@ export function createRunTasks(
 			title: 'Starting API Gateways',
 			task: createGatewayContainerRunTasks(stack.getName(), apis, docker),
 		},
-		wrapTaskForListr({
-			name: 'Starting Entrypoints Proxy',
-			factory: (ctx) => new RunEntrypointsTask({ stack, entrypoints, docker, network: ctx.network })
-		}),
+		...entrypointsTask
 	]);
 }
 
@@ -248,7 +254,13 @@ export default class Run extends Command {
 		);
 
 		// Capture the results of running tasks to setup docker network, volume and function containers
-		const runTaskResults = await createRunTasks(nitricStack.name, runTaskOptions, runGatewayOptions, this.docker).run();
+		const runTaskResults = await createRunTasks(
+			stack,
+			runTaskOptions,
+			runGatewayOptions,
+			this.docker,
+			nitricStack.entrypoints,
+		).run();
 
 		// Capture created docker resources for cleanup on run termination (see cleanup())
 		const {
