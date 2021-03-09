@@ -35,8 +35,7 @@ function createNginxConfig(stack: Stack, entrypoints: NitricEntrypoints): string
 	return `
 	events {}
 	http {
-
-
+		include mime.types;
 		server {
 			${sites.map(s => `
 				location ${s.path} {
@@ -130,26 +129,37 @@ export class RunEntrypointsTask extends Task<Container> {
 			entries: [NGINX_CONFIG_FILE]
 		});
 
-		// Copy sites onto the frontend container
-		//await Promise.all(stack.getSites().map(async (s) => {
-		//	await Site.build(s);
-		//	const siteTar = tar.pack(s.getAssetPath());
-
-		//	return await container.putArchive(siteTar, {
-		//		path: `/www/${s.getName()}/`,
-		//		noOverwriteDirNonDir: false,
-		//	});
-		//}));
-
+		
 		// write the nginx configuration to the default nginx directory
 		await container.putArchive(packStream, {
 			// Copy nginx.conf to our nginx container
 			path: '/etc/nginx/',
-			
 		});
 
 		// Start the container...
 		await container.start();
+
+		// Copy sites onto the frontend container
+		await Promise.all(stack.getSites().map(async (s) => {
+			await Site.build(s);
+			const siteTar = tar.pack(s.getAssetPath());
+
+			const exec = await container.exec({
+				Cmd: ['mkdir', '-p', `/www/${s.getName()}`],
+				WorkingDir: '/',
+			});
+
+			await exec.start({});
+
+			await new Promise<void>((res) => {
+				setTimeout(res, 5000);
+			});
+
+			return await container.putArchive(siteTar, {
+				path: `/www/${s.getName()}`,
+				noOverwriteDirNonDir: false,
+			});
+		}));
 
 		return container;
 	}
