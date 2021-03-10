@@ -216,7 +216,7 @@ describe('RunEntrypointsTask', () => {
 
 		it('should tarball the nginx config', () => {
 			expect(tarPackMock).toBeCalled();
-			expect(tarPackMock).toBeCalledWith('/home/tim/.nitric/staging/test', { entries: ['nginx.conf'] });
+			expect(tarPackMock).nthCalledWith(1, '/home/tim/.nitric/staging/test', { entries: ['nginx.conf'] });
 		});
 
 		it('should push the nginx config to the new container', () => {
@@ -234,7 +234,7 @@ describe('RunEntrypointsTask', () => {
 
 		it('should pack the build sites', () => {
 			// This is the asset path of the site (see above)
-			expect(tarPackMock).toBeCalledWith('test');
+			expect(tarPackMock).nthCalledWith(2, 'test');
 		});
 
 		it('should push the sites to the nginx container', () => {
