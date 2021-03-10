@@ -221,7 +221,7 @@ describe('RunEntrypointsTask', () => {
 
 		it('should push the nginx config to the new container', () => {
 			expect(putArchiveMock).toBeCalled();
-			expect(putArchiveMock).toBeCalledWith(expect.anything(), expect.objectContaining({ path: '/etc/nginx/' }));
+			expect(putArchiveMock).nthCalledWith(1, expect.anything(), expect.objectContaining({ path: '/etc/nginx/' }));
 		});
 
 		it('should start the nginx container', () => {
@@ -238,7 +238,7 @@ describe('RunEntrypointsTask', () => {
 		});
 
 		it('should push the sites to the nginx container', () => {
-			expect(putArchiveMock).toBeCalledWith(expect.anything(), expect.objectContaining({ path: '/www/test' }));
+			expect(putArchiveMock).nthCalledWith(2, expect.anything(), expect.objectContaining({ path: '/www/test' }));
 		});
 	});
 });
