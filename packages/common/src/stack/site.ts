@@ -1,7 +1,7 @@
-import { NitricStaticSite } from "../types";
-import { Stack } from "./stack";
-import execa from "execa";
-import path from "path";
+import { NitricStaticSite } from '../types';
+import { Stack } from './stack';
+import execa from 'execa';
+import path from 'path';
 
 /**
  * A Nitric Static Site
@@ -30,7 +30,7 @@ export class Site {
 
 	// Get the asset path of a static site
 	getAssetPath(): string {
-		const baseAssetPath = this.descriptor.assetPath 
+		const baseAssetPath = this.descriptor.assetPath
 			? path.join(this.descriptor.path, this.descriptor.assetPath)
 			: this.descriptor.path;
 

@@ -52,7 +52,7 @@ export class Deploy extends Task<void> {
 
 	async do(): Promise<void> {
 		const { stack, region } = this;
-		const { topics = [], schedules = [], apis = [], sites = [], entrypoints } = stack.asNitricStack();
+		const { topics = [], schedules = [], apis = [], entrypoints } = stack.asNitricStack();
 
 		this.update('Defining functions');
 
@@ -73,7 +73,7 @@ export class Deploy extends Task<void> {
 						// Deploy schedules
 						(schedules || []).forEach((schedule) => createSchedule(schedule, deployedTopics));
 
-						const deployedSites = await Promise.all((stack.getSites()).map(createSite))
+						const deployedSites = await Promise.all(stack.getSites().map(createSite));
 
 						const deployedFunctions = stack
 							.getFunctions()

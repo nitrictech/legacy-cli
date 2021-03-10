@@ -130,5 +130,5 @@ export function createApi(api: NitricAPI, funcs: DeployedFunction[]): DeployedAP
 	return {
 		...api,
 		apiGateway: stage,
-	}
+	};
 }

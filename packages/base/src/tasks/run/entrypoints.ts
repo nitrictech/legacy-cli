@@ -1,10 +1,9 @@
-import { Site, Stack, Task } from "@nitric/cli-common";
+import { Site, Stack, Task } from '@nitric/cli-common';
 import Docker, { Container, ContainerCreateOptions, Network, NetworkInspectInfo } from 'dockerode';
 import tar from 'tar-fs';
 import fs from 'fs';
 import path from 'path';
-import getPort from "get-port";
-
+import getPort from 'get-port';
 
 const HTTP_PORT = 80;
 const NGINX_CONFIG_FILE = 'nginx.conf';
@@ -21,7 +20,7 @@ export async function stageStackEntrypoint(stack: Stack, nginxConf: string): Pro
 /**
  * Creates a nginx configuration to act as a single host entrypoint
  * For nitric resources
- * @param entrypoints 
+ * @param entrypoints
  */
 export function createNginxConfig(stack: Stack): string {
 	const { entrypoints } = stack.asNitricStack();
@@ -30,30 +29,38 @@ export function createNginxConfig(stack: Stack): string {
 		throw new Error('Cannot create nginx config for stack with no entrypoints');
 	}
 
-	const eps = Object.keys(entrypoints).map(e => ({
+	const eps = Object.keys(entrypoints).map((e) => ({
 		path: e,
 		...entrypoints[e],
 	}));
 
-	const sites = eps.filter(e => e.type === "site");
-	const apis = eps.filter(e => e.type === "api");
+	const sites = eps.filter((e) => e.type === 'site');
+	const apis = eps.filter((e) => e.type === 'api');
 
 	return `
 	events {}
 	http {
 		include mime.types;
 		server {
-			${sites.map(s => `
+			${sites
+				.map(
+					(s) => `
 				location ${s.path} {
 					root /www/${s.name};
 				}
-			`).join('\n')}
+			`,
+				)
+				.join('\n')}
 
-			${apis.map(a => `
+			${apis
+				.map(
+					(a) => `
 				location ${a.path} {
 					proxy_pass http://${stack.getName()}-${a.name}:8080;
 				}
-			`).join('\n')}
+			`,
+				)
+				.join('\n')}
 		}
 	}
 	`;
@@ -102,7 +109,7 @@ export class RunEntrypointsTask extends Task<Container> {
 
 		// Pull nginx
 		await docker.pull('nginx');
-		
+
 		const dockerOptions = {
 			name: `${stack.getName()}-entrypoints`,
 			// Pull nginx
@@ -114,9 +121,11 @@ export class RunEntrypointsTask extends Task<Container> {
 			HostConfig: {
 				NetworkMode: networkName,
 				PortBindings: {
-					[`${HTTP_PORT}/tcp`]: [{
-						HostPort: `${this.port}/tcp`,
-					}],
+					[`${HTTP_PORT}/tcp`]: [
+						{
+							HostPort: `${this.port}/tcp`,
+						},
+					],
 				},
 			},
 		} as ContainerCreateOptions;
@@ -133,10 +142,9 @@ export class RunEntrypointsTask extends Task<Container> {
 		// We still ahve to stage the configuration as part of the stack somewhere...
 		const packStream = tar.pack(stack.getStagingDirectory(), {
 			// Grab the nginx configuration from the staging directory
-			entries: [NGINX_CONFIG_FILE]
+			entries: [NGINX_CONFIG_FILE],
 		});
 
-		
 		// write the nginx configuration to the default nginx directory
 		await container.putArchive(packStream, {
 			// Copy nginx.conf to our nginx container
@@ -147,26 +155,28 @@ export class RunEntrypointsTask extends Task<Container> {
 		await container.start();
 
 		// Copy sites onto the frontend container
-		await Promise.all(stack.getSites().map(async (s) => {
-			await Site.build(s);
-			const siteTar = tar.pack(s.getAssetPath());
+		await Promise.all(
+			stack.getSites().map(async (s) => {
+				await Site.build(s);
+				const siteTar = tar.pack(s.getAssetPath());
 
-			const exec = await container.exec({
-				Cmd: ['mkdir', '-p', `/www/${s.getName()}`],
-				WorkingDir: '/',
-			});
+				const exec = await container.exec({
+					Cmd: ['mkdir', '-p', `/www/${s.getName()}`],
+					WorkingDir: '/',
+				});
 
-			const execStream = await exec.start({});
+				const execStream = await exec.start({});
 
-			await new Promise<void>((res) => {
-				docker.modem.followProgress(execStream, res, this.update);
-			});
+				await new Promise<void>((res) => {
+					docker.modem.followProgress(execStream, res, this.update);
+				});
 
-			return await container.putArchive(siteTar, {
-				path: `/www/${s.getName()}`,
-				noOverwriteDirNonDir: false,
-			});
-		}));
+				return await container.putArchive(siteTar, {
+					path: `/www/${s.getName()}`,
+					noOverwriteDirNonDir: false,
+				});
+			}),
+		);
 
 		return container;
 	}

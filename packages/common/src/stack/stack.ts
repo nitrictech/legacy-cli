@@ -32,7 +32,10 @@ export class Stack {
 	private sites?: NitricStaticSite[];
 	private entrypoints?: NitricEntrypoints;
 
-	constructor(file: string, { name, functions, topics, queues, buckets, schedules, apis, sites, entrypoints }: NitricStack) {
+	constructor(
+		file: string,
+		{ name, functions, topics, queues, buckets, schedules, apis, sites, entrypoints }: NitricStack,
+	) {
 		this.file = file;
 		this.name = name;
 		this.funcs = functions;
@@ -97,7 +100,7 @@ export class Stack {
 	}
 
 	getSites(): Site[] {
-		return (this.sites || []).map(s => new Site(this, s));
+		return (this.sites || []).map((s) => new Site(this, s));
 	}
 
 	getStagingDirectory(): string {

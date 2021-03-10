@@ -1,10 +1,10 @@
 //import jest from "jest";
-import { Stack, Site } from "@nitric/cli-common";
-import * as EPS from "./entrypoints";
+import { Stack, Site } from '@nitric/cli-common';
+import * as EPS from './entrypoints';
 import fs from 'fs';
 import Docker from 'dockerode';
 import tar from 'tar-fs';
-import { Readable } from "stream";
+import { Readable } from 'stream';
 
 beforeAll(() => {
 	jest.mock('dockerode');
@@ -15,7 +15,7 @@ beforeAll(() => {
 // Catch all to ensure our mocks don't leak into other tests.
 afterAll(() => {
 	jest.restoreAllMocks();
-})
+});
 
 const ASYNC_NO_OP = async (): Promise<any> => {
 	// NO_OP
@@ -23,28 +23,26 @@ const ASYNC_NO_OP = async (): Promise<any> => {
 
 describe('createNginxConfig', () => {
 	describe('Given a stack with no entrypoints', () => {
-		const stack = new Stack("nitric.yaml", {
-			name: "dummy-stack",
+		const stack = new Stack('nitric.yaml', {
+			name: 'dummy-stack',
 		});
-		it("Should throw an error", () => {
-			expect(() => EPS.createNginxConfig(stack)).toThrowError(
-				'Cannot create nginx config for stack with no entrypoints'
-			);
+		it('Should throw an error', () => {
+			expect(() => EPS.createNginxConfig(stack)).toThrowError('Cannot create nginx config for stack with no entrypoints');
 		});
 	});
 
 	describe('Given a stack with a site entrypoint', () => {
-		const stack = new Stack("nitric.yaml", {
-			name: "dummy-stack",
+		const stack = new Stack('nitric.yaml', {
+			name: 'dummy-stack',
 			entrypoints: {
-				"/": {
+				'/': {
 					name: 'test',
-					type: 'site'
-				}
-			}
+					type: 'site',
+				},
+			},
 		});
 
-		it("Should describe an nginx config with a root entrypoint", () => {
+		it('Should describe an nginx config with a root entrypoint', () => {
 			const config = EPS.createNginxConfig(stack);
 
 			expect(config).toContain(`
@@ -56,17 +54,17 @@ describe('createNginxConfig', () => {
 	});
 
 	describe('Given a stack with a api entrypoint', () => {
-		const stack = new Stack("nitric.yaml", {
-			name: "dummy-stack",
+		const stack = new Stack('nitric.yaml', {
+			name: 'dummy-stack',
 			entrypoints: {
-				"/": {
+				'/': {
 					name: 'test',
-					type: 'api'
-				}
-			}
+					type: 'api',
+				},
+			},
 		});
 
-		it("Should describe an nginx config with a proxy_pass entrypoint", () => {
+		it('Should describe an nginx config with a proxy_pass entrypoint', () => {
 			const config = EPS.createNginxConfig(stack);
 
 			expect(config).toContain(`
@@ -90,14 +88,14 @@ describe('stageStackEntrypoints', () => {
 	});
 
 	describe('given any nginx config & stack', () => {
-		const stack = new Stack("nitric.yaml", {
-			name: "dummy-stack",
+		const stack = new Stack('nitric.yaml', {
+			name: 'dummy-stack',
 			entrypoints: {
-				"/": {
+				'/': {
 					name: 'test',
-					type: 'api'
-				}
-			}
+					type: 'api',
+				},
+			},
 		});
 		// TODO: We should probably mock this out...
 		const config = EPS.createNginxConfig(stack);
@@ -141,25 +139,28 @@ describe('RunEntrypointsTask', () => {
 		mockDocker.modem = {
 			followProgress: (_, onFinish, __): any => {
 				onFinish();
-			}
-		}
+			},
+		};
 		//stageStackConfigMock = jest.spyOn(EPS, 'stageStackEntrypoint').mockReturnValue(Promise.resolve());
 		putArchiveMock = jest.fn();
 		containerStartMock = jest.fn();
 		execStartMock = jest.fn();
-		containerExecMock = jest.fn().mockReturnValue(Promise.resolve({
-			start: execStartMock,
-		}));
+		containerExecMock = jest.fn().mockReturnValue(
+			Promise.resolve({
+				start: execStartMock,
+			}),
+		);
 		writeFileSpy = jest.spyOn(fs.promises, 'writeFile').mockImplementation(() => Promise.resolve());
 		siteBuildMock = jest.spyOn(Site, 'build').mockImplementation(ASYNC_NO_OP);
 		tarPackMock = jest.spyOn(tar, 'pack').mockReturnValue((Readable as any).from(['test']));
-		createContainerMock = jest.spyOn(Docker.prototype, 'createContainer')
-			.mockReturnValue(Promise.resolve({
+		createContainerMock = jest.spyOn(Docker.prototype, 'createContainer').mockReturnValue(
+			Promise.resolve({
 				putArchive: putArchiveMock,
 				start: containerStartMock,
 				exec: containerExecMock,
-			} as any));
-		
+			} as any),
+		);
+
 		pullContainerMock = jest.spyOn(Docker.prototype, 'pull').mockReturnValue(Promise.resolve());
 	});
 
@@ -177,19 +178,21 @@ describe('RunEntrypointsTask', () => {
 		writeFileSpy.mockRestore();
 	});
 
-	describe("given a simple stack with a single entrypoint", () => {
+	describe('given a simple stack with a single entrypoint', () => {
 		const testStack = new Stack('nitric.yaml', {
 			name: 'test',
-			sites: [{
-				name: 'test',
-				path: 'test',
-			}],
+			sites: [
+				{
+					name: 'test',
+					path: 'test',
+				},
+			],
 			entrypoints: {
 				'/': {
 					name: 'test',
-					type: 'site'
+					type: 'site',
 				},
-			}
+			},
 		});
 
 		// Do a single run of the run entrypoints task
@@ -198,25 +201,27 @@ describe('RunEntrypointsTask', () => {
 				port: 1234,
 				docker: mockDocker,
 				stack: testStack,
-			}).do()
+			}).do();
 		});
 
-		it("should create a new nginx docker container", () => {
+		it('should create a new nginx docker container', () => {
 			expect(createContainerMock).toBeCalledTimes(1);
-			expect(createContainerMock).toBeCalledWith(expect.objectContaining({
-				name: 'test-entrypoints',
-				Image: 'nginx',
-			}));
+			expect(createContainerMock).toBeCalledWith(
+				expect.objectContaining({
+					name: 'test-entrypoints',
+					Image: 'nginx',
+				}),
+			);
 		});
 
-		it("should tarball the nginx config", () => {
+		it('should tarball the nginx config', () => {
 			expect(tarPackMock).toBeCalled();
-			expect(tarPackMock).toBeCalledWith("/home/tim/.nitric/staging/test", {"entries": ["nginx.conf"]})
+			expect(tarPackMock).toBeCalledWith('/home/tim/.nitric/staging/test', { entries: ['nginx.conf'] });
 		});
 
 		it('should push the nginx config to the new container', () => {
 			expect(putArchiveMock).toBeCalled();
-			expect(putArchiveMock).toBeCalledWith(expect.anything(), expect.objectContaining({ "path": "/etc/nginx/" }));
+			expect(putArchiveMock).toBeCalledWith(expect.anything(), expect.objectContaining({ path: '/etc/nginx/' }));
 		});
 
 		it('should start the nginx container', () => {
@@ -229,11 +234,11 @@ describe('RunEntrypointsTask', () => {
 
 		it('should pack the build sites', () => {
 			// This is the asset path of the site (see above)
-			expect(tarPackMock).toBeCalledWith("test")
+			expect(tarPackMock).toBeCalledWith('test');
 		});
 
 		it('should push the sites to the nginx container', () => {
-			expect(putArchiveMock).toBeCalledWith(expect.anything(), expect.objectContaining({ "path": "/www/test" }));
+			expect(putArchiveMock).toBeCalledWith(expect.anything(), expect.objectContaining({ path: '/www/test' }));
 		});
 	});
 });

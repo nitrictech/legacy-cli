@@ -146,10 +146,10 @@ export function createRunTasks(
 ): Listr {
 	const entrypointsTask = entrypoints
 		? [
-			wrapTaskForListr({
-				name: 'Starting Entrypoints Proxy',
-				factory: (ctx) => new RunEntrypointsTask({ stack, docker, network: ctx.network }),
-			}),
+				wrapTaskForListr({
+					name: 'Starting Entrypoints Proxy',
+					factory: (ctx) => new RunEntrypointsTask({ stack, docker, network: ctx.network }),
+				}),
 		  ]
 		: [];
 
@@ -164,7 +164,7 @@ export function createRunTasks(
 			title: 'Starting API Gateways',
 			task: createGatewayContainerRunTasks(stack.getName(), apis, docker),
 		},
-		...entrypointsTask
+		...entrypointsTask,
 	]);
 }
 

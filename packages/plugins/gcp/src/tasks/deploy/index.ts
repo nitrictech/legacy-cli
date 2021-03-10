@@ -8,7 +8,7 @@ import { createApi } from './apis';
 import { LocalWorkspace } from '@pulumi/pulumi/x/automation';
 import { createSite } from './site';
 import { createEntrypoints } from './entrypoints';
-import * as pulumi from "@pulumi/pulumi";
+import * as pulumi from '@pulumi/pulumi';
 
 interface CommonOptions {
 	gcpProject: string;
@@ -69,7 +69,7 @@ export class Deploy extends Task<void> {
 
 						if (entrypoints) {
 							// Deployed Entrypoints
-							createEntrypoints(stack.getName(), entrypoints, deployedSites, deployedApis)
+							createEntrypoints(stack.getName(), entrypoints, deployedSites, deployedApis);
 						}
 					} catch (e) {
 						pulumi.log.error(e);

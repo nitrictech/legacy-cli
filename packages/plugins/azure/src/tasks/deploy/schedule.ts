@@ -3,7 +3,6 @@ import { NitricSchedule } from '@nitric/cli-common';
 import { DeployedTopic } from '../types';
 //import cronParser from "cron-parser";
 
-
 // The plan here is to eventually support Nitric Schedules as part of
 // our azure deployments, however they do not support cron based recurring schedule triggers
 // NOTE: This is supported by both AWS and GCP, either we need to attempt to translate into their
@@ -22,15 +21,13 @@ export function createSchedule(
 	// It has a Display Name
 	// It has a Topic Endpoint (the endpoint of the eventgrid topic)
 	// It has an SAS (Share access signature) ("Provide your SAS Key")
-	const connection = new web.latest.Connection("", {
-		connectionName: "",
+	const connection = new web.latest.Connection('', {
+		connectionName: '',
 		resourceGroupName: resourceGroup.name,
-		properties: {
-
-		}
+		properties: {},
 	});
 
-	topics[0].eventGridTopic.endpoint
+	topics[0].eventGridTopic.endpoint;
 	return new logic.latest.Workflow(schedule.name, {
 		resourceGroupName: resourceGroup.name,
 		workflowName: schedule.name,
@@ -80,7 +77,7 @@ export function createSchedule(
 					azureeventgridpublish: {
 						connectionId: connection.id,
 						connectionName: connection.name,
-						id: connection.id
+						id: connection.id,
 						//connectionId:
 						//	'/subscriptions/68ac0a02-02c1-4144-a45c-57b3b6f36d2e/resourceGroups/testing/providers/Microsoft.Web/connections/azureeventgridpublish',
 						//connectionName: 'azureeventgridpublish',

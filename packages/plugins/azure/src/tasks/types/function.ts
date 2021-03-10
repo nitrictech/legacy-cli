@@ -1,6 +1,6 @@
-import { NitricFunction } from "@nitric/cli-common";
-import { web } from "@pulumi/azure-nextgen";
-import { Image } from "@pulumi/docker";
+import { NitricFunction } from '@nitric/cli-common';
+import { web } from '@pulumi/azure-nextgen';
+import { Image } from '@pulumi/docker';
 
 export interface DeployedFunctionImage extends NitricFunction {
 	image: Image;

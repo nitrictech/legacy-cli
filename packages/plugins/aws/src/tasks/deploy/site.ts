@@ -31,27 +31,24 @@ export async function createSite(site: Site): Promise<DeployedSite> {
 
 	// Create a Bucket for the static content to reside in
 	const siteBucket = new s3.Bucket(site.getName(), {
-		acl: "public-read",
+		acl: 'public-read',
 		website: {
 			// Assume this for now
 			indexDocument: 'index.html',
 		},
 	});
 
-	await crawlDirectory(
-		path.resolve(site.getAssetPath()),
-		async (filePath: string) => {
-			// Use path.relative to retrieve keyname for each file
-			// This assumes that the asset folder is the root of the bucket
-			const relativePath = path.relative(site.getAssetPath(), filePath);
-			new s3.BucketObject(relativePath, {
-				acl: 'public-read',
-				bucket: siteBucket,
-				contentType: mime.getType(filePath) || undefined,
-				source: new pulumi.asset.FileAsset(filePath),
-			});
-		},
-	);
+	await crawlDirectory(path.resolve(site.getAssetPath()), async (filePath: string) => {
+		// Use path.relative to retrieve keyname for each file
+		// This assumes that the asset folder is the root of the bucket
+		const relativePath = path.relative(site.getAssetPath(), filePath);
+		new s3.BucketObject(relativePath, {
+			acl: 'public-read',
+			bucket: siteBucket,
+			contentType: mime.getType(filePath) || undefined,
+			source: new pulumi.asset.FileAsset(filePath),
+		});
+	});
 
 	return {
 		...site.getDesciptor(),
