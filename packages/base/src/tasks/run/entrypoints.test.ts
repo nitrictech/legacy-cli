@@ -216,7 +216,7 @@ describe('RunEntrypointsTask', () => {
 
 		it('should tarball the nginx config', () => {
 			expect(tarPackMock).toBeCalled();
-			expect(tarPackMock).nthCalledWith(1, '/home/tim/.nitric/staging/test', { entries: ['nginx.conf'] });
+			expect(tarPackMock).nthCalledWith(1, '/home/tim/.nitric/staging/test', expect.objectContaining({entries: ['nginx.conf'] }));
 		});
 
 		it('should push the nginx config to the new container', () => {
