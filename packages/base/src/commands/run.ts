@@ -142,13 +142,14 @@ export function createRunTasks(
 	functions: RunFunctionTaskOptions[],
 	apis: RunGatewayTaskOptions[],
 	docker: Docker,
+	entrypointPort: number,
 	entrypoints?: NitricEntrypoints,
 ): Listr {
 	const entrypointsTask = entrypoints
 		? [
 				wrapTaskForListr({
 					name: 'Starting Entrypoints Proxy',
-					factory: (ctx) => new RunEntrypointsTask({ stack, docker, network: ctx.network }),
+					factory: (ctx) => new RunEntrypointsTask({ stack, docker, network: ctx.network, port: entrypointPort }),
 				}),
 		  ]
 		: [];
@@ -253,12 +254,15 @@ export default class Run extends Command {
 			}),
 		);
 
+		const entrypointPort = await getPort({ port: portRange });
+
 		// Capture the results of running tasks to setup docker network, volume and function containers
 		const runTaskResults = await createRunTasks(
 			stack,
 			runTaskOptions,
 			runGatewayOptions,
 			this.docker,
+			entrypointPort,
 			nitricStack.entrypoints,
 		).run();
 
@@ -287,6 +291,11 @@ export default class Run extends Command {
 			},
 			port: {},
 		});
+
+		if (nitricStack.entrypoints) {
+			cli.url(`Your application entrypoint is available at http://localhost:${entrypointPort}`, `http://localhost:${entrypointPort}`);
+		}
+		
 		cli.action.start('Functions Running press ctrl-C quit');
 	};
 
