@@ -75,11 +75,12 @@ export class RunEntrypointsTask extends Task<Container> {
 	private docker: Docker;
 	private port?: number;
 
-	constructor({ stack, docker, network }: RunEntrypointsTaskOptions) {
+	constructor({ stack, docker, network, port }: RunEntrypointsTaskOptions) {
 		super('Starting Entrypoints');
 		this.stack = stack;
 		this.network = network;
 		this.docker = docker;
+		this.port = port;
 	}
 
 	async do(): Promise<Container> {
@@ -98,6 +99,9 @@ export class RunEntrypointsTask extends Task<Container> {
 				console.warn(`Failed to set custom docker network, defaulting to bridge network`);
 			}
 		}
+
+		// Pull nginx
+		await docker.pull('nginx');
 		
 		const dockerOptions = {
 			name: `${stack.getName()}-entrypoints`,
