@@ -14,6 +14,7 @@ import { Repository } from '../templates';
 import { STAGING_DIR } from '../paths';
 import rimraf from 'rimraf';
 import { Function } from './function';
+import { findFileRead } from '../utils';
 //import multimatch from 'multimatch';
 
 export class Stack {
@@ -97,8 +98,13 @@ export class Stack {
 	 * @param parser to parse the serialized file type, defaults to YAML parser.
 	 */
 	static async fromFile(file: string, parser: (content: string) => NitricStack = YAML.parse): Promise<Stack> {
-		const content = await fs.promises.readFile(file);
-		const stack = parser(content.toString('utf-8'));
+		const content = await findFileRead(file);
+
+		if (!content) {
+			throw new Error(`Nitric Stack file not found. Add ${file} to your project or home directory.`);
+		}
+
+		const stack = parser(content);
 		return new Stack(file, stack);
 	}
 
