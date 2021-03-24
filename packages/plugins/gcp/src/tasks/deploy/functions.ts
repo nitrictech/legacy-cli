@@ -62,7 +62,7 @@ export function createFunction(
 	});
 
 	// wire up its subscriptions
-	if (subs) {
+	if (subs && subs.length) {
 		// Create an account for invoking this function via subscriptions
 		// TODO: Do we want to make this one account for subscription in future
 		// TODO: We will likely configure this via eventarc in the future
