@@ -6,6 +6,8 @@ import { createBucket } from './buckets';
 import { createSchedule } from './schedule';
 import { createApi } from './apis';
 import { LocalWorkspace } from '@pulumi/pulumi/x/automation';
+import fs from "fs";
+import rimraf from 'rimraf';
 
 interface CommonOptions {
 	gcpProject: string;
@@ -70,7 +72,11 @@ export class Deploy extends Task<void> {
 			await pulumiStack.setConfig('gcp:project', { value: gcpProject });
 			await pulumiStack.setConfig('gcp:region', { value: region });
 			// deploy the stack, tailing the logs to console
-			const upRes = await pulumiStack.up({ onOutput: this.update.bind(this) });
+			const update = this.update.bind(this);
+			const upRes = await pulumiStack.up({ onOutput: (out) => {
+				update(out);
+				fs.appendFileSync("./deploy.log", out);
+			}});
 
 			console.log(upRes);
 		} catch (e) {
