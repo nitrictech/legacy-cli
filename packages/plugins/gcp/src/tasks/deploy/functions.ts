@@ -66,8 +66,8 @@ export function createFunction(
 		// Create an account for invoking this function via subscriptions
 		// TODO: Do we want to make this one account for subscription in future
 		// TODO: We will likely configure this via eventarc in the future
-		const invokerAccount = new serviceaccount.Account(`${name}-subscription-invoker`, {
-			accountId: `${name}-subscription-invoker`,
+		const invokerAccount = new serviceaccount.Account(`${name}-invoker`, {
+			accountId: `${name}-invoker`,
 		});
 
 		subs.forEach((sub) => {
