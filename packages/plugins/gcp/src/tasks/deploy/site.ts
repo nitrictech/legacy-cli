@@ -1,7 +1,6 @@
-import { crawlDirectory, DeployedSite } from '../types';
+import { DeployedSite } from '../types';
 import { storage } from '@pulumi/gcp';
-import fs from 'fs';
-import { Site } from '@nitric/cli-common';
+import { crawlDirectory, Site } from '@nitric/cli-common';
 import path from 'path';
 import * as mime from 'mime';
 import * as pulumi from '@pulumi/pulumi';
