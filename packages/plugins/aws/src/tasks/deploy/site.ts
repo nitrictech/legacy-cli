@@ -34,7 +34,7 @@ export async function createSite(site: Site): Promise<DeployedSite> {
 	});
 
 	return {
-		...site.getDesciptor(),
+		...site.getDescriptor(),
 		s3: siteBucket,
 	};
 }

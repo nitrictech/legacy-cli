@@ -24,7 +24,7 @@ export class Site {
 	}
 
 	// Return the original nitric descriptor
-	getDesciptor(): NitricStaticSite {
+	getDescriptor(): NitricStaticSite {
 		return this.descriptor;
 	}
 
