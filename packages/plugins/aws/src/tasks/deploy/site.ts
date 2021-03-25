@@ -33,7 +33,7 @@ export async function createSite(site: Site): Promise<DeployedSite> {
 	const siteBucket = new s3.Bucket(site.getName(), {
 		acl: 'public-read',
 		website: {
-			// Assume this for now
+			// TODO: Determine if this is necessary for this config.
 			indexDocument: 'index.html',
 		},
 	});
