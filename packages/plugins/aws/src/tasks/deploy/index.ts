@@ -83,7 +83,7 @@ export class Deploy extends Task<void> {
 						const deployedApis = (apis || []).map((api) => createApi(api, deployedFunctions));
 
 						if (entrypoints) {
-							// Add cloudfront distributions here...
+							createEntrypoints(stack.getName(), entrypoints, deployedSites, deployedApis);
 							createEntrypoint(stack.getName(), entrypoints, deployedSites, deployedApis);
 						}
 					} catch (e) {
