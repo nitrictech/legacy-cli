@@ -25,8 +25,13 @@ const MOCK_API: NitricAPI = {
 
 describe('GatewayRunTask', () => {
 	let createContainerSpy: jest.SpyInstance;
+	let pullSpy: jest.SpyInstance;
 
 	beforeAll(() => {
+		pullSpy = jest.spyOn(Docker.prototype, 'pull').mockResolvedValue(
+			Promise.resolve()
+		);
+
 		createContainerSpy = jest.spyOn(Docker.prototype, 'createContainer').mockResolvedValue(
 			Promise.resolve({
 				start: jest.fn(),
@@ -41,6 +46,11 @@ describe('GatewayRunTask', () => {
 		beforeAll(async () => {
 			container = await new RunGatewayTask({ stackName: 'test', api: MOCK_API, docker: new Docker() }).do();
 		});
+
+		it('should pull the dev-api-gateway container', () => {
+			expect(pullSpy).toBeCalledTimes(1);
+			expect(pullSpy).toBeCalledWith('nitricimages/dev-api-gateway');
+		})
 
 		it('should generate a port', async () => {
 			expect(getPort).toHaveBeenCalled();

@@ -1,13 +1,20 @@
 import { Command } from '@oclif/command';
 import cli from 'cli-ux';
 import Build, { createBuildTasks } from './build';
-import { Stack, wrapTaskForListr, NitricImage, NitricStack } from '@nitric/cli-common';
+import { Stack, wrapTaskForListr, NitricImage, NitricStack, NitricEntrypoints } from '@nitric/cli-common';
 import Listr from 'listr';
 import path from 'path';
 import Docker, { Network, Container, Volume } from 'dockerode';
 import getPort from 'get-port';
-import { RunFunctionTask, RunFunctionTaskOptions, CreateNetworkTask, CreateVolumeTask } from '../tasks/run';
-import { RunGatewayTask, RunGatewayTaskOptions } from '../tasks/run/gateway';
+import {
+	RunFunctionTask,
+	RunFunctionTaskOptions,
+	CreateNetworkTask,
+	CreateVolumeTask,
+	RunGatewayTask,
+	RunGatewayTaskOptions,
+	RunEntrypointsTask,
+} from '../tasks/run';
 
 interface KnownListrCtx {
 	network: Network;
@@ -131,22 +138,34 @@ export function createFunctionContainerRunTasks(functions: RunFunctionTaskOption
  * Will display tasks for creating docker resources
  */
 export function createRunTasks(
-	stackName: string,
+	stack: Stack,
 	functions: RunFunctionTaskOptions[],
 	apis: RunGatewayTaskOptions[],
 	docker: Docker,
+	entrypointPort: number,
+	entrypoints?: NitricEntrypoints,
 ): Listr {
+	const entrypointsTask = entrypoints
+		? [
+				wrapTaskForListr({
+					name: 'Starting Entrypoints Proxy',
+					factory: (ctx) => new RunEntrypointsTask({ stack, docker, network: ctx.network, port: entrypointPort }),
+				}),
+		  ]
+		: [];
+
 	return new Listr<ListrCtx>([
-		wrapTaskForListr(new CreateNetworkTask({ name: `${stackName}-net`, docker }), 'network'),
-		wrapTaskForListr(new CreateVolumeTask({ volumeName: `${stackName}-vol`, dockerClient: docker }), 'volume'),
+		wrapTaskForListr(new CreateNetworkTask({ name: `${stack.getName()}-net`, docker }), 'network'),
+		wrapTaskForListr(new CreateVolumeTask({ volumeName: `${stack.getName()}-vol`, dockerClient: docker }), 'volume'),
 		{
 			title: 'Running Functions',
 			task: createFunctionContainerRunTasks(functions, docker),
 		},
 		{
 			title: 'Starting API Gateways',
-			task: createGatewayContainerRunTasks(stackName, apis, docker),
+			task: createGatewayContainerRunTasks(stack.getName(), apis, docker),
 		},
+		...entrypointsTask,
 	]);
 }
 
@@ -235,8 +254,17 @@ export default class Run extends Command {
 			}),
 		);
 
+		const entrypointPort = await getPort({ port: portRange });
+
 		// Capture the results of running tasks to setup docker network, volume and function containers
-		const runTaskResults = await createRunTasks(nitricStack.name, runTaskOptions, runGatewayOptions, this.docker).run();
+		const runTaskResults = await createRunTasks(
+			stack,
+			runTaskOptions,
+			runGatewayOptions,
+			this.docker,
+			entrypointPort,
+			nitricStack.entrypoints,
+		).run();
 
 		// Capture created docker resources for cleanup on run termination (see cleanup())
 		const {
@@ -263,6 +291,11 @@ export default class Run extends Command {
 			},
 			port: {},
 		});
+
+		if (nitricStack.entrypoints) {
+			cli.url(`Your application entrypoint is available at http://localhost:${entrypointPort}`, `http://localhost:${entrypointPort}`);
+		}
+		
 		cli.action.start('Functions Running press ctrl-C quit');
 	};
 

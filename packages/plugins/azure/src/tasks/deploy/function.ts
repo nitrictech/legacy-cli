@@ -52,22 +52,28 @@ export function createFunctionAsApp(
 		name: `${func.getStack().getName()}-${nitricFunction.name}`,
 		resourceGroupName: resourceGroup.name,
 		siteConfig: {
-			appSettings: [{
-				name: "WEBSITES_ENABLE_APP_SERVICE_STORAGE",
-				value: 'false'
-			}, {
-				name: "DOCKER_REGISTRY_SERVER_URL",
-				value: pulumi.interpolate`https://${registry.loginServer}`,
-			}, {
-				name: "DOCKER_REGISTRY_SERVER_USERNAME",
-				value: adminUsername,
-			}, {
-				name: "DOCKER_REGISTRY_SERVER_PASSWORD",
-				value: adminPassword
-			}, {
-				name: "WEBSITES_PORT",
-				value: '9001'
-			}],
+			appSettings: [
+				{
+					name: 'WEBSITES_ENABLE_APP_SERVICE_STORAGE',
+					value: 'false',
+				},
+				{
+					name: 'DOCKER_REGISTRY_SERVER_URL',
+					value: pulumi.interpolate`https://${registry.loginServer}`,
+				},
+				{
+					name: 'DOCKER_REGISTRY_SERVER_USERNAME',
+					value: adminUsername,
+				},
+				{
+					name: 'DOCKER_REGISTRY_SERVER_PASSWORD',
+					value: adminPassword,
+				},
+				{
+					name: 'WEBSITES_PORT',
+					value: '9001',
+				},
+			],
 			// alwaysOn: true,
 			linuxFxVersion: pulumi.interpolate`DOCKER|${image.imageName}`,
 		},

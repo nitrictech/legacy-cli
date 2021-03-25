@@ -69,6 +69,8 @@ export class RunGatewayTask extends Task<Container> {
 			}
 		}
 
+		this.docker.pull('nitricimages/dev-api-gateway')
+
 		const dockerOptions = {
 			name: `${stackName}-${api.name}`,
 			// Pull the image from public docker repo

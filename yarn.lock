@@ -739,6 +739,7 @@ __metadata:
     "@pulumi/docker": ^2.8.1
     "@pulumi/pulumi": ^2.20.0
     "@types/lodash": ^4.14.168
+    "@types/mime": ^2.0.3
     "@types/node": ^10
     aws-sdk: ^2.589.0
     dockerode: ^3.2.1
@@ -751,6 +752,7 @@ __metadata:
     jest: ^26.6.1
     listr: ^0.14.3
     lodash: ^4.17.20
+    mime: ^2.5.2
     ts-jest: ^26.4.3
     ts-node: ^8
     tslib: ^1
@@ -801,7 +803,9 @@ __metadata:
     "@pulumi/docker": ^2.8.1
     "@pulumi/gcp": ^4.11.0
     "@pulumi/pulumi": ^2.20.0
+    "@pulumi/tls": ^3.2.0
     "@types/jest": ^26.0.15
+    "@types/mime": ^2.0.3
     "@types/node": ^10
     api-spec-converter: ^2.11.4
     dockerode: ^3.2.1
@@ -812,6 +816,7 @@ __metadata:
     googleapis: ^61.0.0
     jest: ^26.6.1
     listr: ^0.14.3
+    mime: ^2.5.2
     openapi-types: ^7.2.3
     ts-jest: ^26.4.3
     ts-node: ^8
@@ -1192,6 +1197,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@pulumi/tls@npm:^3.2.0":
+  version: 3.2.0
+  resolution: "@pulumi/tls@npm:3.2.0"
+  dependencies:
+    "@pulumi/pulumi": ^2.15.0
+  checksum: acd55267cedd7bb75574baec36d8f3bdfc4dc74b28d1d603451fa8d9a7074a6f9ccf330cba86ac676ae871e8f0572a2ee39c6e94707bb1c9b7a76c32a9f9350b
+  languageName: node
+  linkType: hard
+
 "@samverschueren/stream-to-observable@npm:^0.3.0":
   version: 0.3.1
   resolution: "@samverschueren/stream-to-observable@npm:0.3.1"
@@ -1428,6 +1442,13 @@ __metadata:
   version: 1.3.2
   resolution: "@types/mime@npm:1.3.2"
   checksum: c354bc135628c2f4ab64801ca3867c3acbd4050611579c4c9f5bdfecfb70db71bb8540bf8611b4319f5ef44139c5f7c5af81254369add5ed59e7e02ce929b96f
+  languageName: node
+  linkType: hard
+
+"@types/mime@npm:^2.0.3":
+  version: 2.0.3
+  resolution: "@types/mime@npm:2.0.3"
+  checksum: 6df548a912494f8579d548cd883be0425f30eaa2922283335c405e270600f49045a06d766460c0f0edabb41dff570c614d174d3c52215de3bddd11f190ec9ae9
   languageName: node
   linkType: hard
 
@@ -8188,6 +8209,15 @@ fsevents@^2.1.2:
   bin:
     mime: cli.js
   checksum: 319ec3858894aa9befa9da90e33c4422506689f1e3e7c939095df68abe848050a51070c78a31061769d9192051a8c9f33d14d6771dc0f2ff309fe846898e0807
+  languageName: node
+  linkType: hard
+
+"mime@npm:^2.5.2":
+  version: 2.5.2
+  resolution: "mime@npm:2.5.2"
+  bin:
+    mime: cli.js
+  checksum: 3e5377f0a1891350247699c5fff0469752a35d5c0baeb7cbee86907c143215ee8621d17c17401f10ffe020a0b327aa503b98cb7340039fce69bc465aed414fb7
   languageName: node
   linkType: hard
 
