@@ -1,26 +1,9 @@
-import { Site } from '@nitric/cli-common';
+import { Site, crawlDirectory } from '@nitric/cli-common';
 import { s3 } from '@pulumi/aws';
-import fs from 'fs';
 import { DeployedSite } from '../types';
 import * as pulumi from '@pulumi/pulumi';
 import path from 'path';
 import * as mime from 'mime';
-
-// An asynchronous directory crawling functionW
-// Does not currently handle symlinks and cycles
-async function crawlDirectory(dir: string, f: (_: string) => Promise<void>): Promise<void> {
-	const files = await fs.promises.readdir(dir);
-	for (const file of files) {
-		const filePath = `${dir}/${file}`;
-		const stat = await fs.promises.stat(filePath);
-		if (stat.isDirectory()) {
-			await crawlDirectory(filePath, f);
-		}
-		if (stat.isFile()) {
-			await f(filePath);
-		}
-	}
-}
 
 /**
  * Create and upload static site content to a bucket
