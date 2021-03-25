@@ -10,7 +10,7 @@ import { createTopic } from './topic';
 import { LocalWorkspace } from '@pulumi/pulumi/x/automation';
 import { ecr } from '@pulumi/aws';
 import { createSite } from './site';
-import { createEntrypoint } from './entrypoint';
+import { createEntrypoints } from './entrypoint';
 
 /**
  * Common Task Options
@@ -84,7 +84,6 @@ export class Deploy extends Task<void> {
 
 						if (entrypoints) {
 							createEntrypoints(stack.getName(), entrypoints, deployedSites, deployedApis);
-							createEntrypoint(stack.getName(), entrypoints, deployedSites, deployedApis);
 						}
 					} catch (e) {
 						console.error(e);

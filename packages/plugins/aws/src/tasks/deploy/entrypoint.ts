@@ -105,7 +105,7 @@ function entrypointsToBehaviours(
  * This includes single origin presentation for
  * Static-sites & APIs
  */
-export async function createEntrypoint(
+export async function createEntrypoints(
 	stackName: string,
 	entrypoints: NitricEntrypoints,
 	deployedSites: DeployedSite[],
