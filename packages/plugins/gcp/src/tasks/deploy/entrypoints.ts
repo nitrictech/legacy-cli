@@ -92,8 +92,6 @@ function createURLMap(stackName: string, entrypoints: NitricEntrypoints, backend
 		.filter((k) => k !== '/')
 		.map((k) => ({ path: k, ...entrypoints[k] }));
 
-	pulumi.log.info(JSON.stringify(otherEntrypoints));
-
 	if (!defaultEntrypoint) {
 		throw new Error("A default entrypoint '/' is required");
 	}
