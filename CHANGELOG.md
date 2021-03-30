@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.18](https://github.com/nitrictech/cli/compare/v0.0.17...v0.0.18) (2021-03-30)
+
+
+### Bug Fixes
+
+* Scope stack names to providers for now. ([cc7de2a](https://github.com/nitrictech/cli/commit/cc7de2a5e319d353e14fa525d2d1e4ea183c97d6))
+
 ### [0.0.17](https://github.com/nitrictech/cli/compare/v0.0.16...v0.0.17) (2021-03-30)
 
 
