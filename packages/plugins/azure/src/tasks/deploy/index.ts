@@ -39,7 +39,8 @@ export class Deploy extends Task<void> {
 		try {
 			// Upload the stack to AWS
 			const pulumiStack = await LocalWorkspace.createOrSelectStack({
-				stackName: stack.getName(),
+				// TODO: Incorporate additional stack detail. E.g. dev/test/prod
+				stackName: 'azure',
 				projectName: stack.getName(),
 				// generate our pulumi program on the fly from the POST body
 				program: async () => {
