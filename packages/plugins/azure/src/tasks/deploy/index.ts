@@ -7,6 +7,7 @@ import { createFunctionAsApp } from './function';
 import { createQueue } from './queue';
 import { createAPI } from './api';
 import * as pulumi from '@pulumi/pulumi';
+import fs from 'fs';
 //import { createSchedule } from './schedule';
 
 interface DeployOptions {
@@ -34,10 +35,9 @@ export class Deploy extends Task<void> {
 		const { stack, orgName, adminEmail, region } = this;
 		const { buckets = [], apis = [], topics = [], schedules = [], queues = [] } = stack.asNitricStack();
 
-		const messages: string[] = [];
-
 		try {
 			// Upload the stack to AWS
+			const logFile = await stack.getLoggingFile('deploy:azure');
 			const pulumiStack = await LocalWorkspace.createOrSelectStack({
 				// TODO: Incorporate additional stack detail. E.g. dev/test/prod
 				stackName: 'azure',
@@ -130,13 +130,12 @@ export class Deploy extends Task<void> {
 			const upRes = await pulumiStack.up({
 				onOutput: (out) => {
 					update(out);
-					messages.push(out);
+					fs.appendFileSync(logFile, out);
 				},
 			});
 			console.log(upRes);
 		} catch (e) {
 			console.log(e);
-			console.log(messages);
 		}
 	}
 }

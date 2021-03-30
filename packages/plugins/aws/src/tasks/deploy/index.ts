@@ -11,6 +11,7 @@ import { LocalWorkspace } from '@pulumi/pulumi/x/automation';
 import { ecr } from '@pulumi/aws';
 import { createSite } from './site';
 import { createEntrypoints } from './entrypoint';
+import fs from 'fs';
 
 /**
  * Common Task Options
@@ -58,6 +59,8 @@ export class Deploy extends Task<void> {
 
 		try {
 			// Upload the stack to AWS
+			const logFile = await stack.getLoggingFile('deploy:aws');
+
 			const pulumiStack = await LocalWorkspace.createOrSelectStack({
 				// TODO: Incorporate additional stack detail. E.g. dev/test/prod
 				stackName: 'aws',
@@ -93,8 +96,14 @@ export class Deploy extends Task<void> {
 				},
 			});
 			await pulumiStack.setConfig('aws:region', { value: region });
+			const update = this.update.bind(this)
 			// deploy the stack, tailing the logs to console
-			const upRes = await pulumiStack.up({ onOutput: this.update.bind(this) });
+			const upRes = await pulumiStack.up({ 
+				onOutput: (out: string) => {
+					update(out);
+					fs.appendFileSync(logFile, out);
+				} 
+			});
 
 			console.log(upRes);
 		} catch (e) {

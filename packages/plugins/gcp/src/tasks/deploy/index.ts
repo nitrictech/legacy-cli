@@ -9,6 +9,7 @@ import { LocalWorkspace } from '@pulumi/pulumi/x/automation';
 import { createSite } from './site';
 import { createEntrypoints } from './entrypoints';
 import * as pulumi from '@pulumi/pulumi';
+import fs from 'fs';
 
 interface CommonOptions {
 	gcpProject: string;
@@ -41,6 +42,7 @@ export class Deploy extends Task<void> {
 
 		try {
 			// Upload the stack to AWS
+			const logFile = await stack.getLoggingFile('deploy:gcp');
 			const pulumiStack = await LocalWorkspace.createOrSelectStack({
 				// TODO: Incorporate additional stack detail. E.g. dev/test/prod
 				stackName: 'gcp',
@@ -79,8 +81,14 @@ export class Deploy extends Task<void> {
 			});
 			await pulumiStack.setConfig('gcp:project', { value: gcpProject });
 			await pulumiStack.setConfig('gcp:region', { value: region });
+			const update = this.update.bind(this);
 			// deploy the stack, tailing the logs to console
-			const upRes = await pulumiStack.up({ onOutput: this.update.bind(this) });
+			const upRes = await pulumiStack.up({ 
+				onOutput: (out: string) => {
+					update(out);
+					fs.appendFileSync(logFile, out);
+				}
+			});
 
 			console.log(upRes);
 		} catch (e) {
