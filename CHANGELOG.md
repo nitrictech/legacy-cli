@@ -2,6 +2,64 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.17](https://github.com/nitrictech/cli/compare/v0.0.16...v0.0.17) (2021-03-30)
+
+
+### Features
+
+* Add a quick link via the cli output. ([bb68b6d](https://github.com/nitrictech/cli/commit/bb68b6da86719355f0ef6fce26c1f81424edc216))
+* Add custom type provider for cloud scheduler. ([6226e0b](https://github.com/nitrictech/cli/commit/6226e0b0fb058dcede2511f37aa29922900a3f5e))
+* Add doctor:gcp command and tasks to install GCP pulumi plugin. ([528dab2](https://github.com/nitrictech/cli/commit/528dab26e8523d25de746cc05d8407413f3f7aeb))
+* Add static site building before deploy. ([02541e1](https://github.com/nitrictech/cli/commit/02541e1ceac2328d61811d4eb3b7a94f3277984a))
+* Add static site definition to NitricStack. ([530c2d6](https://github.com/nitrictech/cli/commit/530c2d6feaa59b901e6d4adb1f753065d207fc23))
+* Add template for creating an event bus rule for scheduled events. ([5f70bf9](https://github.com/nitrictech/cli/commit/5f70bf9e5b0e50b9a911939217e9a5ca670a100c))
+* add working aws api gateway deployment ([5b170d4](https://github.com/nitrictech/cli/commit/5b170d4a8ebe848c624f59cb83d0ecf7ca5feb7c))
+* Connect up new site creation and entrypoint creation functions. ([628d58c](https://github.com/nitrictech/cli/commit/628d58ca547a0037f537d9dfaaf6f2d041fdc89c))
+* HTTPs support for gcloud load balancer. ([2450d73](https://github.com/nitrictech/cli/commit/2450d731d1d990d390e672e8e96079a6afb349e7))
+* Preliminary local run task, for nitric entrypoints. ([a6857de](https://github.com/nitrictech/cli/commit/a6857de93ba68e069626052819e6bb70c005776b))
+* WIP commands for template repository download/listing. ([60bba71](https://github.com/nitrictech/cli/commit/60bba716af151111e8c2b01777930c2cf2f7c1be))
+* WIP doctor command to install pre-requisite software. ([f9bbf03](https://github.com/nitrictech/cli/commit/f9bbf03017739ec9cc81ac77f1cc57c9482583fc))
+* WIP entrypoints for AWS cloudfront/s3 buckets. ([68db125](https://github.com/nitrictech/cli/commit/68db125f46e08dbfe125462f4e4917916b4c63cc))
+* WIP GCP entrypoints support. ([ebb90b6](https://github.com/nitrictech/cli/commit/ebb90b675b638b34633f232c12ff37e014e38fdb))
+* WIP google pulumi implementation. ([2a8a823](https://github.com/nitrictech/cli/commit/2a8a823ef8034fffe120b638f28ad91882753bfa))
+* WIP implementation of schedule deployment on google cloud. ([595821c](https://github.com/nitrictech/cli/commit/595821c532ef7b22eb3c7ba24a41df7ba43a6977))
+* Working API/Site deploy for AWS. ([5edd67f](https://github.com/nitrictech/cli/commit/5edd67ff188f6546d5b02eab4fcb93ffcb230987))
+* Working Azure AppService deployment for nitric functions. ([0ea6237](https://github.com/nitrictech/cli/commit/0ea62376df237d1b01ba2265e65eb2533ee7931a))
+* Working GCP pulumi deployment. ([7ceb282](https://github.com/nitrictech/cli/commit/7ceb282b77b04f4191dcf2064ea271bf6c28d690))
+* Working local entrypoints deployment. ([9855ce1](https://github.com/nitrictech/cli/commit/9855ce15ab8213b978c2a3871d517aa92723ae99))
+* Working static site deployment. ([7a45fd4](https://github.com/nitrictech/cli/commit/7a45fd4a052617eda1eb20f506a1942a12614dfe))
+* **azure:** Wrap up prototype deployment scripts for azure. ([8219a01](https://github.com/nitrictech/cli/commit/8219a01a324d1497dc0cce17c8f1d5a71e3db78f))
+* **cli:** WIP GCP API Gateway implementation. ([e5019d8](https://github.com/nitrictech/cli/commit/e5019d897f0f8f5d4ec2c7135de15ff42dee9d95))
+* **cli-common:** Add API definitions for NitricStack ([a76ed94](https://github.com/nitrictech/cli/commit/a76ed94273b8292a96f133280ce16a3fca78e310))
+* **cli/gcp:** Working GCP APIGateway Deployment. ([3d727c6](https://github.com/nitrictech/cli/commit/3d727c633a67916c630ecbe39f6de1caafdb1ef9))
+* **gcp:** Working inline docker build/push ([0c75d18](https://github.com/nitrictech/cli/commit/0c75d18a7d7e07ae3de8e36dd81efeb76d02daf1))
+* **run:** Add API port mapping to output. ([14ea3cb](https://github.com/nitrictech/cli/commit/14ea3cbeffd64767d96ae2e9e76c108bd2c783f1))
+* **run:** WIP local API gateway. ([2ca0fee](https://github.com/nitrictech/cli/commit/2ca0fee8bf062a5c2ec03a988b2b200e5a729148))
+* **run:** Working API gateway startup on run. ([2b7f63e](https://github.com/nitrictech/cli/commit/2b7f63e4c1ce234ecf0d4e434ee0d3f321148233))
+* Working API gateway deployment. ([61ce682](https://github.com/nitrictech/cli/commit/61ce6823f2a276622f5cf88227a983f57461ea91))
+* Working schedule deployments for GCP. ([050711b](https://github.com/nitrictech/cli/commit/050711bd9588b1ac5f5640609c7313a3f8f5b042))
+
+
+### Bug Fixes
+
+* add check for valid project names in make:project ([c2ee442](https://github.com/nitrictech/cli/commit/c2ee4421e32913f3cdad0fbdd6d7b9659876d8fe))
+* build task splits repo and template names to find each individually ([480622d](https://github.com/nitrictech/cli/commit/480622dc50708a1866c020cc565c37b4eb579e19))
+* check if at least one repo is available when listing templates ([885980a](https://github.com/nitrictech/cli/commit/885980a034a02c82ab2ebc7a66655b0b934acc59))
+* clear container start timeout on successful start ([c4c997b](https://github.com/nitrictech/cli/commit/c4c997bb8a6314224b9fd25dbec539f394c9ef7e))
+* copy the full template directory during build staging ([f32fcad](https://github.com/nitrictech/cli/commit/f32fcad284e6e05848171abd2be9ccf50775dd8e))
+* correct make project task classname ([3532329](https://github.com/nitrictech/cli/commit/35323296ca50494fc55fd46a72ef41ced0d29e11))
+* delete placeholder create command ([86108a5](https://github.com/nitrictech/cli/commit/86108a5586e40a1bf1ee3428b9a4cc28d2994ea0))
+* ignore legacy or superfluous template repo directories ([9b6390d](https://github.com/nitrictech/cli/commit/9b6390d19d7c84ed088d94563dfac496068070bb))
+* improve handling of failing to set docker network ([77533e2](https://github.com/nitrictech/cli/commit/77533e2a3cb1ce14c972f588e56bd1f8d3390ae1))
+* improve plugin load performance ([916f7a0](https://github.com/nitrictech/cli/commit/916f7a05ca25301cf4292edca9aee42c419aa907))
+* make port optional for RunFunctionTask ([ad01135](https://github.com/nitrictech/cli/commit/ad01135dd7a03db5e502508cdfc2ac5a2707c981))
+* minor issues in utils functions ([bbd68d5](https://github.com/nitrictech/cli/commit/bbd68d5c5187461e56a747724ccecfcfa12f0551))
+* move project name validation before prompts ([dbf12bc](https://github.com/nitrictech/cli/commit/dbf12bc88cfc8919a151692bfa9080a7b46f1aac))
+* passthrough stdio for doctor installs ([8e7cf4a](https://github.com/nitrictech/cli/commit/8e7cf4ac7f3c7c08eed7e2126ec5acc9807a4c01))
+* set default example func name if none provide for new project ([e7c8342](https://github.com/nitrictech/cli/commit/e7c8342da378d5c30ad04d11af186403538dc490))
+* stop warning about default network when no custom network set ([cdba178](https://github.com/nitrictech/cli/commit/cdba17823605778d2d7394adb19fc57219ca2bba))
+* typo in docker container hostconfig ([a6942c1](https://github.com/nitrictech/cli/commit/a6942c134b66c25b19f9ffa01d8f954ba0dc2244))
+
 ### [0.0.16](https://github.com/nitric-dev/cli/compare/v0.0.15...v0.0.16) (2020-12-20)
 
 ### Features
