@@ -18,7 +18,8 @@ import rimraf from 'rimraf';
 import { Function } from './function';
 import { Site } from './site';
 import { findFileRead } from '../utils';
-//import multimatch from 'multimatch';
+
+const NITRIC_DIRECTORY = '.nitric';
 
 export class Stack {
 	private file: string;
@@ -105,6 +106,33 @@ export class Stack {
 
 	getStagingDirectory(): string {
 		return `${STAGING_DIR}/${this.name}`;
+	}
+
+	private async getRelativeDirectory(directory: string): Promise<string> {
+		const dir = path.join(this.getDirectory(), directory);
+
+		if (!fs.existsSync(dir)) {
+			await fs.promises.mkdir(dir, { recursive: true })
+		}
+
+		return dir;
+	}
+
+	async getNitricDirectory(): Promise<string> {
+		return await this.getRelativeDirectory(`./${NITRIC_DIRECTORY}/`);
+	}
+
+	async getLoggingDirectory(): Promise<string> {
+		return await this.getRelativeDirectory(`./${NITRIC_DIRECTORY}/logs/`)
+	}
+
+	async getLoggingFile(prefix: string): Promise<string> {
+		const currentTime = (new Date().getTime());
+		const logFileName = `${prefix}-${currentTime}`;
+
+		const loggingDirectory = await this.getLoggingDirectory();
+
+		return path.join(loggingDirectory, `./${logFileName}.log`);
 	}
 
 	/**
