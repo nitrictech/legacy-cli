@@ -108,7 +108,7 @@ export class Stack {
 		return `${STAGING_DIR}/${this.name}`;
 	}
 
-	private async getRelativeDirectory(directory: string): Promise<string> {
+	private async makeRelativeDirectory(directory: string): Promise<string> {
 		const dir = path.join(this.getDirectory(), directory);
 
 		if (!fs.existsSync(dir)) {
@@ -118,19 +118,29 @@ export class Stack {
 		return dir;
 	}
 
-	async getNitricDirectory(): Promise<string> {
-		return await this.getRelativeDirectory(`./${NITRIC_DIRECTORY}/`);
+	/**
+	 * Returns the nitric directory and creates it if it doesn't exist
+	 */
+	async makeNitricDirectory(): Promise<string> {
+		return await this.makeRelativeDirectory(`./${NITRIC_DIRECTORY}/`);
 	}
 
-	async getLoggingDirectory(): Promise<string> {
-		return await this.getRelativeDirectory(`./${NITRIC_DIRECTORY}/logs/`)
+	/**
+	 * Returns the nitric log directory and creates it if it doesn't exist
+	 */
+	async makeLoggingDirectory(): Promise<string> {
+		return await this.makeRelativeDirectory(`./${NITRIC_DIRECTORY}/logs/`)
 	}
 
+	/**
+	 * Returns a new log file location. If the log directories are missing, they will be created.
+	 * @param prefix used along with the current time to generate a unique log filename.
+	 */
 	async getLoggingFile(prefix: string): Promise<string> {
 		const currentTime = (new Date().getTime());
 		const logFileName = `${prefix}-${currentTime}`;
 
-		const loggingDirectory = await this.getLoggingDirectory();
+		const loggingDirectory = await this.makeLoggingDirectory();
 
 		return path.join(loggingDirectory, `./${logFileName}.log`);
 	}
