@@ -11,6 +11,7 @@ import { LocalWorkspace } from '@pulumi/pulumi/x/automation';
 import { ecr } from '@pulumi/aws';
 import { createSite } from './site';
 import { createEntrypoints } from './entrypoint';
+import fs from 'fs';
 
 /**
  * Common Task Options
@@ -31,7 +32,7 @@ interface DeployOptions extends CommonOptions {
 }
 
 /**
- * Deploys the given Nitric Stack to AWS as a CloudFormation Stack
+ * Deploys the given Nitric Stack
  */
 export class Deploy extends Task<void> {
 	private stack: Stack;
@@ -57,7 +58,9 @@ export class Deploy extends Task<void> {
 		this.update('Defining functions');
 
 		try {
-			// Upload the stack to AWS
+			// Upload the stack
+			const logFile = await stack.getLoggingFile('deploy:aws');
+
 			const pulumiStack = await LocalWorkspace.createOrSelectStack({
 				// TODO: Incorporate additional stack detail. E.g. dev/test/prod
 				stackName: 'aws',
@@ -93,8 +96,14 @@ export class Deploy extends Task<void> {
 				},
 			});
 			await pulumiStack.setConfig('aws:region', { value: region });
+			const update = this.update.bind(this);
 			// deploy the stack, tailing the logs to console
-			const upRes = await pulumiStack.up({ onOutput: this.update.bind(this) });
+			const upRes = await pulumiStack.up({
+				onOutput: (out: string) => {
+					update(out);
+					fs.appendFileSync(logFile, out);
+				},
+			});
 
 			console.log(upRes);
 		} catch (e) {
