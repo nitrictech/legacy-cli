@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.22](https://github.com/nitrictech/cli/compare/v0.0.21...v0.0.22) (2021-04-01)
+
+
+### Bug Fixes
+
+* add provider scope to down commands ([ecee9be](https://github.com/nitrictech/cli/commit/ecee9be14bd419a79b923fa0108e7947910339db))
+
 ### [0.0.21](https://github.com/nitrictech/cli/compare/v0.0.20...v0.0.21) (2021-04-01)
 
 
