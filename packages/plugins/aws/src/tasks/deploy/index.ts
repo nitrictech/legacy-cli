@@ -32,7 +32,7 @@ interface DeployOptions extends CommonOptions {
 }
 
 /**
- * Deploys the given Nitric Stack to AWS as a CloudFormation Stack
+ * Deploys the given Nitric Stack
  */
 export class Deploy extends Task<void> {
 	private stack: Stack;
@@ -58,7 +58,7 @@ export class Deploy extends Task<void> {
 		this.update('Defining functions');
 
 		try {
-			// Upload the stack to AWS
+			// Upload the stack
 			const logFile = await stack.getLoggingFile('deploy:aws');
 
 			const pulumiStack = await LocalWorkspace.createOrSelectStack({
@@ -96,13 +96,13 @@ export class Deploy extends Task<void> {
 				},
 			});
 			await pulumiStack.setConfig('aws:region', { value: region });
-			const update = this.update.bind(this)
+			const update = this.update.bind(this);
 			// deploy the stack, tailing the logs to console
-			const upRes = await pulumiStack.up({ 
+			const upRes = await pulumiStack.up({
 				onOutput: (out: string) => {
 					update(out);
 					fs.appendFileSync(logFile, out);
-				} 
+				},
 			});
 
 			console.log(upRes);

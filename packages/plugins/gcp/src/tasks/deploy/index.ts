@@ -41,7 +41,7 @@ export class Deploy extends Task<void> {
 		const authClient = await auth.getClient();
 
 		try {
-			// Upload the stack to AWS
+			// Upload the stack
 			const logFile = await stack.getLoggingFile('deploy:gcp');
 			const pulumiStack = await LocalWorkspace.createOrSelectStack({
 				// TODO: Incorporate additional stack detail. E.g. dev/test/prod
@@ -83,11 +83,11 @@ export class Deploy extends Task<void> {
 			await pulumiStack.setConfig('gcp:region', { value: region });
 			const update = this.update.bind(this);
 			// deploy the stack, tailing the logs to console
-			const upRes = await pulumiStack.up({ 
+			const upRes = await pulumiStack.up({
 				onOutput: (out: string) => {
 					update(out);
 					fs.appendFileSync(logFile, out);
-				}
+				},
 			});
 
 			console.log(upRes);

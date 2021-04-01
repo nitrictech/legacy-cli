@@ -36,7 +36,7 @@ export class Deploy extends Task<void> {
 		const { buckets = [], apis = [], topics = [], schedules = [], queues = [] } = stack.asNitricStack();
 
 		try {
-			// Upload the stack to AWS
+			// Upload the stack
 			const logFile = await stack.getLoggingFile('deploy:azure');
 			const pulumiStack = await LocalWorkspace.createOrSelectStack({
 				// TODO: Incorporate additional stack detail. E.g. dev/test/prod
