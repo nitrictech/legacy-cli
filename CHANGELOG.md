@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.19](https://github.com/nitrictech/cli/compare/v0.0.18...v0.0.19) (2021-04-01)
+
+
+### Features
+
+* Add deployment logging for AWS, GCP & Azure. ([798fb43](https://github.com/nitrictech/cli/commit/798fb43943c86d79211ae4eff08a68b0dcaaeccf))
+* **common:** Add utilities for stack operation logging. ([c5e219d](https://github.com/nitrictech/cli/commit/c5e219d3e2c8cb260b237a2bdb4aa9ecad2725a1))
+
+
+### Bug Fixes
+
+* Fix missing common dependencies. ([6b8b305](https://github.com/nitrictech/cli/commit/6b8b305bd9f054bc6af43356a684c50c32a3c551))
+
 ### [0.0.18](https://github.com/nitrictech/cli/compare/v0.0.17...v0.0.18) (2021-03-30)
 
 
