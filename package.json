@@ -5,6 +5,7 @@
   "author": "Nitric <https://github.com/nitric-dev>",
   "scripts": {
     "build:common": "yarn workspace @nitric/cli-common build",
+    "lint:deps": "yarn dlx @yarnpkg/doctor",
     "test": "prettier \"./**/*.{ts,js,css,md}\" --write && ultra -r test",
     "bump": "standard-version"
   },
