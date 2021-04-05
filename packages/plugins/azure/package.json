@@ -10,7 +10,7 @@
     "@oclif/config": "^1",
     "@pulumi/azure-nextgen": "^0.6.1",
     "@pulumi/docker": "^2.8.1",
-    "@pulumi/pulumi": "^2.20.0",
+    "@pulumi/pulumi": "^2.24.1",
     "api-spec-converter": "^2.11.4",
     "cli-ux": "^5.5.1",
     "cron-parser": "^3.2.0",

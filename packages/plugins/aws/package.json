@@ -10,7 +10,7 @@
     "@oclif/config": "^1",
     "@pulumi/aws": "^3.28.1",
     "@pulumi/docker": "^2.8.1",
-    "@pulumi/pulumi": "^2.20.0",
+    "@pulumi/pulumi": "^2.24.1",
     "aws-sdk": "^2.589.0",
     "cli-ux": "^5.5.1",
     "dockerode": "^3.2.1",
