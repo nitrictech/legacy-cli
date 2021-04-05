@@ -413,6 +413,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@grpc/grpc-js@npm:^1.2.7":
+  version: 1.2.12
+  resolution: "@grpc/grpc-js@npm:1.2.12"
+  dependencies:
+    "@types/node": ">=12.12.47"
+    google-auth-library: ^6.1.1
+    semver: ^6.2.0
+  checksum: a2265c5d9f4dfb0795951a30c7520a71622d407c1fbc9fa21d4fe4ad14e73e86630775136ea8561e6f2902cb2aac2e2b1d7359cf83579db97b95544e1da5dad5
+  languageName: node
+  linkType: hard
+
 "@istanbuljs/load-nyc-config@npm:^1.0.0":
   version: 1.1.0
   resolution: "@istanbuljs/load-nyc-config@npm:1.1.0"
@@ -651,6 +662,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@logdna/tail-file@npm:^2.0.6":
+  version: 2.0.6
+  resolution: "@logdna/tail-file@npm:2.0.6"
+  checksum: 63464140f0997603899e2be71aaace859c67a5bdeb81f87ad3b20396c7354912d9816954c96c100a834c3a9629913612bc2ed99dde270926262b4f4ce46640fa
+  languageName: node
+  linkType: hard
+
 "@nitric/cli-common@workspace:*, @nitric/cli-common@workspace:packages/common":
   version: 0.0.0-use.local
   resolution: "@nitric/cli-common@workspace:packages/common"
@@ -741,9 +759,9 @@ __metadata:
     "@oclif/config": ^1
     "@oclif/dev-cli": ^1
     "@oclif/plugin-help": ^3.2.2
-    "@pulumi/aws": ^3.28.1
+    "@pulumi/aws": ^3.36.0
     "@pulumi/docker": ^2.8.1
-    "@pulumi/pulumi": ^2.20.0
+    "@pulumi/pulumi": ^2.24.1
     "@types/lodash": ^4.14.168
     "@types/mime": ^2.0.3
     "@types/node": ^10
@@ -779,7 +797,7 @@ __metadata:
     "@oclif/plugin-help": ^3
     "@pulumi/azure-nextgen": ^0.6.1
     "@pulumi/docker": ^2.8.1
-    "@pulumi/pulumi": ^2.20.0
+    "@pulumi/pulumi": ^2.24.1
     "@types/jest": ^26.0.15
     "@types/node": ^10
     api-spec-converter: ^2.11.4
@@ -812,8 +830,8 @@ __metadata:
     "@oclif/dev-cli": ^1
     "@oclif/plugin-help": ^3.2.2
     "@pulumi/docker": ^2.8.1
-    "@pulumi/gcp": ^4.11.0
-    "@pulumi/pulumi": ^2.20.0
+    "@pulumi/gcp": ^4.18.0
+    "@pulumi/pulumi": ^2.24.1
     "@pulumi/tls": ^3.2.0
     "@types/jest": ^26.0.15
     "@types/mime": ^2.0.3
@@ -1138,9 +1156,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@pulumi/aws@npm:^3.28.1":
-  version: 3.28.1
-  resolution: "@pulumi/aws@npm:3.28.1"
+"@pulumi/aws@npm:^3.36.0":
+  version: 3.36.0
+  resolution: "@pulumi/aws@npm:3.36.0"
   dependencies:
     "@pulumi/pulumi": ^2.17.0
     aws-sdk: ^2.0.0
@@ -1148,7 +1166,7 @@ __metadata:
     mime: ^2.0.0
     read-package-tree: ^5.2.1
     resolve: ^1.7.1
-  checksum: 910665a202512a7922b28246f6614aa1015e2775fc25e6ee44b660fdc7cd9b7a460f7c6b7d8f44e925a90efd1c946b16c825aa3314f02f0329caab1ec2d13558
+  checksum: 0833abcc8dc5b58d4be08b6be7c76d8e77832923c2c849d42aa90f58a9dddf07b27c313ea52e92809548437afb395c3927e5c0deb9bc653174a069e9762fd752
   languageName: node
   linkType: hard
 
@@ -1171,14 +1189,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@pulumi/gcp@npm:^4.11.0":
-  version: 4.11.0
-  resolution: "@pulumi/gcp@npm:4.11.0"
+"@pulumi/gcp@npm:^4.18.0":
+  version: 4.18.0
+  resolution: "@pulumi/gcp@npm:4.18.0"
   dependencies:
     "@pulumi/pulumi": ^2.15.0
     "@types/express": ^4.16.0
     read-package-json: ^2.0.13
-  checksum: f66d1d3bc3f8038db618bb7336cb20d4161010525ae10b11589f23c937375b631d33b05c4d4d1c9413bb0c55b3dc03664f46bb8cefcac46a7dc08cee3e03f81f
+  checksum: ca12ff22af0a6b4a9ea01d626a86cf16845a9c804fc624e9f85e14833200475e1f6db3a78e2c3d211b0c74f0bdc002f14a6cdcd16809e2fae6887ce0f173b651
   languageName: node
   linkType: hard
 
@@ -1201,6 +1219,30 @@ __metadata:
     typescript: ~3.7.3
     upath: ^1.1.0
   checksum: 41d6a65678be42b5cc4ec4295d000e6074ab9ff8a0a94d6df750a9cd47996a78e52efdcf004a183745a69039ee884ef130dd5172136873c3e76e96debe0ef1cd
+  languageName: node
+  linkType: hard
+
+"@pulumi/pulumi@npm:^2.24.1":
+  version: 2.24.1
+  resolution: "@pulumi/pulumi@npm:2.24.1"
+  dependencies:
+    "@grpc/grpc-js": ^1.2.7
+    "@logdna/tail-file": ^2.0.6
+    "@pulumi/query": ^0.3.0
+    google-protobuf: ^3.5.0
+    js-yaml: ^3.14.0
+    minimist: ^1.2.0
+    normalize-package-data: ^2.4.0
+    protobufjs: ^6.8.6
+    read-package-tree: ^5.3.1
+    require-from-string: ^2.0.1
+    semver: ^6.1.0
+    source-map-support: ^0.4.16
+    split2: ^3.2.2
+    ts-node: ^7.0.1
+    typescript: ~3.7.3
+    upath: ^1.1.0
+  checksum: 8c53f84cdf35169bbd6386fc59f944aa80cc67dfa1693bdc4ce6a3fdcc3d0f351d9fbc10ec8f8a3a8479029b78e38572c3b6757eedd4ab6f472c1b911b82e7f0
   languageName: node
   linkType: hard
 
@@ -1491,6 +1533,13 @@ __metadata:
   version: 10.17.43
   resolution: "@types/node@npm:10.17.43"
   checksum: 2b2f80dcb676876d37a1851db58f5d983adfc1bf66f1d288fce139ffef527b54bedaf90c78b82b8bbfd42a8ad3fd651e19ea13cbada7f95f13ced22d0f70a584
+  languageName: node
+  linkType: hard
+
+"@types/node@npm:>=12.12.47":
+  version: 14.14.37
+  resolution: "@types/node@npm:14.14.37"
+  checksum: 5e2d9baf7594ebacaf016716515f30de0765169412787f981481c2fb8b468923149bb9e2e3219ee672399811672ceddc339a7372a61cf15bc656836a5494d991
   languageName: node
   linkType: hard
 
@@ -5617,7 +5666,7 @@ fsevents@^2.1.2:
   languageName: node
   linkType: hard
 
-"google-auth-library@npm:^6.0.0":
+"google-auth-library@npm:^6.0.0, google-auth-library@npm:^6.1.1":
   version: 6.1.3
   resolution: "google-auth-library@npm:6.1.3"
   dependencies:
@@ -9831,7 +9880,7 @@ fsevents@^2.1.2:
   languageName: node
   linkType: hard
 
-"readable-stream@npm:2 || 3, readable-stream@npm:^3.0.2, readable-stream@npm:^3.1.1, readable-stream@npm:^3.4.0, readable-stream@npm:^3.5.0":
+"readable-stream@npm:2 || 3, readable-stream@npm:^3.0.0, readable-stream@npm:^3.0.2, readable-stream@npm:^3.1.1, readable-stream@npm:^3.4.0, readable-stream@npm:^3.5.0":
   version: 3.6.0
   resolution: "readable-stream@npm:3.6.0"
   dependencies:
@@ -10786,6 +10835,15 @@ fsevents@^2.1.2:
   dependencies:
     through2: ^2.0.2
   checksum: cf58dc8aa424499cd68a9e7d9ae94441ff972ce0c1f9599bef9d65b3f4384913c557eeec939ea34e2832309d90b6ad6993c5b51b152cba2f72500299464e6a9c
+  languageName: node
+  linkType: hard
+
+"split2@npm:^3.2.2":
+  version: 3.2.2
+  resolution: "split2@npm:3.2.2"
+  dependencies:
+    readable-stream: ^3.0.0
+  checksum: 04bf20af25bfe917edbb7f719cc9dbd2ca16633e4e6a5e343a8c834310aafd802c74b3aceb96acf3571545b0340d55d2d3273dbee8f9bc6a811371dcfbe0c8a7
   languageName: node
   linkType: hard
 
