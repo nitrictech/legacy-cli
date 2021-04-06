@@ -45,8 +45,6 @@ export function createApi(api: NitricAPI, funcs: DeployedFunction[]): DeployedAP
 		}, [] as string[]),
 	);
 
-	fs.writeFileSync('garbagefile.json', JSON.stringify(targetNames));
-
 	const transformedDoc = pulumi
 		.all(funcs.map((f) => f.awsLambda.invokeArn.apply((arn) => `${f.name}||${arn}`)))
 		.apply((nameArnPairs) => {
