@@ -101,3 +101,5 @@ typings/
 lib/
 
 !**/src/**/*
+
+oclif.manifest.json
