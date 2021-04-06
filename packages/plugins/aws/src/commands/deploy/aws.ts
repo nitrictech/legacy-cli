@@ -56,7 +56,7 @@ export default class DeployCmd extends Command {
 		}),
 	};
 
-	static args = [{ name: 'dir' }];
+	static args = [{ name: 'dir', default: '.' }];
 
 	async run(): Promise<any> {
 		const { args, flags } = this.parse(DeployCmd);

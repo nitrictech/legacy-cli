@@ -4,7 +4,6 @@ import { uniq } from 'lodash';
 import { DeployedAPI, DeployedFunction } from '../types';
 import { apigatewayv2, lambda } from '@pulumi/aws';
 import * as pulumi from '@pulumi/pulumi';
-import fs from 'fs';
 
 type method = 'get' | 'post' | 'put' | 'patch' | 'delete';
 const METHOD_KEYS: method[] = ['get', 'post', 'put', 'patch', 'delete'];
@@ -44,8 +43,6 @@ export function createApi(api: NitricAPI, funcs: DeployedFunction[]): DeployedAP
 			];
 		}, [] as string[]),
 	);
-
-	fs.writeFileSync('garbagefile.json', JSON.stringify(targetNames));
 
 	const transformedDoc = pulumi
 		.all(funcs.map((f) => f.awsLambda.invokeArn.apply((arn) => `${f.name}||${arn}`)))

@@ -9,7 +9,7 @@
     "@oclif/command": "^1",
     "@oclif/config": "^1",
     "@pulumi/docker": "^2.8.1",
-    "@pulumi/gcp": "^4.11.0",
+    "@pulumi/gcp": "^4.18.0",
     "@pulumi/pulumi": "^2.20.0",
     "@pulumi/tls": "^3.2.0",
     "api-spec-converter": "^2.11.4",

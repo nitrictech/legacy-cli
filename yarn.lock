@@ -741,7 +741,7 @@ __metadata:
     "@oclif/config": ^1
     "@oclif/dev-cli": ^1
     "@oclif/plugin-help": ^3.2.2
-    "@pulumi/aws": ^3.28.1
+    "@pulumi/aws": ^3.36.0
     "@pulumi/docker": ^2.8.1
     "@pulumi/pulumi": ^2.20.0
     "@types/lodash": ^4.14.168
@@ -812,7 +812,7 @@ __metadata:
     "@oclif/dev-cli": ^1
     "@oclif/plugin-help": ^3.2.2
     "@pulumi/docker": ^2.8.1
-    "@pulumi/gcp": ^4.11.0
+    "@pulumi/gcp": ^4.18.0
     "@pulumi/pulumi": ^2.20.0
     "@pulumi/tls": ^3.2.0
     "@types/jest": ^26.0.15
@@ -1138,9 +1138,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@pulumi/aws@npm:^3.28.1":
-  version: 3.28.1
-  resolution: "@pulumi/aws@npm:3.28.1"
+"@pulumi/aws@npm:^3.36.0":
+  version: 3.36.0
+  resolution: "@pulumi/aws@npm:3.36.0"
   dependencies:
     "@pulumi/pulumi": ^2.17.0
     aws-sdk: ^2.0.0
@@ -1148,7 +1148,7 @@ __metadata:
     mime: ^2.0.0
     read-package-tree: ^5.2.1
     resolve: ^1.7.1
-  checksum: 910665a202512a7922b28246f6614aa1015e2775fc25e6ee44b660fdc7cd9b7a460f7c6b7d8f44e925a90efd1c946b16c825aa3314f02f0329caab1ec2d13558
+  checksum: 0833abcc8dc5b58d4be08b6be7c76d8e77832923c2c849d42aa90f58a9dddf07b27c313ea52e92809548437afb395c3927e5c0deb9bc653174a069e9762fd752
   languageName: node
   linkType: hard
 
@@ -1171,14 +1171,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@pulumi/gcp@npm:^4.11.0":
-  version: 4.11.0
-  resolution: "@pulumi/gcp@npm:4.11.0"
+"@pulumi/gcp@npm:^4.18.0":
+  version: 4.18.0
+  resolution: "@pulumi/gcp@npm:4.18.0"
   dependencies:
     "@pulumi/pulumi": ^2.15.0
     "@types/express": ^4.16.0
     read-package-json: ^2.0.13
-  checksum: f66d1d3bc3f8038db618bb7336cb20d4161010525ae10b11589f23c937375b631d33b05c4d4d1c9413bb0c55b3dc03664f46bb8cefcac46a7dc08cee3e03f81f
+  checksum: ca12ff22af0a6b4a9ea01d626a86cf16845a9c804fc624e9f85e14833200475e1f6db3a78e2c3d211b0c74f0bdc002f14a6cdcd16809e2fae6887ce0f173b651
   languageName: node
   linkType: hard
 
