@@ -3,7 +3,7 @@ import { wrapTaskForListr, Repository } from '@nitric/cli-common';
 import { MakeProjectTask, MakeFunctionTask } from '../../tasks/make';
 import { AddRepositoryTask } from '../../tasks/repository/add';
 import { UpdateStoreTask } from '../../tasks/store/update';
-import Listr, { ListrTask } from 'listr';
+import { Listr, ListrTask } from 'listr2';
 import cli from 'cli-ux';
 import inquirer from 'inquirer';
 

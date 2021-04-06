@@ -1,7 +1,7 @@
 import { Command, flags } from '@oclif/command';
 import { Deploy } from '../../tasks/deploy';
 import { wrapTaskForListr, Stack, StageStackTask } from '@nitric/cli-common';
-import Listr from 'listr';
+import { Listr } from 'listr2';
 import path from 'path';
 import AWS from 'aws-sdk';
 import inquirer from 'inquirer';

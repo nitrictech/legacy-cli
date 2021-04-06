@@ -1,6 +1,5 @@
-import { Observable } from 'rxjs';
 import { Task } from './task';
-import { ListrTask } from 'listr';
+import { ListrTask } from 'listr2';
 
 interface TaskFactory<T> {
 	name: string;
@@ -22,19 +21,16 @@ export function wrapTaskForListr<T>(
 		// Doesn't matter if we don't have a task factory here
 		// It will come up as undefined otherwise
 		skip: (taskOrTaskFactory as TaskFactory<any>).skip,
-		task: (ctx): Observable<any> =>
-			new Observable((obs) => {
-				const task = Object.keys(taskOrTaskFactory).includes('factory')
-					? (taskOrTaskFactory as TaskFactory<T>).factory(ctx)
-					: (taskOrTaskFactory as Task<T>);
-				task.on('update', (message) => obs.next(message));
-				task.on('error', (error) => obs.error(error));
-				task.on('done', (result: T) => {
-					ctx[contextKey] = result;
-					obs.complete();
-				});
-				task.run(...args);
-			}),
+		task: async (ctx, task): Promise<T> => {
+			const t = Object.keys(taskOrTaskFactory).includes('factory')
+				? (taskOrTaskFactory as TaskFactory<T>).factory(ctx)
+				: (taskOrTaskFactory as Task<T>);
+
+			t.on('update', (message) => (task.output = message));
+			const result = await t.run(...args);
+			ctx[contextKey] = result;
+			return result;
+		},
 	};
 }
 

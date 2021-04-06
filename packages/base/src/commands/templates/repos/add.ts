@@ -1,6 +1,6 @@
 import { wrapTaskForListr } from '@nitric/cli-common';
 import { Command, flags } from '@oclif/command';
-import Listr from 'listr';
+import { Listr } from 'listr2';
 import { AddRepositoryTask } from '../../../tasks/repository/add';
 import { UpdateStoreTask } from '../../../tasks/store/update';
 

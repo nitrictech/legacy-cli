@@ -2,7 +2,7 @@ import { Command } from '@oclif/command';
 import cli from 'cli-ux';
 import Build, { createBuildTasks } from './build';
 import { Stack, wrapTaskForListr, NitricImage, NitricStack, NitricEntrypoints } from '@nitric/cli-common';
-import Listr from 'listr';
+import { Listr, ListrTask, ListrContext, ListrRenderer } from 'listr2';
 import path from 'path';
 import Docker, { Network, Container, Volume } from 'dockerode';
 import getPort from 'get-port';
@@ -15,12 +15,13 @@ import {
 	RunGatewayTaskOptions,
 	RunEntrypointsTask,
 } from '../tasks/run';
+import { TaskWrapper } from 'listr2/dist/lib/task-wrapper';
 
 interface KnownListrCtx {
 	network: Network;
 	volume: Volume;
 }
-type ListrCtx = { [key: string]: any } & KnownListrCtx & Listr.ListrContext;
+type ListrCtx = { [key: string]: any } & KnownListrCtx & ListrContext;
 
 // Lowest available ephemeral port
 export const MIN_PORT = 49152; // start of ephemeral port range, as defined by IANA
@@ -72,7 +73,7 @@ export function createFunctionTasks(
 	docker: Docker,
 	network: Docker.Network,
 	volume: Docker.Volume,
-): Array<Listr.ListrTask> {
+): Array<ListrTask> {
 	return functions.map((func) =>
 		wrapTaskForListr(
 			new RunFunctionTask(
@@ -92,7 +93,7 @@ export function createGatewayTasks(
 	apis: RunGatewayTaskOptions[],
 	docker: Docker,
 	network: Docker.Network,
-): Array<Listr.ListrTask> {
+): Array<ListrTask> {
 	return apis.map((api) =>
 		wrapTaskForListr(
 			new RunGatewayTask({
@@ -109,12 +110,14 @@ export function createGatewayContainerRunTasks(
 	stackName: string,
 	apis: RunGatewayTaskOptions[],
 	docker: Docker,
-): (ctx) => Listr {
-	return (ctx): Listr => {
-		return new Listr(createGatewayTasks(stackName, apis, docker, ctx.network), {
+): (ctx, task) => Listr {
+	return (ctx, task: TaskWrapper<unknown, typeof ListrRenderer>): Listr => {
+		return task.newListr(createGatewayTasks(stackName, apis, docker, ctx.network), {
 			concurrent: true,
 			// Don't fail all on a single function failure...
 			exitOnError: false,
+			// Added to allow custom handling of SIGINT for run cmd cleanup.
+			registerSignalListeners: false,
 		});
 	};
 }
@@ -123,12 +126,17 @@ export function createGatewayContainerRunTasks(
  * Listrception: Creates function substasks for the 'Running Functions' listr task (see createRunTasks)
  * which will be run in parallel
  */
-export function createFunctionContainerRunTasks(functions: RunFunctionTaskOptions[], docker: Docker): (ctx) => Listr {
-	return (ctx): Listr => {
-		return new Listr(createFunctionTasks(functions, docker, ctx.network, ctx.volume), {
+export function createFunctionContainerRunTasks(
+	functions: RunFunctionTaskOptions[],
+	docker: Docker,
+): (ctx, task) => Listr {
+	return (ctx, task: TaskWrapper<unknown, typeof ListrRenderer>): Listr => {
+		return task.newListr(createFunctionTasks(functions, docker, ctx.network, ctx.volume), {
 			concurrent: true,
 			// Don't fail all on a single function failure...
 			exitOnError: false,
+			// Added to allow custom handling of SIGINT for run cmd cleanup.
+			registerSignalListeners: false,
 		});
 	};
 }
@@ -154,19 +162,25 @@ export function createRunTasks(
 		  ]
 		: [];
 
-	return new Listr<ListrCtx>([
-		wrapTaskForListr(new CreateNetworkTask({ name: `${stack.getName()}-net`, docker }), 'network'),
-		wrapTaskForListr(new CreateVolumeTask({ volumeName: `${stack.getName()}-vol`, dockerClient: docker }), 'volume'),
+	return new Listr<ListrCtx>(
+		[
+			wrapTaskForListr(new CreateNetworkTask({ name: `${stack.getName()}-net`, docker }), 'network'),
+			wrapTaskForListr(new CreateVolumeTask({ volumeName: `${stack.getName()}-vol`, dockerClient: docker }), 'volume'),
+			{
+				title: 'Running Functions',
+				task: createFunctionContainerRunTasks(functions, docker),
+			},
+			{
+				title: 'Starting API Gateways',
+				task: createGatewayContainerRunTasks(stack.getName(), apis, docker),
+			},
+			...entrypointsTask,
+		],
 		{
-			title: 'Running Functions',
-			task: createFunctionContainerRunTasks(functions, docker),
+			// Added to allow custom handling of SIGINT for run cmd cleanup.
+			registerSignalListeners: false,
 		},
-		{
-			title: 'Starting API Gateways',
-			task: createGatewayContainerRunTasks(stack.getName(), apis, docker),
-		},
-		...entrypointsTask,
-	]);
+	);
 }
 
 /**
@@ -293,9 +307,12 @@ export default class Run extends Command {
 		});
 
 		if (nitricStack.entrypoints) {
-			cli.url(`Your application entrypoint is available at http://localhost:${entrypointPort}`, `http://localhost:${entrypointPort}`);
+			cli.url(
+				`Your application entrypoint is available at http://localhost:${entrypointPort}`,
+				`http://localhost:${entrypointPort}`,
+			);
 		}
-		
+
 		cli.action.start('Functions Running press ctrl-C quit');
 	};
 
@@ -314,6 +331,8 @@ export default class Run extends Command {
 							try {
 								await container.stop();
 							} catch (error) {
+								// TODO: Improve error logging here (file based)
+								cli.error(error);
 								// console.log("there was an error stopping this container");
 							} finally {
 								await container.remove();

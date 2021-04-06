@@ -1,37 +1,45 @@
 import { Command, flags } from '@oclif/command';
 import { wrapTaskForListr, Stack, NitricImage, StageStackTask } from '@nitric/cli-common';
 import { BuildFunctionTask } from '../tasks/build';
-import Listr, { ListrTask } from 'listr';
+import { Listr, ListrTask } from 'listr2';
 import path from 'path';
 
 export function createBuildTasks(stack: Stack, directory: string, provider = 'local'): Listr {
 	const nitricStack = stack.asNitricStack();
 
-	return new Listr([
-		wrapTaskForListr(new StageStackTask({ stack })),
-		{
-			title: 'Building Functions',
-			task: (): Listr =>
-				new Listr(
-					nitricStack.functions!.map(
-						(func): ListrTask =>
-							wrapTaskForListr(
-								new BuildFunctionTask({
-									func,
-									baseDir: directory,
-									stackName: nitricStack.name,
-									provider,
-								}),
-							),
+	return new Listr(
+		[
+			wrapTaskForListr(new StageStackTask({ stack })),
+			{
+				title: 'Building Functions',
+				task: (ctx, task): Listr =>
+					task.newListr(
+						nitricStack.functions!.map(
+							(func): ListrTask =>
+								wrapTaskForListr(
+									new BuildFunctionTask({
+										func,
+										baseDir: directory,
+										stackName: nitricStack.name,
+										provider,
+									}),
+								),
+						),
+						{
+							concurrent: true,
+							// Don't fail all on a single function failure...
+							exitOnError: false,
+							// Added to allow custom handling of SIGINT for run cmd cleanup.
+							registerSignalListeners: false,
+						},
 					),
-					{
-						concurrent: true,
-						// Don't fail all on a single function failure...
-						exitOnError: false,
-					},
-				),
+			},
+		],
+		{
+			// Added to allow custom handling of SIGINT for run cmd cleanup.
+			registerSignalListeners: false,
 		},
-	]);
+	);
 }
 
 /**
