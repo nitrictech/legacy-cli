@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.23](https://github.com/nitrictech/cli/compare/v0.0.22...v0.0.23) (2021-04-06)
+
+
+### Bug Fixes
+
+* add default dir for deploy:aws cmd ([5e309f5](https://github.com/nitrictech/cli/commit/5e309f5714d6ae25d31ab6aed1e44144a945ad0b))
+* deployment failures due to pulumi version ([be5aa0a](https://github.com/nitrictech/cli/commit/be5aa0ae58a87eb9e2db55b9e89199f786df5b4c))
+* remove unused import ([152d586](https://github.com/nitrictech/cli/commit/152d5862572c34891646d26ada6fa6fc0bc7f5a3))
+* Update gcp and aws pulumi dependencies. ([c28e187](https://github.com/nitrictech/cli/commit/c28e187be447c2fad61550cbbd89a1ff2f34fa1c))
+* Update pulumi. ([2cbe552](https://github.com/nitrictech/cli/commit/2cbe552f604d7210b87dd0d5fdc34382e68700a6))
+
 ### [0.0.22](https://github.com/nitrictech/cli/compare/v0.0.21...v0.0.22) (2021-04-01)
 
 
