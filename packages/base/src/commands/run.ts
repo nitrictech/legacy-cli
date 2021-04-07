@@ -331,9 +331,11 @@ export default class Run extends Command {
 							try {
 								await container.stop();
 							} catch (error) {
-								// TODO: Improve error logging here (file based)
-								cli.error(error);
-								// console.log("there was an error stopping this container");
+								if (error.statusCode && error.statusCode === 304) {
+									cli.log(`container ${(await container.inspect()).Name} already stopped.`);
+								} else {
+									cli.log(error);
+								}
 							} finally {
 								await container.remove();
 							}
