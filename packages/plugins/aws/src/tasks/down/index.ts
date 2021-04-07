@@ -29,7 +29,13 @@ export class Down extends Task<void> {
 			});
 
 			const res = await pulumiStack.destroy({ onOutput: this.update.bind(this) });
-			console.log(res);
+
+			if (res.summary && res.summary.resourceChanges) {
+				const changes = Object.entries(res.summary.resourceChanges)
+					.map((entry) => entry.join(': '))
+					.join(', ');
+				this.update(changes);
+			}
 		} catch (e) {
 			console.log(e);
 			throw e;

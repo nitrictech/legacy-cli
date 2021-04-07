@@ -105,7 +105,12 @@ export class Deploy extends Task<void> {
 				},
 			});
 
-			console.log(upRes);
+			if (upRes.summary && upRes.summary.resourceChanges) {
+				const changes = Object.entries(upRes.summary.resourceChanges)
+					.map((entry) => entry.join(': '))
+					.join(', ');
+				this.update(changes);
+			}
 		} catch (e) {
 			console.log(e);
 		}
