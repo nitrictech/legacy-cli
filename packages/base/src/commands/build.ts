@@ -12,7 +12,7 @@ export function createBuildTasks(stack: Stack, directory: string, provider = 'lo
 			wrapTaskForListr(new StageStackTask({ stack })),
 			{
 				title: 'Building Functions',
-				task: (ctx, task): Listr =>
+				task: (_, task): Listr =>
 					task.newListr(
 						nitricStack.functions!.map(
 							(func): ListrTask => ({
