@@ -5,6 +5,14 @@ import fs from 'fs';
 import Docker from 'dockerode';
 import tar from 'tar-fs';
 import { Readable } from 'stream';
+import _ from 'stream-to-promise';
+
+jest.mock('stream-to-promise', () => ({
+	__esModule: true, // this property makes it work
+	default: async (): Promise<void> => {
+		/* NOOP */
+	},
+}));
 
 beforeAll(() => {
 	jest.mock('dockerode');
@@ -216,7 +224,11 @@ describe('RunEntrypointsTask', () => {
 
 		it('should tarball the nginx config', () => {
 			expect(tarPackMock).toBeCalled();
-			expect(tarPackMock).nthCalledWith(1, testStack.getStagingDirectory(), expect.objectContaining({entries: ['nginx.conf'] }));
+			expect(tarPackMock).nthCalledWith(
+				1,
+				testStack.getStagingDirectory(),
+				expect.objectContaining({ entries: ['nginx.conf'] }),
+			);
 		});
 
 		it('should push the nginx config to the new container', () => {
