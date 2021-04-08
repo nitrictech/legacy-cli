@@ -2,6 +2,7 @@ import { NitricAPI, Task, STAGING_API_DIR } from '@nitric/cli-common';
 import Docker, { Container, ContainerCreateOptions, Network, NetworkInspectInfo } from 'dockerode';
 import fs from 'fs';
 import getPort from 'get-port';
+import streamToPromise from 'stream-to-promise';
 import tar from 'tar-fs';
 
 export interface RunGatewayTaskOptions {
@@ -69,7 +70,7 @@ export class RunGatewayTask extends Task<Container> {
 			}
 		}
 
-		this.docker.pull('nitricimages/dev-api-gateway')
+		await streamToPromise(await this.docker.pull('nitricimages/dev-api-gateway'));
 
 		const dockerOptions = {
 			name: `${stackName}-${api.name}`,

@@ -4,6 +4,7 @@ import tar from 'tar-fs';
 import fs from 'fs';
 import path from 'path';
 import getPort from 'get-port';
+import streamToPromise from 'stream-to-promise';
 
 const HTTP_PORT = 80;
 const NGINX_CONFIG_FILE = 'nginx.conf';
@@ -108,7 +109,7 @@ export class RunEntrypointsTask extends Task<Container> {
 		}
 
 		// Pull nginx
-		await docker.pull('nginx');
+		await streamToPromise(await docker.pull('nginx'));
 
 		const dockerOptions = {
 			name: `${stack.getName()}-entrypoints`,
