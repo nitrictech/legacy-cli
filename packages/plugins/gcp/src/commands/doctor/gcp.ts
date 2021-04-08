@@ -1,7 +1,7 @@
 import { wrapTaskForListr } from '@nitric/cli-common';
 import { Command, flags } from '@oclif/command';
 import cli from 'cli-ux';
-import Listr from 'listr';
+import { Listr } from 'listr2';
 import { CheckPlugins, InstallGCPPulumiPlugin } from '../../tasks/doctor';
 
 /**
