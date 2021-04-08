@@ -15,8 +15,8 @@ export function createBuildTasks(stack: Stack, directory: string, provider = 'lo
 				task: (ctx, task): Listr =>
 					task.newListr(
 						nitricStack.functions!.map(
-							(func): ListrTask =>
-								wrapTaskForListr(
+							(func): ListrTask => ({
+								...wrapTaskForListr(
 									new BuildFunctionTask({
 										func,
 										baseDir: directory,
@@ -24,11 +24,15 @@ export function createBuildTasks(stack: Stack, directory: string, provider = 'lo
 										provider,
 									}),
 								),
+								options: {
+									persistentOutput: true,
+								},
+							}),
 						),
 						{
 							concurrent: true,
 							// Don't fail all on a single function failure...
-							exitOnError: false,
+							exitOnError: true,
 							// Added to allow custom handling of SIGINT for run cmd cleanup.
 							registerSignalListeners: false,
 						},
