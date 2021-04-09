@@ -3,11 +3,18 @@ import { RunGatewayTask } from '.';
 import Docker, { Container } from 'dockerode';
 import getPort from 'get-port';
 import { NitricAPI } from '@nitric/cli-common';
+import _ from 'stream-to-promise';
 
 jest.mock('get-port');
 jest.mock('fs');
 jest.mock('dockerode');
 jest.mock('../../utils');
+jest.mock('stream-to-promise', () => ({
+	__esModule: true, // this property makes it work
+	default: async (): Promise<void> => {
+		/* NOOP */
+	},
+}));
 
 afterAll(() => {
 	jest.restoreAllMocks();
@@ -28,9 +35,7 @@ describe('GatewayRunTask', () => {
 	let pullSpy: jest.SpyInstance;
 
 	beforeAll(() => {
-		pullSpy = jest.spyOn(Docker.prototype, 'pull').mockResolvedValue(
-			Promise.resolve()
-		);
+		pullSpy = jest.spyOn(Docker.prototype, 'pull').mockResolvedValue(Promise.resolve());
 
 		createContainerSpy = jest.spyOn(Docker.prototype, 'createContainer').mockResolvedValue(
 			Promise.resolve({
@@ -50,7 +55,7 @@ describe('GatewayRunTask', () => {
 		it('should pull the dev-api-gateway container', () => {
 			expect(pullSpy).toBeCalledTimes(1);
 			expect(pullSpy).toBeCalledWith('nitricimages/dev-api-gateway');
-		})
+		});
 
 		it('should generate a port', async () => {
 			expect(getPort).toHaveBeenCalled();
