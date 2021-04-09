@@ -7,7 +7,7 @@ import 'jest';
 
 jest.mock('@nitric/cli-common');
 jest.mock('../tasks/build');
-jest.mock('listr');
+jest.mock('listr2');
 
 describe('Given executing nitric build', () => {
 	let result;
