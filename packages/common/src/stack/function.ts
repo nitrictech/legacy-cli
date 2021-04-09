@@ -29,7 +29,13 @@ export class Function {
 	}
 
 	getDirectory(): string {
-		return path.join(this.stack.getDirectory(), this.descriptor.path);
+		const funcPath = path.join(this.stack.getDirectory(), this.descriptor.path);
+		if (!fs.existsSync(funcPath)) {
+			throw new Error(
+				`function directory '${this.descriptor.path}' for function '${this.descriptor.name}' not found. Directory may have been renamed or removed, check 'path' configuration for this function in the config file.`,
+			);
+		}
+		return funcPath;
 	}
 
 	getStagingDirectory(): string {
