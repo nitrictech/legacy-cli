@@ -16,7 +16,7 @@
     "dockerode": "^3.2.1",
     "execa": "^5.0.0",
     "inquirer": "^7.3.3",
-    "listr": "^0.14.3",
+    "listr2": "^3.6.2",
     "lodash": "^4.17.20",
     "mime": "^2.5.2",
     "openapi-types": "^7.2.3",

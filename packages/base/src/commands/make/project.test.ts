@@ -6,7 +6,7 @@ import 'jest';
 jest.mock('../../tasks/make');
 jest.mock('../../utils');
 jest.mock('inquirer');
-jest.mock('listr');
+jest.mock('listr2');
 
 it.skip('placeholder', () => {
 	return;

@@ -112,7 +112,7 @@ export class Stack {
 		const dir = path.join(this.getDirectory(), directory);
 
 		if (!fs.existsSync(dir)) {
-			await fs.promises.mkdir(dir, { recursive: true })
+			await fs.promises.mkdir(dir, { recursive: true });
 		}
 
 		return dir;
@@ -129,7 +129,7 @@ export class Stack {
 	 * Returns the nitric log directory and creates it if it doesn't exist
 	 */
 	async makeLoggingDirectory(): Promise<string> {
-		return await this.makeRelativeDirectory(`./${NITRIC_DIRECTORY}/logs/`)
+		return await this.makeRelativeDirectory(`./${NITRIC_DIRECTORY}/logs/`);
 	}
 
 	/**
@@ -137,7 +137,7 @@ export class Stack {
 	 * @param prefix used along with the current time to generate a unique log filename.
 	 */
 	async getLoggingFile(prefix: string): Promise<string> {
-		const currentTime = (new Date().getTime());
+		const currentTime = new Date().getTime();
 		const logFileName = `${prefix}-${currentTime}`;
 
 		const loggingDirectory = await this.makeLoggingDirectory();

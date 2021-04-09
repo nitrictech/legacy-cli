@@ -24,12 +24,7 @@ export abstract class Task<T> extends EventEmitter {
 	/**
 	 * Execute the task, typically following the setup of event listeners
 	 */
-	public async run(...args: any[]): Promise<void> {
-		try {
-			const result = await this.do(...args);
-			this.emit('done', result);
-		} catch (error) {
-			this.emit('error', error);
-		}
+	public async run(...args: any[]): Promise<T> {
+		return await this.do(...args);
 	}
 }

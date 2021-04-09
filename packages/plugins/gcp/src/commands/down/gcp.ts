@@ -1,6 +1,6 @@
 import { Command, flags } from '@oclif/command';
 import { wrapTaskForListr, Stack, NitricStack } from '@nitric/cli-common';
-import Listr from 'listr';
+import { Listr } from 'listr2';
 import path from 'path';
 import { Down } from '../../tasks/down';
 import inquirer from 'inquirer';

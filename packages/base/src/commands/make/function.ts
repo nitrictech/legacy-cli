@@ -1,7 +1,7 @@
 import { Command, flags } from '@oclif/command';
 import { wrapTaskForListr, Repository } from '@nitric/cli-common';
 import { MakeFunctionTask } from '../../tasks/make';
-import Listr from 'listr';
+import { Listr } from 'listr2';
 import inquirer from 'inquirer';
 
 interface MakeFunctionArgs {

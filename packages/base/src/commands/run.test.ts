@@ -5,7 +5,7 @@ import { MIN_PORT, MAX_PORT, getPortRange, getContainerSubscriptions, sortImages
 // import { RunFunctionTask } from '../tasks/run';
 import * as getPort from 'get-port';
 // import * as clicommon from '@nitric/cli-common';
-import Listr from 'listr';
+import { Listr } from 'listr2';
 import { NitricImage, NitricStack } from '@nitric/cli-common';
 
 jest.mock('dockerode');
@@ -23,7 +23,7 @@ jest.mock('cli-ux', () => ({
 		return;
 	},
 }));
-jest.mock('listr');
+jest.mock('listr2');
 jest.mock('../tasks/run');
 jest.mock('../tasks/build');
 
@@ -123,7 +123,7 @@ describe('Given executing nitric run', () => {
 		jest.spyOn(process.stdin, 'pause').mockImplementation(jest.fn());
 		jest.spyOn(process.stdout, 'write').mockImplementation((str) => !!results.push(str));
 
-		// Mock listr for the BuildFunctionTask
+		// Mock listr2 for the BuildFunctionTask
 		mocked(Listr, true).mockImplementationOnce(
 			(tasks): Listr<unknown> => {
 				(tasks! as Array<any>).forEach((element) => {

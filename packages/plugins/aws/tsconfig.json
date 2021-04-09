@@ -1,6 +1,8 @@
 {
   "extends": "../../../tsconfig.json",
   "compilerOptions": {
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
     "declaration": true,
     "importHelpers": true,
     "module": "commonjs",
