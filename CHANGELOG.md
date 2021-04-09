@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.25](https://github.com/nitrictech/cli/compare/v0.0.24...v0.0.25) (2021-04-09)
+
+
+### Features
+
+* move from listr to listr2 for cli UX ([26e965a](https://github.com/nitrictech/cli/commit/26e965a805bae83a1af1c43d97267102586563a3))
+* update gcp plugin commands to listr2 ([53e571f](https://github.com/nitrictech/cli/commit/53e571f5f46c014f3069575159b4c819e9b7f564))
+
+
+### Bug Fixes
+
+* Exit on build error and display more useful info. ([a197ef7](https://github.com/nitrictech/cli/commit/a197ef7fcde55fb312c9d3eb51c33afa9e89909c))
+* improve error logging when stopping already stopped containers ([a328fb3](https://github.com/nitrictech/cli/commit/a328fb36934801a42fe22c4ec06ac77478737d46))
+* reduce noise of aws:deploy and down ([9672873](https://github.com/nitrictech/cli/commit/96728730927ce6da787c0daf2079c1850c4e5fdf))
+* update listr import in remaining commands ([535b43b](https://github.com/nitrictech/cli/commit/535b43bc795d992c8825622f1481ec78228d6793))
+
 ### [0.0.24](https://github.com/nitrictech/cli/compare/v0.0.23...v0.0.24) (2021-04-09)
 
 
