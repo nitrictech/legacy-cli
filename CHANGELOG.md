@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.26](https://github.com/nitrictech/cli/compare/v0.0.25...v0.0.26) (2021-04-11)
+
+
+### Bug Fixes
+
+* improve error message when function path can't be found ([fb215fb](https://github.com/nitrictech/cli/commit/fb215fb7d1354481bf1d24c414207ccb75571e87))
+
 ### [0.0.25](https://github.com/nitrictech/cli/compare/v0.0.24...v0.0.25) (2021-04-09)
 
 
