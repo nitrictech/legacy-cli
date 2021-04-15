@@ -1,12 +1,60 @@
-import { cloudfront, types } from '@pulumi/aws';
+import { cloudfront, types, apigatewayv2, lambda } from '@pulumi/aws';
+import * as pulumi from '@pulumi/pulumi';
 import { NitricEntrypoints } from '@nitric/cli-common';
-import { DeployedAPI, DeployedSite } from '../types';
+import { DeployedAPI, DeployedFunction, DeployedSite } from '../types';
+import { Principals } from '@pulumi/aws/iam';
+
+function createApiGatewayForFunction(deployedFunction: DeployedFunction): apigatewayv2.Stage {
+	// Grant apigateway permission to execute the lambda
+	new lambda.Permission(`${deployedFunction.name}ProxyPermission`, {
+		action: 'lambda:InvokeFunction',
+		function: deployedFunction.awsLambda,
+		principal: Principals.ApiGatewayPrincipal.toString(),
+	});
+	// Create the lambda proxy API for invocation via cloudfront
+	const lambdaAPI = new apigatewayv2.Api(`${deployedFunction.name}ProxyApi`, {
+		body: pulumi.interpolate`
+			openapi: '3.0.1',
+			info: {
+				version: '1.0',
+				title: {
+					Ref: 'AWS::StackName',
+				},
+			},
+			paths: {
+				$default: {
+					'x-amazon-apigateway-any-method': {
+						'x-amazon-apigateway-integration': {
+							type: 'aws_proxy',
+							httpMethod: 'POST',
+							payloadFormatVersion: '2.0',
+							uri: ${deployedFunction.awsLambda.invokeArn},
+						},
+						isDefaultRoute: true,
+						responses: {},
+					},
+				},
+			},
+		`,
+		protocolType: 'HTTP',
+	});
+
+	// Create a deployment for this API
+	const deployment = new apigatewayv2.Stage(`${deployedFunction.name}ProxyDeployment`, {
+		apiId: lambdaAPI.id,
+		name: '$default',
+		autoDeploy: true,
+	});
+
+	return deployment;
+}
 
 function originsFromEntrypoints(
 	oai: cloudfront.OriginAccessIdentity,
 	entrypoints: NitricEntrypoints,
 	deployedSites: DeployedSite[],
 	deployedApis: DeployedAPI[],
+	deployedFunctions: DeployedFunction[],
 ): types.input.cloudfront.DistributionOrigin[] {
 	return Object.keys(entrypoints).map((key) => {
 		const { type, name } = entrypoints[key];
@@ -47,6 +95,30 @@ function originsFromEntrypoints(
 					originId: deployedSite.name,
 					s3OriginConfig: {
 						originAccessIdentity: oai.cloudfrontAccessIdentityPath,
+					},
+				};
+			}
+			case 'function': {
+				const deployedFunction = deployedFunctions.find((s) => s.name === name);
+
+				if (!deployedFunction) {
+					throw new Error(`Target Function ${name} configured in entrypoints but does not exist`);
+				}
+
+				const apiGateway = createApiGatewayForFunction(deployedFunction);
+
+				// Then we extract the domain name from the created api gateway...
+				const domainName = apiGateway.invokeUrl.apply((url) => new URL(url).host);
+
+				//// Craft and API origin here...
+				return {
+					domainName,
+					originId: deployedFunction.name,
+					customOriginConfig: {
+						httpPort: 80,
+						httpsPort: 443,
+						originProtocolPolicy: 'https-only',
+						originSslProtocols: ['TLSv1.2', 'SSLv3'],
 					},
 				};
 			}
@@ -110,6 +182,7 @@ export async function createEntrypoints(
 	entrypoints: NitricEntrypoints,
 	deployedSites: DeployedSite[],
 	deployedApis: DeployedAPI[],
+	deployedFunctions: DeployedFunction[],
 ): Promise<cloudfront.Distribution> {
 	const defaultEntrypoint = entrypoints['/'];
 
@@ -120,7 +193,7 @@ export async function createEntrypoints(
 	}
 
 	const oai = new cloudfront.OriginAccessIdentity(`${stackName}OAI`);
-	const origins = originsFromEntrypoints(oai, entrypoints, deployedSites, deployedApis);
+	const origins = originsFromEntrypoints(oai, entrypoints, deployedSites, deployedApis, deployedFunctions);
 	const { defaultCacheBehavior, orderedCacheBehaviors } = entrypointsToBehaviours(entrypoints);
 
 	// Create a new cloudfront distribution

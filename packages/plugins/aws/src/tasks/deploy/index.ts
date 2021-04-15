@@ -87,7 +87,7 @@ export class Deploy extends Task<void> {
 						const deployedApis = (apis || []).map((api) => createApi(api, deployedFunctions));
 
 						if (entrypoints) {
-							createEntrypoints(stack.getName(), entrypoints, deployedSites, deployedApis);
+							createEntrypoints(stack.getName(), entrypoints, deployedSites, deployedApis, deployedFunctions);
 						}
 					} catch (e) {
 						console.error(e);
