@@ -37,6 +37,7 @@ export function createNginxConfig(stack: Stack): string {
 
 	const sites = eps.filter((e) => e.type === 'site');
 	const apis = eps.filter((e) => e.type === 'api');
+	const functions = eps.filter((e) => e.type === 'function');
 
 	return `
 	events {}
@@ -58,6 +59,16 @@ export function createNginxConfig(stack: Stack): string {
 					(a) => `
 				location ${a.path} {
 					proxy_pass http://${stack.getName()}-${a.name}:8080;
+				}
+			`,
+				)
+				.join('\n')}
+
+			${functions
+				.map(
+					(a) => `
+				location ${a.path} {
+					proxy_pass http://${stack.getName()}-${a.name}:9001;
 				}
 			`,
 				)
