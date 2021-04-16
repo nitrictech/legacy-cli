@@ -1,25 +1,18 @@
 import { cloudfront, types, apigatewayv2, lambda } from '@pulumi/aws';
-import * as pulumi from '@pulumi/pulumi';
 import { NitricEntrypoints } from '@nitric/cli-common';
 import { DeployedAPI, DeployedFunction, DeployedSite } from '../types';
-import { Principals } from '@pulumi/aws/iam';
+import * as pulumi from '@pulumi/pulumi';
+import YAML from 'yaml';
 
 function createApiGatewayForFunction(deployedFunction: DeployedFunction): apigatewayv2.Stage {
 	// Grant apigateway permission to execute the lambda
-	new lambda.Permission(`${deployedFunction.name}ProxyPermission`, {
-		action: 'lambda:InvokeFunction',
-		function: deployedFunction.awsLambda,
-		principal: Principals.ApiGatewayPrincipal.toString(),
-	});
-	// Create the lambda proxy API for invocation via cloudfront
-	const lambdaAPI = new apigatewayv2.Api(`${deployedFunction.name}ProxyApi`, {
-		body: pulumi.interpolate`
+
+	const body = deployedFunction.awsLambda.invokeArn.apply((invokeArn) =>
+		YAML.stringify({
 			openapi: '3.0.1',
 			info: {
 				version: '1.0',
-				title: {
-					Ref: 'AWS::StackName',
-				},
+				title: `${deployedFunction.name}Proxy`,
 			},
 			paths: {
 				$default: {
@@ -28,14 +21,19 @@ function createApiGatewayForFunction(deployedFunction: DeployedFunction): apigat
 							type: 'aws_proxy',
 							httpMethod: 'POST',
 							payloadFormatVersion: '2.0',
-							uri: ${deployedFunction.awsLambda.invokeArn},
+							uri: invokeArn,
 						},
 						isDefaultRoute: true,
 						responses: {},
 					},
 				},
 			},
-		`,
+		}),
+	);
+
+	// Create the lambda proxy API for invocation via cloudfront
+	const lambdaAPI = new apigatewayv2.Api(`${deployedFunction.name}ProxyApi`, {
+		body,
 		protocolType: 'HTTP',
 	});
 
@@ -44,6 +42,13 @@ function createApiGatewayForFunction(deployedFunction: DeployedFunction): apigat
 		apiId: lambdaAPI.id,
 		name: '$default',
 		autoDeploy: true,
+	});
+
+	new lambda.Permission(`${deployedFunction.name}ProxyPermission`, {
+		action: 'lambda:InvokeFunction',
+		function: deployedFunction.awsLambda,
+		principal: 'apigateway.amazonaws.com',
+		sourceArn: pulumi.interpolate`${deployment.executionArn}/*/*/*`,
 	});
 
 	return deployment;
