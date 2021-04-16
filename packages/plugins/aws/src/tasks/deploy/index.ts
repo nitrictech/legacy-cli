@@ -6,6 +6,7 @@ import { createSchedule } from './eb-rule';
 import { createApi } from './api';
 // import createLoadBalancer from './load-balancer';
 import { createTopic } from './topic';
+import * as pulumi from '@pulumi/pulumi';
 
 import { LocalWorkspace } from '@pulumi/pulumi/x/automation';
 import { ecr } from '@pulumi/aws';
@@ -60,6 +61,7 @@ export class Deploy extends Task<void> {
 		try {
 			// Upload the stack
 			const logFile = await stack.getLoggingFile('deploy:aws');
+			const errorFile = await stack.getLoggingFile('error:aws');
 
 			const pulumiStack = await LocalWorkspace.createOrSelectStack({
 				// TODO: Incorporate additional stack detail. E.g. dev/test/prod
@@ -90,8 +92,8 @@ export class Deploy extends Task<void> {
 							createEntrypoints(stack.getName(), entrypoints, deployedSites, deployedApis, deployedFunctions);
 						}
 					} catch (e) {
-						console.error(e);
-						throw e;
+						pulumi.log.error(e);
+						fs.appendFileSync(errorFile, e);
 					}
 				},
 			});
