@@ -72,7 +72,7 @@ export class Deploy extends Task<void> {
 
 						if (entrypoints) {
 							// Deployed Entrypoints
-							createEntrypoints(stack.getName(), entrypoints, deployedSites, deployedApis);
+							createEntrypoints(stack.getName(), entrypoints, deployedSites, deployedApis, deployedFunctions);
 						}
 					} catch (e) {
 						pulumi.log.error(e);

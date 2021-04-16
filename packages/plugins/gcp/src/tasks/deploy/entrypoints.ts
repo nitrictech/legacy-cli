@@ -1,6 +1,6 @@
 import { NitricEntrypoints } from '@nitric/cli-common';
 import { compute } from '@pulumi/gcp';
-import { DeployedApi, DeployedSite } from '../types';
+import { DeployedApi, DeployedFunction, DeployedSite } from '../types';
 import * as pulumi from '@pulumi/pulumi';
 import * as tls from '@pulumi/tls';
 
@@ -23,6 +23,7 @@ function createBackendServices(
 	entrypoints: NitricEntrypoints,
 	deployedApis: DeployedApi[],
 	deployedSites: DeployedSite[],
+	deployedFunctions: DeployedFunction[],
 ): BackendItem[] {
 	const normalizedEntrypoints = Object.keys(entrypoints).map((epPath) => ({
 		path: epPath,
@@ -43,6 +44,7 @@ function createBackendServices(
 					//defaultPort: 443,
 				});
 
+				// Add the apigateways endpoint to the above group
 				new compute.GlobalNetworkEndpoint(`${ep.name}-ne`, {
 					globalNetworkEndpointGroup: apiGatewayNEG.name,
 					fqdn: deployedApi.gateway.defaultHostname,
@@ -50,6 +52,7 @@ function createBackendServices(
 				});
 
 				const backend = new compute.BackendService(`${ep.name}`, {
+					// Link the NEG to the backend
 					backends: [{ group: apiGatewayNEG.id }],
 					customRequestHeaders: [pulumi.interpolate`Host: ${deployedApi.gateway.defaultHostname}`],
 					// TODO: Determine CDN requirements for API gateways
@@ -73,6 +76,34 @@ function createBackendServices(
 					bucketName: deployedSite.bucket.name,
 					// Enable CDN for sites
 					enableCdn: true,
+				});
+
+				return {
+					name: ep.name,
+					backend,
+				};
+			}
+			case 'function': {
+				const deployedFunction = deployedFunctions.find((s) => s.name === ep.name);
+
+				if (!deployedFunction) {
+					throw new Error(`Entrypoint: ${ep.path} contained target that does not exist!`);
+				}
+
+				const serverlessNEG = new compute.RegionNetworkEndpointGroup('', {
+					networkEndpointType: 'SERVERLESS',
+					region: deployedFunction.cloudRun.location,
+					cloudRun: {
+						service: deployedFunction.cloudRun.name,
+					},
+				});
+
+				const backend = new compute.BackendService(`${ep.name}`, {
+					// Link the NEG to the backend
+					backends: [{ group: serverlessNEG.id }],
+					// TODO: Determine CDN requirements for API gateways
+					enableCdn: true,
+					protocol: 'HTTPS',
 				});
 
 				return {
@@ -136,9 +167,10 @@ export function createEntrypoints(
 	entrypoints: NitricEntrypoints,
 	deployedSites: DeployedSite[],
 	deployedApis: DeployedApi[],
+	deployedFunctions: DeployedFunction[],
 ): void {
 	// Created backend services
-	const backends = createBackendServices(entrypoints, deployedApis, deployedSites);
+	const backends = createBackendServices(entrypoints, deployedApis, deployedSites, deployedFunctions);
 	// Create URLMap
 	const urlMap = createURLMap(stackName, entrypoints, backends);
 	// Create FE HTTPS Proxy
@@ -147,7 +179,7 @@ export function createEntrypoints(
 	const ipAddress = new compute.GlobalAddress(`${stackName}address`, {});
 	// Create SSL Certificate
 	// FIXME: This will be for development deployments ONLY
-	// a proper certificate will need ot be configured for production deployments
+	// a proper certificate will need to be configured for production deployments
 	const privateKey = new tls.PrivateKey(`${stackName}pk`, {
 		algorithm: 'RSA',
 		rsaBits: 2048,
