@@ -68,7 +68,7 @@ export function createNginxConfig(stack: Stack): string {
 				.map(
 					(a) => `
 				location ${a.path} {
-					proxy_pass http://${stack.getName()}-${a.name}:9001;
+					proxy_pass http://${a.name}:9001;
 				}
 			`,
 				)
