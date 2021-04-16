@@ -90,7 +90,7 @@ function createBackendServices(
 					throw new Error(`Entrypoint: ${ep.path} contained target that does not exist!`);
 				}
 
-				const serverlessNEG = new compute.RegionNetworkEndpointGroup('', {
+				const serverlessNEG = new compute.RegionNetworkEndpointGroup(`${ep.name}neg`, {
 					networkEndpointType: 'SERVERLESS',
 					region: deployedFunction.cloudRun.location,
 					cloudRun: {
