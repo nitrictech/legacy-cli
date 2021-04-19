@@ -92,8 +92,8 @@ export class Deploy extends Task<void> {
 							createEntrypoints(stack.getName(), entrypoints, deployedSites, deployedApis, deployedFunctions);
 						}
 					} catch (e) {
-						pulumi.log.error(e);
 						fs.appendFileSync(errorFile, e);
+						pulumi.log.error(e);
 					}
 				},
 			});

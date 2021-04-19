@@ -6,7 +6,6 @@ import YAML from 'yaml';
 
 function createApiGatewayForFunction(deployedFunction: DeployedFunction): apigatewayv2.Stage {
 	// Grant apigateway permission to execute the lambda
-
 	const body = deployedFunction.awsLambda.invokeArn.apply((invokeArn) =>
 		YAML.stringify({
 			openapi: '3.0.1',
@@ -48,7 +47,7 @@ function createApiGatewayForFunction(deployedFunction: DeployedFunction): apigat
 		action: 'lambda:InvokeFunction',
 		function: deployedFunction.awsLambda,
 		principal: 'apigateway.amazonaws.com',
-		sourceArn: pulumi.interpolate`${deployment.executionArn}/*/*/*`,
+		sourceArn: pulumi.interpolate`${lambdaAPI.executionArn}/*/*`,
 	});
 
 	return deployment;
