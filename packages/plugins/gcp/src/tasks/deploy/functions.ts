@@ -66,14 +66,15 @@ export function createFunction(
 		// Create an account for invoking this function via subscriptions
 		// TODO: Do we want to make this one account for subscription in future
 		// TODO: We will likely configure this via eventarc in the future
-		const invokerAccount = new serviceaccount.Account(`${name}-subscription-invoker`, {
-			accountId: `${name}-subscription-invoker`,
+		const invokerAccount = new serviceaccount.Account(`${name}-subacct`, {
+			// Limit it to 30 characters
+			accountId: `${name}-subacct`.substring(0, 30),
 		});
 
 		subs.forEach((sub) => {
 			const topic = topics.find((t) => t.name === sub.topic);
 			if (topic) {
-				new pubsub.Subscription(`${name}-${sub.topic}-subscription`, {
+				new pubsub.Subscription(`${name}-${sub.topic}-sub`, {
 					topic: topic.pubsub.name,
 					// This is a measure of how much processing time the task really gets for subscriptions
 					// at the moment we rely on them returning to the membrane so it can return the status of the task processing
