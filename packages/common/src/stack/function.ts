@@ -5,6 +5,7 @@ import { Repository, Template } from '../templates';
 import fs from 'fs';
 import tar from 'tar-fs';
 import streamToPromise from 'stream-to-promise';
+import match from 'multimatch';
 
 type omitMethods = 'getFunction' | 'getFunctions';
 
@@ -67,6 +68,8 @@ export class Function {
 		const functionStagingDir = f.getStagingDirectory();
 		const template = await Function.findTemplateForFunction(f, repos);
 
+		const dockerIgnoreFiles = await Template.getDockerIgnoreFiles(template);
+
 		// TODO: Do we need to do this?
 		await fs.promises.mkdir(functionStagingDir, { recursive: true });
 
@@ -78,8 +81,14 @@ export class Function {
 		// Now we need to copy the actual function code, the the above directory/function directory
 		const functionDirectory = f.getDirectory();
 
-		// tar.pack(functionDirectory, packOptions).pipe(functionPipe);
-		tar.pack(functionDirectory).pipe(functionPipe);
+		tar
+			.pack(functionDirectory, {
+				ignore: (name) =>
+					// Simple filter before more complex multimatch
+					// dockerIgnoreFiles.filter(f => name.includes(f)).length > 0 ||
+					match(name, dockerIgnoreFiles).length > 0,
+			})
+			.pipe(functionPipe);
 
 		await streamToPromise(functionPipe);
 	}

@@ -43,6 +43,7 @@ export class Deploy extends Task<void> {
 		try {
 			// Upload the stack
 			const logFile = await stack.getLoggingFile('deploy:gcp');
+			const errorFile = await stack.getLoggingFile('error:gcp');
 			const pulumiStack = await LocalWorkspace.createOrSelectStack({
 				// TODO: Incorporate additional stack detail. E.g. dev/test/prod
 				stackName: 'gcp',
@@ -72,10 +73,11 @@ export class Deploy extends Task<void> {
 
 						if (entrypoints) {
 							// Deployed Entrypoints
-							createEntrypoints(stack.getName(), entrypoints, deployedSites, deployedApis);
+							createEntrypoints(stack.getName(), entrypoints, deployedSites, deployedApis, deployedFunctions);
 						}
 					} catch (e) {
 						pulumi.log.error(e);
+						fs.appendFileSync(errorFile, e);
 					}
 				},
 			});

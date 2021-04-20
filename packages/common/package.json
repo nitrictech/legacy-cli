@@ -16,6 +16,7 @@
   ],
   "license": "UNLICENSED",
   "dependencies": {
+    "enquirer": "^2.3.0",
     "eventemitter3": "^4.0.7",
     "execa": "^5.0.0",
     "listr2": "^3.6.2",
