@@ -1,6 +1,6 @@
 {
   "name": "@nitric/cli-common",
-  "version": "0.0.29",
+  "version": "0.0.30",
   "description": "Common Nitric typings and utility functions",
   "author": "Nitric <https://github.com/nitric-dev>",
   "main": "lib/index.js",
