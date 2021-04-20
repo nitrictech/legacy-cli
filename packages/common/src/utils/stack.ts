@@ -16,9 +16,13 @@ export async function findFileRead(file: string, options = { encoding: 'utf-8', 
 
 	while (i--) {
 		filePath = path.join(dirArr.join(path.sep), file);
+
 		if (fs.existsSync(filePath)) {
 			const content = await fs.promises.readFile(filePath, { encoding });
-			return content.toString();
+			return {
+				content: content.toString(),
+				filePath,
+			};
 		}
 
 		dirArr.pop();
@@ -27,7 +31,10 @@ export async function findFileRead(file: string, options = { encoding: 'utf-8', 
 	// Check home directory if home option is true
 	if (home && fs.existsSync(homeFilePath)) {
 		const content = await fs.promises.readFile(homeFilePath, { encoding });
-		return content.toString();
+		return {
+			content: content.toString(),
+			filePath: homeFilePath,
+		};
 	}
 
 	return null;

@@ -152,14 +152,14 @@ export class Stack {
 	 * @param parser to parse the serialized file type, defaults to YAML parser.
 	 */
 	static async fromFile(file: string, parser: (content: string) => NitricStack = YAML.parse): Promise<Stack> {
-		const content = await findFileRead(file);
+		const { content, filePath } = (await findFileRead(file)) || {};
 
 		if (!content) {
 			throw new Error(`Nitric Stack file not found. Add ${file} to your project or home directory.`);
 		}
 
 		const stack = parser(content);
-		return new Stack(file, stack);
+		return new Stack(filePath || file, stack);
 	}
 
 	/**
