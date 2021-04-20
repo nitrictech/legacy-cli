@@ -2,6 +2,25 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.27](https://github.com/nitrictech/cli/compare/v0.0.26...v0.0.27) (2021-04-20)
+
+
+### Features
+
+* Add function as an entrypoint type. ([e22a1be](https://github.com/nitrictech/cli/commit/e22a1bed11e2b1857456e14071716d6738871bd8))
+* Connect functions to entrypoint proxy for nitric run. ([536e7a6](https://github.com/nitrictech/cli/commit/536e7a635fa07a78c77c6be5248ea01be246cb47))
+* Connect gcp deployed functions to entrypoints. ([f9b215a](https://github.com/nitrictech/cli/commit/f9b215ad7e5c637ac7aa2768364127b23d691f1f))
+* Map AWS deployed functions to entrypoints. ([b84fa38](https://github.com/nitrictech/cli/commit/b84fa38e128366ba029da7df80288b0c2de53663))
+
+
+### Bug Fixes
+
+* Fix AWS lambda gateway deployment. ([5052004](https://github.com/nitrictech/cli/commit/5052004666bb63eab1611c65fe8dd3a523e9c45f))
+* Fix GCP subscription account name length. ([127eb94](https://github.com/nitrictech/cli/commit/127eb94da65d2025870c3cf28ee7fe41a582dee2))
+* Have deployment output more useful errors. ([0f2b6a5](https://github.com/nitrictech/cli/commit/0f2b6a5b009a04147088d215c691542db6b192de))
+* Incorrect hostname for local function entrypoint mapping. ([fb6217e](https://github.com/nitrictech/cli/commit/fb6217e990fa5a7c5f4a0bd41f17fb3491d15e72))
+* Respect .dockerignore files specified in function templates. ([f78cdf0](https://github.com/nitrictech/cli/commit/f78cdf03ab8e1ca1f813c789e314036cc4195494))
+
 ### [0.0.26](https://github.com/nitrictech/cli/compare/v0.0.25...v0.0.26) (2021-04-11)
 
 
