@@ -15,6 +15,7 @@
     "api-spec-converter": "^2.11.4",
     "cli-ux": "^5.5.1",
     "dockerode": "^3.2.1",
+    "enquirer": "^2.3.0",
     "execa": "^5.0.0",
     "googleapis": "^61.0.0",
     "inquirer": "^8.0.0",
