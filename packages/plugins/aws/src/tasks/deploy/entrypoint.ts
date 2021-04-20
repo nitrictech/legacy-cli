@@ -74,7 +74,6 @@ function originsFromEntrypoints(
 
 				const domainName = deployedApi.apiGateway.invokeUrl.apply((url) => new URL(url).host);
 
-				// Craft and API origin here...
 				return {
 					domainName,
 					originId: deployedApi.name,

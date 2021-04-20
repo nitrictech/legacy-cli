@@ -67,7 +67,7 @@ export function createFunction(
 		// TODO: Do we want to make this one account for subscription in future
 		// TODO: We will likely configure this via eventarc in the future
 		const invokerAccount = new serviceaccount.Account(`${name}-subacct`, {
-			// Limit it to 30 characters
+			// accountId accepts a max of 30 chars, limit our generated name to this length
 			accountId: `${name}-subacct`.substring(0, 30),
 		});
 
