@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.28](https://github.com/nitrictech/cli/compare/v0.0.27...v0.0.28) (2021-04-20)
+
+
+### Bug Fixes
+
+* use file path from stack file found for working directory ([1c123eb](https://github.com/nitrictech/cli/commit/1c123eb8d2ab4beb7574dbc17163e8d6c254d769))
+
 ### [0.0.27](https://github.com/nitrictech/cli/compare/v0.0.26...v0.0.27) (2021-04-20)
 
 
