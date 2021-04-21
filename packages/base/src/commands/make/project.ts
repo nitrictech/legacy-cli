@@ -41,7 +41,7 @@ export default class Project extends Command {
 
 		if (repos.length == 0) {
 			// XXX: Should we offer to fetch the official repository
-			const fetchOfficial = await cli.confirm('No repositories found, install the the official repository? [y/n]');
+			const fetchOfficial = await cli.confirm('No repositories found, install the official repository? [y/n]');
 			if (!fetchOfficial) {
 				// XXX: Is this true or should we default to none as the template?
 				throw new Error(
