@@ -5,7 +5,7 @@ import { createTopic } from './topics';
 import { createBucket } from './buckets';
 import { createSchedule } from './schedule';
 import { createApi } from './apis';
-import { LocalWorkspace } from '@pulumi/pulumi/x/automation';
+import { LocalWorkspace } from '@pulumi/pulumi/automation';
 import { createSite } from './site';
 import { createEntrypoints } from './entrypoints';
 import * as pulumi from '@pulumi/pulumi';

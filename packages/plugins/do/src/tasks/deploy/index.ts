@@ -1,6 +1,6 @@
 import { Task, Stack } from '@nitric/cli-common';
 import * as pulumi from '@pulumi/pulumi';
-import { LocalWorkspace } from '@pulumi/pulumi/x/automation';
+import { LocalWorkspace } from '@pulumi/pulumi/automation';
 import * as digitalocean from '@pulumi/digitalocean';
 import { createFunction } from './function';
 import fs from 'fs';

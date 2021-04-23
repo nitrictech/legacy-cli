@@ -759,7 +759,7 @@ __metadata:
     "@oclif/plugin-help": ^3.2.2
     "@pulumi/aws": ^3.36.0
     "@pulumi/docker": ^2.8.1
-    "@pulumi/pulumi": ^2.20.0
+    "@pulumi/pulumi": ^3.1.0
     "@types/lodash": ^4.14.168
     "@types/mime": ^2.0.3
     "@types/node": ^10
@@ -797,7 +797,7 @@ __metadata:
     "@oclif/plugin-help": ^3
     "@pulumi/azure-nextgen": ^0.6.1
     "@pulumi/docker": ^2.8.1
-    "@pulumi/pulumi": ^2.20.0
+    "@pulumi/pulumi": ^3.1.0
     "@types/jest": ^26.0.15
     "@types/node": ^10
     api-spec-converter: ^2.11.4
@@ -832,7 +832,7 @@ __metadata:
     "@oclif/plugin-help": ^3.2.2
     "@pulumi/digitalocean": ^4.0.0
     "@pulumi/docker": ^2.8.1
-    "@pulumi/pulumi": ^2.20.0
+    "@pulumi/pulumi": ^3.1.0
     "@types/jest": ^26.0.15
     "@types/mime": ^2.0.3
     "@types/node": ^10
@@ -867,7 +867,7 @@ __metadata:
     "@oclif/plugin-help": ^3.2.2
     "@pulumi/docker": ^2.8.1
     "@pulumi/gcp": ^4.18.0
-    "@pulumi/pulumi": ^2.20.0
+    "@pulumi/pulumi": ^3.1.0
     "@pulumi/tls": ^3.2.0
     "@types/jest": ^26.0.15
     "@types/mime": ^2.0.3
@@ -1292,6 +1292,30 @@ __metadata:
     typescript: ~3.7.3
     upath: ^1.1.0
   checksum: 6bbdad4c730b5ac6e00dca99d1d0134adab0367c51fcc67c011bd080ae6dabc1d666262652a22b2bb762e8347e84ed102d227aabac03888deed0ea8516322087
+  languageName: node
+  linkType: hard
+
+"@pulumi/pulumi@npm:^3.1.0":
+  version: 3.1.0
+  resolution: "@pulumi/pulumi@npm:3.1.0"
+  dependencies:
+    "@grpc/grpc-js": ^1.2.7
+    "@logdna/tail-file": ^2.0.6
+    "@pulumi/query": ^0.3.0
+    google-protobuf: ^3.5.0
+    js-yaml: ^3.14.0
+    minimist: ^1.2.0
+    normalize-package-data: ^2.4.0
+    protobufjs: ^6.8.6
+    read-package-tree: ^5.3.1
+    require-from-string: ^2.0.1
+    semver: ^6.1.0
+    source-map-support: ^0.4.16
+    split2: ^3.2.2
+    ts-node: ^7.0.1
+    typescript: ~3.7.3
+    upath: ^1.1.0
+  checksum: 39cc89625f99b533f68b2d7e8fb57ed914de47d59d5ddb4a38b5478f753468d82f6dd0cbee4cc7ba94e234fcbe4a360eb7a640ba19b99a1bf0804a7627a4e1e1
   languageName: node
   linkType: hard
 

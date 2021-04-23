@@ -1,5 +1,5 @@
 import { Stack, Task } from '@nitric/cli-common';
-import { LocalWorkspace } from '@pulumi/pulumi/x/automation';
+import { LocalWorkspace } from '@pulumi/pulumi/automation';
 import { resources, storage, web, containerregistry } from '@pulumi/azure-nextgen';
 import { createBucket } from './bucket';
 import { createTopic } from './topic';

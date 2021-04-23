@@ -1,5 +1,5 @@
 import { Task } from '@nitric/cli-common';
-import { LocalWorkspace } from '@pulumi/pulumi/x/automation';
+import { LocalWorkspace } from '@pulumi/pulumi/automation';
 
 interface DownOptions {
 	stackName: string;

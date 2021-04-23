@@ -8,7 +8,7 @@ import { createApi } from './api';
 import { createTopic } from './topic';
 import * as pulumi from '@pulumi/pulumi';
 
-import { LocalWorkspace } from '@pulumi/pulumi/x/automation';
+import { LocalWorkspace } from '@pulumi/pulumi/automation';
 import { ecr } from '@pulumi/aws';
 import { createSite } from './site';
 import { createEntrypoints } from './entrypoint';
