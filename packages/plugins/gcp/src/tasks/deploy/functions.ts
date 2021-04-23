@@ -25,6 +25,8 @@ export function createFunction(
 			args: {
 				PROVIDER: 'gcp',
 			},
+			// Create a reasonable shared memory space for image builds
+			extraOptions: ['--shm-size', '1G'],
 		},
 		registry: {
 			server: `https://gcr.io`,

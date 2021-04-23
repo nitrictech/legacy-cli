@@ -25,6 +25,8 @@ export function createFunction(
 			args: {
 				PROVIDER: 'do',
 			},
+			// Create a reasonable shared memory space for image builds
+			extraOptions: ['--shm-size', '1G'],
 		},
 		registry: {
 			server: 'registry.digitalocean.com',
