@@ -6,9 +6,9 @@ import path from 'path';
 import inquirer from 'inquirer';
 
 export default class DeployCmd extends Command {
-	static description = 'Deploy a Nitric application to Amazon Web Services (AWS)';
+	static description = 'Deploy a Nitric application to Digital Ocean';
 
-	static examples = [`$ nitric deploy:aws . -a 123123123123 -r us-east-1`];
+	static examples = [`$ nitric deploy:do . -r nyc1`];
 
 	static flags = {
 		containerRegistry: flags.string({

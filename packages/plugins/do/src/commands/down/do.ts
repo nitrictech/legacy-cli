@@ -5,9 +5,9 @@ import path from 'path';
 import { Down } from '../../tasks/down';
 
 export default class DownCmd extends Command {
-	static description = 'Delete a CloudFormation Stack on AWS that was deployed by $ nitric deploy:aws';
+	static description = 'Delete a Stack on Digital Ocean deployed by $ nitric deploy:do';
 
-	static examples = [`$ nitric down:aws`];
+	static examples = [`$ nitric down:do`];
 
 	static flags = {
 		file: flags.string({ char: 'f' }),

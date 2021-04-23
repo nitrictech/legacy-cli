@@ -3,7 +3,7 @@ import * as digitalocean from '@pulumi/digitalocean';
 import * as pulumi from '@pulumi/pulumi';
 import * as docker from '@pulumi/docker';
 
-interface NormlizedFunctionEntrypoint {
+interface NormalizedFunctionEntrypoint {
 	path: string;
 	name: string;
 	type: 'function' | 'site' | 'api';
@@ -13,7 +13,7 @@ export function createFunction(
 	func: Function,
 	registryName: string,
 	token: string,
-	entrypoints: NormlizedFunctionEntrypoint[],
+	entrypoints: NormalizedFunctionEntrypoint[],
 ): digitalocean.types.input.AppSpecService {
 	const nitricFunction = func.asNitricFunction();
 	// Push the image
@@ -44,7 +44,6 @@ export function createFunction(
 		image: {
 			registryType: 'DOCR',
 			// TODO: Apply docker deployed repository here...
-			// Do we provide the full repository id here???
 			repository: imageName,
 		},
 		routes: entrypoints.filter(({ name }) => name === nitricFunction.name).map(({ path }) => ({ path })),

@@ -139,7 +139,6 @@ export class Deploy extends Task<void> {
 					return {};
 				},
 			});
-			//await pulumiStack.setConfig('digitalocean:region', { value: region });
 
 			// deploy the stack, log to console
 			const update = this.update.bind(this);
