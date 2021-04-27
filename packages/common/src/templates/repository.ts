@@ -131,7 +131,6 @@ export class Repository {
 	 */
 	static async checkout(name: string, url: string): Promise<Repository> {
 		const repositoryPath = path.join(TEMPLATE_DIR, `./${name}`);
-		const git = gitP(repositoryPath);
 
 		// Do a fresh checkout every time
 		if (fs.existsSync(repositoryPath)) {
@@ -139,6 +138,8 @@ export class Repository {
 		}
 
 		await fs.promises.mkdir(repositoryPath, { recursive: true });
+
+		const git = gitP(repositoryPath);
 
 		await git.clone(url, '.', {
 			'--depth': 1,
