@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.32](https://github.com/nitrictech/cli/compare/v0.0.31...v0.0.32) (2021-04-27)
+
+
+### Features
+
+* Increase docker build shm sizes. ([11b65b5](https://github.com/nitrictech/cli/commit/11b65b5e3c5b959dcb6c426f804465486f325128))
+* Initial Digital Ocean plugin. ([78cc98d](https://github.com/nitrictech/cli/commit/78cc98d3815a8bf9c64a0403408ea3e592ea32bf))
+
 ### [0.0.31](https://github.com/nitrictech/cli/compare/v0.0.30...v0.0.31) (2021-04-27)
 
 

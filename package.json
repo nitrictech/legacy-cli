@@ -1,6 +1,6 @@
 {
   "name": "nitric-cli",
-  "version": "0.0.31",
+  "version": "0.0.32",
   "description": "CLI monorepo for the Nitric framework",
   "author": "Nitric <https://github.com/nitric-dev>",
   "scripts": {
