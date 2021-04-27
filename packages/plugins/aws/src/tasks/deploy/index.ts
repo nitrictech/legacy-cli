@@ -55,14 +55,13 @@ export class Deploy extends Task<void> {
 	async do(): Promise<void> {
 		const { stack, region } = this;
 		const { topics = [], schedules = [], apis = [], entrypoints } = stack.asNitricStack();
+		const logFile = await stack.getLoggingFile('deploy:aws');
+		const errorFile = await stack.getLoggingFile('error:aws');
 
 		this.update('Defining functions');
 
 		try {
 			// Upload the stack
-			const logFile = await stack.getLoggingFile('deploy:aws');
-			const errorFile = await stack.getLoggingFile('error:aws');
-
 			const pulumiStack = await LocalWorkspace.createOrSelectStack({
 				// TODO: Incorporate additional stack detail. E.g. dev/test/prod
 				stackName: 'aws',
@@ -93,7 +92,7 @@ export class Deploy extends Task<void> {
 						}
 					} catch (e) {
 						fs.appendFileSync(errorFile, e);
-						pulumi.log.error(e);
+						pulumi.log.error('There we an error deploying the stack please check error logs for more detail');
 					}
 				},
 			});
@@ -114,7 +113,9 @@ export class Deploy extends Task<void> {
 				this.update(changes);
 			}
 		} catch (e) {
-			console.log(e);
+			fs.appendFileSync(errorFile, e);
+			throw new Error('An error occurred during deployment, please see latest aws:error log for more details');
+			// console.log(e);
 		}
 	}
 }
