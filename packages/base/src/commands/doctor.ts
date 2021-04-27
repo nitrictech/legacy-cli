@@ -1,5 +1,5 @@
 import { Command, flags } from '@oclif/command';
-import { Task, Repository, NITRIC_REPOSITORIES_FILE } from '@nitric/cli-common';
+import { Task, Repository, NITRIC_REPOSITORIES_FILE, block } from '@nitric/cli-common';
 import which from 'which';
 import cli from 'cli-ux';
 import emoji from 'node-emoji';
@@ -90,8 +90,7 @@ export default class Doctor extends Command {
 		const uninstalledSoftware = statuses.filter(({ installed }) => !installed);
 
 		if (uninstalledSoftware.length > 0) {
-			cli.log();
-			const autoFix = await cli.confirm('Would you like nitric to try installing missing software? [y/n]');
+			const autoFix = await cli.confirm('\nWould you like nitric to try installing missing software? [y/n]');
 
 			if (autoFix) {
 				// Get install tasks...
@@ -101,9 +100,7 @@ export default class Doctor extends Command {
 					await new tasks[i]({ stdin: process.stdin, stdout: process.stdout }).run();
 				}
 			} else {
-				cli.log();
-
-				cli.info('No worries, installation instructions for missing pre-requisites can be found below:');
+				cli.info('\nNo worries, installation instructions for missing pre-requisites can be found below:');
 
 				uninstalledSoftware.forEach(({ name, icon, installDocs }) => {
 					const string = emoji.emojify(`${icon} ${name}`);
@@ -117,25 +114,19 @@ export default class Doctor extends Command {
 		}
 
 		if (missingTemplates) {
-			cli.log();
-
 			const autoFixRepos = await cli.confirm('Would you like nitric to install the official repository? [y/n]');
 
 			if (autoFixRepos) {
 				await new UpdateStoreTask().run();
 				await new AddRepositoryTask({ alias: 'official' }).run();
 			} else {
-				cli.log();
-
 				cli.info(
-					`At least one template repository is required, make a new project or run ${chalk.cyan(
+					block`At least one template repository is required, make a new project or run ${chalk.cyan(
 						'nitric templates:repos:add',
 					)} to install.`,
 				);
 
 				exit = true;
-
-				cli.log();
 			}
 		}
 
@@ -143,8 +134,6 @@ export default class Doctor extends Command {
 			return;
 		}
 
-		cli.log();
-		cli.info('Good to go 👍 Enjoy using Nitric 🎉');
-		cli.log();
+		cli.info(block`Good to go 👍 Enjoy using Nitric 🎉`);
 	}
 }
