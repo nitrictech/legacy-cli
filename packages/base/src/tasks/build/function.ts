@@ -40,6 +40,7 @@ export class BuildFunctionTask extends Task<NitricImage> {
 				PROVIDER: this.provider,
 			},
 			t: getTagNameForFunction(this.stackName, this.provider, this.func),
+			shmsize: 1000000000,
 		};
 
 		let stream: NodeJS.ReadableStream;

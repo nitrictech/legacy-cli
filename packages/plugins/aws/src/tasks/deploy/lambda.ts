@@ -21,6 +21,8 @@ export function createLambdaFunction(
 			args: {
 				PROVIDER: 'aws',
 			},
+			// Create a reasonable shared memory space for image builds
+			extraOptions: ['--shm-size', '1G'],
 		},
 		registry: {
 			server: token.proxyEndpoint,

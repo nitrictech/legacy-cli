@@ -31,6 +31,8 @@ export function createFunctionAsApp(
 			args: {
 				PROVIDER: 'azure',
 			},
+			// Create a reasonable shared memory space for image builds
+			extraOptions: ['--shm-size', '1G'],
 		},
 		registry: {
 			server: registry.loginServer,
