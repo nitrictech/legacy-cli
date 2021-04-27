@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.31](https://github.com/nitrictech/cli/compare/v0.0.30...v0.0.31) (2021-04-27)
+
+
+### Bug Fixes
+
+* add repository and store check to doctor ([d5cd4c3](https://github.com/nitrictech/cli/commit/d5cd4c3ffb72dc029cc34a3b505174cf9633ec3d))
+* **nit-298:** ensure the checkout directory exists before checkout ([8d398b1](https://github.com/nitrictech/cli/commit/8d398b1174b24506ffb761d0f81acddd2d707af9))
+
 ### [0.0.30](https://github.com/nitrictech/cli/compare/v0.0.29...v0.0.30) (2021-04-20)
 
 ### [0.0.29](https://github.com/nitrictech/cli/compare/v0.0.28...v0.0.29) (2021-04-20)
