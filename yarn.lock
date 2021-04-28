@@ -865,8 +865,8 @@ __metadata:
     "@oclif/config": ^1
     "@oclif/dev-cli": ^1
     "@oclif/plugin-help": ^3.2.2
-    "@pulumi/docker": ^2.8.1
-    "@pulumi/gcp": ^4.18.0
+    "@pulumi/docker": ^3.0.0
+    "@pulumi/gcp": ^5.0.0
     "@pulumi/pulumi": ^3.1.0
     "@pulumi/tls": ^3.2.0
     "@types/jest": ^26.0.15
@@ -874,7 +874,6 @@ __metadata:
     "@types/node": ^10
     api-spec-converter: ^2.11.4
     cli-ux: ^5.5.1
-    dockerode: ^3.2.1
     enquirer: ^2.3.0
     eslint: ^5.13
     eslint-config-oclif: ^3.1
@@ -1248,14 +1247,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@pulumi/gcp@npm:^4.18.0":
-  version: 4.18.0
-  resolution: "@pulumi/gcp@npm:4.18.0"
+"@pulumi/gcp@npm:^5.0.0":
+  version: 5.0.0
+  resolution: "@pulumi/gcp@npm:5.0.0"
   dependencies:
-    "@pulumi/pulumi": ^2.15.0
+    "@pulumi/pulumi": ^3.0.0
     "@types/express": ^4.16.0
     read-package-json: ^2.0.13
-  checksum: ca12ff22af0a6b4a9ea01d626a86cf16845a9c804fc624e9f85e14833200475e1f6db3a78e2c3d211b0c74f0bdc002f14a6cdcd16809e2fae6887ce0f173b651
+  checksum: 68ffd694d6ef5c6162d19a4cda3b653f6b473e06bc5533b4dd57d5aaff1ebc7d0bdae4e5079ade2147f2a79b945eecbf604983d9b041d66c4d786d13418bc9d0
   languageName: node
   linkType: hard
 

@@ -39,11 +39,11 @@ export class Deploy extends Task<void> {
 			scopes: ['https://www.googleapis.com/auth/cloud-platform'],
 		});
 		const authClient = await auth.getClient();
+		const logFile = await stack.getLoggingFile('deploy:gcp');
+		const errorFile = await stack.getLoggingFile('error:gcp');
 
 		try {
 			// Upload the stack
-			const logFile = await stack.getLoggingFile('deploy:gcp');
-			const errorFile = await stack.getLoggingFile('error:gcp');
 			const pulumiStack = await LocalWorkspace.createOrSelectStack({
 				// TODO: Incorporate additional stack detail. E.g. dev/test/prod
 				stackName: 'gcp',
@@ -76,7 +76,7 @@ export class Deploy extends Task<void> {
 							createEntrypoints(stack.getName(), entrypoints, deployedSites, deployedApis, deployedFunctions);
 						}
 					} catch (e) {
-						pulumi.log.error(e);
+						pulumi.log.error('An error occurred, see latest gcp:error log for details');
 						fs.appendFileSync(errorFile, e);
 					}
 				},
@@ -85,16 +85,17 @@ export class Deploy extends Task<void> {
 			await pulumiStack.setConfig('gcp:region', { value: region });
 			const update = this.update.bind(this);
 			// deploy the stack, tailing the logs to console
-			const upRes = await pulumiStack.up({
+			await pulumiStack.up({
 				onOutput: (out: string) => {
 					update(out);
 					fs.appendFileSync(logFile, out);
 				},
 			});
 
-			console.log(upRes);
+			// console.log(upRes);
 		} catch (e) {
-			console.log(e);
+			fs.appendFileSync(errorFile, e);
+			throw new Error('An error occurred, see latest gcp:error log for details');
 		}
 	}
 }

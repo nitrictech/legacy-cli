@@ -8,30 +8,31 @@ import inquirer from 'inquirer';
 
 // XXX: Commented out regions do not support cloud run
 const SUPPORTED_REGIONS = [
-	'us-west1',
-	// 'us-west2',
-	// 'us-west3',
-	// 'us-west4',
+	// 'us-west1', // Api gateway not supported
+	'us-west2',
+	'us-west3',
+	'us-west4',
 	'us-central1',
 	'us-east1',
 	'us-east4',
-	'northamerica-northeast1',
-	// 'southamerica-east1',
-	// 'europe-west2',
+	// 'northamerica-northeast1', // Api gateway not supported
+	// 'southamerica-east1', // Api gateway not supported
 	'europe-west1',
-	'europe-west4',
-	// 'europe-west6'
-	// 'europe-west3'
-	'europe-north1',
-	// 'asia-south1',
-	'asia-southeast1',
-	// 'asia-southeast2',
-	// 'asia-east2',
+	'europe-west2',
+	// 'europe-west4', // Api gateway not supported
+	// 'europe-west6' // Api gateway not supported
+	// 'europe-west3' // Api gateway not supported
+	// 'europe-north1', // Api gateway not supported
+	// 'asia-south1', // Api gateway not supported
+	// 'asia-southeast1', // Api gateway not supported
+	// 'asia-southeast2', // Api gateway not supported
+	// 'asia-east2', // Api gateway not supported
 	'asia-east1',
-	'asia-northeast1',
-	'asia-northeast2',
-	// 'asia-northeast3',
-	'asia-southeast1',
+	// 'asia-northeast1', // Api gateway not supported
+	// 'asia-northeast2', // Api gateway not supported
+	// 'asia-northeast3', // Api gateway not supported
+	// 'asia-southeast1', // Api gateway not supported
+	'australia-southeast1',
 ];
 
 export default class DeployCmd extends Command {
