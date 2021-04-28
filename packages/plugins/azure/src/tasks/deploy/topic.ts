@@ -1,5 +1,5 @@
 import { NitricTopic } from '@nitric/cli-common';
-import { resources, eventgrid } from '@pulumi/azure-nextgen';
+import { resources, eventgrid } from '@pulumi/azure-native';
 import { DeployedTopic } from '../types';
 import * as pulumi from '@pulumi/pulumi';
 

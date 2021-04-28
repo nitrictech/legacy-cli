@@ -1,4 +1,4 @@
-import { resources, logic, web } from '@pulumi/azure-nextgen';
+import { resources, logic, web } from '@pulumi/azure-native';
 import { NitricSchedule } from '@nitric/cli-common';
 import { DeployedTopic } from '../types';
 //import cronParser from "cron-parser";

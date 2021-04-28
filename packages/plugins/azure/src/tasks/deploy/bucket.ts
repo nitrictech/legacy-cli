@@ -1,5 +1,5 @@
 import { NitricBucket } from '@nitric/cli-common';
-import { storage, resources } from '@pulumi/azure-nextgen';
+import { storage, resources } from '@pulumi/azure-native';
 
 /**
  * Creates an Azure storage container

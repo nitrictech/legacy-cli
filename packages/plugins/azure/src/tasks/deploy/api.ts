@@ -1,5 +1,5 @@
 import { NitricAPI, NitricAPITarget } from '@nitric/cli-common';
-import { apimanagement, resources } from '@pulumi/azure-nextgen';
+import { apimanagement, resources } from '@pulumi/azure-native';
 import { OpenAPIV3 } from 'openapi-types';
 import { DeployedFunction } from '../types';
 import * as pulumi from '@pulumi/pulumi';

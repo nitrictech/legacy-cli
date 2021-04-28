@@ -1,5 +1,5 @@
 import { NitricQueue } from '@nitric/cli-common';
-import { storage, resources } from '@pulumi/azure-nextgen';
+import { storage, resources } from '@pulumi/azure-native';
 
 export function createQueue(
 	resourceGroup: resources.latest.ResourceGroup,

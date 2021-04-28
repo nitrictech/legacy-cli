@@ -1,6 +1,6 @@
 import { Stack, Task } from '@nitric/cli-common';
 import { LocalWorkspace } from '@pulumi/pulumi/automation';
-import { resources, storage, web, containerregistry } from '@pulumi/azure-nextgen';
+import { resources, storage, web, containerregistry } from '@pulumi/azure-native';
 import { createBucket } from './bucket';
 import { createTopic } from './topic';
 import { createFunctionAsApp } from './function';
@@ -123,7 +123,7 @@ export class Deploy extends Task<void> {
 					}
 				},
 			});
-			await pulumiStack.setConfig('azure-nextgen:location', { value: region });
+			await pulumiStack.setConfig('azure-native:location', { value: region });
 
 			// deploy the stack, log to console
 			const update = this.update.bind(this);

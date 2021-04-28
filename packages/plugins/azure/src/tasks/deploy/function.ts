@@ -1,5 +1,5 @@
 import { Function } from '@nitric/cli-common';
-import { resources, web, eventgrid, containerregistry } from '@pulumi/azure-nextgen';
+import { resources, web, eventgrid, containerregistry } from '@pulumi/azure-native';
 import { DeployedFunction, DeployedTopic } from '../types';
 import * as docker from '@pulumi/docker';
 import * as pulumi from '@pulumi/pulumi';
