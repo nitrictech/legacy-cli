@@ -831,14 +831,12 @@ __metadata:
     "@oclif/dev-cli": ^1
     "@oclif/plugin-help": ^3.2.2
     "@pulumi/digitalocean": ^4.0.0
-    "@pulumi/docker": ^2.8.1
+    "@pulumi/docker": ^3.0.0
     "@pulumi/pulumi": ^3.1.0
     "@types/jest": ^26.0.15
     "@types/mime": ^2.0.3
     "@types/node": ^10
-    api-spec-converter: ^2.11.4
     cli-ux: ^5.5.1
-    dockerode: ^3.2.1
     enquirer: ^2.3.0
     eslint: ^5.13
     eslint-config-oclif: ^3.1
@@ -848,7 +846,6 @@ __metadata:
     inquirer: ^8.0.0
     jest: ^26.6.1
     listr2: ^3.6.2
-    openapi-types: ^7.2.3
     ts-jest: ^26.4.3
     ts-node: ^8
     tslib: ^1
