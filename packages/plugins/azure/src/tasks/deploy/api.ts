@@ -9,16 +9,16 @@ type method = 'get' | 'post' | 'put' | 'update' | 'delete' | 'patch';
 const METHODS: method[] = ['get', 'post', 'put', 'update', 'delete', 'patch'];
 
 export function createAPI(
-	resourceGroup: resources.latest.ResourceGroup,
+	resourceGroup: resources.ResourceGroup,
 	orgName: string,
 	adminEmail: string,
 	api: NitricAPI,
 	functions: DeployedFunction[],
-): apimanagement.latest.ApiManagementService {
+): apimanagement.ApiManagementService {
 	// For API deployments, we will want to
 	// create a new API service
 	// One management service per API for now?
-	const service = new apimanagement.latest.ApiManagementService('', {
+	const service = new apimanagement.ApiManagementService('', {
 		resourceGroupName: resourceGroup.name,
 		// TODO: Extract from API doc?
 		serviceName: `${api.name}-service`,
@@ -33,7 +33,7 @@ export function createAPI(
 
 	const { name, ...openapi } = api;
 
-	const azureApi = new apimanagement.latest.Api('api', {
+	const azureApi = new apimanagement.Api('api', {
 		apiId: name,
 		format: 'openapi-json',
 		path: '/',
@@ -57,7 +57,7 @@ export function createAPI(
 				const func = functions.find((f) => f.name === pathMethod['x-nitric-target'].name);
 
 				if (func) {
-					new apimanagement.latest.ApiOperationPolicy('', {
+					new apimanagement.ApiOperationPolicy('', {
 						resourceGroupName: resourceGroup.name,
 						apiId: azureApi.id,
 						serviceName: service.name,

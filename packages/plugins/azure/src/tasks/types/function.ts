@@ -7,5 +7,5 @@ export interface DeployedFunctionImage extends NitricFunction {
 }
 
 export interface DeployedFunction extends NitricFunction {
-	appService: web.latest.WebApp;
+	appService: web.WebApp;
 }

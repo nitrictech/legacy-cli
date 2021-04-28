@@ -9,10 +9,10 @@ import { DeployedTopic } from '../types';
 // language for recurrence by parsing the cron expression or look at raising feature requests for
 // microsoft to implement CRONTAB expressions for azure logic apps (the same way they do for function triggers currently)
 export function createSchedule(
-	resourceGroup: resources.latest.ResourceGroup,
+	resourceGroup: resources.ResourceGroup,
 	schedule: NitricSchedule,
 	topics: DeployedTopic[],
-): logic.latest.Workflow {
+): logic.Workflow {
 	//const normalizedSchedule = cronParser.parseExpression(schedule.expression);
 
 	//normalizedSchedule.fields.
@@ -21,14 +21,14 @@ export function createSchedule(
 	// It has a Display Name
 	// It has a Topic Endpoint (the endpoint of the eventgrid topic)
 	// It has an SAS (Share access signature) ("Provide your SAS Key")
-	const connection = new web.latest.Connection('', {
+	const connection = new web.Connection('', {
 		connectionName: '',
 		resourceGroupName: resourceGroup.name,
 		properties: {},
 	});
 
 	topics[0].eventGridTopic.endpoint;
-	return new logic.latest.Workflow(schedule.name, {
+	return new logic.Workflow(schedule.name, {
 		resourceGroupName: resourceGroup.name,
 		workflowName: schedule.name,
 		definition: {

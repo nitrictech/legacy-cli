@@ -3,6 +3,6 @@ import { eventgrid } from '@pulumi/azure-native';
 import { Output } from '@pulumi/pulumi';
 
 export interface DeployedTopic extends NitricTopic {
-	eventGridTopic: eventgrid.latest.Topic;
+	eventGridTopic: eventgrid.Topic;
 	sasKeys: Output<string>[];
 }

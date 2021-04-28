@@ -8,11 +8,11 @@ import { storage, resources } from '@pulumi/azure-native';
  * @param bucket - The Nitric Bucket description we're deploying
  */
 export function createBucket(
-	resourceGroup: resources.latest.ResourceGroup,
-	storageAcct: storage.latest.StorageAccount,
+	resourceGroup: resources.ResourceGroup,
+	storageAcct: storage.StorageAccount,
 	bucket: NitricBucket,
-): storage.latest.BlobContainer {
-	return new storage.latest.BlobContainer(bucket.name, {
+): storage.BlobContainer {
+	return new storage.BlobContainer(bucket.name, {
 		containerName: bucket.name,
 		resourceGroupName: resourceGroup.name,
 		accountName: storageAcct.name,

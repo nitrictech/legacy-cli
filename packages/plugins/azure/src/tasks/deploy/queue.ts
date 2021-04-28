@@ -2,11 +2,11 @@ import { NitricQueue } from '@nitric/cli-common';
 import { storage, resources } from '@pulumi/azure-native';
 
 export function createQueue(
-	resourceGroup: resources.latest.ResourceGroup,
-	storageAcct: storage.latest.StorageAccount,
+	resourceGroup: resources.ResourceGroup,
+	storageAcct: storage.StorageAccount,
 	queue: NitricQueue,
-): storage.latest.Queue {
-	return new storage.latest.Queue(queue.name, {
+): storage.Queue {
+	return new storage.Queue(queue.name, {
 		resourceGroupName: resourceGroup.name,
 		accountName: storageAcct.name,
 		queueName: queue.name,
