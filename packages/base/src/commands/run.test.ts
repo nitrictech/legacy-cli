@@ -6,7 +6,7 @@ import { MIN_PORT, MAX_PORT, getPortRange, getContainerSubscriptions, sortImages
 import * as getPort from 'get-port';
 // import * as clicommon from '@nitric/cli-common';
 import { Listr } from 'listr2';
-import { NitricImage, NitricStack } from '@nitric/cli-common';
+import { NitricFunction, NitricImage, NitricStack } from '@nitric/cli-common';
 
 jest.mock('dockerode');
 jest.mock('get-port');
@@ -108,6 +108,53 @@ describe('Given getPortRange', () => {
 			it('should throw and exception', () => {
 				const BASE_PORT = 3000;
 				expect(() => getPortRange(BASE_PORT, BASE_PORT - 1)).toThrow();
+			});
+		});
+	});
+});
+
+describe('Given getContainerSubscriptions', () => {
+	describe('Given topics are defined', () => {
+		const topicStack = {
+			topics: [{ name: 'topic-one' }, { name: 'topic-two' }],
+		};
+
+		describe('When the topics have subscribers', () => {
+			const subscribedStack = {
+				...topicStack,
+				functions: [
+					{
+						name: 'function-one',
+						subs: [{ topic: 'topic-one' }],
+					},
+					{
+						name: 'function-two',
+						subs: [{ topic: 'topic-two' }],
+					},
+				],
+			};
+
+			it('Should return the topics and their subscribers', () => {
+				const subs = getContainerSubscriptions(subscribedStack as NitricStack);
+				expect(subs).toEqual({
+					'topic-one': ['http://function-one:9001'],
+					'topic-two': ['http://function-two:9001'],
+				});
+			});
+		});
+
+		describe("When the topics don't have subscribers", () => {
+			const unsubscribedStack = {
+				...topicStack,
+				functions: [] as NitricFunction[],
+			};
+
+			it('Should return the topics with empty subscriber address arrays', () => {
+				const subs = getContainerSubscriptions(unsubscribedStack as NitricStack);
+				expect(subs).toEqual({
+					'topic-one': [],
+					'topic-two': [],
+				});
 			});
 		});
 	});
