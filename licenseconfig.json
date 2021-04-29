@@ -1,0 +1,31 @@
+{
+    "ignoreFile": ".gitignore",
+    "ignore": [
+        ".*",
+        "**/*.config.*",
+        "**/.gitignore",
+        "**/bin/*",
+        ".yarn/",
+        ".github/",
+        "**/*.md",
+        "*.lock",
+        "*.html",
+        "**/.eslintignore"
+    ],
+    "license": "./assets/license_header.txt",
+    "licenseFormats": {
+        "js|ts": {
+            "prepend": "//",
+            "append": " //",
+            "eachLine": {
+                "prepend": "//"
+            }
+        },
+        "dotfile|^Dockerfile": {
+            "eachLine": {
+                "prepend": "# "
+            }
+        }
+    },
+    "trailingWhitespace": "TRIM"
+}
