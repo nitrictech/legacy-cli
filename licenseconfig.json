@@ -16,9 +16,9 @@
     "licenseFormats": {
         "js|ts": {
             "prepend": "//",
-            "append": " //",
+            "append": "//",
             "eachLine": {
-                "prepend": "//"
+                "prepend": "// "
             }
         },
         "dotfile|^Dockerfile": {
