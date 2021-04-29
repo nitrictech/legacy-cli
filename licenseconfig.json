@@ -16,7 +16,7 @@
     "licenseFormats": {
         "js|ts": {
             "prepend": "",
-            "append": "\n",
+            "append": "",
             "eachLine": {
                 "prepend": "// "
             }
