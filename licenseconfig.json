@@ -15,8 +15,6 @@
     "license": "./assets/license_header.txt",
     "licenseFormats": {
         "js|ts": {
-            "prepend": "",
-            "append": "",
             "eachLine": {
                 "prepend": "// "
             }
