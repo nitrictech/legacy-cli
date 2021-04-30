@@ -38,13 +38,20 @@ export const MAX_PORT = 65535; // end of ephemeral port range, as defined by IAN
  * @param stack used to generate the full subscriber list for every topic.
  */
 export function getContainerSubscriptions(stack: NitricStack): Record<string, string[]> | undefined {
-	return stack.functions?.reduce((subs, func) => {
-		func.subs?.forEach(({ topic }) => {
-			subs[topic] = subs[topic] || [];
-			// TODO: Don't hardcode 9001 port, pull from config or env.
-			subs[topic].push(`http://${func.name}:9001`);
-		});
-		return subs;
+	return stack.topics?.reduce((subs, topic) => {
+		return {
+			...subs,
+			[topic.name]: stack.functions
+				?.filter(({ subs }) => {
+					return (
+						subs &&
+						subs.filter(({ topic: subTopic }) => {
+							return subTopic == topic.name;
+						}).length >= 1
+					);
+				})
+				.map((func) => `http://${func.name}:9001`) as string[],
+		};
 	}, {} as Record<string, string[]>);
 }
 
