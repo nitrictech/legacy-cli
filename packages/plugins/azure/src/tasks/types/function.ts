@@ -1,5 +1,5 @@
 import { NitricFunction } from '@nitric/cli-common';
-import { web } from '@pulumi/azure-nextgen';
+import { web } from '@pulumi/azure-native';
 import { Image } from '@pulumi/docker';
 
 export interface DeployedFunctionImage extends NitricFunction {
@@ -7,5 +7,5 @@ export interface DeployedFunctionImage extends NitricFunction {
 }
 
 export interface DeployedFunction extends NitricFunction {
-	appService: web.latest.WebApp;
+	appService: web.WebApp;
 }

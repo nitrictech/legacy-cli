@@ -35,7 +35,9 @@ describe('createNginxConfig', () => {
 			name: 'dummy-stack',
 		});
 		it('Should throw an error', () => {
-			expect(() => EPS.createNginxConfig(stack)).toThrowError('Cannot create nginx config for stack with no entrypoints');
+			expect(() => EPS.createNginxConfig(stack)).toThrowError(
+				'Cannot create nginx config for stack with no entrypoints',
+			);
 		});
 	});
 

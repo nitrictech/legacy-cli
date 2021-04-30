@@ -1,6 +1,6 @@
 import { Stack, Task } from '@nitric/cli-common';
-import { LocalWorkspace } from '@pulumi/pulumi/x/automation';
-import { resources, storage, web, containerregistry } from '@pulumi/azure-nextgen';
+import { LocalWorkspace } from '@pulumi/pulumi/automation';
+import { resources, storage, web, containerregistry } from '@pulumi/azure-native';
 import { createBucket } from './bucket';
 import { createTopic } from './topic';
 import { createFunctionAsApp } from './function';
@@ -48,12 +48,12 @@ export class Deploy extends Task<void> {
 					try {
 						// Create a new resource group for the nitric stack
 						// This'll be used for basically everything we deploy in this stack
-						const resourceGroup = new resources.latest.ResourceGroup(stack.getName(), {
+						const resourceGroup = new resources.ResourceGroup(stack.getName(), {
 							resourceGroupName: stack.getName(),
 							location: region,
 						});
 
-						const registry = new containerregistry.latest.Registry(`${stack.getName()}-registry`, {
+						const registry = new containerregistry.Registry(`${stack.getName()}-registry`, {
 							resourceGroupName: resourceGroup.name,
 							location: resourceGroup.location,
 							registryName: `${stack.getName().replace(/-/g, '')}Registry`,
@@ -64,7 +64,7 @@ export class Deploy extends Task<void> {
 						});
 
 						// Deploy
-						const appServicePlan = new web.latest.AppServicePlan(`${stack.getName()}Plan`, {
+						const appServicePlan = new web.AppServicePlan(`${stack.getName()}Plan`, {
 							name: `${stack.getName()}Plan`,
 							location: resourceGroup.location,
 							resourceGroupName: resourceGroup.name,
@@ -84,7 +84,7 @@ export class Deploy extends Task<void> {
 
 						// Create a new storage account for this stack
 						if (buckets || queues) {
-							const account = new storage.latest.StorageAccount(`${stack.getName()}-storage-account`, {
+							const account = new storage.StorageAccount(`${stack.getName()}-storage-account`, {
 								resourceGroupName: resourceGroup.name,
 								// 24 character limit
 								accountName: `${stack.getName().replace(/-/g, '')}`,
@@ -123,7 +123,7 @@ export class Deploy extends Task<void> {
 					}
 				},
 			});
-			await pulumiStack.setConfig('azure-nextgen:location', { value: region });
+			await pulumiStack.setConfig('azure-native:location', { value: region });
 
 			// deploy the stack, log to console
 			const update = this.update.bind(this);

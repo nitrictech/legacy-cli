@@ -1,21 +1,21 @@
 import { Function } from '@nitric/cli-common';
-import { resources, web, eventgrid, containerregistry } from '@pulumi/azure-nextgen';
+import { resources, web, eventgrid, containerregistry } from '@pulumi/azure-native';
 import { DeployedFunction, DeployedTopic } from '../types';
 import * as docker from '@pulumi/docker';
 import * as pulumi from '@pulumi/pulumi';
 
 // deploy a nitric function to microsoft azure as an AppService application
 export function createFunctionAsApp(
-	resourceGroup: resources.latest.ResourceGroup,
-	registry: containerregistry.latest.Registry,
-	plan: web.latest.AppServicePlan,
+	resourceGroup: resources.ResourceGroup,
+	registry: containerregistry.Registry,
+	plan: web.AppServicePlan,
 	func: Function,
 	topics: DeployedTopic[],
 ): DeployedFunction {
 	const nitricFunction = func.asNitricFunction();
 
 	const credentials = pulumi.all([resourceGroup.name, registry.name]).apply(([resourceGroupName, registryName]) =>
-		containerregistry.latest.listRegistryCredentials({
+		containerregistry.listRegistryCredentials({
 			resourceGroupName: resourceGroupName,
 			registryName: registryName,
 		}),
@@ -49,7 +49,7 @@ export function createFunctionAsApp(
 	// Azure that utilizes that contract.
 	// return new appservice.FunctionApp()
 
-	const deployedApp = new web.latest.WebApp(nitricFunction.name, {
+	const deployedApp = new web.WebApp(nitricFunction.name, {
 		serverFarmId: plan.id,
 		name: `${func.getStack().getName()}-${nitricFunction.name}`,
 		resourceGroupName: resourceGroup.name,
@@ -87,7 +87,7 @@ export function createFunctionAsApp(
 		const topic = topics.find((t) => t.name === s.topic);
 
 		if (topic) {
-			new eventgrid.latest.EventSubscription(`${nitricFunction.name}-${topic.name}-subscription`, {
+			new eventgrid.EventSubscription(`${nitricFunction.name}-${topic.name}-subscription`, {
 				eventSubscriptionName: `${nitricFunction.name}-${topic.name}-subscription`,
 				scope: topic.eventGridTopic.id,
 				destination: {

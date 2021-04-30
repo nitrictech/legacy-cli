@@ -757,9 +757,9 @@ __metadata:
     "@oclif/config": ^1
     "@oclif/dev-cli": ^1
     "@oclif/plugin-help": ^3.2.2
-    "@pulumi/aws": ^3.36.0
-    "@pulumi/docker": ^2.8.1
-    "@pulumi/pulumi": ^2.20.0
+    "@pulumi/aws": ^4.1.0
+    "@pulumi/docker": ^3.0.0
+    "@pulumi/pulumi": ^3.1.0
     "@types/lodash": ^4.14.168
     "@types/mime": ^2.0.3
     "@types/node": ^10
@@ -795,9 +795,9 @@ __metadata:
     "@oclif/config": ^1
     "@oclif/dev-cli": ^1
     "@oclif/plugin-help": ^3
-    "@pulumi/azure-nextgen": ^0.6.1
-    "@pulumi/docker": ^2.8.1
-    "@pulumi/pulumi": ^2.20.0
+    "@pulumi/azure-native": ^1.1.0
+    "@pulumi/docker": ^3.0.0
+    "@pulumi/pulumi": ^3.1.0
     "@types/jest": ^26.0.15
     "@types/node": ^10
     api-spec-converter: ^2.11.4
@@ -831,14 +831,12 @@ __metadata:
     "@oclif/dev-cli": ^1
     "@oclif/plugin-help": ^3.2.2
     "@pulumi/digitalocean": ^4.0.0
-    "@pulumi/docker": ^2.8.1
-    "@pulumi/pulumi": ^2.20.0
+    "@pulumi/docker": ^3.0.0
+    "@pulumi/pulumi": ^3.1.0
     "@types/jest": ^26.0.15
     "@types/mime": ^2.0.3
     "@types/node": ^10
-    api-spec-converter: ^2.11.4
     cli-ux: ^5.5.1
-    dockerode: ^3.2.1
     enquirer: ^2.3.0
     eslint: ^5.13
     eslint-config-oclif: ^3.1
@@ -848,7 +846,6 @@ __metadata:
     inquirer: ^8.0.0
     jest: ^26.6.1
     listr2: ^3.6.2
-    openapi-types: ^7.2.3
     ts-jest: ^26.4.3
     ts-node: ^8
     tslib: ^1
@@ -865,16 +862,15 @@ __metadata:
     "@oclif/config": ^1
     "@oclif/dev-cli": ^1
     "@oclif/plugin-help": ^3.2.2
-    "@pulumi/docker": ^2.8.1
-    "@pulumi/gcp": ^4.18.0
-    "@pulumi/pulumi": ^2.20.0
+    "@pulumi/docker": ^3.0.0
+    "@pulumi/gcp": ^5.0.0
+    "@pulumi/pulumi": ^3.1.0
     "@pulumi/tls": ^3.2.0
     "@types/jest": ^26.0.15
     "@types/mime": ^2.0.3
     "@types/node": ^10
     api-spec-converter: ^2.11.4
     cli-ux: ^5.5.1
-    dockerode: ^3.2.1
     enquirer: ^2.3.0
     eslint: ^5.13
     eslint-config-oclif: ^3.1
@@ -1193,26 +1189,26 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@pulumi/aws@npm:^3.36.0":
-  version: 3.36.0
-  resolution: "@pulumi/aws@npm:3.36.0"
+"@pulumi/aws@npm:^4.1.0":
+  version: 4.1.0
+  resolution: "@pulumi/aws@npm:4.1.0"
   dependencies:
-    "@pulumi/pulumi": ^2.17.0
+    "@pulumi/pulumi": ^3.0.0
     aws-sdk: ^2.0.0
     builtin-modules: 3.0.0
     mime: ^2.0.0
     read-package-tree: ^5.2.1
     resolve: ^1.7.1
-  checksum: 0833abcc8dc5b58d4be08b6be7c76d8e77832923c2c849d42aa90f58a9dddf07b27c313ea52e92809548437afb395c3927e5c0deb9bc653174a069e9762fd752
+  checksum: 1e2dfd2b0dccce12907a81e7763723734f423ce9cbd1127dccb3ee0dc47323c2ad5d39594f11be662b2d254fce7083d730de84afaddf43ba7dea19e083fb1787
   languageName: node
   linkType: hard
 
-"@pulumi/azure-nextgen@npm:^0.6.1":
-  version: 0.6.1
-  resolution: "@pulumi/azure-nextgen@npm:0.6.1"
+"@pulumi/azure-native@npm:^1.1.0":
+  version: 1.1.0
+  resolution: "@pulumi/azure-native@npm:1.1.0"
   dependencies:
-    "@pulumi/pulumi": ^2.20.0
-  checksum: c8d17a5d0ea213d67fa33a547b8dbaa5661fe76c31904fba5a2ffdc201dc53f4e983ff3687b5c06e18b76c4296be6f2d5f5735622cd06e5d2d884868a7105a7a
+    "@pulumi/pulumi": ^3.0.0
+  checksum: 7fe962077b38ad70732dbeadc47f11759b80467c22fc3e7bc4db58183839b56ce47cb409eab03f68d9ca44b391ed0e6cc4d4e2b79abbe456e5c0106c7000ef72
   languageName: node
   linkType: hard
 
@@ -1228,28 +1224,28 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@pulumi/docker@npm:^2.8.1":
-  version: 2.8.1
-  resolution: "@pulumi/docker@npm:2.8.1"
+"@pulumi/docker@npm:^3.0.0":
+  version: 3.0.0
+  resolution: "@pulumi/docker@npm:3.0.0"
   dependencies:
-    "@pulumi/pulumi": ^2.15.0
+    "@pulumi/pulumi": ^3.0.0
     semver: ^5.4.0
-  checksum: d1785c71bbe3fadfc4b7bfad3f82240a5a5d78a7afb6420a722d43fb2a40532c578a7c004819899b2c7444d7e5806f2225a642e10a9623280803ad825304816d
+  checksum: ebbaf71437caaf82abddc95f7284827a281cb0a1f6d0970848776451ffe8d2e6c4b7e60fd726d66627659dcfa512ff1844357959b09fe636b20a69d1cd198dbb
   languageName: node
   linkType: hard
 
-"@pulumi/gcp@npm:^4.18.0":
-  version: 4.18.0
-  resolution: "@pulumi/gcp@npm:4.18.0"
+"@pulumi/gcp@npm:^5.0.0":
+  version: 5.0.0
+  resolution: "@pulumi/gcp@npm:5.0.0"
   dependencies:
-    "@pulumi/pulumi": ^2.15.0
+    "@pulumi/pulumi": ^3.0.0
     "@types/express": ^4.16.0
     read-package-json: ^2.0.13
-  checksum: ca12ff22af0a6b4a9ea01d626a86cf16845a9c804fc624e9f85e14833200475e1f6db3a78e2c3d211b0c74f0bdc002f14a6cdcd16809e2fae6887ce0f173b651
+  checksum: 68ffd694d6ef5c6162d19a4cda3b653f6b473e06bc5533b4dd57d5aaff1ebc7d0bdae4e5079ade2147f2a79b945eecbf604983d9b041d66c4d786d13418bc9d0
   languageName: node
   linkType: hard
 
-"@pulumi/pulumi@npm:^2.15.0, @pulumi/pulumi@npm:^2.17.0, @pulumi/pulumi@npm:^2.20.0":
+"@pulumi/pulumi@npm:^2.15.0":
   version: 2.20.0
   resolution: "@pulumi/pulumi@npm:2.20.0"
   dependencies:
@@ -1268,6 +1264,30 @@ __metadata:
     typescript: ~3.7.3
     upath: ^1.1.0
   checksum: 41d6a65678be42b5cc4ec4295d000e6074ab9ff8a0a94d6df750a9cd47996a78e52efdcf004a183745a69039ee884ef130dd5172136873c3e76e96debe0ef1cd
+  languageName: node
+  linkType: hard
+
+"@pulumi/pulumi@npm:^3.0.0, @pulumi/pulumi@npm:^3.1.0":
+  version: 3.1.0
+  resolution: "@pulumi/pulumi@npm:3.1.0"
+  dependencies:
+    "@grpc/grpc-js": ^1.2.7
+    "@logdna/tail-file": ^2.0.6
+    "@pulumi/query": ^0.3.0
+    google-protobuf: ^3.5.0
+    js-yaml: ^3.14.0
+    minimist: ^1.2.0
+    normalize-package-data: ^2.4.0
+    protobufjs: ^6.8.6
+    read-package-tree: ^5.3.1
+    require-from-string: ^2.0.1
+    semver: ^6.1.0
+    source-map-support: ^0.4.16
+    split2: ^3.2.2
+    ts-node: ^7.0.1
+    typescript: ~3.7.3
+    upath: ^1.1.0
+  checksum: 39cc89625f99b533f68b2d7e8fb57ed914de47d59d5ddb4a38b5478f753468d82f6dd0cbee4cc7ba94e234fcbe4a360eb7a640ba19b99a1bf0804a7627a4e1e1
   languageName: node
   linkType: hard
 
