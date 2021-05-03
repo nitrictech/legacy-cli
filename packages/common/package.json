@@ -14,7 +14,7 @@
     "Jye Cusch <jye.cusch@gmail.com>",
     "Tim Holm <timothy.j.holm@gmail.com>"
   ],
-  "license": "UNLICENSED",
+  "license": "Apache-2.0",
   "dependencies": {
     "enquirer": "^2.3.0",
     "eventemitter3": "^4.0.7",

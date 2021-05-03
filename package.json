@@ -8,14 +8,15 @@
     "lint:deps": "yarn dlx @yarnpkg/doctor@2.1.3",
     "test": "prettier \"./**/*.{ts,js,css,md}\" --write && ultra -r test",
     "bump": "standard-version",
-    "license:check": "license-check-and-add check -f ./licenseconfig.json",
+    "license:check": "licensee",
+    "license:header:check": "license-check-and-add check -f ./licenseconfig.json",
     "license:add": "license-check-and-add add -f ./licenseconfig.json"
   },
   "contributors": [
     "Jye Cusch <jye.cusch@gmail.com>",
     "Tim Holm <timothy.j.holm@gmail.com>"
   ],
-  "license": "UNLICENSED",
+  "license": "Apache-2.0",
   "private": true,
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^2.27.0",
@@ -33,6 +34,7 @@
     "globby": "^11.0.1",
     "husky": "^4.2.5",
     "license-check-and-add": "^4.0.2",
+    "licensee": "^8.2.0",
     "lint-staged": "^10.1.3",
     "prettier": "^2.0.4",
     "standard-version": "^9.0.0",
