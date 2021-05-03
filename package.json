@@ -8,7 +8,7 @@
     "lint:deps": "yarn dlx @yarnpkg/doctor@2.1.3",
     "test": "prettier \"./**/*.{ts,js,css,md}\" --write && ultra -r test",
     "bump": "standard-version",
-    "license:check": "licensee",
+    "license:check": "yarn workspaces foreach run license:check",
     "license:header:check": "license-check-and-add check -f ./licenseconfig.json",
     "license:add": "license-check-and-add add -f ./licenseconfig.json"
   },
@@ -34,7 +34,6 @@
     "globby": "^11.0.1",
     "husky": "^4.2.5",
     "license-check-and-add": "^4.0.2",
-    "licensee": "^8.2.0",
     "lint-staged": "^10.1.3",
     "prettier": "^2.0.4",
     "standard-version": "^9.0.0",

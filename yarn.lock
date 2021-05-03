@@ -687,6 +687,7 @@ __metadata:
     eventemitter3: ^4.0.7
     execa: ^5.0.0
     jest: ^26.6.1
+    licensee: ^8.2.0
     listr2: ^3.6.2
     multimatch: ^5.0.0
     openapi-types: ^7.2.3
@@ -780,6 +781,7 @@ __metadata:
     globby: ^10
     inquirer: ^7.3.3
     jest: ^26.6.1
+    licensee: ^8.2.0
     listr2: ^3.6.2
     lodash: ^4.17.20
     mime: ^2.5.2
@@ -818,6 +820,7 @@ __metadata:
     globby: ^10
     inquirer: ^8.0.0
     jest: ^26.6.1
+    licensee: ^8.2.0
     listr2: ^3.6.2
     openapi-types: ^7.2.3
     ts-jest: ^26.4.3
@@ -851,6 +854,7 @@ __metadata:
     globby: ^10
     inquirer: ^8.0.0
     jest: ^26.6.1
+    licensee: ^8.2.0
     listr2: ^3.6.2
     ts-jest: ^26.4.3
     ts-node: ^8
@@ -886,6 +890,7 @@ __metadata:
     googleapis: ^61.0.0
     inquirer: ^8.0.0
     jest: ^26.6.1
+    licensee: ^8.2.0
     listr2: ^3.6.2
     mime: ^2.5.2
     openapi-types: ^7.2.3

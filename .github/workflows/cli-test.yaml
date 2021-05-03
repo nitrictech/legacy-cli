@@ -16,9 +16,11 @@ jobs:
     - name: Install modules
       run: yarn --immutable
     - name: Copyright Header Checks
-      run: yarn license:check
+      run: yarn license:header:check
     - name: Lint dependencies
       run: yarn lint:deps
+    - name: OSS License Checks
+      run: yarn license:check
     - name: Build Common
       run: yarn build:common
     - name: Run tests
