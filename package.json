@@ -10,7 +10,8 @@
     "bump": "standard-version",
     "license:check": "yarn workspaces foreach run license:check",
     "license:header:check": "license-check-and-add check -f ./licenseconfig.json",
-    "license:add": "license-check-and-add add -f ./licenseconfig.json"
+    "license:add": "license-check-and-add add -f ./licenseconfig.json",
+    "license:remove": "license-check-and-add remove -f ./licenseconfig.json"
   },
   "contributors": [
     "Jye Cusch <jye.cusch@gmail.com>",
