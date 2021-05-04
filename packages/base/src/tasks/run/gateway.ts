@@ -21,7 +21,7 @@ import tar from 'tar-fs';
 
 export interface RunGatewayTaskOptions {
 	stackName: string;
-	api: NitricAPI;
+	api: NitricAPI & { name: string };
 	port?: number;
 	docker: Docker;
 	network?: Network;

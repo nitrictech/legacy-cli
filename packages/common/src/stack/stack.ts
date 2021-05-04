@@ -14,53 +14,32 @@
 
 import path from 'path';
 import {
-	NitricBucket,
-	NitricTopic,
-	NitricQueue,
-	NitricFunction,
-	NitricSchedule,
+	NitricService,
 	NitricStack,
-	NitricAPI,
-	NitricStaticSite,
-	NitricEntrypoints,
 } from '../types';
 import fs from 'fs';
 import YAML from 'yaml';
 import { Repository } from '../templates';
 import { STAGING_DIR } from '../paths';
 import rimraf from 'rimraf';
-import { Function } from './function';
 import { Site } from './site';
 import { findFileRead } from '../utils';
+import { Service } from './service';
 
 const NITRIC_DIRECTORY = '.nitric';
 
 export class Stack {
 	private file: string;
 	private name: string;
-	private funcs?: NitricFunction[];
-	private buckets?: NitricBucket[];
-	private queues?: NitricQueue[];
-	private topics?: NitricTopic[];
-	private schedules?: NitricSchedule[];
-	private apis?: NitricAPI[];
-	private sites?: NitricStaticSite[];
-	private entrypoints?: NitricEntrypoints;
+	private descriptor: NitricStack;
 
 	constructor(
 		file: string,
-		{ name, functions, topics, queues, buckets, schedules, apis, sites, entrypoints }: NitricStack,
+		descriptor: NitricStack,
 	) {
+		this.name = descriptor.name;
+		this.descriptor = descriptor;
 		this.file = file;
-		this.name = name;
-		this.funcs = functions;
-		this.topics = topics;
-		this.queues = queues;
-		this.buckets = buckets;
-		this.schedules = schedules;
-		this.apis = apis;
-		this.sites = sites;
-		this.entrypoints = entrypoints;
 	}
 
 	getName(): string {
@@ -68,54 +47,56 @@ export class Stack {
 	}
 
 	asNitricStack(): NitricStack {
-		return {
-			name: this.name,
-			functions: this.funcs,
-			buckets: this.buckets,
-			queues: this.queues,
-			topics: this.topics,
-			schedules: this.schedules,
-			apis: this.apis,
-			sites: this.sites,
-			entrypoints: this.entrypoints,
-		};
+		return this.descriptor;
 	}
 
 	getDirectory(): string {
 		return path.dirname(this.file);
 	}
 
-	addFunction(func: NitricFunction): Stack {
-		const { funcs = [] } = this;
+	addService(name: string, svc: NitricService): Stack {
+		const { descriptor } = this;
+		const { services = {} } = this.descriptor;
 
-		// Name/path compound key, these should both be unique
-		const existingFunction = funcs.find((f) => f.name === func.name || f.path === func.path);
-
-		if (existingFunction) {
-			throw new Error(`Function ${func.name} already defined in ${this.file}`);
+		if (services[name]) {
+			throw new Error(`Service ${name} already defined in ${this.file}`);
 		}
 
-		this.funcs = [...(this.funcs || []), func];
+		this.descriptor = {
+			...descriptor,
+			services: {
+				...services,
+				[name]: svc
+			},
+		};
 
 		return this;
 	}
 
-	getFunction(funcName: string): Function {
-		const func = (this.funcs || []).find((f) => f.name === funcName);
+	getService(name: string): Service {
+		const { descriptor } = this;
+		const { services = {} } = descriptor;
 
-		if (!func) {
-			throw new Error(`Stack ${this.name}, does not containe function ${funcName}`);
+		if (!services[name]) {
+			throw new Error(`Stack ${this.name}, does not contain service ${name}`);
 		}
 
-		return new Function(this, func);
+		return new Service(this, name, services[name]);
 	}
 
-	getFunctions(): Function[] {
-		return (this.funcs || []).map((f) => new Function(this, f));
+	getServices(): Service[] {
+		const { descriptor } = this;
+		const { services = {} } = descriptor;
+
+		return Object.keys(services).map(
+			svcName => new Service(this, svcName, services[svcName]));
 	}
 
 	getSites(): Site[] {
-		return (this.sites || []).map((s) => new Site(this, s));
+		const { descriptor } = this;
+		const { sites = {} } = descriptor;
+
+		return Object.keys(sites).map(siteName => new Site(this, siteName, sites[siteName]))
 	}
 
 	getStagingDirectory(): string {
@@ -231,6 +212,6 @@ export class Stack {
 		await fs.promises.mkdir(stackStagingDirectory, { recursive: true });
 
 		// Stage each function
-		await Promise.all(stack.getFunctions().map(async (f) => Function.stage(f, repos)));
+		await Promise.all(stack.getServices().map(async (s) => Service.stage(s, repos)));
 	}
 }

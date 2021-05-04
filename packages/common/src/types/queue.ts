@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export interface NitricQueue {
-	name: string;
+export interface NitricQueue<Ext extends Record<string, any> = {}> {
 	// deadLetter: NitricQueue
 	// leaseTime: int // the default time a queue item will be leased for when popped.
+	ext?: Ext;
 }

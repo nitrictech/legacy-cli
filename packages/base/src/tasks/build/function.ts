@@ -15,37 +15,36 @@
 import tar from 'tar-fs';
 import {
 	dockerodeEvtToString,
-	NitricFunction,
 	NitricImage,
 	Task,
-	getTagNameForFunction,
 	STAGING_DIR,
+	Service,
 } from '@nitric/cli-common';
 import Docker from 'dockerode';
 import path from 'path';
 
-interface BuildFunctionTaskOptions {
+interface BuildServiceTaskOptions {
 	stackName: string;
 	baseDir: string;
-	func: NitricFunction;
+	service: Service;
 	provider?: string;
 }
 
-export class BuildFunctionTask extends Task<NitricImage> {
-	private func: NitricFunction;
+export class BuildServiceTask extends Task<NitricImage> {
+	private service: Service;
 	private stackName: string;
 	private provider: string;
 
-	constructor({ func, stackName, provider = 'local' }: BuildFunctionTaskOptions) {
-		super(`${func.name}`);
-		this.func = func;
+	constructor({ service, stackName, provider = 'local' }: BuildServiceTaskOptions) {
+		super(`${service.getName()}`);
+		this.service = service;
 		this.stackName = stackName;
 		this.provider = provider;
 	}
 
 	async do(): Promise<NitricImage> {
 		const docker = new Docker();
-		const functionStagingDirectory = path.join(STAGING_DIR, this.stackName, this.func.name);
+		const functionStagingDirectory = path.join(STAGING_DIR, this.stackName, this.service.getName());
 		// Tarball the required files for the image build
 		const pack = tar.pack(functionStagingDirectory);
 
@@ -53,7 +52,7 @@ export class BuildFunctionTask extends Task<NitricImage> {
 			buildargs: {
 				PROVIDER: this.provider,
 			},
-			t: getTagNameForFunction(this.stackName, this.provider, this.func),
+			t: this.service.getImageTagName(this.provider),
 			shmsize: 1000000000,
 		};
 
@@ -86,7 +85,7 @@ export class BuildFunctionTask extends Task<NitricImage> {
 		const filteredResults = buildResults.filter((obj) => 'aux' in obj && 'ID' in obj['aux']);
 		if (filteredResults.length > 0) {
 			const imageId = filteredResults[filteredResults.length - 1]['aux'].ID.split(':').pop() as string;
-			return { id: imageId, func: this.func } as NitricImage;
+			return { id: imageId, serviceName: this.service.getName() } as NitricImage;
 		} else {
 			const {
 				errorDetail: { message },

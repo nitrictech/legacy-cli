@@ -29,10 +29,10 @@ export interface NitricScheduleTarget {
 /**
  * A Nitric Schedule definition
  */
-export interface NitricSchedule {
-	name: string;
+export interface NitricSchedule<Ext extends Record<string, any> = {}> {
 	expression: string;
 	// The Topic to be targeted for schedule
 	target: NitricScheduleTarget;
 	event: NitricScheduleEvent;
+	ext?: Ext;
 }

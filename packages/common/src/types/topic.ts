@@ -12,6 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export interface NitricTopic {
-	name: string;
+export interface NitricTopic<Ext extends Record<string, any> = {}> {
+	ext?: Ext;
 }

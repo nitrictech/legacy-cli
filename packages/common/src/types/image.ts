@@ -12,9 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { NitricFunction } from './function';
-
 export interface NitricImage {
 	id: string;
-	func: NitricFunction;
+	serviceName: string;
 }

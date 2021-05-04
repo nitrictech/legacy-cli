@@ -12,13 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './function';
+export * from './service';
 export * from './image';
 export * from './stack';
 export * from './bucket';
 export * from './topic';
 export * from './queue';
-export * from './subscription';
 export * from './schedule';
 export * from './api';
 export * from './static-site';

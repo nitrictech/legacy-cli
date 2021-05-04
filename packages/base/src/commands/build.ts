@@ -14,13 +14,11 @@
 
 import { Command, flags } from '@oclif/command';
 import { wrapTaskForListr, Stack, NitricImage, StageStackTask } from '@nitric/cli-common';
-import { BuildFunctionTask } from '../tasks/build';
+import { BuildServiceTask } from '../tasks/build';
 import { Listr, ListrTask } from 'listr2';
 import path from 'path';
 
 export function createBuildTasks(stack: Stack, directory: string, provider = 'local'): Listr {
-	const nitricStack = stack.asNitricStack();
-
 	return new Listr(
 		[
 			wrapTaskForListr(new StageStackTask({ stack })),
@@ -28,13 +26,13 @@ export function createBuildTasks(stack: Stack, directory: string, provider = 'lo
 				title: 'Building Functions',
 				task: (_, task): Listr =>
 					task.newListr(
-						nitricStack.functions!.map(
-							(func): ListrTask => ({
+						stack.getServices().map(
+							(service): ListrTask => ({
 								...wrapTaskForListr(
-									new BuildFunctionTask({
-										func,
+									new BuildServiceTask({
+										service,
 										baseDir: directory,
-										stackName: nitricStack.name,
+										stackName: stack.getName(),
 										provider,
 									}),
 								),
