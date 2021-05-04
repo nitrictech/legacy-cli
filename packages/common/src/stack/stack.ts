@@ -160,7 +160,11 @@ export class Stack {
 		file: string,
 		stringify: (obj: NitricStack) => string = YAML.stringify,
 	): Promise<void> {
-		return await fs.promises.writeFile(file, stringify(stack.asNitricStack()));
+		let stackString = stringify(stack.asNitricStack()) //Turn object into yaml
+			.split('\n')
+			.filter((value) => value.search(/null/gi) === -1) //Return values that don't have null
+			.join('\n');
+		return await fs.promises.writeFile(file, stackString);
 	}
 
 	/**
