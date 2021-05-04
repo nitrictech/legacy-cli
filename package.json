@@ -8,14 +8,16 @@
     "lint:deps": "yarn dlx @yarnpkg/doctor@2.1.3",
     "test": "prettier \"./**/*.{ts,js,css,md}\" --write && ultra -r test",
     "bump": "standard-version",
-    "license:check": "license-check-and-add check -f ./licenseconfig.json",
-    "license:add": "license-check-and-add add -f ./licenseconfig.json"
+    "license:check": "yarn workspaces foreach run license:check",
+    "license:header:check": "license-check-and-add check -f ./licenseconfig.json",
+    "license:add": "license-check-and-add add -f ./licenseconfig.json",
+    "license:remove": "license-check-and-add remove -f ./licenseconfig.json"
   },
   "contributors": [
     "Jye Cusch <jye.cusch@gmail.com>",
     "Tim Holm <timothy.j.holm@gmail.com>"
   ],
-  "license": "UNLICENSED",
+  "license": "Apache-2.0",
   "private": true,
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^2.27.0",

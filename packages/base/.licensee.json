@@ -1,0 +1,23 @@
+{
+  "licenses": {
+    "spdx": [
+      "MIT",
+      "BSD-3-Clause",
+      "Apache-2.0",
+      "ISC",
+      "0BSD",
+      "WTFPL",
+      "Unlicense",
+      "BSD-2-Clause"
+    ]
+  },
+  "packages": {
+    "streamsearch": "<=0.1.2",
+    "ssh2-streams": "<=0.4.10",
+    "ssh2": "<=0.8.9",
+    "yarn": "<=1.22.10"
+  },
+  "ignore": [
+    { "package": "yarn" }
+  ]
+}
