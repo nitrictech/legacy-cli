@@ -261,9 +261,9 @@ export default class Run extends Command {
 		cli.action.stop();
 
 		// Build the container images for each function in the Nitric Stack
-		const builtImages = await createBuildTasks(stack, directory).run();
+		const builtImages = await createBuildTasks(stack, directory).run() as { [key: string]: NitricImage };
 		// Filter out undefined and non image results from build tasks
-		let images = Object.values(builtImages).filter((i: any) => i && i.func) as NitricImage[];
+		let images = Object.values(builtImages).filter((i) => i && i.serviceName) as NitricImage[];
 
 		// Generate a range of ports to try to assign to function containers
 		const portRange = getPortRange();
