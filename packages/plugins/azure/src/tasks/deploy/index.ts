@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Stack, Task } from '@nitric/cli-common';
+import { Stack, Task, mapObject } from '@nitric/cli-common';
 import { LocalWorkspace } from '@pulumi/pulumi/automation';
 import { resources, storage, web, containerregistry } from '@pulumi/azure-native';
 import { createBucket } from './bucket';
@@ -47,7 +47,7 @@ export class Deploy extends Task<void> {
 
 	async do(): Promise<void> {
 		const { stack, orgName, adminEmail, region } = this;
-		const { buckets = [], apis = [], topics = [], schedules = [], queues = [] } = stack.asNitricStack();
+		const { buckets, apis = {}, topics = {}, schedules = {}, queues } = stack.asNitricStack();
 
 		try {
 			// Upload the stack
@@ -110,16 +110,16 @@ export class Deploy extends Task<void> {
 
 							// Not using refeschedulerrences produced currently,
 							// but leaving as map in case we need to reference in future
-							(buckets || []).map((b) => createBucket(resourceGroup, account, b));
-							(queues || []).map((q) => createQueue(resourceGroup, account, q));
+							mapObject(buckets || {}).map((b) => createBucket(resourceGroup, account, b));
+							mapObject(queues || {}).map((q) => createQueue(resourceGroup, account, q));
 						}
 
-						const deployedTopics = (topics || []).map((t) => createTopic(resourceGroup, t));
+						const deployedTopics = mapObject(topics).map((t) => createTopic(resourceGroup, t));
 
 						// Deploy functions here...
 						// need to determine our deployment method for them
-						const deployedFunctions = stack
-							.getFunctions()
+						const DeployedServices = stack
+							.getServices()
 							.map((f) => createFunctionAsApp(resourceGroup, registry, appServicePlan, f, deployedTopics));
 
 						// TODO: Add schedule support
@@ -130,7 +130,7 @@ export class Deploy extends Task<void> {
 							// schedules.map(s => createSchedule(resourceGroup, s))
 						}
 
-						(apis || []).map((a) => createAPI(resourceGroup, orgName, adminEmail, a, deployedFunctions));
+						mapObject(apis).map((a) => createAPI(resourceGroup, orgName, adminEmail, a, DeployedServices));
 					} catch (e) {
 						console.error(e);
 						throw e;

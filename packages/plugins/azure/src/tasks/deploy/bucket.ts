@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { NitricBucket } from '@nitric/cli-common';
+import { NitricBucket, NamedObject } from '@nitric/cli-common';
 import { storage, resources } from '@pulumi/azure-native';
 
 /**
@@ -24,7 +24,7 @@ import { storage, resources } from '@pulumi/azure-native';
 export function createBucket(
 	resourceGroup: resources.ResourceGroup,
 	storageAcct: storage.StorageAccount,
-	bucket: NitricBucket,
+	bucket: NamedObject<NitricBucket>,
 ): storage.BlobContainer {
 	return new storage.BlobContainer(bucket.name, {
 		containerName: bucket.name,

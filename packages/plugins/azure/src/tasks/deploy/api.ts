@@ -12,10 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { NitricAPI, NitricAPITarget } from '@nitric/cli-common';
+import { NitricAPI, NitricAPITarget, NamedObject } from '@nitric/cli-common';
 import { apimanagement, resources } from '@pulumi/azure-native';
 import { OpenAPIV3 } from 'openapi-types';
-import { DeployedFunction } from '../types';
+import { DeployedService } from '../types';
 import * as pulumi from '@pulumi/pulumi';
 
 type method = 'get' | 'post' | 'put' | 'update' | 'delete' | 'patch';
@@ -26,8 +26,8 @@ export function createAPI(
 	resourceGroup: resources.ResourceGroup,
 	orgName: string,
 	adminEmail: string,
-	api: NitricAPI,
-	functions: DeployedFunction[],
+	api: NamedObject<NitricAPI>,
+	services: DeployedService[],
 ): apimanagement.ApiManagementService {
 	// For API deployments, we will want to
 	// create a new API service
@@ -68,7 +68,7 @@ export function createAPI(
 				// Get the nitric target URL
 
 				const pathMethod = path[m] as OpenAPIV3.OperationObject<NitricAPITarget>;
-				const func = functions.find((f) => f.name === pathMethod['x-nitric-target'].name);
+				const func = services.find((f) => f.name === pathMethod['x-nitric-target'].name);
 
 				if (func) {
 					new apimanagement.ApiOperationPolicy('', {

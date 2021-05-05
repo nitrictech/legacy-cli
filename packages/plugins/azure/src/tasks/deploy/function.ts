@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Function } from '@nitric/cli-common';
+import { Service } from '@nitric/cli-common';
 import { resources, web, eventgrid, containerregistry } from '@pulumi/azure-native';
-import { DeployedFunction, DeployedTopic } from '../types';
+import { DeployedService, DeployedTopic } from '../types';
 import * as docker from '@pulumi/docker';
 import * as pulumi from '@pulumi/pulumi';
 
@@ -23,10 +23,10 @@ export function createFunctionAsApp(
 	resourceGroup: resources.ResourceGroup,
 	registry: containerregistry.Registry,
 	plan: web.AppServicePlan,
-	func: Function,
+	service: Service,
 	topics: DeployedTopic[],
-): DeployedFunction {
-	const nitricFunction = func.asNitricFunction();
+): DeployedService {
+	const nitricService = service.asNitricService();
 
 	const credentials = pulumi.all([resourceGroup.name, registry.name]).apply(([resourceGroupName, registryName]) =>
 		containerregistry.listRegistryCredentials({
@@ -37,11 +37,11 @@ export function createFunctionAsApp(
 	const adminUsername = credentials.apply((credentials) => credentials.username!);
 	const adminPassword = credentials.apply((credentials) => credentials.passwords![0].value!);
 
-	const image = new docker.Image(`${func.getImageTagName()}-image`, {
-		imageName: pulumi.interpolate`${registry.loginServer}/${func.getImageTagName()}`,
+	const image = new docker.Image(`${service.getImageTagName()}-image`, {
+		imageName: pulumi.interpolate`${registry.loginServer}/${service.getImageTagName()}`,
 		build: {
 			// Staging directory
-			context: func.getStagingDirectory(),
+			context: service.getStagingDirectory(),
 			args: {
 				PROVIDER: 'azure',
 			},
@@ -63,9 +63,9 @@ export function createFunctionAsApp(
 	// Azure that utilizes that contract.
 	// return new appservice.FunctionApp()
 
-	const deployedApp = new web.WebApp(nitricFunction.name, {
+	const deployedApp = new web.WebApp(nitricService.name, {
 		serverFarmId: plan.id,
-		name: `${func.getStack().getName()}-${nitricFunction.name}`,
+		name: `${service.getStack().getName()}-${nitricService.name}`,
 		resourceGroupName: resourceGroup.name,
 		siteConfig: {
 			appSettings: [
@@ -94,15 +94,15 @@ export function createFunctionAsApp(
 			linuxFxVersion: pulumi.interpolate`DOCKER|${image.imageName}`,
 		},
 	});
-	const { subs = [] } = nitricFunction;
+	const { triggers = {} } = nitricService;
 
 	// Deploy an evengrid webhook subscription
-	(subs || []).forEach((s) => {
-		const topic = topics.find((t) => t.name === s.topic);
+	(triggers.topics || []).forEach((s) => {
+		const topic = topics.find((t) => t.name === s);
 
 		if (topic) {
-			new eventgrid.EventSubscription(`${nitricFunction.name}-${topic.name}-subscription`, {
-				eventSubscriptionName: `${nitricFunction.name}-${topic.name}-subscription`,
+			new eventgrid.EventSubscription(`${service.getName()}-${topic.name}-subscription`, {
+				eventSubscriptionName: `${service.getName()}-${topic.name}-subscription`,
 				scope: topic.eventGridTopic.id,
 				destination: {
 					endpointType: 'WebHook',
@@ -117,7 +117,8 @@ export function createFunctionAsApp(
 	});
 
 	return {
-		...nitricFunction,
+		name: service.getName(),
+		...nitricService,
 		appService: deployedApp,
 	};
 }

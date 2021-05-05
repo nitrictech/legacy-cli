@@ -12,13 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { NitricQueue } from '@nitric/cli-common';
+import { NitricQueue, NamedObject } from '@nitric/cli-common';
 import { storage, resources } from '@pulumi/azure-native';
 
 export function createQueue(
 	resourceGroup: resources.ResourceGroup,
 	storageAcct: storage.StorageAccount,
-	queue: NitricQueue,
+	queue: NamedObject<NitricQueue>,
 ): storage.Queue {
 	return new storage.Queue(queue.name, {
 		resourceGroupName: resourceGroup.name,

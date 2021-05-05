@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import { resources, logic, web } from '@pulumi/azure-native';
-import { NitricSchedule } from '@nitric/cli-common';
+import { NitricSchedule, NamedObject } from '@nitric/cli-common';
 import { DeployedTopic } from '../types';
 //import cronParser from "cron-parser";
 
@@ -24,7 +24,7 @@ import { DeployedTopic } from '../types';
 // microsoft to implement CRONTAB expressions for azure logic apps (the same way they do for function triggers currently)
 export function createSchedule(
 	resourceGroup: resources.ResourceGroup,
-	schedule: NitricSchedule,
+	schedule: NamedObject<NitricSchedule>,
 	topics: DeployedTopic[],
 ): logic.Workflow {
 	//const normalizedSchedule = cronParser.parseExpression(schedule.expression);
