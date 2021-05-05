@@ -23,12 +23,16 @@ interface NormalizedFunctionEntrypoint {
 	type: 'service' | 'site' | 'api';
 }
 
+interface CreateFunctionResult {
+	spec: digitalocean.types.input.AppSpecService,
+}
+
 export function createFunction(
 	service: Service,
 	registryName: string,
 	token: string,
 	entrypoints: NormalizedFunctionEntrypoint[],
-): digitalocean.types.input.AppSpecService {
+): CreateFunctionResult {
 	// Push the image
 	const image = new docker.Image(`${service.getImageTagName()}-image`, {
 		imageName: pulumi.interpolate`registry.digitalocean.com/${registryName}/${service.getName()}`,
@@ -49,16 +53,20 @@ export function createFunction(
 	});
 
 	// Need to await the image, so we'll apply this to ensure there is a dependency on the deployment
-	const imageName = image.baseImageName.apply((bin) => bin.split('/').pop()!);
+	// XXX: We MUST using imageName here as baseImageName is already known so it cannot be used as
+	// a dependency to wait on deployment
+	const imageName = image.imageName.apply((name) => name.split('/').pop()!.split[':'][0] as string);
 
 	return {
-		name: service.getName(),
-		httpPort: 9001,
-		image: {
-			registryType: 'DOCR',
-			// TODO: Apply docker deployed repository here...
-			repository: imageName,
-		},
-		routes: entrypoints.filter(({ name }) => name === service.getName()).map(({ path }) => ({ path })),
+		spec: {
+			name: service.getName(),
+			httpPort: 9001,
+			image: {
+				registryType: 'DOCR',
+				// TODO: Apply docker deployed repository here...
+				repository: imageName,
+			},
+			routes: entrypoints.filter(({ name }) => name === service.getName()).map(({ path }) => ({ path })),
+		}
 	};
 }

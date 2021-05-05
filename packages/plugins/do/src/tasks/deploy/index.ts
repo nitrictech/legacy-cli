@@ -62,10 +62,11 @@ export class Deploy extends Task<void> {
 			queues = {},
 			entrypoints = {},
 		} = stack.asNitricStack();
+		const errorFile = await stack.getLoggingFile('error:do');
+		const logFile = await stack.getLoggingFile('deploy:do');
 
 		try {
 			// Upload the stack
-			const logFile = await stack.getLoggingFile('deploy:do');
 			const pulumiStack = await LocalWorkspace.createOrSelectStack({
 				// TODO: Incorporate additional stack detail. E.g. dev/test/prod
 				stackName: 'do',
@@ -75,27 +76,27 @@ export class Deploy extends Task<void> {
 					// Now we can start deploying with Pulumi
 					try {
 						// Create a new storage account for this stack
-						if (mapObject(buckets).length > 0) {
+						if (mapObject(buckets || {}).length > 0) {
 							pulumi.log.warn('Buckets currently not supported for digital ocean deployments');
 						}
 
-						if (mapObject(apis).length > 0) {
+						if (mapObject(apis || {}).length > 0) {
 							pulumi.log.warn('APIs currently not supported for digital ocean deployments');
 						}
 
-						if (mapObject(topics).length > 0) {
+						if (mapObject(topics || {}).length > 0) {
 							pulumi.log.warn('Topics currently not supported for digital ocean deployments');
 						}
 
-						if (mapObject(schedules).length > 0) {
+						if (mapObject(schedules || {}).length > 0) {
 							pulumi.log.warn('Schedules currently not supported for digital ocean deployments');
 						}
 
-						if (mapObject(queues).length > 0) {
+						if (mapObject(queues || {}).length > 0) {
 							pulumi.log.warn('Queues currently not supported for digital ocean deployments');
 						}
 
-						if (mapObject(sites).length > 0) {
+						if (mapObject(sites || {}).length > 0) {
 							pulumi.log.warn('Static sites currently not supported for digital ocean deployments');
 						}
 
@@ -134,15 +135,17 @@ export class Deploy extends Task<void> {
 							}
 
 							// Create the functions
-							const functionSpecs = stack
+							const results = stack
 								.getServices()
 								.map((f) => createFunction(f, registryName, token, functionEntrypoints));
+
+
 							const app = new digitalocean.App(stack.getName(), {
 								spec: {
 									name: stack.getName(),
 									// TODO: Configure region
 									region: region,
-									services: functionSpecs,
+									services: results.map(r => r.spec),
 								},
 							});
 
@@ -151,7 +154,8 @@ export class Deploy extends Task<void> {
 							};
 						}
 					} catch (e) {
-						console.error(e);
+						// console.error(e);
+						fs.appendFileSync(errorFile, e.stack);
 						throw e;
 					}
 
@@ -169,6 +173,7 @@ export class Deploy extends Task<void> {
 			});
 			console.log(upRes.outputs);
 		} catch (e) {
+			fs.appendFileSync(errorFile, e.stack);
 			console.log(e);
 		}
 	}
