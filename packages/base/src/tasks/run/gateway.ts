@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { NitricAPI, Task, STAGING_API_DIR } from '@nitric/cli-common';
+import { NitricAPI, NamedObject, Task, STAGING_API_DIR } from '@nitric/cli-common';
 import Docker, { Container, ContainerCreateOptions, Network, NetworkInspectInfo } from 'dockerode';
 import fs from 'fs';
 import getPort from 'get-port';
@@ -54,7 +54,7 @@ export function createAPIDirectory(apiName: string): string {
  */
 export class RunGatewayTask extends Task<Container> {
 	private stackName: string;
-	private api: NitricAPI;
+	private api: NamedObject<NitricAPI>;
 	private port?: number;
 	private network?: Network;
 	private docker: Docker;
