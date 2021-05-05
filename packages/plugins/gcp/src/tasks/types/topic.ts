@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { NitricTopic } from '@nitric/cli-common';
+import { NitricTopic, NamedObject } from '@nitric/cli-common';
 import { pubsub } from '@pulumi/gcp';
 
-export interface DeployedTopic extends NitricTopic {
+export interface DeployedTopic extends NamedObject<NitricTopic> {
 	pubsub: pubsub.Topic;
 }

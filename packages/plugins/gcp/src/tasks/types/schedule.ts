@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { NitricSchedule } from '@nitric/cli-common';
+import { NitricSchedule, NamedObject } from '@nitric/cli-common';
 import { cloudscheduler } from '@pulumi/gcp';
 
-export interface DeployedSchedule extends NitricSchedule {
+export interface DeployedSchedule extends NamedObject<NitricSchedule> {
 	job: cloudscheduler.Job;
 }

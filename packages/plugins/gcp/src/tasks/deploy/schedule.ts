@@ -12,11 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { NitricSchedule } from '@nitric/cli-common';
+import { NitricSchedule, NamedObject } from '@nitric/cli-common';
 import { cloudscheduler } from '@pulumi/gcp';
 import { DeployedSchedule, DeployedTopic } from '../types';
 
-export function createSchedule(schedule: NitricSchedule, topics: DeployedTopic[]): DeployedSchedule {
+export function createSchedule(schedule: NamedObject<NitricSchedule>, topics: DeployedTopic[]): DeployedSchedule {
 	// Find our target topic
 
 	// Currently we only support topic targets for schedules

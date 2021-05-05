@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import { google } from 'googleapis';
-import { Task, Stack } from '@nitric/cli-common';
+import { Task, Stack, mapObject } from '@nitric/cli-common';
 import { createFunction } from './functions';
 import { createTopic } from './topics';
 import { createBucket } from './buckets';
@@ -48,7 +48,7 @@ export class Deploy extends Task<void> {
 
 	async do(): Promise<void> {
 		const { stack, gcpProject, region } = this;
-		const { buckets = [], apis = [], topics = [], schedules = [], entrypoints } = stack.asNitricStack();
+		const { buckets = {}, apis = {}, topics = {}, schedules = {}, entrypoints } = stack.asNitricStack();
 		const auth = new google.auth.GoogleAuth({
 			scopes: ['https://www.googleapis.com/auth/cloud-platform'],
 		});
@@ -67,23 +67,23 @@ export class Deploy extends Task<void> {
 					// Now we can start deploying with Pulumi
 					try {
 						// deploy the buckets
-						(buckets || []).map(createBucket);
+						mapObject(buckets).map(createBucket);
 
 						// Deploy the topics
-						const deployedTopics = (topics || []).map(createTopic);
+						const deployedTopics = mapObject(topics).map(createTopic);
 						// deploy the functions
 						const { token: imageDeploymentToken } = await authClient.getAccessToken();
 
 						const deployedSites = await Promise.all(stack.getSites().map(createSite));
-						const stackFunctions = stack.getFunctions();
+						const stackFunctions = stack.getServices();
 
 						const deployedFunctions = stackFunctions.map((f) =>
 							createFunction(region, f, deployedTopics, imageDeploymentToken!, gcpProject),
 						);
 						// deploy the schedules
-						(schedules || []).map((s) => createSchedule(s, deployedTopics));
+						mapObject(schedules).map((s) => createSchedule(s, deployedTopics));
 						// deploy apis
-						const deployedApis = await Promise.all((apis || []).map((a) => createApi(a, deployedFunctions)));
+						const deployedApis = await Promise.all(mapObject(apis).map((a) => createApi(a, deployedFunctions)));
 
 						if (entrypoints) {
 							// Deployed Entrypoints

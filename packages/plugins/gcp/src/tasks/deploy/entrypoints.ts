@@ -14,7 +14,7 @@
 
 import { NitricEntrypoints } from '@nitric/cli-common';
 import { compute } from '@pulumi/gcp';
-import { DeployedApi, DeployedFunction, DeployedSite } from '../types';
+import { DeployedApi, DeployedService, DeployedSite } from '../types';
 import * as pulumi from '@pulumi/pulumi';
 import * as tls from '@pulumi/tls';
 
@@ -37,7 +37,7 @@ function createBackendServices(
 	entrypoints: NitricEntrypoints,
 	deployedApis: DeployedApi[],
 	deployedSites: DeployedSite[],
-	deployedFunctions: DeployedFunction[],
+	deployedFunctions: DeployedService[],
 ): BackendItem[] {
 	const normalizedEntrypoints = Object.keys(entrypoints).map((epPath) => ({
 		path: epPath,
@@ -97,7 +97,7 @@ function createBackendServices(
 					backend,
 				};
 			}
-			case 'function': {
+			case 'service': {
 				const deployedFunction = deployedFunctions.find((s) => s.name === ep.name);
 
 				if (!deployedFunction) {
@@ -181,7 +181,7 @@ export function createEntrypoints(
 	entrypoints: NitricEntrypoints,
 	deployedSites: DeployedSite[],
 	deployedApis: DeployedApi[],
-	deployedFunctions: DeployedFunction[],
+	deployedFunctions: DeployedService[],
 ): void {
 	// Created backend services
 	const backends = createBackendServices(entrypoints, deployedApis, deployedSites, deployedFunctions);
