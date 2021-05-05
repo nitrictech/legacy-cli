@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Task, Stack } from '@nitric/cli-common';
+import { Task, Stack, mapObject } from '@nitric/cli-common';
 import * as pulumi from '@pulumi/pulumi';
 import { LocalWorkspace } from '@pulumi/pulumi/automation';
 import * as digitalocean from '@pulumi/digitalocean';
@@ -54,11 +54,12 @@ export class Deploy extends Task<void> {
 	async do(): Promise<void> {
 		const { stack, region, registryName, token } = this;
 		const {
-			buckets = [],
-			apis = [],
-			topics = [],
-			schedules = [],
-			queues = [],
+			buckets = {},
+			apis = {},
+			topics = {},
+			schedules = {},
+			sites = {},
+			queues = {},
 			entrypoints = {},
 		} = stack.asNitricStack();
 
@@ -74,29 +75,33 @@ export class Deploy extends Task<void> {
 					// Now we can start deploying with Pulumi
 					try {
 						// Create a new storage account for this stack
-						if (buckets.length > 0) {
+						if (mapObject(buckets).length > 0) {
 							pulumi.log.warn('Buckets currently not supported for digital ocean deployments');
 						}
 
-						if (apis.length > 0) {
+						if (mapObject(apis).length > 0) {
 							pulumi.log.warn('APIs currently not supported for digital ocean deployments');
 						}
 
-						if (topics.length > 0) {
+						if (mapObject(topics).length > 0) {
 							pulumi.log.warn('Topics currently not supported for digital ocean deployments');
 						}
 
-						if (schedules.length > 0) {
+						if (mapObject(schedules).length > 0) {
 							pulumi.log.warn('Schedules currently not supported for digital ocean deployments');
 						}
 
-						if (queues.length > 0) {
+						if (mapObject(queues).length > 0) {
 							pulumi.log.warn('Queues currently not supported for digital ocean deployments');
 						}
 
-						const funcs = stack.getFunctions();
+						if (mapObject(sites).length > 0) {
+							pulumi.log.warn('Static sites currently not supported for digital ocean deployments');
+						}
 
-						if (funcs.length > 0) {
+						const services = stack.getServices();
+
+						if (services.length > 0) {
 							const containerRegistry = await digitalocean.getContainerRegistry({
 								name: registryName,
 							});
@@ -114,15 +119,15 @@ export class Deploy extends Task<void> {
 								throw new Error('Entrypoints must contain a default route /');
 							}
 
-							const functionEntrypoints = normalizedEntrypoints.filter(({ type }) => type === 'function');
-							const otherEntrypoints = normalizedEntrypoints.filter(({ type }) => type !== 'function');
+							const functionEntrypoints = normalizedEntrypoints.filter(({ type }) => type === 'service');
+							const otherEntrypoints = normalizedEntrypoints.filter(({ type }) => type !== 'service');
 
 							if (otherEntrypoints.length > 0) {
 								pulumi.log.warn('Non function entrypoints are not supported for digital ocean deployments');
 							}
 
 							// This currently assumes that the registry is empty
-							if (funcs.length > REGISTRY_LIMITS[containerRegistry.subscriptionTierSlug]) {
+							if (services.length > REGISTRY_LIMITS[containerRegistry.subscriptionTierSlug]) {
 								pulumi.log.error(
 									'Provided registry cannot support the number of functions in this stack, look at upgrading your DOCR subscription tier',
 								);
@@ -130,7 +135,7 @@ export class Deploy extends Task<void> {
 
 							// Create the functions
 							const functionSpecs = stack
-								.getFunctions()
+								.getServices()
 								.map((f) => createFunction(f, registryName, token, functionEntrypoints));
 							const app = new digitalocean.App(stack.getName(), {
 								spec: {

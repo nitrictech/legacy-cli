@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Function } from '@nitric/cli-common';
+import { Service } from '@nitric/cli-common';
 import * as digitalocean from '@pulumi/digitalocean';
 import * as pulumi from '@pulumi/pulumi';
 import * as docker from '@pulumi/docker';
@@ -20,22 +20,21 @@ import * as docker from '@pulumi/docker';
 interface NormalizedFunctionEntrypoint {
 	path: string;
 	name: string;
-	type: 'function' | 'site' | 'api';
+	type: 'service' | 'site' | 'api';
 }
 
 export function createFunction(
-	func: Function,
+	service: Service,
 	registryName: string,
 	token: string,
 	entrypoints: NormalizedFunctionEntrypoint[],
 ): digitalocean.types.input.AppSpecService {
-	const nitricFunction = func.asNitricFunction();
 	// Push the image
-	const image = new docker.Image(`${func.getImageTagName()}-image`, {
-		imageName: pulumi.interpolate`registry.digitalocean.com/${registryName}/${nitricFunction.name}`,
+	const image = new docker.Image(`${service.getImageTagName()}-image`, {
+		imageName: pulumi.interpolate`registry.digitalocean.com/${registryName}/${service.getName()}`,
 		build: {
 			// Staging directory
-			context: func.getStagingDirectory(),
+			context: service.getStagingDirectory(),
 			args: {
 				PROVIDER: 'do',
 			},
@@ -53,13 +52,13 @@ export function createFunction(
 	const imageName = image.baseImageName.apply((bin) => bin.split('/').pop()!);
 
 	return {
-		name: nitricFunction.name,
+		name: service.getName(),
 		httpPort: 9001,
 		image: {
 			registryType: 'DOCR',
 			// TODO: Apply docker deployed repository here...
 			repository: imageName,
 		},
-		routes: entrypoints.filter(({ name }) => name === nitricFunction.name).map(({ path }) => ({ path })),
+		routes: entrypoints.filter(({ name }) => name === service.getName()).map(({ path }) => ({ path })),
 	};
 }
