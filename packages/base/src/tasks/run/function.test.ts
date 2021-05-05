@@ -14,7 +14,7 @@
 
 import 'jest';
 import { mocked } from 'ts-jest/utils';
-import { RunFunctionTask, Cleanup } from '.';
+import { RunServiceTask, Cleanup } from '.';
 import Docker, { Network } from 'dockerode';
 
 jest.mock('get-port');
@@ -41,14 +41,10 @@ describe('Given a Nitric function is being run locally as a container', () => {
 
 	test('A container image should be created', async () => {
 		expect.assertions(1);
-		const runFunctionTask = new RunFunctionTask({
+		const runFunctionTask = new RunServiceTask({
 			image: {
 				id: 'test-id',
-				func: {
-					name: 'test-function',
-					path: 'test-function-path',
-					runtime: 'dummy' as any,
-				},
+				serviceName: 'test-function',
 			},
 			// port: 3000, network: '', subscriptions: '', volume: '',
 		});
@@ -63,14 +59,10 @@ describe('Given a Nitric function is being run locally as a container', () => {
 
 	describe('When docker run takes too long to respond', () => {
 		test('The task promise should reject with details', () => {
-			const runFunctionTask = new RunFunctionTask({
+			const runFunctionTask = new RunServiceTask({
 				image: {
 					id: 'test-id',
-					func: {
-						name: 'test-function',
-						path: 'test-function-path',
-						runtime: 'dummy' as any,
-					},
+					serviceName: 'test-function',
 				},
 				// port: 3000, network: '', subscriptions: '', volume: '',
 			});
@@ -104,17 +96,13 @@ describe('Given a Nitric function is being run locally as a container', () => {
 		const runConfig = {
 			image: {
 				id: 'test-id',
-				func: {
-					name: 'test-function',
-					path: 'test-function-path',
-					runtime: 'dummy' as any,
-				},
+				serviceName: 'test-function',
 			},
 		};
 
 		test('The status code should be logged', async () => {
 			expect.assertions(1);
-			const runFunctionTask = new RunFunctionTask(runConfig);
+			const runFunctionTask = new RunServiceTask(runConfig);
 
 			const mockInstance = mocked(Docker, true).mock.instances[0];
 			const mockRun = mocked(mockInstance.run, true);
@@ -127,7 +115,7 @@ describe('Given a Nitric function is being run locally as a container', () => {
 
 		test('An error should be logged if it occurs', async () => {
 			expect.assertions(1);
-			const runFunctionTask = new RunFunctionTask(runConfig);
+			const runFunctionTask = new RunServiceTask(runConfig);
 
 			const mockInstance = mocked(Docker, true).mock.instances[0];
 			const mockRun = mocked(mockInstance.run, true);
@@ -142,14 +130,10 @@ describe('Given a Nitric function is being run locally as a container', () => {
 	describe('When a custom docker network is set', () => {
 		test('The network config should be passed to Docker', async () => {
 			expect.assertions(1);
-			const runFunctionTask = new RunFunctionTask({
+			const runFunctionTask = new RunServiceTask({
 				image: {
 					id: 'test-id',
-					func: {
-						name: 'test-function',
-						path: 'test-function-path',
-						runtime: 'dummy' as any,
-					},
+					serviceName: 'test-function',
 				},
 				network: {
 					inspect: async () => {
@@ -187,14 +171,10 @@ describe('Given a Nitric function is being run locally as a container', () => {
 
 			test('A warning should be logged', async () => {
 				expect.assertions(1);
-				const runFunctionTask = new RunFunctionTask({
+				const runFunctionTask = new RunServiceTask({
 					image: {
 						id: 'test-id',
-						func: {
-							name: 'test-function',
-							path: 'test-function-path',
-							runtime: 'dummy' as any,
-						},
+						serviceName: 'test-function',
 					},
 					// port: 3000,
 					network: new Network(null, 'dummy-network'),
@@ -212,14 +192,10 @@ describe('Given a Nitric function is being run locally as a container', () => {
 
 			test('The bridge network should be used instead', async () => {
 				expect.assertions(1);
-				const runFunctionTask = new RunFunctionTask({
+				const runFunctionTask = new RunServiceTask({
 					image: {
 						id: 'test-id',
-						func: {
-							name: 'test-function',
-							path: 'test-function-path',
-							runtime: 'dummy' as any,
-						},
+						serviceName: 'test-function',
 					},
 					// port: 3000,
 					network: new Network(null, 'dummy-network'),
@@ -250,14 +226,10 @@ describe('Given a Nitric function is being run locally as a container', () => {
 	describe('When a docker volume is provide', () => {
 		test('The volume config should be passed to Docker', async () => {
 			expect.assertions(1);
-			const runFunctionTask = new RunFunctionTask({
+			const runFunctionTask = new RunServiceTask({
 				image: {
 					id: 'test-id',
-					func: {
-						name: 'test-function',
-						path: 'test-function-path',
-						runtime: 'dummy' as any,
-					},
+					serviceName: 'test-function',
 				},
 				// port: 3000, subscriptions: '', volume: '',
 				volume: {

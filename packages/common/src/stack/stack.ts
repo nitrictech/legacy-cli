@@ -13,10 +13,7 @@
 // limitations under the License.
 
 import path from 'path';
-import {
-	NitricService,
-	NitricStack,
-} from '../types';
+import { NitricService, NitricStack } from '../types';
 import fs from 'fs';
 import YAML from 'yaml';
 import { Repository } from '../templates';
@@ -33,10 +30,7 @@ export class Stack {
 	private name: string;
 	private descriptor: NitricStack;
 
-	constructor(
-		file: string,
-		descriptor: NitricStack,
-	) {
+	constructor(file: string, descriptor: NitricStack) {
 		this.name = descriptor.name;
 		this.descriptor = descriptor;
 		this.file = file;
@@ -66,7 +60,7 @@ export class Stack {
 			...descriptor,
 			services: {
 				...services,
-				[name]: svc
+				[name]: svc,
 			},
 		};
 
@@ -88,15 +82,14 @@ export class Stack {
 		const { descriptor } = this;
 		const { services = {} } = descriptor;
 
-		return Object.keys(services).map(
-			svcName => new Service(this, svcName, services[svcName]));
+		return Object.keys(services).map((svcName) => new Service(this, svcName, services[svcName]));
 	}
 
 	getSites(): Site[] {
 		const { descriptor } = this;
 		const { sites = {} } = descriptor;
 
-		return Object.keys(sites).map(siteName => new Site(this, siteName, sites[siteName]))
+		return Object.keys(sites).map((siteName) => new Site(this, siteName, sites[siteName]));
 	}
 
 	getStagingDirectory(): string {

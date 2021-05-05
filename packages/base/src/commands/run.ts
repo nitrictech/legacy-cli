@@ -51,21 +51,22 @@ export const MAX_PORT = 65535; // end of ephemeral port range, as defined by IAN
  *
  * @param stack used to generate the full subscriber list for every topic.
  */
-export function getContainerSubscriptions({ topics = {}, services = {} }: NitricStack): Record<string, string[]> | undefined {
-	const namedTopics = Object.keys(topics).map(name => ({ name, ...topics[name] }));
-	const namedServices = Object.keys(services).map(name => ({ name, ...services[name] }))
-	
+export function getContainerSubscriptions({
+	topics = {},
+	services = {},
+}: NitricStack): Record<string, string[]> | undefined {
+	const namedTopics = Object.keys(topics).map((name) => ({ name, ...topics[name] }));
+	const namedServices = Object.keys(services).map((name) => ({ name, ...services[name] }));
+
 	return namedTopics.reduce((subs, topic) => {
 		return {
 			...subs,
-			[topic.name]: namedServices.filter(({ triggers }) => {
-				return (
-					triggers &&
-					(triggers.topics || []).filter(name => name === topic.name).length > 0
-				)
-			})
-			.map((service) => `http://${service.name}:9001`)
-		}
+			[topic.name]: namedServices
+				.filter(({ triggers }) => {
+					return triggers && (triggers.topics || []).filter((name) => name === topic.name).length > 0;
+				})
+				.map((service) => `http://${service.name}:9001`),
+		};
 	}, {} as Record<string, string[]>);
 }
 
@@ -210,7 +211,7 @@ export function createRunTasks(
  */
 export function sortImages(images: NitricImage[]): NitricImage[] {
 	const imagesCopy = [...images];
-	imagesCopy.sort(({ serviceName: nameA }, { serviceName:  nameB }) => {
+	imagesCopy.sort(({ serviceName: nameA }, { serviceName: nameB }) => {
 		if (nameA < nameB) {
 			return -1;
 		}
@@ -256,12 +257,12 @@ export default class Run extends Command {
 	runContainers = async (stack: Stack, directory: string): Promise<void> => {
 		const nitricStack = stack.asNitricStack();
 		const { apis = {} } = nitricStack;
-		const namedApis = Object.keys(apis || {}).map(name => ({ name, ...apis[name] }))
+		const namedApis = Object.keys(apis || {}).map((name) => ({ name, ...apis[name] }));
 
 		cli.action.stop();
 
 		// Build the container images for each function in the Nitric Stack
-		const builtImages = await createBuildTasks(stack, directory).run() as { [key: string]: NitricImage };
+		const builtImages = (await createBuildTasks(stack, directory).run()) as { [key: string]: NitricImage };
 		// Filter out undefined and non image results from build tasks
 		let images = Object.values(builtImages).filter((i) => i && i.serviceName) as NitricImage[];
 

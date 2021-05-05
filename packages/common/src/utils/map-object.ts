@@ -13,8 +13,8 @@
 // limitations under the License.
 
 export function mapObject<T>(obj: Record<string, T>): (T & { name: string })[] {
-	return Object.keys(obj).map(name => ({
+	return Object.keys(obj).map((name) => ({
 		name,
-		...obj[name]
+		...obj[name],
 	}));
 }

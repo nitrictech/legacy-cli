@@ -29,7 +29,10 @@ interface GoogleExtensions {
 	};
 }
 
-async function transformOpenApiSpec(api: NamedObject<NitricAPI>, funcs: DeployedService[]): Promise<pulumi.Output<string>> {
+async function transformOpenApiSpec(
+	api: NamedObject<NitricAPI>,
+	funcs: DeployedService[],
+): Promise<pulumi.Output<string>> {
 	const { name, ...spec } = api;
 
 	// Convert to swagger

@@ -64,9 +64,7 @@ export class Service {
 	}
 
 	getImageTagName(provider?: string): string {
-		const providerString =	provider 
-			? `-${provider}`
-			: "";
+		const providerString = provider ? `-${provider}` : '';
 		return `${this.stack.getName()}-${this.name}${providerString}`;
 	}
 

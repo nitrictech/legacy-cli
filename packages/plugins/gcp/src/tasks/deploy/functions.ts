@@ -26,7 +26,7 @@ export function createFunction(
 	gcpProject: string,
 ): DeployedService {
 	const nitricFunc = service.asNitricService();
-	const {  minScale = 0, maxScale = 10, triggers = {} } = nitricFunc;
+	const { minScale = 0, maxScale = 10, triggers = {} } = nitricFunc;
 
 	//const grcHost = getGcrHost(region);
 

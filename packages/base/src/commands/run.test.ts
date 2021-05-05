@@ -14,13 +14,10 @@
 
 import 'jest';
 import { mocked } from 'ts-jest/utils';
-// import Run, { MIN_PORT, MAX_PORT, getPortRange, getContainerSubscriptions, sortImages } from './run';
 import { MIN_PORT, MAX_PORT, getPortRange, getContainerSubscriptions, sortImages } from './run';
-// import { RunFunctionTask } from '../tasks/run';
 import * as getPort from 'get-port';
-// import * as clicommon from '@nitric/cli-common';
 import { Listr } from 'listr2';
-import { NitricService, NitricImage, NitricStack } from '@nitric/cli-common';
+import { NitricImage, NitricStack } from '@nitric/cli-common';
 
 jest.mock('dockerode');
 jest.mock('get-port');
@@ -130,22 +127,32 @@ describe('Given getPortRange', () => {
 describe('Given getContainerSubscriptions', () => {
 	describe('Given topics are defined', () => {
 		const topicStack = {
-			topics: [{ name: 'topic-one' }, { name: 'topic-two' }],
+			topics: {
+				'topic-one': {},
+				'topic-two': {},
+			},
 		};
 
 		describe('When the topics have subscribers', () => {
 			const subscribedStack = {
+				name: 'subscribed-stack',
 				...topicStack,
-				functions: [
-					{
-						name: 'function-one',
-						subs: [{ topic: 'topic-one' }],
+				services: {
+					'function-one': {
+						path: './function-one',
+						runtime: 'official/nextjs',
+						triggers: {
+							topics: ['topic-one'],
+						},
 					},
-					{
-						name: 'function-two',
-						subs: [{ topic: 'topic-two' }],
+					'function-two': {
+						path: './function-one',
+						runtime: 'official/nextjs',
+						triggers: {
+							topics: ['topic-two'],
+						},
 					},
-				],
+				},
 			};
 
 			it('Should return the topics and their subscribers', () => {
@@ -159,8 +166,9 @@ describe('Given getContainerSubscriptions', () => {
 
 		describe("When the topics don't have subscribers", () => {
 			const unsubscribedStack = {
+				name: 'unsubscribed-stack',
 				...topicStack,
-				functions: [] as NitricService[],
+				services: {},
 			};
 
 			it('Should return the topics with empty subscriber address arrays', () => {
@@ -274,46 +282,39 @@ describe('Given executing nitric run', () => {
 	describe('Given a nitric stack with multiple functions', () => {
 		const multiFunctionStack: NitricStack = {
 			name: 'test-stack',
-			functions: [
-				{
-					name: 'dummy-func1',
+			services: {
+				'dummy-func1': {
 					runtime: 'custom',
 					path: 'dummy-func1',
 				},
-				{
-					name: 'dummy-func2',
+				'dummy-func2': {
 					runtime: 'custom',
 					path: 'dummy-func2',
 				},
-			],
+			},
 		};
 
 		describe('Given an event topic', () => {
 			const eventTopicStack: NitricStack = {
 				...multiFunctionStack,
 				// add the topic
-				topics: [
-					{
-						name: 'test-topic',
-					},
-				],
+				topics: {
+					'test-topic': {},
+				},
 			};
 
 			describe('When one function has a subscription', () => {
 				const subscribedStack: NitricStack = {
 					name: eventTopicStack.name,
-					functions: [
-						{
-							...eventTopicStack.functions![0],
-							// add the subscription
-							subs: [
-								{
-									topic: 'test-topic',
-								},
-							],
+					services: {
+						...eventTopicStack.services,
+						'dummy-func1': {
+							...eventTopicStack.services!['dummy-func1'],
+							triggers: {
+								topics: ['test-topic'],
+							},
 						},
-						eventTopicStack.functions![1],
-					],
+					},
 					topics: eventTopicStack.topics,
 				};
 
@@ -332,85 +333,45 @@ describe('Given executing nitric run', () => {
 			const unsortedImages: NitricImage[] = [
 				{
 					id: '1111',
-					func: {
-						name: 'a-function',
-						path: './some-path',
-						runtime: 'custom',
-					},
+					serviceName: 'a-function',
 				},
 				{
 					id: '1111',
-					func: {
-						name: 'c-function',
-						path: './some-path',
-						runtime: 'custom',
-					},
+					serviceName: 'c-function',
 				},
 				{
 					id: '1111',
-					func: {
-						name: 'same-name',
-						path: './some-path',
-						runtime: 'custom',
-					},
+					serviceName: 'same-name',
 				},
 				{
 					id: '1111',
-					func: {
-						name: 'same-name',
-						path: './some-path',
-						runtime: 'custom',
-					},
+					serviceName: 'same-name',
 				},
 				{
 					id: '1111',
-					func: {
-						name: 'b-function',
-						path: './some-path',
-						runtime: 'custom',
-					},
+					serviceName: 'b-function',
 				},
 			];
 			expect(sortImages(unsortedImages)).toEqual([
 				{
 					id: '1111',
-					func: {
-						name: 'a-function',
-						path: './some-path',
-						runtime: 'custom',
-					},
+					serviceName: 'a-function',
 				},
 				{
 					id: '1111',
-					func: {
-						name: 'b-function',
-						path: './some-path',
-						runtime: 'custom',
-					},
+					serviceName: 'b-function',
 				},
 				{
 					id: '1111',
-					func: {
-						name: 'c-function',
-						path: './some-path',
-						runtime: 'custom',
-					},
+					serviceName: 'c-function',
 				},
 				{
 					id: '1111',
-					func: {
-						name: 'same-name',
-						path: './some-path',
-						runtime: 'custom',
-					},
+					serviceName: 'same-name',
 				},
 				{
 					id: '1111',
-					func: {
-						name: 'same-name',
-						path: './some-path',
-						runtime: 'custom',
-					},
+					serviceName: 'same-name',
 				},
 			]);
 		});

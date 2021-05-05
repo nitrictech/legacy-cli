@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { NitricAPI } from '@nitric/cli-common';
+import { NitricAPI, NamedObject } from '@nitric/cli-common';
 import { apigatewayv2 } from '@pulumi/aws';
 
-export interface DeployedAPI extends NitricAPI {
+export interface DeployedAPI extends NamedObject<NitricAPI> {
 	apiGateway: apigatewayv2.Stage;
 }

@@ -13,13 +13,7 @@
 // limitations under the License.
 
 import tar from 'tar-fs';
-import {
-	dockerodeEvtToString,
-	NitricImage,
-	Task,
-	STAGING_DIR,
-	Service,
-} from '@nitric/cli-common';
+import { dockerodeEvtToString, NitricImage, Task, STAGING_DIR, Service } from '@nitric/cli-common';
 import Docker from 'dockerode';
 import path from 'path';
 
