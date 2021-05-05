@@ -22,3 +22,4 @@ export * from './schedule';
 export * from './api';
 export * from './static-site';
 export * from './entrypoints';
+export * from './named-object';

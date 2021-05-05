@@ -14,18 +14,18 @@
 
 import { cloudfront, types, apigatewayv2, lambda } from '@pulumi/aws';
 import { NitricEntrypoints } from '@nitric/cli-common';
-import { DeployedAPI, DeployedFunction, DeployedSite } from '../types';
+import { DeployedAPI, DeployedService, DeployedSite } from '../types';
 import * as pulumi from '@pulumi/pulumi';
 import YAML from 'yaml';
 
-function createApiGatewayForFunction(deployedFunction: DeployedFunction): apigatewayv2.Stage {
+function createApiGatewayForFunction(deployedService: DeployedService): apigatewayv2.Stage {
 	// Grant apigateway permission to execute the lambda
-	const body = deployedFunction.awsLambda.invokeArn.apply((invokeArn) =>
+	const body = deployedService.awsLambda.invokeArn.apply((invokeArn) =>
 		YAML.stringify({
 			openapi: '3.0.1',
 			info: {
 				version: '1.0',
-				title: `${deployedFunction.name}Proxy`,
+				title: `${deployedService.name}Proxy`,
 			},
 			paths: {
 				$default: {
@@ -45,21 +45,21 @@ function createApiGatewayForFunction(deployedFunction: DeployedFunction): apigat
 	);
 
 	// Create the lambda proxy API for invocation via cloudfront
-	const lambdaAPI = new apigatewayv2.Api(`${deployedFunction.name}ProxyApi`, {
+	const lambdaAPI = new apigatewayv2.Api(`${deployedService.name}ProxyApi`, {
 		body,
 		protocolType: 'HTTP',
 	});
 
 	// Create a deployment for this API
-	const deployment = new apigatewayv2.Stage(`${deployedFunction.name}ProxyDeployment`, {
+	const deployment = new apigatewayv2.Stage(`${deployedService.name}ProxyDeployment`, {
 		apiId: lambdaAPI.id,
 		name: '$default',
 		autoDeploy: true,
 	});
 
-	new lambda.Permission(`${deployedFunction.name}ProxyPermission`, {
+	new lambda.Permission(`${deployedService.name}ProxyPermission`, {
 		action: 'lambda:InvokeFunction',
-		function: deployedFunction.awsLambda,
+		function: deployedService.awsLambda,
 		principal: 'apigateway.amazonaws.com',
 		sourceArn: pulumi.interpolate`${lambdaAPI.executionArn}/*/*`,
 	});
@@ -72,7 +72,7 @@ function originsFromEntrypoints(
 	entrypoints: NitricEntrypoints,
 	deployedSites: DeployedSite[],
 	deployedApis: DeployedAPI[],
-	deployedFunctions: DeployedFunction[],
+	deployedServices: DeployedService[],
 ): types.input.cloudfront.DistributionOrigin[] {
 	return Object.keys(entrypoints).map((key) => {
 		const { type, name } = entrypoints[key];
@@ -115,14 +115,14 @@ function originsFromEntrypoints(
 					},
 				};
 			}
-			case 'function': {
-				const deployedFunction = deployedFunctions.find((s) => s.name === name);
+			case 'service': {
+				const deployedService = deployedServices.find((s) => s.name === name);
 
-				if (!deployedFunction) {
+				if (!deployedService) {
 					throw new Error(`Target Function ${name} configured in entrypoints but does not exist`);
 				}
 
-				const apiGateway = createApiGatewayForFunction(deployedFunction);
+				const apiGateway = createApiGatewayForFunction(deployedService);
 
 				// Then we extract the domain name from the created api gateway...
 				const domainName = apiGateway.invokeUrl.apply((url) => new URL(url).host);
@@ -130,7 +130,7 @@ function originsFromEntrypoints(
 				//// Craft and API origin here...
 				return {
 					domainName,
-					originId: deployedFunction.name,
+					originId: deployedService.name,
 					customOriginConfig: {
 						httpPort: 80,
 						httpsPort: 443,
@@ -199,7 +199,7 @@ export async function createEntrypoints(
 	entrypoints: NitricEntrypoints,
 	deployedSites: DeployedSite[],
 	deployedApis: DeployedAPI[],
-	deployedFunctions: DeployedFunction[],
+	deployedServices: DeployedService[],
 ): Promise<cloudfront.Distribution> {
 	const defaultEntrypoint = entrypoints['/'];
 
@@ -210,7 +210,7 @@ export async function createEntrypoints(
 	}
 
 	const oai = new cloudfront.OriginAccessIdentity(`${stackName}OAI`);
-	const origins = originsFromEntrypoints(oai, entrypoints, deployedSites, deployedApis, deployedFunctions);
+	const origins = originsFromEntrypoints(oai, entrypoints, deployedSites, deployedApis, deployedServices);
 	const { defaultCacheBehavior, orderedCacheBehaviors } = entrypointsToBehaviours(entrypoints);
 
 	// Create a new cloudfront distribution

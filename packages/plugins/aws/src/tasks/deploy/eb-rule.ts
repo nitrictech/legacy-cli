@@ -12,11 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { NitricSchedule } from '@nitric/cli-common';
+import { NitricSchedule, NamedObject } from '@nitric/cli-common';
 import { DeployedTopic } from '../types';
 import { cloudwatch } from '@pulumi/aws';
 
-export function createSchedule(schedule: NitricSchedule, topics: DeployedTopic[]): void {
+export function createSchedule(schedule: NamedObject<NitricSchedule>, topics: DeployedTopic[]): void {
 	const targetTopic = topics.find((t) => t.name === schedule.target.id);
 
 	if (targetTopic) {

@@ -12,10 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { NitricAPI } from '@nitric/cli-common';
+import { NitricAPI, NamedObject } from '@nitric/cli-common';
 import { OpenAPIV3 } from 'openapi-types';
 import { uniq } from 'lodash';
-import { DeployedAPI, DeployedFunction } from '../types';
+import { DeployedAPI, DeployedService } from '../types';
 import { apigatewayv2, lambda } from '@pulumi/aws';
 import * as pulumi from '@pulumi/pulumi';
 
@@ -39,7 +39,7 @@ interface AwsExtentions {
 	};
 }
 
-export function createApi(api: NitricAPI, funcs: DeployedFunction[]): DeployedAPI {
+export function createApi(api: NamedObject<NitricAPI>, funcs: DeployedService[]): DeployedAPI {
 	const { name, ...rest } = api;
 
 	const targetNames = uniq(
@@ -82,8 +82,6 @@ export function createApi(api: NitricAPI, funcs: DeployedFunction[]): DeployedAP
 							const invokeArn = invokeArnPair.split('||')[1];
 							// Discard the old key on the transformed API
 							const { 'x-nitric-target': _, ...rest } = p;
-
-							// console.log("invokeArn:", invokeArn);
 
 							return {
 								...acc,

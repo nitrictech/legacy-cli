@@ -58,7 +58,7 @@ export class Template {
 	 * @param template Copies the wrapper code and dockerfile of the given template
 	 * @param path
 	 */
-	static async copyRuntimeTo(template: Template, toDir: string): Promise<Buffer> {
+	static async copyRuntimeTo(template: Template, toDir: string): Promise<void | Buffer> {
 		const inPath = template.getPath();
 		//TODO: should probably do something to make sure the file exists
 		// Make a copy of the function template, using the new name in the output directory
@@ -94,7 +94,7 @@ export class Template {
 	 * @param template Copies the code directory of a given template to a given path
 	 * @param path
 	 */
-	static async copyCodeTo(template: Template, path: string): Promise<Buffer> {
+	static async copyCodeTo(template: Template, path: string): Promise<void | Buffer> {
 		const inPath = template.getCodePath();
 		//TODO: should probably do something to make sure the file exists
 		// Make a copy of the function template, using the new name in the output directory

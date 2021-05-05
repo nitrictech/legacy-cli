@@ -21,7 +21,7 @@ import tar from 'tar-fs';
 import streamToPromise from 'stream-to-promise';
 import match from 'multimatch';
 
-type omitMethods = 'getFunction' | 'getFunctions';
+type omitMethods = 'getService' | 'getServices';
 
 export class Service {
 	// Back reference to the parent stack
