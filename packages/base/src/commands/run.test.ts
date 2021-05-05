@@ -20,7 +20,7 @@ import { MIN_PORT, MAX_PORT, getPortRange, getContainerSubscriptions, sortImages
 import * as getPort from 'get-port';
 // import * as clicommon from '@nitric/cli-common';
 import { Listr } from 'listr2';
-import { NitricFunction, NitricImage, NitricStack } from '@nitric/cli-common';
+import { NitricService, NitricImage, NitricStack } from '@nitric/cli-common';
 
 jest.mock('dockerode');
 jest.mock('get-port');
@@ -160,7 +160,7 @@ describe('Given getContainerSubscriptions', () => {
 		describe("When the topics don't have subscribers", () => {
 			const unsubscribedStack = {
 				...topicStack,
-				functions: [] as NitricFunction[],
+				functions: [] as NitricService[],
 			};
 
 			it('Should return the topics with empty subscriber address arrays', () => {

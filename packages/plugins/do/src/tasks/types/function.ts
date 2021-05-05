@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { NitricFunction } from '@nitric/cli-common';
+import { NitricService } from '@nitric/cli-common';
 import * as digitalocean from '@pulumi/digitalocean';
 
-export interface DeployedFunction extends NitricFunction {
+export interface DeployedFunction extends NitricService {
 	app: digitalocean.App;
 }
