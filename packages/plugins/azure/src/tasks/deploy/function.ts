@@ -63,9 +63,9 @@ export function createFunctionAsApp(
 	// Azure that utilizes that contract.
 	// return new appservice.FunctionApp()
 
-	const deployedApp = new web.WebApp(nitricService.name, {
+	const deployedApp = new web.WebApp(service.getName(), {
 		serverFarmId: plan.id,
-		name: `${service.getStack().getName()}-${nitricService.name}`,
+		name: `${service.getStack().getName()}-${service.getName()}`,
 		resourceGroupName: resourceGroup.name,
 		siteConfig: {
 			appSettings: [
