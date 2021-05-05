@@ -55,7 +55,7 @@ export function createFunction(
 	// Need to await the image, so we'll apply this to ensure there is a dependency on the deployment
 	// XXX: We MUST using imageName here as baseImageName is already known so it cannot be used as
 	// a dependency to wait on deployment
-	const imageName = image.imageName.apply((name) => name.split('/').pop()!.split[':'][0] as string);
+	const imageName = image.imageName.apply((name) => name.split('/').pop()!.split(':')[0] as string);
 
 	return {
 		spec: {
