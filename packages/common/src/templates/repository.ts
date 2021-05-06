@@ -34,7 +34,6 @@ interface TemplateDescriptor {
  * File representation of repository
  */
 interface RepositoryFile {
-	name: string;
 	templates: TemplateDescriptor[];
 }
 
