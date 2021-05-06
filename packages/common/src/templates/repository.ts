@@ -99,7 +99,8 @@ export class Repository {
 	static fromFile(file: string): Repository {
 		const repoFile = YAML.parse(fs.readFileSync(file).toString()) as RepositoryFile;
 		// TODO: Add repo file validation
-		return new Repository(repoFile.name, path.join(file, '../'), repoFile.templates);
+		const repoName = path.dirname(file).split(path.sep).pop()!
+		return new Repository(repoName, path.join(file, '../'), repoFile.templates);
 	}
 
 	/**

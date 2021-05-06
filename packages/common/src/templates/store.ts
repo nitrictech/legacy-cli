@@ -49,6 +49,10 @@ export class Store {
 		return await Repository.checkout(key, repo.location);
 	}
 
+	availableRepositories(): string[] {
+		return Object.keys(this.repositories);
+	}
+
 	hasRepostory(name: string): boolean {
 		return !!this.repositories[name];
 	}
