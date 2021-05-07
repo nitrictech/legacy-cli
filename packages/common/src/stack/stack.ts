@@ -40,8 +40,10 @@ export class Stack {
 		return this.name;
 	}
 
-	asNitricStack(): NitricStack {
-		return this.descriptor;
+	asNitricStack(noUndefined: boolean = false): NitricStack {
+		return Object.keys(this.descriptor)
+			.filter((k) => this.descriptor[k] != undefined || !noUndefined)
+			.reduce((acc, k) => ({ ...acc, [k]: this.descriptor[k] }), {}) as NitricStack;
 	}
 
 	getDirectory(): string {
@@ -160,10 +162,7 @@ export class Stack {
 		file: string,
 		stringify: (obj: NitricStack) => string = YAML.stringify,
 	): Promise<void> {
-		let stackString = stringify(stack.asNitricStack()) //Turn object into yaml
-			.split('\n')
-			.filter((value) => value.search(/null/gi) === -1) //Return values that don't have null
-			.join('\n');
+		let stackString = stringify(stack.asNitricStack(true)); //Turn object into yaml
 		return await fs.promises.writeFile(file, stackString);
 	}
 
