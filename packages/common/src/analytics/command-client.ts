@@ -20,6 +20,8 @@ export class CommandClient {
 		this.startTime = new Date().getTime();
 
 		if (this.visitor) {
+			console.log("starting", this.name);
+			this.visitor.pageview(this.name, "CLI");
 			this.visitor.event(this.name, "start");		
 		}
 
@@ -49,6 +51,7 @@ export class CommandClient {
 		}
 
 		if (this.visitor) {
+			console.log("stopping", this.name);
 			this.visitor.event(this.name, "stop");
 
 			const runtime = new Date().getTime() - this.startTime;

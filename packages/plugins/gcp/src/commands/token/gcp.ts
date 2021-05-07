@@ -14,6 +14,7 @@
 
 import { flags } from '@oclif/command';
 import { google } from 'googleapis';
+import { BaseCommand } from "@nitric/cli-common";
 
 export default class Token extends BaseCommand {
 	static description = 'Deploy a Nitric application to Google Cloud Platform (GCP)';

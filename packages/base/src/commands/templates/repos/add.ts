@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import { BaseCommand, wrapTaskForListr, Store } from '@nitric/cli-common';
-import { Command, flags } from '@oclif/command';
+import { flags } from '@oclif/command';
 import { cli } from 'cli-ux';
 import { Listr } from 'listr2';
 import { AddRepositoryTask } from '../../../tasks/repository/add';
