@@ -1,10 +1,9 @@
-import fs from "fs";
-import { PREFERENCES_FILE } from "../paths";
-import { v4 } from "uuid";
-import YAML from "yaml";
+import fs from 'fs';
+import { PREFERENCES_FILE } from '../paths';
+import { v4 } from 'uuid';
+import YAML from 'yaml';
 import inquirer from 'inquirer';
-import { block } from "../utils";
-
+import { block } from '../utils';
 
 /**
  * Interface for structuring
@@ -54,7 +53,7 @@ export class Preferences {
 	}
 
 	static requiresInit(): boolean {
-		return !fs.existsSync(PREFERENCES_FILE)
+		return !fs.existsSync(PREFERENCES_FILE);
 	}
 
 	/**
@@ -63,9 +62,9 @@ export class Preferences {
 	static async fromDefault(): Promise<Preferences> {
 		// Check if the file exists...
 		if (!fs.existsSync(PREFERENCES_FILE)) {
-			throw new Error("Preferences file not initialized!");
+			throw new Error('Preferences file not initialized!');
 		}
-			
+
 		return await this.fromFile(PREFERENCES_FILE);
 	}
 
@@ -81,15 +80,18 @@ export class Preferences {
 		if (Preferences.requiresInit()) {
 			console.log(block`
 			At Nitric we're striving to provide the best possible developer experience for all of our tools.
-			To help us do this we'd like to collect anonymous analytics in order to help us troubleshoot any bugs or
-			performance issues you may come across.
+			To help us do this we'd like to collect anonymous analytics to help us track plugins & features used, issues and performance metrics.
+
+			Note: this doesn't include any personal data, source code or other sensitive information about your projects.
 		`);
 
-			const { analyticsOptIn } = await inquirer.prompt([{
-				name: "analyticsOptIn",
-				message: "Enable Anonymous Analytics",
-				type: "confirm"
-			}]);
+			const { analyticsOptIn } = await inquirer.prompt([
+				{
+					name: 'analyticsOptIn',
+					message: 'Enable Anonymous Analytics',
+					type: 'confirm',
+				},
+			]);
 
 			await Preferences.init({
 				analyticsOptIn,
@@ -108,7 +110,7 @@ export class Preferences {
 		}
 
 		const data: PreferenceData = {
-			clientId
+			clientId,
 		};
 
 		const preferences = new Preferences(data);
