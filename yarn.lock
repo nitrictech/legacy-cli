@@ -683,6 +683,7 @@ __metadata:
     "@types/jest": ^26.0.15
     "@types/node": ^10
     "@types/stream-to-promise": ^2.2.1
+    "@types/universal-analytics": ^0.4.4
     enquirer: ^2.3.0
     eventemitter3: ^4.0.7
     execa: ^5.0.0
@@ -698,6 +699,7 @@ __metadata:
     ts-jest: ^26.4.3
     tslib: ^1
     typescript: ^3.3
+    universal-analytics: ^0.4.23
     yaml: ^1.10.0
   languageName: unknown
   linkType: soft
@@ -1695,6 +1697,13 @@ __metadata:
   dependencies:
     "@types/node": "*"
   checksum: 8cb13723e123cf35cfb15abae7118ae5a91d37e6deafb8ae5b9c02566d3862e1fa3f582060550630e87d724014d51e394f517cb9b5805b70c6f6a9e80a3b6754
+  languageName: node
+  linkType: hard
+
+"@types/universal-analytics@npm:^0.4.4":
+  version: 0.4.4
+  resolution: "@types/universal-analytics@npm:0.4.4"
+  checksum: af07f1eaa4adc7bb5eac6004d67bb77982d16f0e0df7944830514b4bedde12981ecbdbe53ad923b0e1924887ee361c2c0022ce6e2d83fa40ecc654547c515416
   languageName: node
   linkType: hard
 
@@ -12070,6 +12079,17 @@ typescript@~3.7.3:
   languageName: node
   linkType: hard
 
+"universal-analytics@npm:^0.4.23":
+  version: 0.4.23
+  resolution: "universal-analytics@npm:0.4.23"
+  dependencies:
+    debug: ^4.1.1
+    request: ^2.88.2
+    uuid: ^3.0.0
+  checksum: fd9cae3c6760317b251436a3299637749ea4c109f62719fa007de48f4211fa356e9152f7451103c7cb625e171684f68802bb362a5e3e27b69f8a912ad4b029f6
+  languageName: node
+  linkType: hard
+
 "universalify@npm:^0.1.0":
   version: 0.1.2
   resolution: "universalify@npm:0.1.2"
@@ -12184,6 +12204,15 @@ typescript@~3.7.3:
   bin:
     uuid: ./bin/uuid
   checksum: f407d974ca30b20bfbd32ae9cc05d20e18df5fd9e5fa088d91db04a6597125dcc8d09eeeb7237782724daba36418e24f557e0245e6ce7b8e4ad25d6436f1cde1
+  languageName: node
+  linkType: hard
+
+"uuid@npm:^3.0.0":
+  version: 3.4.0
+  resolution: "uuid@npm:3.4.0"
+  bin:
+    uuid: ./bin/uuid
+  checksum: 1ce3f37e214d6d0dc94a6a9663a0365013ace66bc3fd5b203e6f5d2eeb978aaee1192367222386345d30b4c6a447928c501121aa84c637724bf105ef57284949
   languageName: node
   linkType: hard
 

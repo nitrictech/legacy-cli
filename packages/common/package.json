@@ -17,6 +17,7 @@
   ],
   "license": "Apache-2.0",
   "dependencies": {
+    "@types/universal-analytics": "^0.4.4",
     "enquirer": "^2.3.0",
     "eventemitter3": "^4.0.7",
     "execa": "^5.0.0",
@@ -27,6 +28,7 @@
     "stream-to-promise": "^3.0.0",
     "tar-fs": "^2.1.1",
     "tslib": "^1",
+    "universal-analytics": "^0.4.23",
     "yaml": "^1.10.0"
   },
   "devDependencies": {
