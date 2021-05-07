@@ -680,13 +680,17 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@nitric/cli-common@workspace:packages/common"
   dependencies:
+    "@oclif/command": ^1.8.0
+    "@types/inquirer": ^7.3.1
     "@types/jest": ^26.0.15
     "@types/node": ^10
     "@types/stream-to-promise": ^2.2.1
     "@types/universal-analytics": ^0.4.4
+    "@types/uuid": ^8.3.0
     enquirer: ^2.3.0
     eventemitter3: ^4.0.7
     execa: ^5.0.0
+    inquirer: ^8.0.0
     jest: ^26.6.1
     licensee: ^8.2.0
     listr2: ^3.6.2
@@ -700,6 +704,7 @@ __metadata:
     tslib: ^1
     typescript: ^3.3
     universal-analytics: ^0.4.23
+    uuid: ^8.3.2
     yaml: ^1.10.0
   languageName: unknown
   linkType: soft
@@ -1480,6 +1485,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/inquirer@npm:^7.3.1":
+  version: 7.3.1
+  resolution: "@types/inquirer@npm:7.3.1"
+  dependencies:
+    "@types/through": "*"
+    rxjs: ^6.4.0
+  checksum: 2db996acf8d9073a215c5f87797d08a50a86dd1921f4f7b45040aa225b62c522d7d67a37529329395c6e24f6f5e877ddf463f20686aad819d70c0afea6297a4a
+  languageName: node
+  linkType: hard
+
 "@types/istanbul-lib-coverage@npm:*, @types/istanbul-lib-coverage@npm:^2.0.0, @types/istanbul-lib-coverage@npm:^2.0.1":
   version: 2.0.3
   resolution: "@types/istanbul-lib-coverage@npm:2.0.3"
@@ -1700,10 +1715,26 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/through@npm:*":
+  version: 0.0.30
+  resolution: "@types/through@npm:0.0.30"
+  dependencies:
+    "@types/node": "*"
+  checksum: 67bae5cefe5c2604a522d98e6227bd5fccf0fa73fd878dddaf54af495c5b89c8a768d62c84efac3cb28e2ce241ffdcd74b3cd0246a7d9723624b5f13d822d09a
+  languageName: node
+  linkType: hard
+
 "@types/universal-analytics@npm:^0.4.4":
   version: 0.4.4
   resolution: "@types/universal-analytics@npm:0.4.4"
   checksum: af07f1eaa4adc7bb5eac6004d67bb77982d16f0e0df7944830514b4bedde12981ecbdbe53ad923b0e1924887ee361c2c0022ce6e2d83fa40ecc654547c515416
+  languageName: node
+  linkType: hard
+
+"@types/uuid@npm:^8.3.0":
+  version: 8.3.0
+  resolution: "@types/uuid@npm:8.3.0"
+  checksum: 620985aed8fdb4aed153daca5235f4303457a67a4d181efac0021712eabd9edd7e88895f79730c0e651effde7633b1b61e49a81519ac8d4e75019d2ac9b6412f
   languageName: node
   linkType: hard
 
@@ -12222,6 +12253,15 @@ typescript@~3.7.3:
   bin:
     uuid: dist/bin/uuid
   checksum: 6a5d07c5564614271237d8bbc5c1c72abf056343e91af8f67a8e6d29957a1a061f347b8425a1e499af32f5a8f0039c44d200dff663b9a8090c51a7f7b5031534
+  languageName: node
+  linkType: hard
+
+"uuid@npm:^8.3.2":
+  version: 8.3.2
+  resolution: "uuid@npm:8.3.2"
+  bin:
+    uuid: dist/bin/uuid
+  checksum: aed2bcef341f95635f308fea8831fb9038b18c485fe7e71feb89d2e05602dfecad0cb6f2246fae096d4da425cca6e8a71056f28abd97ad98cf770a2018853248
   languageName: node
   linkType: hard
 

@@ -77,6 +77,7 @@ export function dockerodeEvtToString({ stream, progress, status, errorDetail }):
 	}
 }
 
+export * from './command';
 export * from './task';
 export * from './types';
 export * from './utils';
@@ -84,3 +85,4 @@ export * from './stack';
 export * from './templates';
 export * from './tasks';
 export * from './paths';
+export * from './analytics';
