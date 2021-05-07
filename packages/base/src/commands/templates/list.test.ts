@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ListTemplatesTask } from '../../tasks/template/list';
+import { ListTemplatesTask } from '../../tasks';
 import { cli } from 'cli-ux';
 import { Preferences } from '@nitric/cli-common';
 import { Tree } from 'cli-ux/lib/styled/tree';
