@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.36](https://github.com/nitrictech/cli/compare/v0.0.35...v0.0.36) (2021-05-07)
+
+
+### Features
+
+* Update repostory download. ([22bda35](https://github.com/nitrictech/cli/commit/22bda35f47d020c0581c982e8917f78e67ffacda))
+* WIP stack definition refactor. ([f68c84b](https://github.com/nitrictech/cli/commit/f68c84b84f968ecfaa0fed3689a515a48bd6b3a2))
+
+
+### Bug Fixes
+
+* Ensure DO App creation waits on image push. ([4dd69a3](https://github.com/nitrictech/cli/commit/4dd69a36f537ae3ce2984d9ca037cf29f5df573e))
+* Fix syntax error in method call. ([8414d4c](https://github.com/nitrictech/cli/commit/8414d4c46af55b48825875518623f2e8a24cc537))
+* Missing NamedObject API type. ([98e2399](https://github.com/nitrictech/cli/commit/98e23991518f614b931dd0574eaa68e3ee97665e))
+* Type error in azure plugin. ([bc0f394](https://github.com/nitrictech/cli/commit/bc0f3947e211aebd823399a37cbfa42a44ca663f))
+
 ### [0.0.35](https://github.com/nitrictech/cli/compare/v0.0.34...v0.0.35) (2021-05-04)
 
 ### [0.0.34](https://github.com/nitrictech/cli/compare/v0.0.33...v0.0.34) (2021-04-30)
