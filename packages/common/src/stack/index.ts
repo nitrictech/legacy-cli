@@ -13,5 +13,5 @@
 // limitations under the License.
 
 export * from './stack';
-export * from './function';
+export * from './service';
 export * from './site';

@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { NitricAPI, NitricAPITarget } from '@nitric/cli-common';
-import { DeployedApi, DeployedFunction } from '../types';
+import { NitricAPI, NitricAPITarget, NamedObject } from '@nitric/cli-common';
+import { DeployedApi, DeployedService } from '../types';
 import { OpenAPIV2 } from 'openapi-types';
 import Converter from 'api-spec-converter';
 import { apigateway } from '@pulumi/gcp';
@@ -29,7 +29,10 @@ interface GoogleExtensions {
 	};
 }
 
-async function transformOpenApiSpec(api: NitricAPI, funcs: DeployedFunction[]): Promise<pulumi.Output<string>> {
+async function transformOpenApiSpec(
+	api: NamedObject<NitricAPI>,
+	funcs: DeployedService[],
+): Promise<pulumi.Output<string>> {
 	const { name, ...spec } = api;
 
 	// Convert to swagger
@@ -99,7 +102,7 @@ async function transformOpenApiSpec(api: NitricAPI, funcs: DeployedFunction[]): 
 	return transformedDoc;
 }
 
-export async function createApi(api: NitricAPI, funcs: DeployedFunction[]): Promise<DeployedApi> {
+export async function createApi(api: NamedObject<NitricAPI>, funcs: DeployedService[]): Promise<DeployedApi> {
 	const b64Spec = await transformOpenApiSpec(api, funcs);
 
 	// Deploy the API

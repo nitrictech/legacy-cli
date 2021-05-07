@@ -14,9 +14,7 @@
 
 // A static site deployment with Nitric
 // We also support server rendered applications
-export interface NitricStaticSite {
-	// A name for the static site...
-	name: string;
+export interface NitricStaticSite<Ext extends Record<string, any> = {}> {
 	// Base path of the site
 	// Will be used to execute scripts
 	path: string;
@@ -25,4 +23,6 @@ export interface NitricStaticSite {
 	assetPath?: string;
 	// Build scripts to execute before upload
 	buildScripts?: string[];
+
+	ext?: Ext;
 }

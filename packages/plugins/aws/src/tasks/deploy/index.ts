@@ -12,13 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Task, Stack } from '@nitric/cli-common';
-// import createSecurityGroup from './security-group';
-// import createContainer from './container';
+import { Task, Stack, mapObject } from '@nitric/cli-common';
 import { createLambdaFunction } from './lambda';
 import { createSchedule } from './eb-rule';
 import { createApi } from './api';
-// import createLoadBalancer from './load-balancer';
 import { createTopic } from './topic';
 import * as pulumi from '@pulumi/pulumi';
 
@@ -41,9 +38,6 @@ interface CommonOptions {
  */
 interface DeployOptions extends CommonOptions {
 	stack: Stack;
-	// vpc: string;
-	// cluster: string;
-	// subnets: string[];
 }
 
 /**
@@ -52,23 +46,16 @@ interface DeployOptions extends CommonOptions {
 export class Deploy extends Task<void> {
 	private stack: Stack;
 	private region: string;
-	// private vpc: string;
-	// private cluster: string;
-	// private subnets: string[];
 
 	constructor({ stack, region }: DeployOptions) {
 		super('Deploying Nitric Stack');
 		this.stack = stack;
 		this.region = region;
-		// TODO: Just generate the dang VPC and get rid of these three things.
-		// this.vpc = vpc;
-		// this.cluster = cluster;
-		// this.subnets = subnets;
 	}
 
 	async do(): Promise<void> {
 		const { stack, region } = this;
-		const { topics = [], schedules = [], apis = [], entrypoints } = stack.asNitricStack();
+		const { topics = {}, schedules = {}, apis = {}, entrypoints } = stack.asNitricStack();
 		const logFile = await stack.getLoggingFile('deploy:aws');
 		const errorFile = await stack.getLoggingFile('error:aws');
 
@@ -87,25 +74,26 @@ export class Deploy extends Task<void> {
 						const authToken = await ecr.getAuthorizationToken();
 						// Create topics
 						// There are a few dependencies on this
-						const deployedTopics = (topics || []).map(createTopic);
+
+						const deployedTopics = mapObject(topics).map(createTopic);
 
 						// Deploy schedules
-						(schedules || []).forEach((schedule) => createSchedule(schedule, deployedTopics));
+						mapObject(schedules).forEach((schedule) => createSchedule(schedule, deployedTopics));
 
 						const deployedSites = await Promise.all(stack.getSites().map(createSite));
 
-						const deployedFunctions = stack
-							.getFunctions()
-							.map((func) => createLambdaFunction(func, deployedTopics, authToken));
+						const deployedServices = stack
+							.getServices()
+							.map((svc) => createLambdaFunction(svc, deployedTopics, authToken));
 
 						// Deploy APIs
-						const deployedApis = (apis || []).map((api) => createApi(api, deployedFunctions));
+						const deployedApis = mapObject(apis).map((api) => createApi(api, deployedServices));
 
 						if (entrypoints) {
-							createEntrypoints(stack.getName(), entrypoints, deployedSites, deployedApis, deployedFunctions);
+							createEntrypoints(stack.getName(), entrypoints, deployedSites, deployedApis, deployedServices);
 						}
 					} catch (e) {
-						fs.appendFileSync(errorFile, e);
+						fs.appendFileSync(errorFile, e.stack);
 						pulumi.log.error('There we an error deploying the stack please check error logs for more detail');
 					}
 				},
@@ -127,7 +115,7 @@ export class Deploy extends Task<void> {
 				this.update(changes);
 			}
 		} catch (e) {
-			fs.appendFileSync(errorFile, e);
+			fs.appendFileSync(errorFile, e.stack);
 			throw new Error('An error occurred during deployment, please see latest aws:error log for more details');
 			// console.log(e);
 		}

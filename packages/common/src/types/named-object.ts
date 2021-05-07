@@ -12,14 +12,4 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { sanitizeStringForDockerTag } from '../src/utils';
-
-describe('Function utilities', () => {
-	describe('When sanitizing string for use with docker', () => {
-		describe(`Given the string 'My Function'`, () => {
-			test(`The result should be myfunction`, () => {
-				expect(sanitizeStringForDockerTag('My Function')).toBe('myfunction');
-			});
-		});
-	});
-});
+export type NamedObject<T> = { name: string } & T;

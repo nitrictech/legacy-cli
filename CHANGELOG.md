@@ -6,18 +6,16 @@ All notable changes to this project will be documented in this file. See [standa
 
 ### [0.0.34](https://github.com/nitrictech/cli/compare/v0.0.33...v0.0.34) (2021-04-30)
 
-
 ### Features
 
-* Upgrade AWS plugin dependencies. ([3b02f89](https://github.com/nitrictech/cli/commit/3b02f89aaf1ded81756b37105a9684add9bcec18))
-* Upgrade libraries to pulumi 3. ([11b4a9b](https://github.com/nitrictech/cli/commit/11b4a9bd1edf1876ecdd32cb6183ba036a1f5b1d))
-
+- Upgrade AWS plugin dependencies. ([3b02f89](https://github.com/nitrictech/cli/commit/3b02f89aaf1ded81756b37105a9684add9bcec18))
+- Upgrade libraries to pulumi 3. ([11b4a9b](https://github.com/nitrictech/cli/commit/11b4a9bd1edf1876ecdd32cb6183ba036a1f5b1d))
 
 ### Bug Fixes
 
-* Fix deployable region subset for gcp plugin. ([e343966](https://github.com/nitrictech/cli/commit/e3439664306721f22137f91f2da61defcbcebbb4))
-* setup all topics on 'run', even without subscribers ([66646ee](https://github.com/nitrictech/cli/commit/66646eec69a5e09b30d346e0cccd1461fccd1cc9))
-* update pulumi api references in azure plugin ([6a98939](https://github.com/nitrictech/cli/commit/6a98939238c669f1172ebd677a6efe462af1c854))
+- Fix deployable region subset for gcp plugin. ([e343966](https://github.com/nitrictech/cli/commit/e3439664306721f22137f91f2da61defcbcebbb4))
+- setup all topics on 'run', even without subscribers ([66646ee](https://github.com/nitrictech/cli/commit/66646eec69a5e09b30d346e0cccd1461fccd1cc9))
+- update pulumi api references in azure plugin ([6a98939](https://github.com/nitrictech/cli/commit/6a98939238c669f1172ebd677a6efe462af1c854))
 
 ### [0.0.33](https://github.com/nitrictech/cli/compare/v0.0.32...v0.0.33) (2021-04-27)
 

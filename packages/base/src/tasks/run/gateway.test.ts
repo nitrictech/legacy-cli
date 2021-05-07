@@ -16,7 +16,7 @@ import 'jest';
 import { RunGatewayTask } from '.';
 import Docker, { Container } from 'dockerode';
 import getPort from 'get-port';
-import { NitricAPI } from '@nitric/cli-common';
+import { NamedObject, NitricAPI } from '@nitric/cli-common';
 import _ from 'stream-to-promise';
 
 jest.mock('get-port');
@@ -34,7 +34,7 @@ afterAll(() => {
 	jest.restoreAllMocks();
 });
 
-const MOCK_API: NitricAPI = {
+const MOCK_API: NamedObject<NitricAPI> = {
 	name: 'test',
 	openapi: '3.0.0',
 	info: {

@@ -205,12 +205,11 @@ describe('RunEntrypointsTask', () => {
 	describe('given a simple stack with a single entrypoint', () => {
 		const testStack = new Stack('nitric.yaml', {
 			name: 'test',
-			sites: [
-				{
-					name: 'test',
+			sites: {
+				test: {
 					path: 'test',
 				},
-			],
+			},
 			entrypoints: {
 				'/': {
 					name: 'test',

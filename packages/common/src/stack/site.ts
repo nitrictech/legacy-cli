@@ -21,11 +21,13 @@ import path from 'path';
  * A Nitric Static Site
  */
 export class Site {
+	private name: string;
 	private stack: Stack;
 	private descriptor: NitricStaticSite;
 
-	constructor(stack: Stack, descriptor: NitricStaticSite) {
+	constructor(stack: Stack, name: string, descriptor: NitricStaticSite) {
 		this.stack = stack;
+		this.name = name;
 		this.descriptor = descriptor;
 	}
 
@@ -34,7 +36,7 @@ export class Site {
 	}
 
 	getName(): string {
-		return this.descriptor.name;
+		return this.name;
 	}
 
 	// Return the original nitric descriptor

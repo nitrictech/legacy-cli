@@ -25,7 +25,4 @@ export interface NitricAPITarget {
 	};
 }
 
-export interface NitricAPI extends OpenAPIV3.Document<NitricAPITarget> {
-	// The name of the API...
-	name: string;
-}
+export type NitricAPI<Ext extends Record<string, any> = {}> = { ext?: Ext } & OpenAPIV3.Document<NitricAPITarget>;

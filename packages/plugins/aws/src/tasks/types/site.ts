@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { NitricStaticSite } from '@nitric/cli-common';
+import { NitricStaticSite, NamedObject } from '@nitric/cli-common';
 import { s3 } from '@pulumi/aws';
 
-export interface DeployedSite extends NitricStaticSite {
+export interface DeployedSite extends NamedObject<NitricStaticSite> {
 	s3: s3.Bucket;
 }

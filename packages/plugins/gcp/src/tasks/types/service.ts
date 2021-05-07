@@ -12,12 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/**
- * A model defining a nitric subscription
- */
-export interface NitricSubscription {
-	/**
-	 * A name reference to a Nitric Topic
-	 */
-	topic: string;
+import { NitricService, NamedObject } from '@nitric/cli-common';
+import { cloudrun } from '@pulumi/gcp';
+
+export interface DeployedService extends NamedObject<NitricService> {
+	cloudRun: cloudrun.Service;
 }

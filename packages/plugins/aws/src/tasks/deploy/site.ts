@@ -48,6 +48,7 @@ export async function createSite(site: Site): Promise<DeployedSite> {
 	});
 
 	return {
+		name: site.getName(),
 		...site.getDescriptor(),
 		s3: siteBucket,
 	};

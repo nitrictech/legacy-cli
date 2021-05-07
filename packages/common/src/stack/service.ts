@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { NitricFunction } from '../types';
+import { NitricService } from '../types';
 import { Stack } from './stack';
 import path from 'path';
 import { Repository, Template } from '../templates';
@@ -21,16 +21,18 @@ import tar from 'tar-fs';
 import streamToPromise from 'stream-to-promise';
 import match from 'multimatch';
 
-type omitMethods = 'getFunction' | 'getFunctions';
+type omitMethods = 'getService' | 'getServices';
 
-export class Function {
+export class Service {
 	// Back reference to the parent stack
 	// emit getFunction here to prevent recursion
 	private stack: Omit<Stack, omitMethods>;
-	private descriptor: NitricFunction;
+	private name: string;
+	private descriptor: NitricService;
 
-	constructor(stack: Stack, descriptor: NitricFunction) {
+	constructor(stack: Stack, name: string, descriptor: NitricService) {
 		this.stack = stack;
+		this.name = name;
 		this.descriptor = descriptor;
 	}
 
@@ -39,31 +41,36 @@ export class Function {
 		return this.stack;
 	}
 
-	asNitricFunction(): NitricFunction {
+	asNitricService(): NitricService {
 		return this.descriptor;
+	}
+
+	getName(): string {
+		return this.name;
 	}
 
 	getDirectory(): string {
 		const funcPath = path.join(this.stack.getDirectory(), this.descriptor.path);
 		if (!fs.existsSync(funcPath)) {
 			throw new Error(
-				`function directory '${this.descriptor.path}' for function '${this.descriptor.name}' not found. Directory may have been renamed or removed, check 'path' configuration for this function in the config file.`,
+				`function directory '${this.descriptor.path}' for function '${this.name}' not found. Directory may have been renamed or removed, check 'path' configuration for this function in the config file.`,
 			);
 		}
 		return funcPath;
 	}
 
 	getStagingDirectory(): string {
-		return path.join(this.stack.getStagingDirectory(), this.descriptor.name);
+		return path.join(this.stack.getStagingDirectory(), this.name);
 	}
 
-	getImageTagName(): string {
-		return `${this.stack.getName()}-${this.descriptor.name}`;
+	getImageTagName(provider?: string): string {
+		const providerString = provider ? `-${provider}` : '';
+		return `${this.stack.getName()}-${this.name}${providerString}`;
 	}
 
 	// Find the template for a function from a given set of repositories
-	static async findTemplateForFunction(f: Function, repos: Repository[]): Promise<Template> {
-		const [repoName, tmplName] = f.descriptor.runtime.split('/');
+	static async findTemplateForService(s: Service, repos: Repository[]): Promise<Template> {
+		const [repoName, tmplName] = s.descriptor.runtime.split('/');
 
 		const repo = repos.find((r) => r.getName() === repoName);
 		if (!repo) {
@@ -78,22 +85,22 @@ export class Function {
 	}
 
 	// Stage the files for a function ready to build
-	static async stage(f: Function, repos: Repository[]): Promise<void> {
-		const functionStagingDir = f.getStagingDirectory();
-		const template = await Function.findTemplateForFunction(f, repos);
+	static async stage(s: Service, repos: Repository[]): Promise<void> {
+		const serviceStaging = s.getStagingDirectory();
+		const template = await Service.findTemplateForService(s, repos);
 
 		const dockerIgnoreFiles = await Template.getDockerIgnoreFiles(template);
 
 		// TODO: Do we need to do this?
-		await fs.promises.mkdir(functionStagingDir, { recursive: true });
+		await fs.promises.mkdir(serviceStaging, { recursive: true });
 
-		await Template.copyRuntimeTo(template, functionStagingDir);
+		await Template.copyRuntimeTo(template, serviceStaging);
 
 		// TODO: Should we rm or exclude the code directory of the Template, to ensure
 		// extra files don't make it through?
-		const functionPipe = tar.extract(`${functionStagingDir}/function`);
+		const functionPipe = tar.extract(`${serviceStaging}/function`);
 		// Now we need to copy the actual function code, the the above directory/function directory
-		const functionDirectory = f.getDirectory();
+		const functionDirectory = s.getDirectory();
 
 		tar
 			.pack(functionDirectory, {

@@ -12,26 +12,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Function } from '@nitric/cli-common';
+import { Service } from '@nitric/cli-common';
 import { lambda, iam, sns, ecr } from '@pulumi/aws';
-import { DeployedTopic, DeployedFunction } from '../types';
+import { DeployedTopic, DeployedService } from '../types';
 import * as docker from '@pulumi/docker';
 
 // Creates a Lambda Function using pulumi
 export function createLambdaFunction(
-	func: Function,
+	service: Service,
 	topics: DeployedTopic[],
 	token: ecr.GetAuthorizationTokenResult,
-): DeployedFunction {
-	const nitricFunc = func.asNitricFunction();
+): DeployedService {
+	const nitricFunc = service.asNitricService();
 	// Ensure an image repository is available
-	const repository = new ecr.Repository(func.getImageTagName());
+	const repository = new ecr.Repository(service.getImageTagName());
 
-	const image = new docker.Image(`${func.getImageTagName()}-image`, {
+	const image = new docker.Image(`${service.getImageTagName()}-image`, {
 		imageName: repository.repositoryUrl,
 		build: {
 			// Staging directory
-			context: func.getStagingDirectory(),
+			context: service.getStagingDirectory(),
 			args: {
 				PROVIDER: 'aws',
 			},
@@ -44,20 +44,20 @@ export function createLambdaFunction(
 			password: token.password,
 		},
 	});
-	//repository.repositoryUrl
+	// repository.repositoryUrl
 	// Build and deploy container
 
-	const lambdaRole = new iam.Role(`${nitricFunc.name}LambdaRole`, {
+	const lambdaRole = new iam.Role(`${service.getName()}LambdaRole`, {
 		assumeRolePolicy: iam.assumeRolePolicyForPrincipal(iam.Principals.LambdaPrincipal),
 	});
 
-	new iam.RolePolicyAttachment(`${nitricFunc.name}LambdaBasicExecution`, {
+	new iam.RolePolicyAttachment(`${service.getName()}LambdaBasicExecution`, {
 		policyArn: iam.ManagedPolicies.AWSLambdaBasicExecutionRole,
 		role: lambdaRole.id,
 	});
 
 	// TODO: Lock this SNS topics for which this function has pub definitions
-	new iam.RolePolicy(`${nitricFunc.name}SNSAccess`, {
+	new iam.RolePolicy(`${service.getName()}SNSAccess`, {
 		role: lambdaRole.id,
 		policy: JSON.stringify({
 			Version: '2012-10-17',
@@ -78,7 +78,7 @@ export function createLambdaFunction(
 		}),
 	});
 
-	new iam.RolePolicy(`${nitricFunc.name}DynamoDBAccess`, {
+	new iam.RolePolicy(`${service.getName()}DynamoDBAccess`, {
 		role: lambdaRole.id,
 		policy: JSON.stringify({
 			Version: '2012-10-17',
@@ -104,7 +104,7 @@ export function createLambdaFunction(
 		}),
 	});
 
-	const lfunction = new lambda.Function(nitricFunc.name, {
+	const lfunction = new lambda.Function(service.getName(), {
 		imageUri: image.imageName, // generateEcrRepositoryUri(account, region, stackName, func) + ':latest',
 		memorySize: 128,
 		timeout: 15,
@@ -112,21 +112,21 @@ export function createLambdaFunction(
 		role: lambdaRole.arn,
 	});
 
-	const { subs = [] } = nitricFunc;
+	const { triggers = {} } = nitricFunc;
 
-	(subs || []).forEach((sub) => {
-		const topic = topics.find((t) => t.name === sub.topic);
+	(triggers.topics || []).forEach((triggerTopic) => {
+		const topic = topics.find((t) => t.name === triggerTopic);
 
 		// Only apply if the topic exists
 		if (topic) {
-			new lambda.Permission(`${nitricFunc.name}${sub.topic}Permission`, {
+			new lambda.Permission(`${service.getName()}${triggerTopic}Permission`, {
 				sourceArn: topic.awsTopic.arn,
 				function: lfunction,
 				principal: 'sns.amazonaws.com',
 				action: 'lambda:InvokeFunction',
 			});
 
-			new sns.TopicSubscription(`${nitricFunc.name}${sub.topic}Subscription`, {
+			new sns.TopicSubscription(`${service.getName()}${triggerTopic}Subscription`, {
 				endpoint: lfunction.arn,
 				protocol: 'lambda',
 				topic: topic.awsTopic,
@@ -138,6 +138,7 @@ export function createLambdaFunction(
 
 	return {
 		...nitricFunc,
+		name: service.getName(),
 		awsLambda: lfunction,
 	};
 }

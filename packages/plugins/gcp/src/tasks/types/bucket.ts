@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { NitricBucket } from '@nitric/cli-common';
+import { NitricBucket, NamedObject } from '@nitric/cli-common';
 import { storage } from '@pulumi/gcp';
 
-export interface DeployedBucket extends NitricBucket {
+export interface DeployedBucket extends NamedObject<NitricBucket> {
 	storage: storage.Bucket;
 }

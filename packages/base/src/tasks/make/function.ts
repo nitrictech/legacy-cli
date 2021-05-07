@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// import { templateFunctionPath } from '../../common/paths';
 import { Stack, Task, Repository, Template } from '@nitric/cli-common';
 import path from 'path';
 
@@ -64,8 +63,7 @@ export class MakeFunctionTask extends Task<void> {
 		this.update('Start Make');
 		const nitricProjectDirectory = path.dirname(nitricFile);
 
-		stack.addFunction({
-			name: this.functionName,
+		stack.addService(this.functionName, {
 			path: path.relative(nitricProjectDirectory, this.dir),
 			runtime: this.template,
 		});

@@ -12,13 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { NitricTopic } from '@nitric/cli-common';
+import { NitricTopic, NamedObject } from '@nitric/cli-common';
 import { resources, eventgrid } from '@pulumi/azure-native';
 import { DeployedTopic } from '../types';
 import * as pulumi from '@pulumi/pulumi';
 
 // Create a topic on azure event grid
-export function createTopic(resourceGroup: resources.ResourceGroup, topic: NitricTopic): DeployedTopic {
+export function createTopic(resourceGroup: resources.ResourceGroup, topic: NamedObject<NitricTopic>): DeployedTopic {
 	const deployedTopic = new eventgrid.Topic(topic.name, {
 		topicName: topic.name,
 		resourceGroupName: resourceGroup.name,

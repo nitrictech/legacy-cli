@@ -12,11 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { NitricBucket } from '@nitric/cli-common';
+import { NitricBucket, NamedObject } from '@nitric/cli-common';
 import { storage } from '@pulumi/gcp';
 import { DeployedBucket } from '../types';
 
-export function createBucket(bucket: NitricBucket): DeployedBucket {
+export function createBucket(bucket: NamedObject<NitricBucket>): DeployedBucket {
 	const gcloudBucket = new storage.Bucket(bucket.name, {
 		// TODO: Determine this configuration
 		// storageClass: "MULTI_REGIONAL"

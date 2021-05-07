@@ -12,9 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { NitricFunction } from '@nitric/cli-common';
+import { NitricService } from '@nitric/cli-common';
 import { lambda } from '@pulumi/aws';
 
-export interface DeployedFunction extends NitricFunction {
+export interface DeployedService extends NitricService {
+	name: string;
 	awsLambda: lambda.Function;
 }

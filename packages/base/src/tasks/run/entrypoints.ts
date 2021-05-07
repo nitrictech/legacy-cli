@@ -51,7 +51,7 @@ export function createNginxConfig(stack: Stack): string {
 
 	const sites = eps.filter((e) => e.type === 'site');
 	const apis = eps.filter((e) => e.type === 'api');
-	const functions = eps.filter((e) => e.type === 'function');
+	const services = eps.filter((e) => e.type === 'service');
 
 	return `
 	events {}
@@ -78,7 +78,7 @@ export function createNginxConfig(stack: Stack): string {
 				)
 				.join('\n')}
 
-			${functions
+			${services
 				.map(
 					(a) => `
 				location ${a.path} {

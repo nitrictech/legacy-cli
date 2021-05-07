@@ -12,10 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { NitricSubscription } from './subscription';
+export interface NitricServiceTriggers {
+	topics?: string[];
+}
 
-export interface NitricFunction {
-	name: string;
+export interface NitricService<Ext extends Record<string, any> = {}> {
 	path: string;
 	runtime: string;
 	// Scripts that will be executed by the nitric
@@ -26,7 +27,8 @@ export interface NitricFunction {
 	excludes?: string[];
 	// Allow the user to specify a custom unique tag for the function
 	tag?: string;
-	subs?: NitricSubscription[];
+	// subs?: NitricSubscription[];
+	triggers?: NitricServiceTriggers;
 	// The minimum number of instances to keep alive
 	minScale?: number;
 	// The maximum nunber of instances to scale to
@@ -37,4 +39,5 @@ export interface NitricFunction {
 	// invokable without authentication
 	// would use public, but its reserved by typescript
 	external?: boolean;
+	ext?: Ext;
 }

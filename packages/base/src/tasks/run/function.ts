@@ -20,7 +20,7 @@ import fs from 'fs';
 
 const GATEWAY_PORT = 9001;
 
-export interface RunFunctionTaskOptions {
+export interface RunServiceTaskOptions {
 	image: NitricImage;
 	port?: number | undefined;
 	subscriptions?: Record<string, string[]>;
@@ -28,7 +28,7 @@ export interface RunFunctionTaskOptions {
 	volume?: Volume;
 }
 
-export class RunFunctionTask extends Task<Container> {
+export class RunServiceTask extends Task<Container> {
 	private image: NitricImage;
 	private port: number | undefined;
 	private docker: Docker;
@@ -36,8 +36,8 @@ export class RunFunctionTask extends Task<Container> {
 	private volume: Volume | undefined;
 	private subscriptions: Record<string, string[]> | undefined;
 
-	constructor({ image, port, network, subscriptions, volume }: RunFunctionTaskOptions, docker?: Docker) {
-		super(`${image.func.name} - ${image.id.substring(0, 12)}`);
+	constructor({ image, port, network, subscriptions, volume }: RunServiceTaskOptions, docker?: Docker) {
+		super(`${image.serviceName} - ${image.id.substring(0, 12)}`);
 		this.image = image;
 		this.port = port;
 		this.docker = docker || new Docker();
@@ -64,7 +64,7 @@ export class RunFunctionTask extends Task<Container> {
 		}
 
 		const dockerOptions = {
-			name: this.image.func.name,
+			name: this.image.serviceName,
 			Env: [`LOCAL_SUBSCRIPTIONS=${JSON.stringify(subscriptions)}`],
 			ExposedPorts: {
 				[`${GATEWAY_PORT}/tcp`]: {},
@@ -87,7 +87,7 @@ export class RunFunctionTask extends Task<Container> {
 			dockerOptions['NetworkingConfig'] = {
 				EndpointsConfig: {
 					[networkName]: {
-						Aliases: [this.image.func.name],
+						Aliases: [this.image.serviceName],
 					},
 				},
 			};

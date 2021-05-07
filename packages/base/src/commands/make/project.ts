@@ -78,16 +78,16 @@ export default class Project extends Command {
 		const { example }: { example: string } = await inquirer.prompt([
 			{
 				name: 'example',
-				message: 'Include an example function?',
+				message: 'Include an example service?',
 				type: 'list',
 				choices: [...templates, 'none'],
 			},
 		]);
 
 		if (example !== 'none') {
-			const { functionName } = await inquirer.prompt([
+			const { serviceName } = await inquirer.prompt([
 				{
-					name: 'functionName',
+					name: 'serviceName',
 					message: 'Name for the example function?',
 					type: 'input',
 					default: 'example',
@@ -99,9 +99,9 @@ export default class Project extends Command {
 				wrapTaskForListr(
 					new MakeFunctionTask({
 						template: example,
-						dir: `./${name}/${functionName}/`,
+						dir: `./${name}/${serviceName}/`,
 						file: `./${name}/nitric.yaml`,
-						name: functionName,
+						name: serviceName,
 					}),
 				),
 			];
