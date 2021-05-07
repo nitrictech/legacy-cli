@@ -33,7 +33,7 @@ export default class Doctor extends BaseCommand {
 
 	static args = [];
 
-	async run(): Promise<void> {
+	async do(): Promise<void> {
 		await new Listr<any>([
 			wrapTaskForListr(new CheckPulumiPluginTask(), 'installed'),
 			wrapTaskForListr({

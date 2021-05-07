@@ -30,7 +30,7 @@ export default class DownCmd extends BaseCommand {
 
 	static args = [{ name: 'dir' }];
 
-	async run(): Promise<any> {
+	async do(): Promise<any> {
 		const { args, flags } = this.parse(DownCmd);
 		const { dir = '.' } = args;
 		const { file = 'nitric.yaml' } = flags;

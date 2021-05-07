@@ -74,7 +74,7 @@ export default class DeployCmd extends BaseCommand {
 
 	static args = [{ name: 'dir' }];
 
-	async run(): Promise<void> {
+	async do(): Promise<void> {
 		const auth = new google.auth.GoogleAuth({
 			scopes: ['https://www.googleapis.com/auth/cloud-platform'],
 		});
