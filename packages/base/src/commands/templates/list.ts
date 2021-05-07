@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import { BaseCommand } from '@nitric/cli-common';
-import { Command, flags } from '@oclif/command';
+import { flags } from '@oclif/command';
 import { ListTemplatesTask } from '../../tasks/template/list';
 import { cli } from 'cli-ux';
 
@@ -22,7 +22,7 @@ export default class ListTemplates extends BaseCommand {
 
 	static examples = ['$ nitric templates:list'];
 
-	static flags = {
+	static flags: flags.Input<any> = {
 		help: flags.help({ char: 'h' }),
 	};
 

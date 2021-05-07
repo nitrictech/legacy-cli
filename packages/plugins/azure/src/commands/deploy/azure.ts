@@ -12,10 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Command, flags } from '@oclif/command';
+import { flags } from '@oclif/command';
 import { Listr } from 'listr2';
 import inquirer from 'inquirer';
-import { Stack, StageStackTask, wrapTaskForListr } from '@nitric/cli-common';
+import { BaseCommand, Stack, StageStackTask, wrapTaskForListr } from '@nitric/cli-common';
 import path from 'path';
 import { Deploy } from '../../tasks/deploy';
 
@@ -86,7 +86,7 @@ const SUPPORTED_REGIONS = [
 	'brazilsoutheast',
 ];
 
-export default class DeployCmd extends Command {
+export default class DeployCmd extends BaseCommand {
 	static description = 'Deploy a Nitric application to Microsoft Azure';
 
 	static examples = [`$ nitric deploy:azure`];
@@ -109,7 +109,7 @@ export default class DeployCmd extends Command {
 
 	static args = [{ name: 'dir' }];
 
-	async run(): Promise<void> {
+	async do(): Promise<void> {
 		const { args, flags } = this.parse(DeployCmd);
 		const { guided } = flags;
 		const { dir = '.' } = args;

@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Command, flags } from '@oclif/command';
+import { flags } from '@oclif/command';
 import { Deploy } from '../../tasks/deploy';
-import { wrapTaskForListr, Stack, StageStackTask } from '@nitric/cli-common';
+import { BaseCommand, wrapTaskForListr, Stack, StageStackTask } from '@nitric/cli-common';
 import { Listr } from 'listr2';
 import path from 'path';
 import { google } from 'googleapis';
@@ -49,7 +49,7 @@ const SUPPORTED_REGIONS = [
 	'australia-southeast1',
 ];
 
-export default class DeployCmd extends Command {
+export default class DeployCmd extends BaseCommand {
 	static description = 'Deploy a Nitric application to Google Cloud Platform (GCP)';
 
 	static examples = [`$ nitric deploy:gcp`];

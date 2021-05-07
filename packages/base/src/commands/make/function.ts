@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Command, flags } from '@oclif/command';
-import { wrapTaskForListr, Repository } from '@nitric/cli-common';
+import { flags } from '@oclif/command';
+import { wrapTaskForListr, Repository, BaseCommand } from '@nitric/cli-common';
 import { MakeFunctionTask } from '../../tasks/make';
 import { Listr } from 'listr2';
 import inquirer from 'inquirer';
@@ -23,7 +23,7 @@ interface MakeFunctionArgs {
 	name: string;
 }
 
-export default class Function extends Command {
+export default class Function extends BaseCommand {
 	static description = 'Builds a nitric function';
 
 	static examples = ['$ nitric make:function .'];
@@ -67,7 +67,7 @@ export default class Function extends Command {
 		},
 	];
 
-	async run(): Promise<void> {
+	async do(): Promise<void> {
 		const { args, flags } = this.parse(Function);
 		// Prompt for any args that weren't provided in the command
 		const prompts = Function.args

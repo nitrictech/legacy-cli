@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Command, flags } from '@oclif/command';
-import { wrapTaskForListr, Repository } from '@nitric/cli-common';
+import { flags } from '@oclif/command';
+import { wrapTaskForListr, Repository, BaseCommand } from '@nitric/cli-common';
 import { MakeProjectTask, MakeFunctionTask } from '../../tasks/make';
 import { AddRepositoryTask } from '../../tasks/repository/add';
 import { UpdateStoreTask } from '../../tasks/store/update';
@@ -23,7 +23,7 @@ import inquirer from 'inquirer';
 
 const projectNameRegex = /^[a-z]+(-[a-z]+)*$/g;
 
-export default class Project extends Command {
+export default class Project extends BaseCommand {
 	static description = 'Creates a new Nitric project';
 
 	static examples = [`$ nitric make:function .`];
@@ -41,7 +41,7 @@ export default class Project extends Command {
 		},
 	];
 
-	async run(): Promise<void> {
+	async do(): Promise<void> {
 		const { args, flags } = this.parse(Project);
 		const { name } = args;
 		const { force } = flags;

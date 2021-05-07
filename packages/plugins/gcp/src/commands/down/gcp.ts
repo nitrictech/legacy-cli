@@ -12,14 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Command, flags } from '@oclif/command';
-import { wrapTaskForListr, Stack, NitricStack } from '@nitric/cli-common';
+import { flags } from '@oclif/command';
+import { BaseCommand, wrapTaskForListr, Stack, NitricStack } from '@nitric/cli-common';
 import { Listr } from 'listr2';
 import path from 'path';
 import { Down } from '../../tasks/down';
 import inquirer from 'inquirer';
 
-export default class DownCmd extends Command {
+export default class DownCmd extends BaseCommand {
 	static description = 'Delete a Nitric application on Google Cloud Platform (GCP)';
 
 	static examples = [`$ nitric down:gcp`];
@@ -40,7 +40,7 @@ export default class DownCmd extends Command {
 
 	static args = [{ name: 'dir' }];
 
-	async run(): Promise<void> {
+	async do(): Promise<void> {
 		const { args, flags } = this.parse(DownCmd);
 		const { guided } = flags;
 		const { dir = '.' } = args;

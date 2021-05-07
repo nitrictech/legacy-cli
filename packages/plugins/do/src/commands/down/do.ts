@@ -12,13 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Command, flags } from '@oclif/command';
-import { wrapTaskForListr, Stack } from '@nitric/cli-common';
+import { flags } from '@oclif/command';
+import { BaseCommand, wrapTaskForListr, Stack } from '@nitric/cli-common';
 import { Listr } from 'listr2';
 import path from 'path';
 import { Down } from '../../tasks/down';
 
-export default class DownCmd extends Command {
+export default class DownCmd extends BaseCommand {
 	static description = 'Delete a Stack on Digital Ocean deployed by $ nitric deploy:do';
 
 	static examples = [`$ nitric down:do`];
@@ -30,7 +30,7 @@ export default class DownCmd extends Command {
 
 	static args = [{ name: 'dir' }];
 
-	async run(): Promise<any> {
+	async do(): Promise<any> {
 		const { args, flags } = this.parse(DownCmd);
 		const { dir = '.' } = args;
 		const { file = 'nitric.yaml' } = flags;

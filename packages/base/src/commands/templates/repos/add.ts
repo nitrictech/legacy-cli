@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { wrapTaskForListr, Store } from '@nitric/cli-common';
+import { BaseCommand, wrapTaskForListr, Store } from '@nitric/cli-common';
 import { Command, flags } from '@oclif/command';
 import { cli } from 'cli-ux';
 import { Listr } from 'listr2';
@@ -20,7 +20,7 @@ import { AddRepositoryTask } from '../../../tasks/repository/add';
 import { UpdateStoreTask } from '../../../tasks/store/update';
 import inquirer from 'inquirer';
 
-export default class AddRepository extends Command {
+export default class AddRepository extends BaseCommand {
 	static description = 'Adds a new repository for nitric templates';
 
 	static examples = ['$ nitric templates:repos:add'];
@@ -42,7 +42,7 @@ export default class AddRepository extends Command {
 		},
 	];
 
-	async run(): Promise<void> {
+	async do(): Promise<void> {
 		const { args, flags } = this.parse(AddRepository);
 		// Pull the official repository by default
 		let { alias } = args;

@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { wrapTaskForListr } from '@nitric/cli-common';
-import { Command, flags } from '@oclif/command';
+import { BaseCommand, wrapTaskForListr } from '@nitric/cli-common';
+import { flags } from '@oclif/command';
 import cli from 'cli-ux';
 import { Listr } from 'listr2';
 import { CheckPlugins, InstallGCPPulumiPlugin } from '../../tasks/doctor';
@@ -22,7 +22,7 @@ import { CheckPlugins, InstallGCPPulumiPlugin } from '../../tasks/doctor';
  * Nitric CLI GCP Doctor command
  * Will check and install pre-requisite software for deploying Nitric applications to GCP
  */
-export default class Doctor extends Command {
+export default class Doctor extends BaseCommand {
 	static description = 'Checks environment for configuration for deployment to GCP';
 
 	static examples = [`$ nitric doctor:gcp`];
@@ -33,7 +33,7 @@ export default class Doctor extends Command {
 
 	static args = [];
 
-	async run(): Promise<void> {
+	async do(): Promise<void> {
 		await new Listr<any>([
 			wrapTaskForListr(new CheckPlugins(), 'installed'),
 			wrapTaskForListr({

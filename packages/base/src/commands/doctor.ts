@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Command, flags } from '@oclif/command';
-import { Task, Repository, NITRIC_REPOSITORIES_FILE, block } from '@nitric/cli-common';
+import { flags } from '@oclif/command';
+import { BaseCommand, Task, Repository, NITRIC_REPOSITORIES_FILE, block } from '@nitric/cli-common';
 import which from 'which';
 import cli from 'cli-ux';
 import emoji from 'node-emoji';
@@ -58,7 +58,7 @@ const INSTALL_TASK_MAP: Record<string, { new (opts: InputPassthroughOptions): Ta
  * Will use docker to build the users application as a docker image
  * ready to be executed on a CaaS
  */
-export default class Doctor extends Command {
+export default class Doctor extends BaseCommand {
 	static description = 'Checks environment for configuration and pre-requisite software';
 
 	static examples = [`$ nitric doctor`];
@@ -69,7 +69,7 @@ export default class Doctor extends Command {
 
 	static args = [];
 
-	async run(): Promise<void> {
+	async do(): Promise<void> {
 		let exit = false;
 
 		const statuses = PREREQUISITE_SOFTWARE.map((software) => ({

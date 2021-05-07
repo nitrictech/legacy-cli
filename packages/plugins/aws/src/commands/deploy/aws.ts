@@ -12,15 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Command, flags } from '@oclif/command';
+import { flags } from '@oclif/command';
 import { Deploy } from '../../tasks/deploy';
-import { wrapTaskForListr, Stack, StageStackTask } from '@nitric/cli-common';
+import { BaseCommand, wrapTaskForListr, Stack, StageStackTask } from '@nitric/cli-common';
 import { Listr } from 'listr2';
 import path from 'path';
 import AWS from 'aws-sdk';
 import inquirer from 'inquirer';
 
-export default class DeployCmd extends Command {
+export default class DeployCmd extends BaseCommand {
 	static description = 'Deploy a Nitric application to Amazon Web Services (AWS)';
 
 	static examples = [`$ nitric deploy:aws . -a 123123123123 -r us-east-1`];
@@ -72,7 +72,7 @@ export default class DeployCmd extends Command {
 
 	static args = [{ name: 'dir', default: '.' }];
 
-	async run(): Promise<any> {
+	async do(): Promise<any> {
 		const { args, flags } = this.parse(DeployCmd);
 		const { dir } = args;
 		const sts = new AWS.STS();

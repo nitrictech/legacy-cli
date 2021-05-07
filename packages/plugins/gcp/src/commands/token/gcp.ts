@@ -12,10 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Command, flags } from '@oclif/command';
+import { flags } from '@oclif/command';
 import { google } from 'googleapis';
 
-export default class Token extends Command {
+export default class Token extends BaseCommand {
 	static description = 'Deploy a Nitric application to Google Cloud Platform (GCP)';
 
 	static examples = [`$ nitric deploy:gcp . -p my-gcp-project`];
@@ -26,7 +26,7 @@ export default class Token extends Command {
 
 	static args = [];
 
-	async run(): Promise<void> {
+	async do(): Promise<void> {
 		// const { args } = this.parse(Token);
 
 		const auth = new google.auth.GoogleAuth({
