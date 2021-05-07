@@ -7,6 +7,7 @@
         "**/bin/*",
         ".yarn/",
         ".github/",
+        ".idea/",
         "**/*.md",
         "*.lock",
         "*.html",

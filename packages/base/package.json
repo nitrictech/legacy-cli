@@ -38,7 +38,7 @@
   "devDependencies": {
     "@oclif/dev-cli": "1.26.0",
     "@types/dockerode": "^2.5.34",
-    "@types/jest": "^26.0.15",
+    "@types/jest": "^26.0.23",
     "@types/node": "^10",
     "@types/node-emoji": "^1.8.1",
     "@types/rimraf": "^3.0.0",
