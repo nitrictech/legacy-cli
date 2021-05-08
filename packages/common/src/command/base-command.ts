@@ -1,9 +1,13 @@
-import { Command } from '@oclif/command';
+import { Command, flags } from '@oclif/command';
 import { AnalyticsClient } from '../analytics';
 import { Preferences } from '../preferences';
 
 export abstract class BaseCommand extends Command {
-	static flags = {};
+	static flags: flags.Input<{
+		help: void;
+	}> = {
+		help: flags.help({ char: 'h' }),
+	};
 
 
 	//public args: {

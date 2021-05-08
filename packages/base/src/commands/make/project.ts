@@ -28,9 +28,11 @@ export default class Project extends BaseCommand {
 
 	static examples = [`$ nitric make:function .`];
 
-	static flags = {
-		help: flags.help({ char: 'h' }),
-		force: flags.boolean(),
+	static flags: flags.Input<{
+		force: boolean;
+	}> = {
+		...BaseCommand.flags,
+		force: flags.boolean({ char: 'f' }),
 	};
 
 	static args = [

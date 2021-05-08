@@ -29,7 +29,7 @@ export default class Function extends BaseCommand {
 	static examples = ['$ nitric make:function .'];
 
 	static flags = {
-		help: flags.help({ char: 'h' }),
+		...BaseCommand.flags,
 		directory: flags.string({
 			char: 'd',
 			description: 'directory where the new function should be made',
