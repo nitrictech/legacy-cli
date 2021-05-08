@@ -98,7 +98,6 @@ export default class AzureDeploy extends BaseCommand {
 			char: 'r',
 			description: 'azure region to deploy to',
 		}),
-		guided: flags.boolean({ default: false }),
 		file: flags.string({
 			char: 'f',
 			default: 'nitric.yaml',
@@ -111,7 +110,7 @@ export default class AzureDeploy extends BaseCommand {
 
 	async do(): Promise<void> {
 		const { args, flags } = this.parse(AzureDeploy);
-		const { guided } = flags;
+		const { ci } = flags;
 		const { dir = '.' } = args;
 
 		const prompts = Object.keys(AzureDeploy.flags)
@@ -131,7 +130,7 @@ export default class AzureDeploy extends BaseCommand {
 			});
 
 		let promptFlags = {};
-		if (guided) {
+		if (!ci) {
 			promptFlags = await inquirer.prompt(prompts);
 		}
 
