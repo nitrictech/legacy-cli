@@ -1,4 +1,4 @@
-import { Visitor } from "universal-analytics";
+import { Visitor } from 'universal-analytics';
 
 /**
  * Command client for tracking
@@ -7,7 +7,7 @@ export class CommandClient {
 	private name: string;
 	private visitor?: Visitor;
 	private startTime?: number;
-	
+
 	constructor(name: string, visitor?: Visitor) {
 		this.name = name;
 		this.visitor = visitor;
@@ -20,8 +20,8 @@ export class CommandClient {
 		this.startTime = new Date().getTime();
 
 		if (this.visitor) {
-			this.visitor.pageview(this.name, "CLI");
-			this.visitor.event(this.name, "start");		
+			this.visitor.pageview(this.name, 'CLI');
+			this.visitor.event(this.name, 'start');
 		}
 
 		return this;
@@ -30,13 +30,13 @@ export class CommandClient {
 	/**
 	 * Log an error for the command
 	 * @param error
-	 * @param fatal 
+	 * @param fatal
 	 */
 	error(error: Error, fatal: boolean): CommandClient {
 		if (this.visitor) {
-			this.visitor.exception(error.stack || error.message, fatal)
+			this.visitor.exception(error.stack || error.message, fatal);
 		}
-		
+
 		return this;
 	}
 
@@ -44,18 +44,17 @@ export class CommandClient {
 	 * Stop the command
 	 */
 	async stop(): Promise<void> {
-		
 		if (!this.startTime) {
-			throw new Error("Command client stopped without being started");
+			throw new Error('Command client stopped without being started');
 		}
 
 		if (this.visitor) {
-			this.visitor.event(this.name, "stop");
+			this.visitor.event(this.name, 'stop');
 
 			const runtime = new Date().getTime() - this.startTime;
 
-			await new Promise<void>(res => {
-				this.visitor!.timing(this.name, "runtime", runtime).send(() => {
+			await new Promise<void>((res) => {
+				this.visitor!.timing(this.name, 'runtime', runtime).send(() => {
 					res();
 				});
 			});

@@ -24,16 +24,18 @@ const BaseFlags = {
 		char: 'f',
 		default: 'nitric.yaml',
 	}),
-}
+};
 
 export default class DownCmd extends BaseCommand {
 	static description = 'Delete a Nitric application on Google Cloud Platform (GCP)';
 
 	static examples = [`$ nitric down:gcp`];
 
-	static flags: typeof BaseFlags & typeof BaseCommand.flags & flags.Input<{
-		nonInteractive: boolean
-	}> = {
+	static flags: typeof BaseFlags &
+		typeof BaseCommand.flags &
+		flags.Input<{
+			nonInteractive: boolean;
+		}> = {
 		...BaseCommand.flags,
 		...BaseFlags,
 		nonInteractive: flags.boolean({

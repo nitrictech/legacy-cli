@@ -49,30 +49,29 @@ export default class AddRepository extends BaseCommand {
 		const { url } = flags;
 
 		try {
-			cli.action.start("Fetching latest template store");
+			cli.action.start('Fetching latest template store');
 			await new UpdateStoreTask().run();
-			cli.action.stop()
+			cli.action.stop();
 		} catch (e) {
-			cli.error("There was an issue downloading the nitric template store");
+			cli.error('There was an issue downloading the nitric template store');
 		}
-		
 
 		// if alias is undefined we should prompt for it
 		if (!alias && !url) {
 			// prompt for an alias...
-			const { alias: promptedAlias } = await inquirer.prompt([{
-				name: "alias",
-				message: "Repository to download?",
-				type: 'list',
-				choices: Store.fromDefault().availableRepositories(),
-			}]);
+			const { alias: promptedAlias } = await inquirer.prompt([
+				{
+					name: 'alias',
+					message: 'Repository to download?',
+					type: 'list',
+					choices: Store.fromDefault().availableRepositories(),
+				},
+			]);
 
 			// Update the alias to the selection
 			alias = promptedAlias;
 		}
 
-		await new Listr([
-			wrapTaskForListr(new AddRepositoryTask({ alias, url })),
-		]).run();
+		await new Listr([wrapTaskForListr(new AddRepositoryTask({ alias, url }))]).run();
 	}
 }

@@ -63,19 +63,21 @@ const BaseFlags = {
 		char: 'f',
 		default: 'nitric.yaml',
 	}),
-}
+};
 
 export default class GcpDeploy extends BaseCommand {
 	static description = 'Deploy a Nitric application to Google Cloud Platform (GCP)';
 
 	static examples = [`$ nitric deploy:gcp`];
 
-	static flags: typeof BaseFlags & typeof BaseCommand.flags & flags.Input<{
-		nonInteractive: boolean,
-	}> = {
+	static flags: typeof BaseFlags &
+		typeof BaseCommand.flags &
+		flags.Input<{
+			nonInteractive: boolean;
+		}> = {
 		...BaseCommand.flags,
 		...BaseFlags,
-		nonInteractive: flags.boolean({ 
+		nonInteractive: flags.boolean({
 			default: false,
 			char: 'n',
 		}),

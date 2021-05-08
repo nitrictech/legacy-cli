@@ -139,13 +139,12 @@ export class Deploy extends Task<void> {
 								.getServices()
 								.map((f) => createFunction(f, registryName, token, functionEntrypoints));
 
-
 							const app = new digitalocean.App(stack.getName(), {
 								spec: {
 									name: stack.getName(),
 									// TODO: Configure region
 									region: region,
-									services: results.map(r => r.spec),
+									services: results.map((r) => r.spec),
 								},
 							});
 

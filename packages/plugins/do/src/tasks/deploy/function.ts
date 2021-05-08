@@ -24,7 +24,7 @@ interface NormalizedFunctionEntrypoint {
 }
 
 interface CreateFunctionResult {
-	spec: digitalocean.types.input.AppSpecService,
+	spec: digitalocean.types.input.AppSpecService;
 }
 
 export function createFunction(
@@ -67,6 +67,6 @@ export function createFunction(
 				repository: imageName,
 			},
 			routes: entrypoints.filter(({ name }) => name === service.getName()).map(({ path }) => ({ path })),
-		}
+		},
 	};
 }

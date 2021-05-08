@@ -27,7 +27,7 @@ export default class Doctor extends BaseCommand {
 	static examples = [`$ nitric doctor:gcp`];
 
 	static flags = {
-		...BaseCommand.flags
+		...BaseCommand.flags,
 	};
 
 	static args = [];

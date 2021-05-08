@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Command, flags } from '@oclif/command';
+import { flags } from '@oclif/command';
 import { wrapTaskForListr, Stack, NitricImage, StageStackTask, BaseCommand } from '@nitric/cli-common';
 import { BuildServiceTask } from '../tasks/build';
 import { Listr, ListrTask } from 'listr2';

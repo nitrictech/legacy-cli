@@ -9,7 +9,6 @@ export abstract class BaseCommand extends Command {
 		help: flags.help({ char: 'h' }),
 	};
 
-
 	//public args: {
 	//	[name: string]: any;
 	//} = {};

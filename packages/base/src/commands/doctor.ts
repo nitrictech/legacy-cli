@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { flags } from '@oclif/command';
 import { BaseCommand, Task, Repository, NITRIC_REPOSITORIES_FILE, block } from '@nitric/cli-common';
 import which from 'which';
 import cli from 'cli-ux';
@@ -64,7 +63,7 @@ export default class Doctor extends BaseCommand {
 	static examples = [`$ nitric doctor`];
 
 	static flags = {
-		...BaseCommand.flags
+		...BaseCommand.flags,
 	};
 
 	static args = [];

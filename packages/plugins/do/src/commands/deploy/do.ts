@@ -39,7 +39,7 @@ export default class DoDeploy extends BaseCommand {
 			char: 'f',
 			default: 'nitric.yaml' as string,
 			description: 'Nitric descriptor file location',
-		})
+		}),
 	};
 
 	static args = [{ name: 'dir', default: '.' }];
