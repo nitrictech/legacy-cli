@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.37](https://github.com/nitrictech/cli/compare/v0.0.36...v0.0.37) (2021-05-08)
+
+
+### Bug Fixes
+
+* fix empty arrays default to null in stack definition ([4de0dba](https://github.com/nitrictech/cli/commit/4de0dbaec3ef67dbe5b245fd766557fed215c7a7))
+
 ### [0.0.36](https://github.com/nitrictech/cli/compare/v0.0.35...v0.0.36) (2021-05-07)
 
 
