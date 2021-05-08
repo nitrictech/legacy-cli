@@ -69,7 +69,7 @@ export default class Build extends BaseCommand {
 	static examples = [`$ nitric build .`];
 
 	static flags = {
-		help: flags.help({ char: 'h' }),
+		...BaseCommand.flags,
 		file: flags.string(),
 		provider: flags.enum({
 			char: 'p',

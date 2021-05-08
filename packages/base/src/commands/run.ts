@@ -236,6 +236,7 @@ export default class Run extends BaseCommand {
 	static args = [...Build.args];
 
 	static flags = {
+		...BaseCommand.flags,
 		...Build.flags,
 	};
 

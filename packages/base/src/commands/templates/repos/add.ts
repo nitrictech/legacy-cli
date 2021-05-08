@@ -26,7 +26,7 @@ export default class AddRepository extends BaseCommand {
 	static examples = ['$ nitric templates:repos:add'];
 
 	static flags = {
-		help: flags.help({ char: 'h' }),
+		...BaseCommand.flags,
 		url: flags.string({
 			char: 'u',
 			description: 'URL of the git repository to retrieve template repository from',

@@ -680,7 +680,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@nitric/cli-common@workspace:packages/common"
   dependencies:
-    "@oclif/command": ^1.8.0
+    "@oclif/command": ^1
     "@types/inquirer": ^7.3.1
     "@types/jest": ^26.0.15
     "@types/node": ^10

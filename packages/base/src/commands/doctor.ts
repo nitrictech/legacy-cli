@@ -64,7 +64,8 @@ export default class Doctor extends BaseCommand {
 	static examples = [`$ nitric doctor`];
 
 	static flags = {
-		help: flags.help({ char: 'h' }),
+		...BaseCommand.flags
+		// help: flags.help({ char: 'h' }),
 	};
 
 	static args = [];
