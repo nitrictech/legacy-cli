@@ -13,7 +13,6 @@
 // limitations under the License.
 
 import { BaseCommand, wrapTaskForListr } from '@nitric/cli-common';
-import { flags } from '@oclif/command';
 import cli from 'cli-ux';
 import { Listr } from 'listr2';
 import { CheckPulumiPlugins, InstallAWSPulumiPlugin } from '../../tasks/doctor';
@@ -22,13 +21,13 @@ import { CheckPulumiPlugins, InstallAWSPulumiPlugin } from '../../tasks/doctor';
  * Nitric AWS Doctor command
  * Will Check pre-requisite software and configurations for deploying to AWS
  */
-export default class Doctor extends BaseCommand {
+export default class AwsDoctor extends BaseCommand {
 	static description = 'Checks environment for configuration for deployment to AWS';
 
 	static examples = [`$ nitric doctor:aws`];
 
 	static flags = {
-		help: flags.help({ char: 'h' }),
+		...BaseCommand.flags,
 	};
 
 	static args = [];

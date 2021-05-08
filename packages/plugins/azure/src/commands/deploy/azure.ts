@@ -86,12 +86,13 @@ const SUPPORTED_REGIONS = [
 	'brazilsoutheast',
 ];
 
-export default class DeployCmd extends BaseCommand {
+export default class AzureDeploy extends BaseCommand {
 	static description = 'Deploy a Nitric application to Microsoft Azure';
 
 	static examples = [`$ nitric deploy:azure`];
 
 	static flags = {
+		...BaseCommand.flags,
 		region: flags.enum({
 			options: SUPPORTED_REGIONS,
 			char: 'r',
@@ -104,20 +105,19 @@ export default class DeployCmd extends BaseCommand {
 		}),
 		orgName: flags.string({}),
 		adminEmail: flags.string({}),
-		help: flags.help({ char: 'h', default: false }),
 	};
 
 	static args = [{ name: 'dir' }];
 
 	async do(): Promise<void> {
-		const { args, flags } = this.parse(DeployCmd);
+		const { args, flags } = this.parse(AzureDeploy);
 		const { guided } = flags;
 		const { dir = '.' } = args;
 
-		const prompts = Object.keys(DeployCmd.flags)
+		const prompts = Object.keys(AzureDeploy.flags)
 			.filter((key) => flags[key] === undefined || flags[key] === null)
 			.map((key) => {
-				const flag = DeployCmd.flags[key];
+				const flag = AzureDeploy.flags[key];
 				const prompt = {
 					name: key,
 					message: flag.description,

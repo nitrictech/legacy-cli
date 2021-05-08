@@ -18,20 +18,20 @@ import { Listr } from 'listr2';
 import path from 'path';
 import { Down } from '../../tasks/down';
 
-export default class DownCmd extends BaseCommand {
+export default class AwsDown extends BaseCommand {
 	static description = 'Delete a CloudFormation Stack on AWS that was deployed by $ nitric deploy:aws';
 
 	static examples = [`$ nitric down:aws`];
 
 	static flags = {
+		...BaseCommand.flags,
 		file: flags.string({ char: 'f' }),
-		help: flags.help({ char: 'h' }),
 	};
 
 	static args = [{ name: 'dir' }];
 
 	async do(): Promise<any> {
-		const { args, flags } = this.parse(DownCmd);
+		const { args, flags } = this.parse(AwsDown);
 		const { dir = '.' } = args;
 		const { file = 'nitric.yaml' } = flags;
 

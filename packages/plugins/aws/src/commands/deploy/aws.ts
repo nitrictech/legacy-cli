@@ -20,12 +20,13 @@ import path from 'path';
 import AWS from 'aws-sdk';
 import inquirer from 'inquirer';
 
-export default class DeployCmd extends BaseCommand {
+export default class AwsDeploy extends BaseCommand {
 	static description = 'Deploy a Nitric application to Amazon Web Services (AWS)';
 
 	static examples = [`$ nitric deploy:aws . -a 123123123123 -r us-east-1`];
 
 	static flags = {
+		...BaseCommand.flags,
 		account: flags.string({
 			char: 'a',
 			description: 'AWS Account ID to deploy to (default: locally configured account)',
@@ -48,40 +49,25 @@ export default class DeployCmd extends BaseCommand {
 				'ap-south-1',
 			],
 		}),
-		// vpc: flags.string({
-		// 	description: 'VPC to deploy in',
-		// }),
-		// cluster: flags.string({
-		// 	char: 'c',
-		// 	description: 'ECS cluster to use',
-		// }),
-		// subnets: flags.string({
-		// 	char: 's',
-		// 	description: 'VPC subnets to deploy in, comma separated e.g. subnet-1bbb2222,subnet-2ccc3333',
-		// }),
 		file: flags.string({
 			char: 'f',
 			default: 'nitric.yaml' as string,
 			description: 'Nitric descriptor file location',
-		}),
-		help: flags.help({
-			char: 'h',
-			default: false,
 		}),
 	};
 
 	static args = [{ name: 'dir', default: '.' }];
 
 	async do(): Promise<any> {
-		const { args, flags } = this.parse(DeployCmd);
+		const { args, flags } = this.parse(AwsDeploy);
 		const { dir } = args;
 		const sts = new AWS.STS();
 		const { Account: derivedAccountId } = await sts.getCallerIdentity({}).promise();
 
-		const prompts = Object.keys(DeployCmd.flags)
+		const prompts = Object.keys(AwsDeploy.flags)
 			.filter((key) => flags[key] === undefined || flags[key] === null)
 			.map((key) => {
-				const flag = DeployCmd.flags[key];
+				const flag = AwsDeploy.flags[key];
 				const prompt = {
 					name: key,
 					message: flag.description,
@@ -96,11 +82,6 @@ export default class DeployCmd extends BaseCommand {
 		const promptFlags = await inquirer.prompt(prompts);
 
 		const { account, region, file } = { ...flags, ...promptFlags } as Record<keyof typeof flags, string>;
-		// const subnets = subnetsString.split(',');
-
-		// if (subnets.length < 2) {
-		// 	throw new Error('At least 2 subnets must be provided.');
-		// }
 
 		if (!account && !derivedAccountId) {
 			throw new Error('No account provided or deduced.');

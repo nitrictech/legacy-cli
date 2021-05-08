@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { flags } from '@oclif/command';
 import { google } from 'googleapis';
 import { BaseCommand } from "@nitric/cli-common";
 
@@ -22,7 +21,7 @@ export default class Token extends BaseCommand {
 	static examples = [`$ nitric deploy:gcp . -p my-gcp-project`];
 
 	static flags = {
-		help: flags.help({ char: 'h' }),
+		...BaseCommand.flags,
 	};
 
 	static args = [];

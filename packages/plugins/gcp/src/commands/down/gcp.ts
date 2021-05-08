@@ -19,21 +19,25 @@ import path from 'path';
 import { Down } from '../../tasks/down';
 import inquirer from 'inquirer';
 
+const BaseFlags = {
+	file: flags.string({
+		char: 'f',
+		default: 'nitric.yaml',
+	}),
+}
+
 export default class DownCmd extends BaseCommand {
 	static description = 'Delete a Nitric application on Google Cloud Platform (GCP)';
 
 	static examples = [`$ nitric down:gcp`];
 
-	static flags = {
-		file: flags.string({
-			char: 'f',
-			default: 'nitric.yaml',
-		}),
-		guided: flags.boolean({
-			default: false,
-		}),
-		help: flags.help({
-			char: 'h',
+	static flags: typeof BaseFlags & typeof BaseCommand.flags & flags.Input<{
+		nonInteractive: boolean
+	}> = {
+		...BaseCommand.flags,
+		...BaseFlags,
+		nonInteractive: flags.boolean({
+			char: 'n',
 			default: false,
 		}),
 	};
@@ -42,7 +46,7 @@ export default class DownCmd extends BaseCommand {
 
 	async do(): Promise<void> {
 		const { args, flags } = this.parse(DownCmd);
-		const { guided } = flags;
+		const { nonInteractive } = flags;
 		const { dir = '.' } = args;
 
 		const prompts = Object.keys(DownCmd.flags)
@@ -64,7 +68,7 @@ export default class DownCmd extends BaseCommand {
 			});
 
 		let promptFlags = {};
-		if (guided) {
+		if (!nonInteractive) {
 			promptFlags = await inquirer.prompt(prompts);
 		}
 

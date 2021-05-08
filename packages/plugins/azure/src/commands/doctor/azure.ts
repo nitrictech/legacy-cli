@@ -22,13 +22,13 @@ import { CheckPulumiPluginTask, InstallPulumiPluginTask } from '../../tasks/doct
  * Nitric CLI Azure Doctor command
  * Will check and install pre-requisite software for deploying Nitric applications to Azure
  */
-export default class Doctor extends BaseCommand {
+export default class AzureDoctor extends BaseCommand {
 	static description = 'Checks environment for configuration for deployment to Azure';
 
 	static examples = [`$ nitric doctor:azure`];
 
 	static flags = {
-		help: flags.help({ char: 'h' }),
+		...BaseCommand.flags,
 	};
 
 	static args = [];

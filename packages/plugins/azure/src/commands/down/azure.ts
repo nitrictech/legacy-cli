@@ -24,8 +24,8 @@ export default class DownCmd extends BaseCommand {
 	static examples = [`$ nitric down:azure`];
 
 	static flags = {
+		...BaseCommand.flags,
 		file: flags.string({ char: 'f' }),
-		help: flags.help({ char: 'h' }),
 	};
 
 	static args = [{ name: 'dir' }];

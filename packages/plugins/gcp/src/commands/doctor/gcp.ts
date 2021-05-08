@@ -13,7 +13,6 @@
 // limitations under the License.
 
 import { BaseCommand, wrapTaskForListr } from '@nitric/cli-common';
-import { flags } from '@oclif/command';
 import cli from 'cli-ux';
 import { Listr } from 'listr2';
 import { CheckPlugins, InstallGCPPulumiPlugin } from '../../tasks/doctor';
@@ -28,7 +27,7 @@ export default class Doctor extends BaseCommand {
 	static examples = [`$ nitric doctor:gcp`];
 
 	static flags = {
-		help: flags.help({ char: 'h' }),
+		...BaseCommand.flags
 	};
 
 	static args = [];
