@@ -86,3 +86,4 @@ export * from './templates';
 export * from './tasks';
 export * from './paths';
 export * from './analytics';
+export * from './config';

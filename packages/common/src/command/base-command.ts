@@ -14,12 +14,21 @@
 import { Command, flags } from '@oclif/command';
 import { AnalyticsClient } from '../analytics';
 import { Preferences } from '../preferences';
+import { Config } from '../config';
 
 export abstract class BaseCommand extends Command {
 	static flags: flags.Input<{
 		help: void;
+		ci: boolean;
 	}> = {
-		help: flags.help({ char: 'h' }),
+		// Enable CI mode (non-interactive mode)
+		ci: flags.boolean({
+			default: false,
+		}),
+		help: flags.help({
+			char: 'h',
+			default: false,
+		}),
 	};
 
 	//public args: {
@@ -48,6 +57,13 @@ export abstract class BaseCommand extends Command {
 	}
 
 	async run(): Promise<any> {
+		const {
+			flags: { ci },
+		} = this.parse(BaseCommand);
+
+		// Set global config CI mode the the provided ci flag...
+		Config.get().ciMode = ci;
+
 		const requiredInit = Preferences.requiresInit();
 
 		await Preferences.initWorkflow();

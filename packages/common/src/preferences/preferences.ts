@@ -17,6 +17,7 @@ import { v4 } from 'uuid';
 import YAML from 'yaml';
 import inquirer from 'inquirer';
 import { block } from '../utils';
+import { Config } from '../config';
 
 /**
  * Interface for structuring
@@ -24,6 +25,7 @@ import { block } from '../utils';
  */
 interface PreferenceData {
 	clientId?: string;
+	analyticsEnabled: boolean;
 }
 
 /**
@@ -32,6 +34,10 @@ interface PreferenceData {
 interface PreferenceInitOptions {
 	analyticsOptIn: boolean;
 }
+
+const CI_DEFAULTS: PreferenceData = {
+	analyticsEnabled: false,
+};
 
 /**
  * Model for managing user preference data for the Nitric CLI
@@ -48,11 +54,17 @@ export class Preferences {
 	}
 
 	/**
-	 * A user with an undefined clientId
-	 * Has opted out of analytics
+	 * Users client ID for analytics
 	 */
 	get clientId(): string | undefined {
 		return this.data.clientId;
+	}
+
+	/**
+	 * Users optin status for analytics collection
+	 */
+	get analyticsEnabled(): boolean {
+		return this.data.analyticsEnabled;
 	}
 
 	/**
@@ -66,6 +78,12 @@ export class Preferences {
 	}
 
 	static requiresInit(): boolean {
+		// Skip preferences in CI mode
+		// and user defaults
+		if (Config.get().ciMode) {
+			return false;
+		}
+
 		return !fs.existsSync(PREFERENCES_FILE);
 	}
 
@@ -73,6 +91,11 @@ export class Preferences {
 	 * Load the preferences file from default location
 	 */
 	static async fromDefault(): Promise<Preferences> {
+		// Return defaults if CI is enabled...
+		if (Config.get().ciMode) {
+			return new Preferences(CI_DEFAULTS);
+		}
+
 		// Check if the file exists...
 		if (!fs.existsSync(PREFERENCES_FILE)) {
 			throw new Error('Preferences file not initialized!');
@@ -116,14 +139,9 @@ export class Preferences {
 	 * Initialize a new preferences file
 	 */
 	static async init({ analyticsOptIn }: PreferenceInitOptions): Promise<Preferences> {
-		let clientId: string | undefined = undefined;
-		if (analyticsOptIn) {
-			// Generate a new clientId for this user
-			clientId = v4();
-		}
-
 		const data: PreferenceData = {
-			clientId,
+			clientId: v4(),
+			analyticsEnabled: analyticsOptIn,
 		};
 
 		const preferences = new Preferences(data);

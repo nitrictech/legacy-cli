@@ -21,8 +21,8 @@ import { CommandClient } from './command-client';
 export class AnalyticsClient {
 	private visitor?: Visitor;
 
-	constructor(clientId?: string) {
-		if (clientId) {
+	constructor(enabled: boolean, clientId?: string) {
+		if (enabled && clientId) {
 			this.visitor = analytics('UA-196426669-2', clientId);
 		}
 	}
@@ -35,6 +35,6 @@ export class AnalyticsClient {
 	static async defaultAnalyticsClient(): Promise<AnalyticsClient> {
 		// Load user preferences analytics opt-in
 		const preferences = await Preferences.fromDefault();
-		return new AnalyticsClient(preferences.clientId);
+		return new AnalyticsClient(preferences.analyticsEnabled, preferences.clientId);
 	}
 }
