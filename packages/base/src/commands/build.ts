@@ -14,7 +14,7 @@
 
 import { flags } from '@oclif/command';
 import { wrapTaskForListr, Stack, NitricImage, StageStackTask, BaseCommand } from '@nitric/cli-common';
-import { BuildServiceTask } from '../tasks/build';
+import { BuildServiceTask } from '../tasks';
 import { Listr, ListrTask } from 'listr2';
 import path from 'path';
 
@@ -26,6 +26,7 @@ export function createBuildTasks(stack: Stack, directory: string, provider = 'lo
 				title: 'Building Functions',
 				task: (_, task): Listr =>
 					task.newListr(
+						// Create a sub-task to build each service in the project
 						stack.getServices().map(
 							(service): ListrTask => ({
 								...wrapTaskForListr(
@@ -60,19 +61,22 @@ export function createBuildTasks(stack: Stack, directory: string, provider = 'lo
 
 /**
  * Nitric CLI build command
- * Will use docker to build the users application as a docker image
+ * Will use docker to build application services as docker images
  * ready to be executed on a CaaS
  */
 export default class Build extends BaseCommand {
-	static description = 'Builds a project';
+	static description = 'build a project';
 
 	static examples = [`$ nitric build .`];
 
 	static flags = {
 		...BaseCommand.flags,
-		file: flags.string(),
+		file: flags.string({
+			description: 'the stack definition file (default: ./nitric.yaml)',
+		}),
 		provider: flags.enum({
 			char: 'p',
+			description: 'the targeted provider for this build',
 			options: ['local', 'gcp', 'aws'],
 		}),
 	};
@@ -80,6 +84,8 @@ export default class Build extends BaseCommand {
 	static args = [
 		{
 			name: 'directory',
+			description: 'The project directory to build from',
+			required: false,
 		},
 	];
 
@@ -93,7 +99,7 @@ export default class Build extends BaseCommand {
 			return await createBuildTasks(stack, directory, provider).run();
 		} catch (error) {
 			const origErrs = error.errors && error.errors.length ? error.errors : error;
-			throw new Error(`Something went wrong, see error details inline above.\n ${origErrs}`);
+			throw new Error(`Something went wrong, see error details.\n ${origErrs}`);
 		}
 	}
 }
