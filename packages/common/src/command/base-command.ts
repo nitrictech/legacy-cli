@@ -32,7 +32,7 @@ export abstract class BaseCommand extends Command {
 	}
 
 	async run(): Promise<any> {
-		//const requiredInit = Preferences.requiresInit();
+		const requiredInit = Preferences.requiresInit();
 
 		await Preferences.initWorkflow();
 		const analyticsClient = await AnalyticsClient.defaultAnalyticsClient();
@@ -40,9 +40,9 @@ export abstract class BaseCommand extends Command {
 		cmd.start();
 		let results: any = undefined;
 		try {
-			//if (requiredInit) {
-			console.log('Running:', this.ctor.name);
-			//}
+			if (requiredInit) {
+				console.log('Running:', this.ctor.name);
+			}
 			results = await this.do();
 		} catch (e) {
 			cmd.error(e, true);
