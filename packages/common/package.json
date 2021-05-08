@@ -36,6 +36,9 @@
     "uuid": "^8.3.2",
     "yaml": "^1.10.0"
   },
+  "files": [
+    "/lib"
+  ],
   "devDependencies": {
     "@types/jest": "^26.0.15",
     "@types/node": "^10",

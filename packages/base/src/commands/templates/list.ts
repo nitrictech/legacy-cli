@@ -23,7 +23,6 @@ export default class ListTemplates extends BaseCommand {
 
 	static flags = {
 		...BaseCommand.flags,
-		// help: flags.help({ char: 'h' }),
 	};
 
 	static args = [];

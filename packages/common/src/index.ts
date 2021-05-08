@@ -87,3 +87,4 @@ export * from './tasks';
 export * from './paths';
 export * from './analytics';
 export * from './config';
+export * from './preferences';
