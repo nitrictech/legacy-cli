@@ -13,7 +13,6 @@
 // limitations under the License.
 
 import { BaseCommand, wrapTaskForListr } from '@nitric/cli-common';
-import { flags } from '@oclif/command';
 import cli from 'cli-ux';
 import { Listr } from 'listr2';
 import { CheckPulumiPluginTask, InstallPulumiPluginTask } from '../../tasks/doctor';
