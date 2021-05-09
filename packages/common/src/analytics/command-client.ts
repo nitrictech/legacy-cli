@@ -29,7 +29,7 @@ export class CommandClient {
 	/**
 	 * Start the command
 	 */
-	start(): CommandClient {
+	public start(): CommandClient {
 		this.startTime = new Date().getTime();
 
 		if (this.visitor) {
@@ -45,7 +45,7 @@ export class CommandClient {
 	 * @param error
 	 * @param fatal
 	 */
-	error(error: Error, fatal: boolean): CommandClient {
+	public error(error: Error, fatal: boolean): CommandClient {
 		if (this.visitor) {
 			this.visitor.exception(error.stack || error.message, fatal);
 		}
@@ -56,7 +56,7 @@ export class CommandClient {
 	/**
 	 * Stop the command
 	 */
-	async stop(): Promise<void> {
+	public async stop(): Promise<void> {
 		if (!this.startTime) {
 			throw new Error('Command client stopped without being started');
 		}
