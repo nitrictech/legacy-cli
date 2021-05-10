@@ -13,11 +13,11 @@
 // limitations under the License.
 
 import { BaseCommand } from '@nitric/cli-common';
-import { ListTemplatesTask } from '../../tasks/template/list';
+import { ListTemplatesTask } from '../../tasks';
 import { cli } from 'cli-ux';
 
 export default class ListTemplates extends BaseCommand {
-	static description = 'Lists locally available nitric templates';
+	static description = 'lists locally available nitric templates';
 
 	static examples = ['$ nitric templates:list'];
 

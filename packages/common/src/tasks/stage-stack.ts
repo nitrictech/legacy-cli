@@ -15,10 +15,16 @@
 import { Stack } from '../stack';
 import { Task } from '../task';
 
+/**
+ * Options when staging a stack for building
+ */
 interface StageStackOptions {
 	stack: Stack;
 }
 
+/**
+ * Stage a stack for the building
+ */
 export class StageStackTask extends Task<void> {
 	private stack: Stack;
 

@@ -14,7 +14,7 @@
 
 import { flags } from '@oclif/command';
 import { wrapTaskForListr, Repository, BaseCommand } from '@nitric/cli-common';
-import { MakeFunctionTask } from '../../tasks/make';
+import { MakeFunctionTask } from '../../tasks';
 import { Listr } from 'listr2';
 import inquirer from 'inquirer';
 
@@ -24,23 +24,19 @@ interface MakeFunctionArgs {
 }
 
 export default class Function extends BaseCommand {
-	static description = 'Builds a nitric function';
+	static description = 'add a new function to a project';
 
-	static examples = ['$ nitric make:function .'];
+	static examples = ['$ nitric make:function'];
 
 	static flags = {
 		...BaseCommand.flags,
 		directory: flags.string({
 			char: 'd',
-			description: 'directory where the new function should be made',
+			description: 'Directory within the project where the new function should be made',
 		}),
 		file: flags.string({
 			char: 'f',
-			description: 'nitric project YAML file',
-		}),
-		template: flags.string({
-			char: 't',
-			description: 'template to use',
+			description: 'Project stack definition file (e.g. nitric.yaml)',
 		}),
 	};
 
@@ -50,6 +46,7 @@ export default class Function extends BaseCommand {
 			required: false,
 			description: 'Function template',
 			// TODO: Handle case where no templates are available. Prompt to install template(s).
+			// Present available templates from locally installed repositories
 			choices: (): string[] => {
 				const repos = Repository.fromDefaultDirectory();
 
@@ -69,7 +66,8 @@ export default class Function extends BaseCommand {
 
 	async do(): Promise<void> {
 		const { args, flags } = this.parse(Function);
-		// Prompt for any args that weren't provided in the command
+
+		// Prompt for args that weren't provided
 		const prompts = Function.args
 			.filter((arg) => !args[arg.name])
 			.map((arg) => {
@@ -89,6 +87,7 @@ export default class Function extends BaseCommand {
 		const { template, name } = { ...args, ...promptArgs } as MakeFunctionArgs;
 		const { directory = `./${name}`, file = './nitric.yaml' } = flags;
 
+		// Normalize function name to lower kebab case
 		const functionName = (name as string)
 			.toLowerCase()
 			.replace(/ /g, '-')

@@ -18,6 +18,11 @@ import { DeployedAPI, DeployedService, DeployedSite } from '../types';
 import * as pulumi from '@pulumi/pulumi';
 import YAML from 'yaml';
 
+/**
+ * Create an API Gateway for a single function, enabling it to be the target of an entrypoint.
+ *
+ * @param deployedService to create the gateway for
+ */
 function createApiGatewayForFunction(deployedService: DeployedService): apigatewayv2.Stage {
 	// Grant apigateway permission to execute the lambda
 	const body = deployedService.awsLambda.invokeArn.apply((invokeArn) =>
@@ -67,6 +72,14 @@ function createApiGatewayForFunction(deployedService: DeployedService): apigatew
 	return deployment;
 }
 
+/**
+ * Return a list of DistributionOrigins from a list of Entrypoints
+ * @param oai
+ * @param entrypoints
+ * @param deployedSites
+ * @param deployedApis
+ * @param deployedServices
+ */
 function originsFromEntrypoints(
 	oai: cloudfront.OriginAccessIdentity,
 	entrypoints: NitricEntrypoints,
@@ -79,7 +92,7 @@ function originsFromEntrypoints(
 
 		switch (type) {
 			case 'api': {
-				// Search out deployed APIs for the name
+				// Search deployed APIs for the name
 				const deployedApi = deployedApis.find((a) => a.name === name);
 
 				if (!deployedApi) {
@@ -146,6 +159,10 @@ function originsFromEntrypoints(
 	});
 }
 
+/**
+ * Return Distribution Cache Behaviors for the given entrypoints
+ * @param entrypoints
+ */
 function entrypointsToBehaviours(
 	entrypoints: NitricEntrypoints,
 ): {
@@ -190,9 +207,8 @@ function entrypointsToBehaviours(
 }
 
 /**
- * Creates a front-end for nitric applicaiton ingress
- * This includes single origin presentation for
- * Static-sites & APIs
+ * Creates a front-end for nitric application ingress
+ * This includes single origin presentation for Static-sites & APIs
  */
 export async function createEntrypoints(
 	stackName: string,

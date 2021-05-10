@@ -14,9 +14,7 @@
 
 import { flags } from '@oclif/command';
 import { wrapTaskForListr, Repository, BaseCommand } from '@nitric/cli-common';
-import { MakeProjectTask, MakeFunctionTask } from '../../tasks/make';
-import { AddRepositoryTask } from '../../tasks/repository/add';
-import { UpdateStoreTask } from '../../tasks/store/update';
+import { MakeProjectTask, MakeFunctionTask, AddRepositoryTask, UpdateStoreTask } from '../../tasks';
 import { Listr, ListrTask } from 'listr2';
 import cli from 'cli-ux';
 import inquirer from 'inquirer';

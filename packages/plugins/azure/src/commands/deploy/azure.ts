@@ -86,8 +86,13 @@ const SUPPORTED_REGIONS = [
 	'brazilsoutheast',
 ];
 
+/**
+ * Deploy a stack to Microsoft Azure
+ *
+ * Note: Azure Deployments are currently a working progress.
+ */
 export default class AzureDeploy extends BaseCommand {
-	static description = 'Deploy a Nitric application to Microsoft Azure';
+	static description = 'deploy a stack to Microsoft Azure';
 
 	static examples = [`$ nitric deploy:azure`];
 
@@ -101,12 +106,19 @@ export default class AzureDeploy extends BaseCommand {
 		file: flags.string({
 			char: 'f',
 			default: 'nitric.yaml',
+			description: 'stack definition file to deploy',
 		}),
+		//TODO: provide descriptions for these flags
 		orgName: flags.string({}),
 		adminEmail: flags.string({}),
 	};
 
-	static args = [{ name: 'dir' }];
+	static args = [
+		{
+			name: 'dir',
+			description: 'directory containing the stack to be deployed',
+		},
+	];
 
 	async do(): Promise<void> {
 		const { args, flags } = this.parse(AzureDeploy);

@@ -54,6 +54,9 @@ export class Repository {
 		this.templateDescriptors = templates;
 	}
 
+	/**
+	 * Return the name of the repository
+	 */
 	getName(): string {
 		return this.name;
 	}
@@ -67,6 +70,10 @@ export class Repository {
 		);
 	}
 
+	/**
+	 * Returns true if this repository contains a template with the provided name
+	 * @param templateName to search for
+	 */
 	hasTemplate(templateName: string): boolean {
 		const descriptor = this.templateDescriptors.find(({ name }) => name === templateName);
 
@@ -78,8 +85,8 @@ export class Repository {
 	}
 
 	/**
-	 * Get a template from this repository
-	 * @param name
+	 * Return a template from this repository if it exists
+	 * @param templateName of template to retrieve
 	 */
 	getTemplate(templateName: string): Template {
 		const descriptor = this.templateDescriptors.find(({ name }) => name === templateName);
@@ -93,7 +100,7 @@ export class Repository {
 
 	/**
 	 * Load a repository from a repository file
-	 * @param file
+	 * @param file containing the repository descriptor
 	 */
 	static fromFile(file: string): Repository {
 		const repoFile = YAML.parse(fs.readFileSync(file).toString()) as RepositoryFile;
@@ -103,8 +110,8 @@ export class Repository {
 	}
 
 	/**
-	 * Loads repositories from a given directory
-	 * @param path
+	 * Load all repositories from a given directory
+	 * @param path containing repository sub-directories
 	 */
 	static fromDirectory(path: string): Repository[] {
 		try {
@@ -122,7 +129,7 @@ export class Repository {
 	}
 
 	/**
-	 * Load repostories from default template directory
+	 * Load all repositories from the default template directory
 	 */
 	static fromDefaultDirectory(): Repository[] {
 		return Repository.fromDirectory(TEMPLATE_DIR);
@@ -130,7 +137,7 @@ export class Repository {
 
 	/**
 	 * Return flat list of available templates from a list of repositories
-	 * @param repos
+	 * @param repos to retrieve templates from
 	 */
 	static availableTemplates(repos: Repository[]): string[] {
 		return repos.reduce(
@@ -140,8 +147,9 @@ export class Repository {
 	}
 
 	/**
-	 * Checkout a fresh repository
-	 * @param url
+	 * Checkout a template repository from a remote git repo
+	 * @param name to give the repository locally
+	 * @param url containing the repository git repository
 	 */
 	static async checkout(name: string, url: string): Promise<Repository> {
 		const repositoryPath = path.join(TEMPLATE_DIR, `./${name}`);

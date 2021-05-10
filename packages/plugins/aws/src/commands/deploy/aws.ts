@@ -20,10 +20,13 @@ import path from 'path';
 import AWS from 'aws-sdk';
 import inquirer from 'inquirer';
 
+/**
+ * Command to deploy a stack to Amazon Web Services Cloud (AWS)
+ */
 export default class AwsDeploy extends BaseCommand {
-	static description = 'Deploy a Nitric application to Amazon Web Services (AWS)';
+	static description = 'deploy a stack to Amazon Web Services (AWS)';
 
-	static examples = [`$ nitric deploy:aws . -a 123123123123 -r us-east-1`];
+	static examples = [`$ nitric deploy:aws`];
 
 	static flags = {
 		...BaseCommand.flags,
@@ -84,7 +87,9 @@ export default class AwsDeploy extends BaseCommand {
 		const { account, region, file } = { ...flags, ...promptFlags } as Record<keyof typeof flags, string>;
 
 		if (!account && !derivedAccountId) {
-			throw new Error('No account provided or deduced.');
+			throw new Error(
+				'AWS account id must be provided via the -a flag or configured locally (see AWS "Setting Credentials" documentation)',
+			);
 		}
 
 		const accountId = account || (derivedAccountId as string);

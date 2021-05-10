@@ -15,6 +15,9 @@
 import { NitricStack, Task } from '@nitric/cli-common';
 import { LocalWorkspace } from '@pulumi/pulumi/automation';
 
+/**
+ * Options when tearing down a nitric stack from AWS
+ */
 interface DownOptions {
 	stack: NitricStack;
 }
@@ -23,6 +26,9 @@ const NO_OP = async (): Promise<void> => {
 	return;
 };
 
+/**
+ * Tear down a previously deployed nitric stack from AWS.
+ */
 export class Down extends Task<void> {
 	private stack: NitricStack;
 

@@ -21,6 +21,8 @@ import * as mime from 'mime';
 
 /**
  * Create and upload static site content to a bucket
+ *
+ * @param site to create
  */
 export async function createSite(site: Site): Promise<DeployedSite> {
 	// Build the sites content

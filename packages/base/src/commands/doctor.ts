@@ -19,9 +19,7 @@ import emoji from 'node-emoji';
 import chalk from 'chalk';
 import stream from 'stream';
 import fs from 'fs';
-import { InstallPulumi, InstallDocker } from '../tasks/doctor';
-import { UpdateStoreTask } from '../tasks/store/update';
-import { AddRepositoryTask } from '../tasks/repository/add';
+import { InstallPulumi, InstallDocker, UpdateStoreTask, AddRepositoryTask } from '../tasks';
 
 interface Software {
 	name: string;
@@ -29,14 +27,17 @@ interface Software {
 	installDocs: string;
 }
 
+/**
+ * Software required for the Nitric CLI to be fully functional
+ */
 const PREREQUISITE_SOFTWARE: Software[] = [
 	{
-		name: 'pulumi',
+		name: 'pulumi' /* Used for deployments */,
 		icon: ':cloud: ',
 		installDocs: 'https://www.pulumi.com/docs/get-started/install/',
 	},
 	{
-		name: 'docker',
+		name: 'docker' /* Used for 'build' and 'run' commands */,
 		icon: ':whale:',
 		installDocs: 'https://www.docker.com/get-started',
 	},
@@ -47,18 +48,21 @@ interface InputPassthroughOptions {
 	stdout: stream.Writable;
 }
 
+/**
+ * Maps prerequisite software to tasks that install them
+ */
 const INSTALL_TASK_MAP: Record<string, { new (opts: InputPassthroughOptions): Task<void> }> = {
 	pulumi: InstallPulumi,
 	docker: InstallDocker,
 };
 
 /**
- * Nitric CLI build command
- * Will use docker to build the users application as a docker image
- * ready to be executed on a CaaS
+ * Nitric CLI doctor command
+ * Assists in verifying that the CLI is ready to use and prerequisite software is installed.
+ * Attempts to resolve known issues if possible.
  */
 export default class Doctor extends BaseCommand {
-	static description = 'Checks environment for configuration and pre-requisite software';
+	static description = 'check environment for config and prerequisite software';
 
 	static examples = [`$ nitric doctor`];
 
@@ -71,6 +75,7 @@ export default class Doctor extends BaseCommand {
 	async do(): Promise<void> {
 		let exit = false;
 
+		// Determine the install status of prerequisite software
 		const statuses = PREREQUISITE_SOFTWARE.map((software) => ({
 			...software,
 			installed: !!which.sync(software.name, { nothrow: true }),
@@ -81,6 +86,7 @@ export default class Doctor extends BaseCommand {
 		const storeExists = fs.existsSync(NITRIC_REPOSITORIES_FILE);
 		const missingTemplates = !repos.length || !storeExists;
 
+		// Display doctor results
 		cli.table(
 			[
 				...statuses,
@@ -100,34 +106,32 @@ export default class Doctor extends BaseCommand {
 			},
 		);
 
-		const uninstalledSoftware = statuses.filter(({ installed }) => !installed);
+		const missingSoftware = statuses.filter(({ installed }) => !installed);
 
-		if (uninstalledSoftware.length > 0) {
-			const autoFix = await cli.confirm('\nWould you like nitric to try installing missing software? [y/n]');
+		if (missingSoftware.length > 0) {
+			const autoFix = await cli.confirm('\nAttempt to automatically install missing software? [y/n]');
 
 			if (autoFix) {
-				// Get install tasks...
-				const tasks = uninstalledSoftware.map((soft) => INSTALL_TASK_MAP[soft.name]);
-				// await new Listr(tasks.map((task) => wrapTaskForListr(new task()))).run();
+				// Get and run the install tasks for the missing software
+				const tasks = missingSoftware.map((soft) => INSTALL_TASK_MAP[soft.name]);
 				for (let i = 0; i < tasks.length; i++) {
 					await new tasks[i]({ stdin: process.stdin, stdout: process.stdout }).run();
 				}
 			} else {
-				cli.info('\nNo worries, installation instructions for missing pre-requisites can be found below:');
+				cli.info('\nNo worries, installation instructions for missing software can be found below:');
 
-				uninstalledSoftware.forEach(({ name, icon, installDocs }) => {
+				missingSoftware.forEach(({ name, icon, installDocs }) => {
 					const string = emoji.emojify(`${icon} ${name}`);
 					cli.url(string, installDocs);
 				});
 
 				exit = true;
-
 				cli.log();
 			}
 		}
 
 		if (missingTemplates) {
-			const autoFixRepos = await cli.confirm('Would you like nitric to install the official repository? [y/n]');
+			const autoFixRepos = await cli.confirm('Install the official template repository? [y/n]');
 
 			if (autoFixRepos) {
 				await new UpdateStoreTask().run();

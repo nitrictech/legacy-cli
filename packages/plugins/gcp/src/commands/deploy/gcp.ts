@@ -20,7 +20,7 @@ import path from 'path';
 import { google } from 'googleapis';
 import inquirer from 'inquirer';
 
-// XXX: Commented out regions do not support cloud run
+// XXX: Commented out regions do not support Cloud Run
 const SUPPORTED_REGIONS = [
 	// 'us-west1', // Api gateway not supported
 	'us-west2',
@@ -66,7 +66,7 @@ const BaseFlags = {
 };
 
 export default class GcpDeploy extends BaseCommand {
-	static description = 'Deploy a Nitric application to Google Cloud Platform (GCP)';
+	static description = 'deploy a stack to Google Cloud Platform (GCP)';
 
 	static examples = [`$ nitric deploy:gcp`];
 

@@ -935,7 +935,7 @@ __metadata:
     "@oclif/plugin-help": ^3.2.2
     "@oclif/plugin-plugins": ^1.9.5
     "@types/dockerode": ^2.5.34
-    "@types/jest": ^26.0.15
+    "@types/jest": ^26.0.23
     "@types/node": ^10
     "@types/node-emoji": ^1.8.1
     "@types/rimraf": ^3.0.0
@@ -1741,6 +1741,16 @@ __metadata:
     jest-diff: ^26.0.0
     pretty-format: ^26.0.0
   checksum: 42fe39d582de1d79f9d6b96f3dee43ba2e9336c9d1f0e31c4f2f58bbaa059c9f4295c42a213ea9450f91400515a3abde4aae2673522fc6e11ea33f7e21c25dbe
+  languageName: node
+  linkType: hard
+
+"@types/jest@npm:^26.0.23":
+  version: 26.0.23
+  resolution: "@types/jest@npm:26.0.23"
+  dependencies:
+    jest-diff: ^26.0.0
+    pretty-format: ^26.0.0
+  checksum: a015676b78bdc51be6f6315acef10d9106ea8064e3e49143bca3c75b834b61285b45c5f5ccfd049a80107f1e2869a9183cdb5be85816c073ea8dd05852fafdc6
   languageName: node
   linkType: hard
 

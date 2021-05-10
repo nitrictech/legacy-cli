@@ -15,11 +15,19 @@
 import { Task } from '@nitric/cli-common';
 import Docker, { Volume } from 'dockerode';
 
+/**
+ * Options when creating a new volume for containers to use during development/testing
+ */
 interface CreateVolumeTaskOptions {
 	dockerClient?: Docker;
 	volumeName: string;
 }
 
+/**
+ * Create a new volume for containers to use during development/testing.
+ *
+ * Used for Cloud Service emulation, such as Blob Storage.
+ */
 export class CreateVolumeTask extends Task<Volume> {
 	private dockerClient: Docker;
 	private volumeName: string;

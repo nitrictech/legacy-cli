@@ -16,6 +16,9 @@
 import execa from 'execa';
 import { Task } from '@nitric/cli-common';
 
+/**
+ * Install the Pulumi AWS plugin
+ */
 export class InstallAWSPulumiPlugin extends Task<void> {
 	constructor() {
 		super('Installing Pulumi AWS plugin');

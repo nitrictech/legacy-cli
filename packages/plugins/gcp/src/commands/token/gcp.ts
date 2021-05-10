@@ -16,9 +16,9 @@ import { google } from 'googleapis';
 import { BaseCommand } from '@nitric/cli-common';
 
 export default class Token extends BaseCommand {
-	static description = 'Deploy a Nitric application to Google Cloud Platform (GCP)';
+	static description = 'convenience method to generate an access token for GCP';
 
-	static examples = [`$ nitric deploy:gcp . -p my-gcp-project`];
+	static examples = [`$ nitric token:gcp`];
 
 	static flags = {
 		...BaseCommand.flags,

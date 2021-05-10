@@ -34,6 +34,9 @@ interface DeployOptions extends CommonOptions {
 	region: string;
 }
 
+/**
+ * Deploy Nitric Stack to GCP Project
+ */
 export class Deploy extends Task<void> {
 	private stack: Stack;
 	private gcpProject: string;
@@ -69,9 +72,9 @@ export class Deploy extends Task<void> {
 						// deploy the buckets
 						mapObject(buckets).map(createBucket);
 
-						// Deploy the topics
+						// deploy the topics
 						const deployedTopics = mapObject(topics).map(createTopic);
-						// deploy the functions
+						// deploy the services
 						const { token: imageDeploymentToken } = await authClient.getAccessToken();
 
 						const deployedSites = await Promise.all(stack.getSites().map(createSite));
@@ -86,7 +89,7 @@ export class Deploy extends Task<void> {
 						const deployedApis = await Promise.all(mapObject(apis).map((a) => createApi(a, deployedFunctions)));
 
 						if (entrypoints) {
-							// Deployed Entrypoints
+							// deployed the entrypoints
 							createEntrypoints(stack.getName(), entrypoints, deployedSites, deployedApis, deployedFunctions);
 						}
 					} catch (e) {
@@ -105,8 +108,6 @@ export class Deploy extends Task<void> {
 					fs.appendFileSync(logFile, out);
 				},
 			});
-
-			// console.log(upRes);
 		} catch (e) {
 			fs.appendFileSync(errorFile, e);
 			throw new Error('An error occurred, see latest gcp:error log for details');

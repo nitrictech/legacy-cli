@@ -26,8 +26,8 @@ interface BuildServiceTaskOptions {
 
 export class BuildServiceTask extends Task<NitricImage> {
 	private service: Service;
-	private stackName: string;
-	private provider: string;
+	private readonly stackName: string;
+	private readonly provider: string;
 
 	constructor({ service, stackName, provider = 'local' }: BuildServiceTaskOptions) {
 		super(`${service.getName()}`);

@@ -16,6 +16,9 @@
 import execa from 'execa';
 import { Task } from '@nitric/cli-common';
 
+/**
+ * Install the GCP plugin for Pulumi to enable GCP deployments
+ */
 export class InstallGCPPulumiPlugin extends Task<void> {
 	constructor() {
 		super('Installing Pulumi GCP Plugin');

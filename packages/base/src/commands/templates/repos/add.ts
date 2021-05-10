@@ -16,12 +16,11 @@ import { BaseCommand, wrapTaskForListr, Store } from '@nitric/cli-common';
 import { flags } from '@oclif/command';
 import { cli } from 'cli-ux';
 import { Listr } from 'listr2';
-import { AddRepositoryTask } from '../../../tasks/repository/add';
-import { UpdateStoreTask } from '../../../tasks/store/update';
+import { AddRepositoryTask, UpdateStoreTask } from '../../../tasks';
 import inquirer from 'inquirer';
 
 export default class AddRepository extends BaseCommand {
-	static description = 'Adds a new repository for nitric templates';
+	static description = 'adds a new template repository';
 
 	static examples = ['$ nitric templates:repos:add'];
 
@@ -38,7 +37,7 @@ export default class AddRepository extends BaseCommand {
 			name: 'alias',
 			required: false,
 			description:
-				'alias of the template repository to retrieve, will look in official nitric repo store first if url is given this will be the name downloaded repository',
+				'alias of the template repository to retrieve, will look in official nitric repo store first if url is given this will be the name of the downloaded repository',
 		},
 	];
 

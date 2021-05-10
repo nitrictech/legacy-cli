@@ -14,6 +14,6 @@
 
 export * from './volume';
 export * from './network';
-export * from './function';
+export * from './service';
 export * from './gateway';
 export * from './entrypoints';

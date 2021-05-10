@@ -92,6 +92,9 @@ export function createNginxConfig(stack: Stack): string {
 	`;
 }
 
+/**
+ * Options when running entrypoints for local testing
+ */
 interface RunEntrypointsTaskOptions {
 	stack: Stack;
 	network?: Network;
@@ -100,7 +103,7 @@ interface RunEntrypointsTaskOptions {
 }
 
 /**
- * RunEntrypointsTask
+ * Run local http entrypoint(s) as containers for developments/testing purposes.
  */
 export class RunEntrypointsTask extends Task<Container> {
 	private stack: Stack;
@@ -165,7 +168,7 @@ export class RunEntrypointsTask extends Task<Container> {
 		await stageStackEntrypoint(stack, configuration);
 
 		// We likely want to buffer this so we can pipe it in as a file to tar-fs
-		// We still ahve to stage the configuration as part of the stack somewhere...
+		// TODO: We still need to stage the configuration as part of the stack somewhere...
 		const packStream = tar.pack(stack.getStagingDirectory(), {
 			// Grab the nginx configuration from the staging directory
 			entries: [NGINX_CONFIG_FILE],
@@ -177,7 +180,7 @@ export class RunEntrypointsTask extends Task<Container> {
 			path: '/etc/nginx/',
 		});
 
-		// Start the container...
+		// Start the entrypoint container
 		await container.start();
 
 		// Copy sites onto the frontend container

@@ -16,6 +16,10 @@ import { NitricBucket, NamedObject } from '@nitric/cli-common';
 import { storage } from '@pulumi/gcp';
 import { DeployedBucket } from '../types';
 
+/**
+ * Create GCP Cloud Storage Bucket for a Nitric Storage Bucket
+ * @param bucket to create
+ */
 export function createBucket(bucket: NamedObject<NitricBucket>): DeployedBucket {
 	const gcloudBucket = new storage.Bucket(bucket.name, {
 		// TODO: Determine this configuration

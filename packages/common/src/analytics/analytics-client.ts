@@ -23,19 +23,18 @@ export class AnalyticsClient {
 
 	constructor(enabled: boolean, clientId?: string) {
 		if (enabled && clientId) {
-			// TODO: Replace with configuration
-			// and pull API key in remotely
+			// TODO: Replace with configuration and pull API key in remotely
 			this.visitor = analytics('UA-196426669-2', clientId);
 		}
 	}
 
-	// Open a new window for a user running a command
+	// Open a new "window" for a user running a command
 	command(name: string): CommandClient {
 		return new CommandClient(name, this.visitor);
 	}
 
 	static async defaultAnalyticsClient(): Promise<AnalyticsClient> {
-		// Load user preferences analytics opt-in
+		// Load user preferences to determine if they have opted into analytics
 		const preferences = await Preferences.fromDefault();
 		return new AnalyticsClient(preferences.analyticsEnabled, preferences.clientId);
 	}

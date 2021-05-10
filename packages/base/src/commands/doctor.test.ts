@@ -164,13 +164,10 @@ describe('Doctor Command:', () => {
 				it('Should ask to install the software', () => {
 					expect(confirmSpy).toBeCalledTimes(2);
 
-					expect(confirmSpy).toHaveBeenNthCalledWith(
-						1,
-						expect.stringContaining('Would you like nitric to try installing missing software?'),
-					);
+					expect(confirmSpy).toHaveBeenNthCalledWith(1, expect.stringContaining('install missing software?'));
 					expect(confirmSpy).toHaveBeenNthCalledWith(
 						2,
-						expect.stringContaining('Would you like nitric to install the official repository?'),
+						expect.stringContaining('Install the official template repository?'),
 					);
 				});
 			});
@@ -198,9 +195,7 @@ describe('Doctor Command:', () => {
 				});
 
 				it('Should ask to install the software', () => {
-					expect(confirmSpy).toBeCalledWith(
-						expect.stringContaining('Would you like nitric to try installing missing software?'),
-					);
+					expect(confirmSpy).toBeCalledWith(expect.stringContaining('install missing software?'));
 				});
 			});
 		});

@@ -14,7 +14,7 @@
 import { Visitor } from 'universal-analytics';
 
 /**
- * Command client for tracking
+ * Command client for command analytics
  */
 export class CommandClient {
 	private name: string;

@@ -20,6 +20,9 @@ import fs from 'fs';
 
 const GATEWAY_PORT = 9001;
 
+/**
+ * Options when running local services/functions for development/testing
+ */
 export interface RunServiceTaskOptions {
 	image: NitricImage;
 	port?: number | undefined;
@@ -28,6 +31,9 @@ export interface RunServiceTaskOptions {
 	volume?: Volume;
 }
 
+/**
+ * Run a Service (e.g. Function/Container) locally for development or testing
+ */
 export class RunServiceTask extends Task<Container> {
 	private image: NitricImage;
 	private port: number | undefined;
@@ -54,6 +60,7 @@ export class RunServiceTask extends Task<Container> {
 			this.port = await getPort();
 		}
 
+		// If available, use the custom network for this service
 		let networkName = 'bridge';
 		if (network) {
 			try {

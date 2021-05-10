@@ -19,6 +19,10 @@ const GCR_REGION_MAPPING = {
 	europe: 'eu.gcr.io',
 };
 
+/**
+ * Return the GCR host for the provided region
+ * @param region to retrieve the GCR host for
+ */
 export function getGcrHost(region: string): string {
 	return GCR_REGION_MAPPING[region.split('-')[0]];
 }

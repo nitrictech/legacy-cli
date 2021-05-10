@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { NitricAPI, NitricAPITarget, NamedObject } from '@nitric/cli-common';
+import { NamedObject, NitricAPI, NitricAPITarget } from '@nitric/cli-common';
 import { DeployedApi, DeployedService } from '../types';
 import { OpenAPIV2 } from 'openapi-types';
 import Converter from 'api-spec-converter';
@@ -29,13 +29,18 @@ interface GoogleExtensions {
 	};
 }
 
+/**
+ * Transform OpenAPI 3 Spec to the Swagger 2 format supported by GCP
+ * @param api to transform
+ * @param services behind the API
+ */
 async function transformOpenApiSpec(
 	api: NamedObject<NitricAPI>,
-	funcs: DeployedService[],
+	services: DeployedService[],
 ): Promise<pulumi.Output<string>> {
 	const { name, ...spec } = api;
 
-	// Convert to swagger
+	// Convert to swagger, OpenAPI 3 spec isn't supported by GCP API Gateway currently.
 	const { spec: translatedApi }: { spec: OpenAPIV2.Document<NitricAPITarget> } = await Converter.convert({
 		from: 'openapi_3',
 		to: 'swagger_2',
@@ -43,8 +48,8 @@ async function transformOpenApiSpec(
 	});
 
 	// Transform the spec and base64 encode
-	const transformedDoc = pulumi
-		.all(funcs.map((f) => f.cloudRun.statuses.apply(([s]) => `${f.name}||${s.url}`)))
+	return pulumi
+		.all(services.map((f) => f.cloudRun.statuses.apply(([s]) => `${f.name}||${s.url}`)))
 		.apply((nameUrlPairs) => {
 			const transformedApi = {
 				...translatedApi,
@@ -98,19 +103,22 @@ async function transformOpenApiSpec(
 			// Base64 encode here as well
 			return Buffer.from(JSON.stringify(transformedApi)).toString('base64');
 		});
-
-	return transformedDoc;
 }
 
-export async function createApi(api: NamedObject<NitricAPI>, funcs: DeployedService[]): Promise<DeployedApi> {
-	const b64Spec = await transformOpenApiSpec(api, funcs);
+/**
+ * Create a GCP API Gateway for a provided Nitric API
+ * @param api to create
+ * @param services to be deployed behind the api
+ */
+export async function createApi(api: NamedObject<NitricAPI>, services: DeployedService[]): Promise<DeployedApi> {
+	const b64Spec = await transformOpenApiSpec(api, services);
 
 	// Deploy the API
 	const deployedApi = new apigateway.Api(api.name, {
 		apiId: api.name,
 	});
 
-	// Now we need to create the document provided and interpolate the deployed function targets
+	// Now we need to create the document provided and interpolate the deployed service targets
 	// i.e. their Urls...
 	// Deploy the config
 	const deployedConfig = new apigateway.ApiConfig(`${api.name}-config`, {

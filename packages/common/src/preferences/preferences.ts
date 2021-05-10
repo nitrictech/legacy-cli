@@ -20,8 +20,7 @@ import { block } from '../utils';
 import { Config } from '../config';
 
 /**
- * Interface for structuring
- * CLI user preferences
+ * Interface for structuring CLI user preferences
  */
 interface PreferenceData {
 	clientId?: string;
@@ -61,7 +60,7 @@ export class Preferences {
 	}
 
 	/**
-	 * Users optin status for analytics collection
+	 * Users opt-in status for analytics collection
 	 */
 	get analyticsEnabled(): boolean {
 		return this.data.analyticsEnabled;

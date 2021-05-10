@@ -31,20 +31,30 @@ export class Site {
 		this.descriptor = descriptor;
 	}
 
+	/**
+	 * Return the path to the directory containing this site within the stack directory
+	 */
 	getPath(): string {
 		return path.join(this.stack.getDirectory(), this.descriptor.path);
 	}
 
+	/**
+	 * Return the name of this site
+	 */
 	getName(): string {
 		return this.name;
 	}
 
-	// Return the original nitric descriptor
+	/**
+	 * Return the descriptor for this site
+	 */
 	getDescriptor(): NitricStaticSite {
 		return this.descriptor;
 	}
 
-	// Get the asset path of a static site
+	/**
+	 * Return the asset path of the static site
+	 */
 	getAssetPath(): string {
 		const baseAssetPath = this.descriptor.assetPath
 			? path.join(this.descriptor.path, this.descriptor.assetPath)
@@ -53,8 +63,11 @@ export class Site {
 		return path.join(this.stack.getDirectory(), baseAssetPath);
 	}
 
+	/**
+	 * Build a static site by executing its build scripts
+	 * @param site the site to build
+	 */
 	static async build(site: Site): Promise<void> {
-		// Build the static site given a set of build scripts
 		if (site.descriptor.buildScripts) {
 			const workingDir = site.getPath();
 

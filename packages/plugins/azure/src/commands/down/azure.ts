@@ -19,7 +19,7 @@ import path from 'path';
 import { Down } from '../../tasks/down';
 
 export default class DownCmd extends BaseCommand {
-	static description = 'Delete Nitric Stack from Azure that was deployed by $ nitric deploy:azure';
+	static description = 'tear down a stack previously deployed to Azure using `$ nitric deploy:azure`';
 
 	static examples = [`$ nitric down:azure`];
 

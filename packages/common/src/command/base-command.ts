@@ -16,6 +16,13 @@ import { AnalyticsClient } from '../analytics';
 import { Preferences } from '../preferences';
 import { Config } from '../config';
 
+/**
+ * Base for all CLI Commands
+ *
+ * Ensure consistent implementation of analytics, CI operating mode, help flag and error handling.
+ *
+ * Note: Analytics only perform if/when user opts into analytics data collection.
+ */
 export abstract class BaseCommand extends Command {
 	static flags: flags.Input<{
 		help: void;
@@ -79,7 +86,7 @@ export abstract class BaseCommand extends Command {
 		} catch (e) {
 			cmd.error(e, true);
 		} finally {
-			cmd.stop();
+			await cmd.stop();
 		}
 
 		return results;

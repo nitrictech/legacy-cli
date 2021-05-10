@@ -26,8 +26,12 @@ const BaseFlags = {
 	}),
 };
 
+/**
+ * Tear down a previously deployed stack from GCP
+ */
 export default class DownCmd extends BaseCommand {
-	static description = 'Delete a Nitric application on Google Cloud Platform (GCP)';
+	static description =
+		'tear down a stack from Google Cloud Platform (GCP) previously deployed with `$nitric deploy:gcp`';
 
 	static examples = [`$ nitric down:gcp`];
 

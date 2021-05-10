@@ -25,6 +25,9 @@ import { Service } from './service';
 
 const NITRIC_DIRECTORY = '.nitric';
 
+/**
+ * Represents a Nitric Project Stack, including resources and their configuration
+ */
 export class Stack {
 	private file: string;
 	private name: string;
@@ -36,20 +39,36 @@ export class Stack {
 		this.file = file;
 	}
 
+	/**
+	 * Return the stack name
+	 */
 	getName(): string {
 		return this.name;
 	}
 
-	asNitricStack(noUndefined: boolean = false): NitricStack {
+	/**
+	 * Return the descriptor for the stack
+	 * @param noUndefined if true, removes undefined top level properties from the description.
+	 * Useful when writing to a config file such as YAML and empty optional properties are undesirable.
+	 */
+	asNitricStack(noUndefined = false): NitricStack {
 		return Object.keys(this.descriptor)
 			.filter((k) => this.descriptor[k] != undefined || !noUndefined)
 			.reduce((acc, k) => ({ ...acc, [k]: this.descriptor[k] }), {}) as NitricStack;
 	}
 
+	/**
+	 * Return the directory containing this stack (the parent directory of the stack definition file)
+	 */
 	getDirectory(): string {
 		return path.dirname(this.file);
 	}
 
+	/**
+	 * Add a service to the stack
+	 * @param name of the new service, which much not already be present in the stack
+	 * @param svc the service descriptor to add
+	 */
 	addService(name: string, svc: NitricService): Stack {
 		const { descriptor } = this;
 		const { services = {} } = this.descriptor;
@@ -69,6 +88,10 @@ export class Stack {
 		return this;
 	}
 
+	/**
+	 * Return a service from the stack by name
+	 * @param name of the service
+	 */
 	getService(name: string): Service {
 		const { descriptor } = this;
 		const { services = {} } = descriptor;
@@ -80,6 +103,9 @@ export class Stack {
 		return new Service(this, name, services[name]);
 	}
 
+	/**
+	 * Return all services in the stack
+	 */
 	getServices(): Service[] {
 		const { descriptor } = this;
 		const { services = {} } = descriptor;
@@ -87,6 +113,9 @@ export class Stack {
 		return Object.keys(services).map((svcName) => new Service(this, svcName, services[svcName]));
 	}
 
+	/**
+	 * Return all sites (static sites) in the stack
+	 */
 	getSites(): Site[] {
 		const { descriptor } = this;
 		const { sites = {} } = descriptor;
@@ -94,10 +123,18 @@ export class Stack {
 		return Object.keys(sites).map((siteName) => new Site(this, siteName, sites[siteName]));
 	}
 
+	/**
+	 * Get the directory used to perform build operations for this stack and its resources
+	 */
 	getStagingDirectory(): string {
 		return `${STAGING_DIR}/${this.name}`;
 	}
 
+	/**
+	 * Make a directory relative to the stack directory and return its path
+	 * @param directory path to be made
+	 * @private
+	 */
 	private async makeRelativeDirectory(directory: string): Promise<string> {
 		const dir = path.join(this.getDirectory(), directory);
 
@@ -109,21 +146,21 @@ export class Stack {
 	}
 
 	/**
-	 * Returns the nitric directory and creates it if it doesn't exist
+	 * Create the nitric directory if it doesn't exist and return its path
 	 */
 	async makeNitricDirectory(): Promise<string> {
 		return await this.makeRelativeDirectory(`./${NITRIC_DIRECTORY}/`);
 	}
 
 	/**
-	 * Returns the nitric log directory and creates it if it doesn't exist
+	 * Create the nitric log directory if it doesn't exist and return its path
 	 */
 	async makeLoggingDirectory(): Promise<string> {
 		return await this.makeRelativeDirectory(`./${NITRIC_DIRECTORY}/logs/`);
 	}
 
 	/**
-	 * Returns a new log file location. If the log directories are missing, they will be created.
+	 * Return a new log file location. If the log directories are missing, they will be created.
 	 * @param prefix used along with the current time to generate a unique log filename.
 	 */
 	async getLoggingFile(prefix: string): Promise<string> {
@@ -154,38 +191,39 @@ export class Stack {
 
 	/**
 	 * Write a stack to a given file
-	 * @param stack
-	 * @param file
+	 * @param stack to write
+	 * @param file to write to
+	 * @param stringify function to use to convert the stack to a string. Defaults to YAML.stringify.
 	 */
 	static async writeTo(
 		stack: Stack,
 		file: string,
 		stringify: (obj: NitricStack) => string = YAML.stringify,
 	): Promise<void> {
-		let stackString = stringify(stack.asNitricStack(true)); //Turn object into yaml
+		const stackString = stringify(stack.asNitricStack(true)); //Turn object into yaml
 		return await fs.promises.writeFile(file, stackString);
 	}
 
 	/**
-	 * Write stack to the file it was loaded from
-	 * @param stack
+	 * Write a stack back to the file it was loaded from
+	 * @param stack to write
 	 */
 	static async write(stack: Stack): Promise<void> {
 		return await Stack.writeTo(stack, stack.file);
 	}
 
 	/**
-	 * Retrive a nitric stack from a given directory assuming 'nitric.yaml' exists in the root
-	 * @param dir
+	 * Retrieve a nitric stack from a given directory assuming 'nitric.yaml' exists in the root
+	 * @param dir path to the directory containing the stack definition file from
 	 */
 	static async fromDirectory(dir: string): Promise<Stack> {
 		return Stack.fromFile(path.join(dir, './nitric.yaml'));
 	}
 
 	/**
-	 * The stack to prepare for staging
+	 * Stage the stack after deleting any existing staging files.
 	 * TODO: We'll want to decompose this into more functions
-	 * @param stack
+	 * @param stack to stage
 	 */
 	static async stage(stack: Stack): Promise<void> {
 		const repos = Repository.fromDefaultDirectory();
