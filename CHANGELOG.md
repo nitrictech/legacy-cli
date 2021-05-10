@@ -2,6 +2,26 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.38](https://github.com/nitrictech/cli/compare/v0.0.37...v0.0.38) (2021-05-10)
+
+
+### Features
+
+* Add ci mode to the CLI to enable a non-interactive DX. ([0fda8d6](https://github.com/nitrictech/cli/commit/0fda8d6d045eef787fb0bcd0e3d1452c95559da6))
+* Finalize first cut of GA CLI integration. ([bd3cae5](https://github.com/nitrictech/cli/commit/bd3cae5b9bb6adf8ac058827af0f62ed42a85dc8))
+* WIP Analytics integration for oclif commands. ([9c83777](https://github.com/nitrictech/cli/commit/9c8377759e904846e7ca7721f351fa9c991fbea6))
+* WIP start for google analytics CLI integration. ([937d753](https://github.com/nitrictech/cli/commit/937d75359a8d5699af1039e118ab68309ba8855d))
+* Wrap commands in BaseCommand. ([2483022](https://github.com/nitrictech/cli/commit/2483022f3dafa07dc3c7139e3cd82faec255d478))
+
+
+### Bug Fixes
+
+* Add missing peer dependency for cli-common. ([8cf883c](https://github.com/nitrictech/cli/commit/8cf883c7eb7f939270c8e44c3d3ad3b0c072e240))
+* Common typings. ([da7ae00](https://github.com/nitrictech/cli/commit/da7ae002ae0c5a2ecce6234682d50860410008c3))
+* Fix static method references in Preferences. ([ca03c2f](https://github.com/nitrictech/cli/commit/ca03c2f09c726405a36de935296a0f2198bf3545))
+* **azure:** use new ci flag to mark non-interactive. ([d435dd4](https://github.com/nitrictech/cli/commit/d435dd41f522f577a9aff634a46dab5f98b74acf))
+* replace remaining 'run' functions with 'do' ([f4ab4f9](https://github.com/nitrictech/cli/commit/f4ab4f90d237e3f6bfc869f690230e612dcf7fba))
+
 ### [0.0.37](https://github.com/nitrictech/cli/compare/v0.0.36...v0.0.37) (2021-05-08)
 
 
