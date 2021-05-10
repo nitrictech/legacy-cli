@@ -13,6 +13,7 @@
 // limitations under the License.
 import { Preferences } from './preferences';
 import { block } from '../utils';
+import { PREFERENCES_FILE } from '../paths';
 import inquirer from 'inquirer';
 
 describe('initWorkflow', () => {
@@ -112,5 +113,21 @@ describe('initWorkflow', () => {
 		it('should not initialize preferences', () => {
 			expect(preferencesInitSpy).not.toBeCalled();
 		});
+	});
+});
+
+describe('init', () => {
+	let writeToFileSpy: jest.SpyInstance;
+
+	beforeAll(() => {
+		writeToFileSpy = jest.spyOn(Preferences, 'writeToFile').mockResolvedValueOnce();
+		Preferences.init({
+			analyticsOptIn: true,
+		});
+	});
+
+	it('should write new preference data to the default preferences file', () => {
+		expect(writeToFileSpy).toBeCalled();
+		expect(writeToFileSpy).toBeCalledWith(PREFERENCES_FILE, expect.any(Preferences))
 	});
 });
