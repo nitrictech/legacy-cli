@@ -128,6 +128,10 @@ describe('init', () => {
 		});
 	});
 
+	afterAll(() => {
+		writeToFileSpy.mockRestore();
+	});
+
 	it('should write new preference data to the default preferences file', () => {
 		expect(writeToFileSpy).toBeCalled();
 		expect(writeToFileSpy).toBeCalledWith(PREFERENCES_FILE, expect.any(Preferences))
@@ -192,6 +196,30 @@ describe('fromDefault', () => {
 			it('should throw an error', () => {
 				expect(Preferences.fromDefault).rejects.toThrowError('Preferences file not initialized!');
 			});
+		});
+	});
+});
+
+describe('requiresInit', () => {
+
+	describe('running out of CI mode', () => {
+		beforeAll(() => {
+			Config.get().ciMode = false;
+			jest.spyOn(fs, 'existsSync').mockReturnValueOnce(false);
+		});
+
+		it('should return true if the default preferences does not exist', () => {
+			expect(Preferences.requiresInit()).toBe(true)
+		});
+	});	
+
+	describe('running in CI mode', () => {
+		beforeAll(() => {
+			Config.get().ciMode = true;
+		});
+		
+		it('should return false', () => {
+			expect(Preferences.requiresInit()).toBe(false);
 		});
 	});
 });
