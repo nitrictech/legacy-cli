@@ -21,7 +21,7 @@ import * as docker from '@pulumi/docker';
  * Creates a Lambda Function to execute a Nitric Service
  * @param service to be created as a Lambda
  * @param topics to subscribe this function to
- * @param token for ECR used to upload container image for the function
+ * @param token for ECR used to upload container image for the service
  */
 export function createLambdaFunction(
 	service: Service,

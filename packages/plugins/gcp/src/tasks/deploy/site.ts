@@ -19,9 +19,12 @@ import path from 'path';
 import * as mime from 'mime';
 import * as pulumi from '@pulumi/pulumi';
 
-// Create a bucket and upload site files to the bucket
+/**
+ * Create a bucket and upload site files to the bucket
+ * @param site to deploy
+ */
 export async function createSite(site: Site): Promise<DeployedSite> {
-	// Build the site if required (This call is NOOP of there are not build scripts)
+	// Build the site if required (This call is NOOP if there are no build scripts)
 	await Site.build(site);
 
 	const siteBucket = new storage.Bucket(site.getName(), {
@@ -31,6 +34,7 @@ export async function createSite(site: Site): Promise<DeployedSite> {
 		},
 	});
 
+	// Add viewer role for all users to the public bucket
 	new storage.BucketIAMBinding(`${site.getName()}publicRule`, {
 		bucket: siteBucket.name,
 		members: ['allUsers'],

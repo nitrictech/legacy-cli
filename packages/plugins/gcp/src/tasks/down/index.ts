@@ -15,12 +15,15 @@
 import { Task } from '@nitric/cli-common';
 import { LocalWorkspace } from '@pulumi/pulumi/automation';
 
+/**
+ * Options when tearing down a stack previously deployed to GCP
+ */
 interface DownOptions {
 	stackName: string;
 }
 
 /**
- * Tear down a deployed stack
+ * Tear down a deployed stack from GCP
  */
 export class Down extends Task<void> {
 	private stackName: string;

@@ -18,6 +18,14 @@ import { cloudrun, serviceaccount, pubsub } from '@pulumi/gcp';
 import * as docker from '@pulumi/docker';
 import * as pulumi from '@pulumi/pulumi';
 
+/**
+ * Create GCP CloudRun service to execute a Nitric Service
+ * @param region to deploy the service into
+ * @param service to be created and deployed
+ * @param topics to subscribe this function to
+ * @param authToken for GCR used to upload container image for the service
+ * @param gcpProject to deploy the service into
+ */
 export function createFunction(
 	region: string,
 	service: Service,
@@ -25,10 +33,8 @@ export function createFunction(
 	authToken: string,
 	gcpProject: string,
 ): DeployedService {
-	const nitricFunc = service.asNitricService();
-	const { minScale = 0, maxScale = 10, triggers = {} } = nitricFunc;
-
-	//const grcHost = getGcrHost(region);
+	const serviceDescriptor = service.asNitricService();
+	const { minScale = 0, maxScale = 10, triggers = {} } = serviceDescriptor;
 
 	// build and push the image with docker
 	const deployedImage = new docker.Image(`${service.getName()}-gcr-image`, {
@@ -49,9 +55,7 @@ export function createFunction(
 		},
 	});
 
-	//deployedImage.registryServer
-
-	// Deploy the function
+	// Deploy the service
 	const deployedFunction = new cloudrun.Service(service.getName(), {
 		// project: project,
 		location: region,
@@ -79,7 +83,7 @@ export function createFunction(
 
 	// wire up its subscriptions
 	if (triggers.topics && triggers.topics.length > 0) {
-		// Create an account for invoking this function via subscriptions
+		// Create an account for invoking this service via subscriptions
 		// TODO: Do we want to make this one account for subscription in future
 		// TODO: We will likely configure this via eventarc in the future
 		const invokerAccount = new serviceaccount.Account(`${service.getName()}-subacct`, {
@@ -110,7 +114,7 @@ export function createFunction(
 					},
 				});
 			} else {
-				// TODO: Throw new error here about misconfiguration???
+				// TODO: Throw new error here about misconfiguration?
 				// As we are unable to locate the topic
 			}
 		});

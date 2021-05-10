@@ -17,7 +17,8 @@ import { pubsub } from '@pulumi/gcp';
 import { DeployedTopic } from '../types';
 
 /**
- * Create a new pubsub topic
+ * Create a GCP PubSub topic for a Nitric Topic
+ * @param topic to deploy
  */
 export function createTopic(topic: NamedObject<NitricTopic>): DeployedTopic {
 	const pubsubTopic = new pubsub.Topic(topic.name, {

@@ -42,7 +42,7 @@ interface AwsExtentions {
 /**
  * Create an AWS Api Gateway V2 API
  * @param api definition to convert to AWS API config
- * @param services to be deployed behind this API
+ * @param services to be deployed behind the API
  */
 export function createApi(api: NamedObject<NitricAPI>, services: DeployedService[]): DeployedAPI {
 	const { ...rest } = api;

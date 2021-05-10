@@ -29,15 +29,21 @@ type BackendItem = {
 // 1: Identify it's type (api/site(bucket))
 // 2: Create its backend service (internet NEG for API and BucketService for site)
 // 3: Create and attach it's endpoint If necessary (i.e. internet FQDN for API)
-// 4: Create URL Map for routing (use entrpoint key -> target from previous step)
+// 4: Create URL Map for routing (use entrypoint key -> target from previous step)
 // 5: Create the frontend (External HTTPS in our case, will need to sort out certs/CA in future)
 
-// Create Backend services for google cloud load balancing
+/**
+ * Create Backend services for google cloud load balancing
+ * @param entrypoints to create services for
+ * @param deployedApis to be deployed behind entrypoint(s)
+ * @param deployedSites to be deployed behind entrypoint(s)
+ * @param deployedServices to be deployed behind entrypoint(s)
+ */
 function createBackendServices(
 	entrypoints: NitricEntrypoints,
 	deployedApis: DeployedApi[],
 	deployedSites: DeployedSite[],
-	deployedFunctions: DeployedService[],
+	deployedServices: DeployedService[],
 ): BackendItem[] {
 	const normalizedEntrypoints = Object.keys(entrypoints).map((epPath) => ({
 		path: epPath,
@@ -50,7 +56,7 @@ function createBackendServices(
 				const deployedApi = deployedApis.find((a) => a.name === ep.name);
 
 				if (!deployedApi) {
-					throw new Error(`Entrypoint: ${ep.path} contained target that does not exist!`);
+					throw new Error(`Entrypoint: ${ep.path} contained target ${ep.name} that does not exist!`);
 				}
 
 				const apiGatewayNEG = new compute.GlobalNetworkEndpointGroup(`${ep.name}-neg`, {
@@ -58,7 +64,7 @@ function createBackendServices(
 					//defaultPort: 443,
 				});
 
-				// Add the apigateways endpoint to the above group
+				// Add the api gateways endpoint to the above group
 				new compute.GlobalNetworkEndpoint(`${ep.name}-ne`, {
 					globalNetworkEndpointGroup: apiGatewayNEG.name,
 					fqdn: deployedApi.gateway.defaultHostname,
@@ -83,7 +89,7 @@ function createBackendServices(
 				const deployedSite = deployedSites.find((s) => s.name === ep.name);
 
 				if (!deployedSite) {
-					throw new Error(`Entrypoint: ${ep.path} contained target that does not exist!`);
+					throw new Error(`Entrypoint: ${ep.path} contained target ${ep.name} that does not exist!`);
 				}
 
 				const backend = new compute.BackendBucket(`${ep.name}`, {
@@ -98,10 +104,10 @@ function createBackendServices(
 				};
 			}
 			case 'service': {
-				const deployedFunction = deployedFunctions.find((s) => s.name === ep.name);
+				const deployedFunction = deployedServices.find((s) => s.name === ep.name);
 
 				if (!deployedFunction) {
-					throw new Error(`Entrypoint: ${ep.path} contained target that does not exist!`);
+					throw new Error(`Entrypoint: ${ep.path} contained target ${ep.path} that does not exist!`);
 				}
 
 				const serverlessNEG = new compute.RegionNetworkEndpointGroup(`${ep.name}neg`, {
@@ -174,7 +180,7 @@ function createURLMap(stackName: string, entrypoints: NitricEntrypoints, backend
 }
 
 /**
- * Setup GCP loadbalances and services as well as CDN configurations
+ * Setup GCP load balancers and services as well as CDN configurations
  */
 export function createEntrypoints(
 	stackName: string,
