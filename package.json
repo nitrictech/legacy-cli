@@ -5,6 +5,11 @@
   "author": "Nitric <https://github.com/nitric-dev>",
   "scripts": {
     "build:common": "yarn workspace @nitric/cli-common build",
+    "prepack:aws": "yarn workspace @nitric/plugin-aws prepack",
+    "prepack:gcp": "yarn workspace @nitric/plugin-gcp prepack",
+    "prepack:azure": "yarn workspace @nitric/plugin-azure prepack",
+    "prepack:do": "yarn workspace @nitric/plugin-do prepack",
+    "build": "yarn build:common && yarn prepack:aws && yarn prepack:gcp && yarn prepack:azure && yarn prepack:do",
     "lint:deps": "yarn dlx @yarnpkg/doctor@2.1.3",
     "test": "prettier \"./**/*.{ts,js,css,md}\" --write && ultra -r test",
     "bump": "standard-version",
