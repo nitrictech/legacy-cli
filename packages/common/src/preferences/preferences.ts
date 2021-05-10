@@ -101,7 +101,7 @@ export class Preferences {
 			throw new Error('Preferences file not initialized!');
 		}
 
-		return await this.fromFile(PREFERENCES_FILE);
+		return await Preferences.fromFile(PREFERENCES_FILE);
 	}
 
 	static async writeToFile(file: string, preferences: Preferences): Promise<void> {
