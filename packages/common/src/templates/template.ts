@@ -18,39 +18,55 @@ import tar from 'tar-fs';
 import streamToPromise from 'stream-to-promise';
 
 /**
+ * The yaml file representation of a Nitric Template
+ */
+export interface TemplateDescriptor {
+	name: string;
+	lang: string;
+	path: string;
+	codeDir?: string;
+	devDockerfile?: string;
+}
+
+/**
  * Class representation of a nitric template
  */
 export class Template {
-	private name: string;
-	private lang: string;
-	// Absolute path of this template
-	private path: string;
-	// path relative to the template directory
-	private codePath?: string;
+	private descriptor: TemplateDescriptor;
 
-	constructor(name: string, lang: string, path: string, codePath?: string) {
-		this.name = name;
-		this.lang = lang;
-		this.path = path;
-		this.codePath = codePath;
+	constructor(descriptor: TemplateDescriptor) {
+		this.descriptor = descriptor;
 	}
 
-	getName(): string {
-		return this.name;
+	get raw(): TemplateDescriptor {
+		return this.descriptor;
 	}
 
-	getLang(): string {
-		return this.lang;
+	get name(): string {
+		return this.descriptor.name;
 	}
 
-	getPath(): string {
-		return this.path;
+	get lang(): string {
+		return this.descriptor.lang;
 	}
 
-	getCodePath(): string {
-		const codePath = this.codePath || './function';
+	get path(): string {
+		return this.descriptor.path
+	}
 
-		return path.join(this.path, codePath);
+	get codePath(): string {
+		const cPath = this.descriptor.codeDir || './function';
+
+		return path.join(this.path, cPath);
+	}
+
+	get hasDevMode(): boolean {
+		return !!this.descriptor.devDockerfile;
+	}
+
+	get devDockerfile(): string {
+		// Return the production dockerfile as a fallback
+		return this.descriptor.devDockerfile || 'Dockerfile';
 	}
 
 	/**
@@ -59,7 +75,7 @@ export class Template {
 	 * @param path
 	 */
 	static async copyRuntimeTo(template: Template, toDir: string): Promise<void | Buffer> {
-		const inPath = template.getPath();
+		const inPath = template.path;
 		//TODO: should probably do something to make sure the file exists
 		// Make a copy of the function template, using the new name in the output directory
 		const outPath = toDir;
@@ -95,7 +111,7 @@ export class Template {
 	 * @param path
 	 */
 	static async copyCodeTo(template: Template, path: string): Promise<void | Buffer> {
-		const inPath = template.getCodePath();
+		const inPath = template.codePath;
 		//TODO: should probably do something to make sure the file exists
 		// Make a copy of the function template, using the new name in the output directory
 		const outPath = path;

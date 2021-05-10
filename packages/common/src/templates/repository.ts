@@ -12,23 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Template } from './template';
+import { Template, TemplateDescriptor } from './template';
 import { TEMPLATE_DIR } from '../paths';
 import fs from 'fs';
 import path from 'path';
 import YAML from 'yaml';
 import rimraf from 'rimraf';
 import { gitP } from 'simple-git';
-
-/**
- * Represents a template description inside a repository file
- */
-interface TemplateDescriptor {
-	name: string;
-	lang: string;
-	path: string;
-	codeDir?: string;
-}
 
 /**
  * File representation of repository
@@ -42,23 +32,30 @@ interface RepositoryFile {
  */
 export class Repository {
 	// The name of this repository
-	private name: string;
+	private _name: string;
 	// The absolute path of this repository
-	private path: string;
+	private _path: string;
 	// Descriptors for the templates located in this repository
 	private templateDescriptors: TemplateDescriptor[];
 
-	constructor(name: string, path: string, templates: TemplateDescriptor[]) {
-		this.name = name;
-		this.path = path;
-		this.templateDescriptors = templates;
+	constructor(name: string, pth: string, templates: TemplateDescriptor[]) {
+		this._name = name;
+		this._path = pth;
+		this.templateDescriptors = templates.map(td => ({
+			...td,
+			path: path.join(pth, td.path)
+		}));
 	}
 
 	/**
 	 * Return the name of the repository
 	 */
-	getName(): string {
-		return this.name;
+	get name(): string {
+		return this._name;
+	}
+
+	get path(): string {
+		return this._path;
 	}
 
 	/**
@@ -66,7 +63,7 @@ export class Repository {
 	 */
 	getTemplates(): Template[] {
 		return this.templateDescriptors.map(
-			(td) => new Template(td.name, td.lang, path.join(this.path, td.path), td.codeDir),
+			(td) => new Template(td),
 		);
 	}
 
@@ -95,7 +92,7 @@ export class Repository {
 			throw new Error(`Template ${templateName} does not exist in repository ${this.name}`);
 		}
 
-		return new Template(descriptor.name, descriptor.lang, path.join(this.path, descriptor.path), descriptor.codeDir);
+		return new Template(descriptor);
 	}
 
 	/**
@@ -141,7 +138,7 @@ export class Repository {
 	 */
 	static availableTemplates(repos: Repository[]): string[] {
 		return repos.reduce(
-			(acc, r) => [...acc, ...r.getTemplates().map((t) => `${r.getName()}/${t.getName()}`)],
+			(acc, r) => [...acc, ...r.getTemplates().map((t) => `${r.name}/${t.name}`)],
 			[] as string[],
 		);
 	}

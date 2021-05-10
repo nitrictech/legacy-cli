@@ -97,7 +97,7 @@ export class Service {
 	static async findTemplateForService(s: Service, repos: Repository[]): Promise<Template> {
 		const [repoName, tmplName] = s.descriptor.runtime.split('/');
 
-		const repo = repos.find((r) => r.getName() === repoName);
+		const repo = repos.find((r) => r.name === repoName);
 		if (!repo) {
 			throw new Error(`Repository ${repoName} could not be found`);
 		}
