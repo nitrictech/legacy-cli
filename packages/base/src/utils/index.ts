@@ -16,12 +16,19 @@ import fs from 'fs';
 import { LOG_DIR } from '@nitric/cli-common';
 import path from 'path';
 
+/**
+ * Creates the log output directory if it doesn't already exist
+ */
 export function createNitricLogDir(): void {
 	if (!fs.existsSync(LOG_DIR)) {
 		fs.mkdirSync(LOG_DIR);
 	}
 }
 
+/**
+ * Provides a path that can be used for the logfile for a specific service/function
+ * @param name of the service/function. This must be unique to ensure no collision with file paths.
+ */
 export function functionLogFilePath(name: string): string {
 	return path.join(LOG_DIR, `${name}.txt`);
 }

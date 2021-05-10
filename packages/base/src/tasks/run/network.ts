@@ -15,11 +15,17 @@
 import { Task } from '@nitric/cli-common';
 import Docker, { Network } from 'dockerode';
 
+/**
+ * Local development/testing container network options
+ */
 export interface CreateNetworkTaskOptions {
 	name: string;
 	docker?: Docker;
 }
 
+/**
+ * Create a docker network that allows development/test containers to communicate using their names
+ */
 export class CreateNetworkTask extends Task<Network> {
 	private networkName: string;
 	private docker: Docker;
@@ -32,10 +38,9 @@ export class CreateNetworkTask extends Task<Network> {
 
 	async do(): Promise<Network> {
 		const { networkName, docker } = this;
-		const network = await docker.createNetwork({
+		return await docker.createNetwork({
 			Name: networkName,
 			// Driver: "bridge", // defaults to 'bridge' driver.
 		});
-		return network;
 	}
 }

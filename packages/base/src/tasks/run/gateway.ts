@@ -19,6 +19,12 @@ import getPort from 'get-port';
 import streamToPromise from 'stream-to-promise';
 import tar from 'tar-fs';
 
+const GATEWAY_PORT = 8080;
+const NITRIC_BASE_API_GATEWAY_IMAGE = 'nitricimages/dev-api-gateway';
+
+/**
+ * Options when running API Gateways for local testing
+ */
 export interface RunGatewayTaskOptions {
 	stackName: string;
 	api: NitricAPI & { name: string };
@@ -27,11 +33,10 @@ export interface RunGatewayTaskOptions {
 	network?: Network;
 }
 
-const GATEWAY_PORT = 8080;
-
+/**
+ * Create a temporary staging directory for API Gateway container builds
+ */
 export function createAPIStagingDirectory(): string {
-	// createNitricHome();
-	// create temporary staging directory
 	if (!fs.existsSync(`${STAGING_API_DIR}`)) {
 		fs.mkdirSync(`${STAGING_API_DIR}`);
 	}
@@ -39,9 +44,11 @@ export function createAPIStagingDirectory(): string {
 	return `${STAGING_API_DIR}`;
 }
 
+/**
+ * Create a temporary staging directory for a specific API Gateway container build
+ */
 export function createAPIDirectory(apiName: string): string {
 	const stagingDir = createAPIStagingDirectory();
-	// create temporary staging directory
 	if (!fs.existsSync(`${stagingDir}/${apiName}`)) {
 		fs.mkdirSync(`${stagingDir}/${apiName}`);
 	}
@@ -50,7 +57,7 @@ export function createAPIDirectory(apiName: string): string {
 }
 
 /**
- * RunGatewayTask
+ * Run local API Gateways for development/testing
  */
 export class RunGatewayTask extends Task<Container> {
 	private stackName: string;
@@ -84,12 +91,15 @@ export class RunGatewayTask extends Task<Container> {
 			}
 		}
 
-		await streamToPromise(await this.docker.pull('nitricimages/dev-api-gateway'));
+		// Download the base API Gateway container image
+		// note: needed because docker.createContainer doesn't appear to automatically retrieve the base image.
+		await streamToPromise(await this.docker.pull(NITRIC_BASE_API_GATEWAY_IMAGE));
 
+		// Build a new image for this specific API Gateway
 		const dockerOptions = {
 			name: `${stackName}-${api.name}`,
 			// Pull the image from public docker repo
-			Image: 'nitricimages/dev-api-gateway',
+			Image: NITRIC_BASE_API_GATEWAY_IMAGE,
 			ExposedPorts: {
 				[`${GATEWAY_PORT}/tcp`]: {},
 			},
@@ -105,14 +115,14 @@ export class RunGatewayTask extends Task<Container> {
 				},
 			},
 		} as ContainerCreateOptions;
-
 		const container = await this.docker.createContainer(dockerOptions);
 
 		const { name, ...spec } = api;
 
+		// Create staging dir for the build and add the api spec to be loaded by the gateway server
 		const dirName = createAPIDirectory(name);
-
 		fs.writeFileSync(`${dirName}/openapi.json`, JSON.stringify(spec));
+
 		// use tarfs to create a buffer to pipe to put archive...
 		const packStream = tar.pack(dirName);
 
@@ -120,6 +130,7 @@ export class RunGatewayTask extends Task<Container> {
 		await container.putArchive(packStream, {
 			path: '/',
 		});
+
 		await container.start();
 
 		return container;
