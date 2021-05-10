@@ -12,10 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Command } from '@oclif/command';
 import cli from 'cli-ux';
 import Build, { createBuildTasks } from './build';
-import { Stack, wrapTaskForListr, NitricImage, NitricStack, NitricEntrypoints } from '@nitric/cli-common';
+import { BaseCommand, Stack, wrapTaskForListr, NitricImage, NitricStack, NitricEntrypoints } from '@nitric/cli-common';
 import { Listr, ListrTask, ListrContext, ListrRenderer } from 'listr2';
 import path from 'path';
 import Docker, { Network, Container, Volume } from 'dockerode';
@@ -228,7 +227,7 @@ export function sortImages(images: NitricImage[]): NitricImage[] {
  * Nitric CLI run command
  * Extends the build command to run the built docker images locally for testing.
  */
-export default class Run extends Command {
+export default class Run extends BaseCommand {
 	private volume: Volume | undefined = undefined;
 	private network: Network | undefined = undefined;
 
@@ -237,6 +236,7 @@ export default class Run extends Command {
 	static args = [...Build.args];
 
 	static flags = {
+		...BaseCommand.flags,
 		...Build.flags,
 	};
 
@@ -388,7 +388,7 @@ export default class Run extends Command {
 	/**
 	 * Oclif command entrypoint
 	 */
-	run = async (): Promise<void> => {
+	do = async (): Promise<void> => {
 		const { runContainers, cleanup } = this;
 		const { args, flags } = this.parse(Run);
 		const { file = './nitric.yaml' } = flags;

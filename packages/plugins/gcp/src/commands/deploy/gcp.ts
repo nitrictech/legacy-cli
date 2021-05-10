@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Command, flags } from '@oclif/command';
+import { flags } from '@oclif/command';
 import { Deploy } from '../../tasks/deploy';
-import { wrapTaskForListr, Stack, StageStackTask } from '@nitric/cli-common';
+import { BaseCommand, wrapTaskForListr, Stack, StageStackTask } from '@nitric/cli-common';
 import { Listr } from 'listr2';
 import path from 'path';
 import { google } from 'googleapis';
@@ -49,44 +49,55 @@ const SUPPORTED_REGIONS = [
 	'australia-southeast1',
 ];
 
-export default class DeployCmd extends Command {
+const BaseFlags = {
+	project: flags.string({
+		char: 'p',
+		description: 'GCP project ID to deploy to (default: locally configured account)',
+	}),
+	region: flags.enum({
+		options: SUPPORTED_REGIONS,
+		char: 'r',
+		description: 'gcp region to deploy to',
+	}),
+	file: flags.string({
+		char: 'f',
+		default: 'nitric.yaml',
+	}),
+};
+
+export default class GcpDeploy extends BaseCommand {
 	static description = 'Deploy a Nitric application to Google Cloud Platform (GCP)';
 
 	static examples = [`$ nitric deploy:gcp`];
 
-	static flags = {
-		project: flags.string({
-			char: 'p',
-			description: 'GCP project ID to deploy to (default: locally configured account)',
+	static flags: typeof BaseFlags &
+		typeof BaseCommand.flags &
+		flags.Input<{
+			nonInteractive: boolean;
+		}> = {
+		...BaseCommand.flags,
+		...BaseFlags,
+		nonInteractive: flags.boolean({
+			default: false,
+			char: 'n',
 		}),
-		region: flags.enum({
-			options: SUPPORTED_REGIONS,
-			char: 'r',
-			description: 'gcp region to deploy to',
-		}),
-		guided: flags.boolean({ default: false }),
-		file: flags.string({
-			char: 'f',
-			default: 'nitric.yaml',
-		}),
-		help: flags.help({ char: 'h', default: false }),
 	};
 
 	static args = [{ name: 'dir' }];
 
-	async run(): Promise<void> {
+	async do(): Promise<void> {
 		const auth = new google.auth.GoogleAuth({
 			scopes: ['https://www.googleapis.com/auth/cloud-platform'],
 		});
 		const derivedProject = (await auth.getClient()).projectId;
-		const { args, flags } = this.parse(DeployCmd);
-		const { guided } = flags;
+		const { args, flags } = this.parse(GcpDeploy);
+		const { nonInteractive } = flags;
 		const { dir = '.' } = args;
 
-		const prompts = Object.keys(DeployCmd.flags)
+		const prompts = Object.keys(GcpDeploy.flags)
 			.filter((key) => flags[key] === undefined || flags[key] === null)
 			.map((key) => {
-				const flag = DeployCmd.flags[key];
+				const flag = GcpDeploy.flags[key];
 				const prompt = {
 					name: key,
 					message: flag.description,
@@ -100,22 +111,21 @@ export default class DeployCmd extends Command {
 			});
 
 		let promptFlags = {};
-		if (guided) {
+		if (!nonInteractive) {
 			promptFlags = await inquirer.prompt(prompts);
 		}
 
 		const { project = derivedProject, file, region } = { ...flags, ...promptFlags };
 		const stackDefinitionPath = path.join(dir, file);
-		// const stack: NitricStack = (await Stack.fromFile(stackDefinitionPath)).asNitricStack();
 
 		const stack = await Stack.fromFile(stackDefinitionPath);
 
 		if (!region) {
-			throw new Error('Region must be provided, for prompts use the --guided flag');
+			throw new Error('Region must be provided');
 		}
 
 		if (!project) {
-			throw new Error('Project must be provided, for prompts use the --guided flag');
+			throw new Error('Project must be provided');
 		}
 
 		new Listr<any>([

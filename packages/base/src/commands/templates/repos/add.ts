@@ -12,21 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { wrapTaskForListr, Store } from '@nitric/cli-common';
-import { Command, flags } from '@oclif/command';
+import { BaseCommand, wrapTaskForListr, Store } from '@nitric/cli-common';
+import { flags } from '@oclif/command';
 import { cli } from 'cli-ux';
 import { Listr } from 'listr2';
 import { AddRepositoryTask } from '../../../tasks/repository/add';
 import { UpdateStoreTask } from '../../../tasks/store/update';
 import inquirer from 'inquirer';
 
-export default class AddRepository extends Command {
+export default class AddRepository extends BaseCommand {
 	static description = 'Adds a new repository for nitric templates';
 
 	static examples = ['$ nitric templates:repos:add'];
 
 	static flags = {
-		help: flags.help({ char: 'h' }),
+		...BaseCommand.flags,
 		url: flags.string({
 			char: 'u',
 			description: 'URL of the git repository to retrieve template repository from',
@@ -42,37 +42,36 @@ export default class AddRepository extends Command {
 		},
 	];
 
-	async run(): Promise<void> {
+	async do(): Promise<void> {
 		const { args, flags } = this.parse(AddRepository);
 		// Pull the official repository by default
 		let { alias } = args;
 		const { url } = flags;
 
 		try {
-			cli.action.start("Fetching latest template store");
+			cli.action.start('Fetching latest template store');
 			await new UpdateStoreTask().run();
-			cli.action.stop()
+			cli.action.stop();
 		} catch (e) {
-			cli.error("There was an issue downloading the nitric template store");
+			cli.error('There was an issue downloading the nitric template store');
 		}
-		
 
 		// if alias is undefined we should prompt for it
 		if (!alias && !url) {
 			// prompt for an alias...
-			const { alias: promptedAlias } = await inquirer.prompt([{
-				name: "alias",
-				message: "Repository to download?",
-				type: 'list',
-				choices: Store.fromDefault().availableRepositories(),
-			}]);
+			const { alias: promptedAlias } = await inquirer.prompt([
+				{
+					name: 'alias',
+					message: 'Repository to download?',
+					type: 'list',
+					choices: Store.fromDefault().availableRepositories(),
+				},
+			]);
 
 			// Update the alias to the selection
 			alias = promptedAlias;
 		}
 
-		await new Listr([
-			wrapTaskForListr(new AddRepositoryTask({ alias, url })),
-		]).run();
+		await new Listr([wrapTaskForListr(new AddRepositoryTask({ alias, url }))]).run();
 	}
 }

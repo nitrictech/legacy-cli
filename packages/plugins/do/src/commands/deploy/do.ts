@@ -12,19 +12,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Command, flags } from '@oclif/command';
+import { flags } from '@oclif/command';
 import { Deploy } from '../../tasks/deploy';
-import { wrapTaskForListr, Stack, StageStackTask } from '@nitric/cli-common';
+import { BaseCommand, wrapTaskForListr, Stack, StageStackTask } from '@nitric/cli-common';
 import { Listr } from 'listr2';
 import path from 'path';
 import inquirer from 'inquirer';
 
-export default class DeployCmd extends Command {
+export default class DoDeploy extends BaseCommand {
 	static description = 'Deploy a Nitric application to Digital Ocean';
 
 	static examples = [`$ nitric deploy:do . -r nyc1`];
 
 	static flags = {
+		...BaseCommand.flags,
 		containerRegistry: flags.string({
 			char: 'c',
 			description: 'Digital Ocean Container Registry to deploy services to',
@@ -39,16 +40,12 @@ export default class DeployCmd extends Command {
 			default: 'nitric.yaml' as string,
 			description: 'Nitric descriptor file location',
 		}),
-		help: flags.help({
-			char: 'h',
-			default: false,
-		}),
 	};
 
 	static args = [{ name: 'dir', default: '.' }];
 
-	async run(): Promise<any> {
-		const { args, flags } = this.parse(DeployCmd);
+	async do(): Promise<any> {
+		const { args, flags } = this.parse(DoDeploy);
 		const { dir } = args;
 
 		const token = process.env['DIGITALOCEAN_TOKEN'];
@@ -59,10 +56,10 @@ export default class DeployCmd extends Command {
 			);
 		}
 
-		const prompts = Object.keys(DeployCmd.flags)
+		const prompts = Object.keys(DoDeploy.flags)
 			.filter((key) => flags[key] === undefined || flags[key] === null)
 			.map((key) => {
-				const flag = DeployCmd.flags[key];
+				const flag = DoDeploy.flags[key];
 				const prompt = {
 					name: key,
 					message: flag.description,

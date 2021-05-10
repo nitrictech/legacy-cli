@@ -12,37 +12,43 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Command, flags } from '@oclif/command';
-import { wrapTaskForListr, Stack, NitricStack } from '@nitric/cli-common';
+import { flags } from '@oclif/command';
+import { BaseCommand, wrapTaskForListr, Stack, NitricStack } from '@nitric/cli-common';
 import { Listr } from 'listr2';
 import path from 'path';
 import { Down } from '../../tasks/down';
 import inquirer from 'inquirer';
 
-export default class DownCmd extends Command {
+const BaseFlags = {
+	file: flags.string({
+		char: 'f',
+		default: 'nitric.yaml',
+	}),
+};
+
+export default class DownCmd extends BaseCommand {
 	static description = 'Delete a Nitric application on Google Cloud Platform (GCP)';
 
 	static examples = [`$ nitric down:gcp`];
 
-	static flags = {
-		file: flags.string({
-			char: 'f',
-			default: 'nitric.yaml',
-		}),
-		guided: flags.boolean({
-			default: false,
-		}),
-		help: flags.help({
-			char: 'h',
+	static flags: typeof BaseFlags &
+		typeof BaseCommand.flags &
+		flags.Input<{
+			nonInteractive: boolean;
+		}> = {
+		...BaseCommand.flags,
+		...BaseFlags,
+		nonInteractive: flags.boolean({
+			char: 'n',
 			default: false,
 		}),
 	};
 
 	static args = [{ name: 'dir' }];
 
-	async run(): Promise<void> {
+	async do(): Promise<void> {
 		const { args, flags } = this.parse(DownCmd);
-		const { guided } = flags;
+		const { nonInteractive } = flags;
 		const { dir = '.' } = args;
 
 		const prompts = Object.keys(DownCmd.flags)
@@ -64,7 +70,7 @@ export default class DownCmd extends Command {
 			});
 
 		let promptFlags = {};
-		if (guided) {
+		if (!nonInteractive) {
 			promptFlags = await inquirer.prompt(prompts);
 		}
 

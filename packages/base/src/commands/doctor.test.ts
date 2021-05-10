@@ -17,10 +17,18 @@ import Doctor from './doctor';
 import which from 'which';
 import fs from 'fs';
 import cli from 'cli-ux';
-import { Repository } from '@nitric/cli-common';
+import { Repository, Preferences } from '@nitric/cli-common';
 import { InstallPulumi, InstallDocker } from '../tasks/doctor';
 import { UpdateStoreTask } from '../tasks/store/update';
 import { AddRepositoryTask } from '../tasks/repository/add';
+
+beforeAll(() => {
+	Preferences.requiresInit = () => false;
+	Preferences.fromDefault = async () =>
+		new Preferences({
+			analyticsEnabled: false,
+		});
+});
 
 describe('Doctor Command:', () => {
 	let tableSpy: jest.SpyInstance;
@@ -30,6 +38,7 @@ describe('Doctor Command:', () => {
 		jest.mock('cli-ux');
 		jest.mock('fs');
 		jest.mock('which');
+		jest.mock('inquirer');
 		jest.mock('@nitric/cli-common');
 		jest.mock('../tasks/doctor');
 		jest.mock('../tasks/store/update');
@@ -70,7 +79,7 @@ describe('Doctor Command:', () => {
 			});
 
 			it('Should check the software is installed', () => {
-				expect(whichSpy).toBeCalledTimes(2); // Pululi, Docker
+				expect(whichSpy).toBeCalledTimes(2); // Pulumi, Docker
 			});
 
 			it('Should check the store is installed', () => {

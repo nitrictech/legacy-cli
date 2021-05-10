@@ -15,7 +15,8 @@
     "streamsearch": "<=0.1.2",
     "ssh2-streams": "<=0.4.10",
     "ssh2": "<=0.8.9",
-    "yarn": "<=1.22.10"
+    "yarn": "<=1.22.10",
+    "json-schema": "<=0.2.3"
   },
   "ignore": [
     { "package": "yarn" }

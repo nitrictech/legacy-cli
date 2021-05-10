@@ -14,8 +14,17 @@
 
 import { ListTemplatesTask } from '../../tasks/template/list';
 import { cli } from 'cli-ux';
+import { Preferences } from '@nitric/cli-common';
 import { Tree } from 'cli-ux/lib/styled/tree';
 import List from './list';
+
+beforeAll(() => {
+	Preferences.requiresInit = () => false;
+	Preferences.fromDefault = async () =>
+		new Preferences({
+			analyticsEnabled: false,
+		});
+});
 
 describe('nitric templates:list', () => {
 	let treeCreateSpy: jest.SpyInstance;

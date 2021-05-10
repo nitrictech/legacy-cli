@@ -12,8 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { wrapTaskForListr } from '@nitric/cli-common';
-import { Command, flags } from '@oclif/command';
+import { BaseCommand, wrapTaskForListr } from '@nitric/cli-common';
 import cli from 'cli-ux';
 import { Listr } from 'listr2';
 import { CheckPulumiPlugins, InstallAWSPulumiPlugin } from '../../tasks/doctor';
@@ -22,18 +21,18 @@ import { CheckPulumiPlugins, InstallAWSPulumiPlugin } from '../../tasks/doctor';
  * Nitric AWS Doctor command
  * Will Check pre-requisite software and configurations for deploying to AWS
  */
-export default class Doctor extends Command {
+export default class AwsDoctor extends BaseCommand {
 	static description = 'Checks environment for configuration for deployment to AWS';
 
 	static examples = [`$ nitric doctor:aws`];
 
 	static flags = {
-		help: flags.help({ char: 'h' }),
+		...BaseCommand.flags,
 	};
 
 	static args = [];
 
-	async run(): Promise<void> {
+	async do(): Promise<void> {
 		await new Listr<any>([
 			wrapTaskForListr(new CheckPulumiPlugins(), 'installed'),
 			wrapTaskForListr({

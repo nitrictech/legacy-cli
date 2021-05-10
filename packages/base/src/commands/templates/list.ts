@@ -12,22 +12,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Command, flags } from '@oclif/command';
+import { BaseCommand } from '@nitric/cli-common';
 import { ListTemplatesTask } from '../../tasks/template/list';
 import { cli } from 'cli-ux';
 
-export default class ListTemplates extends Command {
+export default class ListTemplates extends BaseCommand {
 	static description = 'Lists locally available nitric templates';
 
 	static examples = ['$ nitric templates:list'];
 
 	static flags = {
-		help: flags.help({ char: 'h' }),
+		...BaseCommand.flags,
 	};
 
 	static args = [];
 
-	async run(): Promise<void> {
+	async do(): Promise<void> {
 		const templates = await new ListTemplatesTask().do();
 
 		if (Object.keys(templates).length == 0) {

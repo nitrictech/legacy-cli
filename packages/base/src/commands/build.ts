@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Command, flags } from '@oclif/command';
-import { wrapTaskForListr, Stack, NitricImage, StageStackTask } from '@nitric/cli-common';
+import { flags } from '@oclif/command';
+import { wrapTaskForListr, Stack, NitricImage, StageStackTask, BaseCommand } from '@nitric/cli-common';
 import { BuildServiceTask } from '../tasks/build';
 import { Listr, ListrTask } from 'listr2';
 import path from 'path';
@@ -63,13 +63,13 @@ export function createBuildTasks(stack: Stack, directory: string, provider = 'lo
  * Will use docker to build the users application as a docker image
  * ready to be executed on a CaaS
  */
-export default class Build extends Command {
+export default class Build extends BaseCommand {
 	static description = 'Builds a project';
 
 	static examples = [`$ nitric build .`];
 
 	static flags = {
-		help: flags.help({ char: 'h' }),
+		...BaseCommand.flags,
 		file: flags.string(),
 		provider: flags.enum({
 			char: 'p',
@@ -83,7 +83,7 @@ export default class Build extends Command {
 		},
 	];
 
-	async run(): Promise<{ [key: string]: NitricImage }> {
+	async do(): Promise<{ [key: string]: NitricImage }> {
 		const { args, flags } = this.parse(Build);
 		const { directory = '.' } = args;
 		const { file = './nitric.yaml', provider = 'local' } = flags;

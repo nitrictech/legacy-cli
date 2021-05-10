@@ -12,10 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Command, flags } from '@oclif/command';
+import { flags } from '@oclif/command';
 import { Listr } from 'listr2';
 import inquirer from 'inquirer';
-import { Stack, StageStackTask, wrapTaskForListr } from '@nitric/cli-common';
+import { BaseCommand, Stack, StageStackTask, wrapTaskForListr } from '@nitric/cli-common';
 import path from 'path';
 import { Deploy } from '../../tasks/deploy';
 
@@ -86,38 +86,37 @@ const SUPPORTED_REGIONS = [
 	'brazilsoutheast',
 ];
 
-export default class DeployCmd extends Command {
+export default class AzureDeploy extends BaseCommand {
 	static description = 'Deploy a Nitric application to Microsoft Azure';
 
 	static examples = [`$ nitric deploy:azure`];
 
 	static flags = {
+		...BaseCommand.flags,
 		region: flags.enum({
 			options: SUPPORTED_REGIONS,
 			char: 'r',
 			description: 'azure region to deploy to',
 		}),
-		guided: flags.boolean({ default: false }),
 		file: flags.string({
 			char: 'f',
 			default: 'nitric.yaml',
 		}),
 		orgName: flags.string({}),
 		adminEmail: flags.string({}),
-		help: flags.help({ char: 'h', default: false }),
 	};
 
 	static args = [{ name: 'dir' }];
 
-	async run(): Promise<void> {
-		const { args, flags } = this.parse(DeployCmd);
-		const { guided } = flags;
+	async do(): Promise<void> {
+		const { args, flags } = this.parse(AzureDeploy);
+		const { ci } = flags;
 		const { dir = '.' } = args;
 
-		const prompts = Object.keys(DeployCmd.flags)
+		const prompts = Object.keys(AzureDeploy.flags)
 			.filter((key) => flags[key] === undefined || flags[key] === null)
 			.map((key) => {
-				const flag = DeployCmd.flags[key];
+				const flag = AzureDeploy.flags[key];
 				const prompt = {
 					name: key,
 					message: flag.description,
@@ -131,7 +130,7 @@ export default class DeployCmd extends Command {
 			});
 
 		let promptFlags = {};
-		if (guided) {
+		if (!ci) {
 			promptFlags = await inquirer.prompt(prompts);
 		}
 
