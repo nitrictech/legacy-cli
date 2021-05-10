@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.39](https://github.com/nitrictech/cli/compare/v0.0.38...v0.0.39) (2021-05-10)
+
+
+### Bug Fixes
+
+* catch more errors in run command, cleanup remaining commands ([a7c3eb5](https://github.com/nitrictech/cli/commit/a7c3eb560081319aa2b614df1141943985c84c3b))
+
 ### [0.0.38](https://github.com/nitrictech/cli/compare/v0.0.37...v0.0.38) (2021-05-10)
 
 
