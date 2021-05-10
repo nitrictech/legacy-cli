@@ -20,7 +20,7 @@ import { Repository } from '../templates';
 import { STAGING_DIR } from '../paths';
 import rimraf from 'rimraf';
 import { Site } from './site';
-import { findFileRead } from '../utils';
+import { compareStackDifferences, findFileRead } from '../utils';
 import { Service } from './service';
 
 const NITRIC_DIRECTORY = '.nitric';
@@ -162,8 +162,7 @@ export class Stack {
 		file: string,
 		stringify: (obj: NitricStack) => string = YAML.stringify,
 	): Promise<void> {
-		let stackString = stringify(stack.asNitricStack(true)); //Turn object into yaml
-		return await fs.promises.writeFile(file, stackString);
+		return await fs.promises.writeFile(file, compareStackDifferences(stack, file, stringify));
 	}
 
 	/**

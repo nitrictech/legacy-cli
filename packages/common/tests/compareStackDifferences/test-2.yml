@@ -1,0 +1,6 @@
+name: test
+# comment
+services:
+  test:
+    path: test
+    runtime: official/nextjs
