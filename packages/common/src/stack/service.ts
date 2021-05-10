@@ -23,6 +23,9 @@ import match from 'multimatch';
 
 type omitMethods = 'getService' | 'getServices';
 
+/**
+ * Represents a Nitric Service (Function/Container/etc.)
+ */
 export class Service {
 	// Back reference to the parent stack
 	// emit getFunction here to prevent recursion
@@ -36,19 +39,30 @@ export class Service {
 		this.descriptor = descriptor;
 	}
 
-	// Returns reference to parent stack sans ability to get methods
+	/**
+	 * Returns reference to parent stack sans ability to get methods
+	 */
 	getStack(): Omit<Stack, omitMethods> {
 		return this.stack;
 	}
 
+	/**
+	 * Returns the descriptor for this service
+	 */
 	asNitricService(): NitricService {
 		return this.descriptor;
 	}
 
+	/**
+	 * Return the service name
+	 */
 	getName(): string {
 		return this.name;
 	}
 
+	/**
+	 * Return the directory that contains this service's source
+	 */
 	getDirectory(): string {
 		const funcPath = path.join(this.stack.getDirectory(), this.descriptor.path);
 		if (!fs.existsSync(funcPath)) {
@@ -59,16 +73,27 @@ export class Service {
 		return funcPath;
 	}
 
+	/**
+	 * Get the directory used to stage a container image build of this service
+	 */
 	getStagingDirectory(): string {
 		return path.join(this.stack.getStagingDirectory(), this.name);
 	}
 
+	/**
+	 * Return the default image tag for a container image built from this service
+	 * @param provider the provider name (e.g. aws), used to uniquely identify builds for specific providers
+	 */
 	getImageTagName(provider?: string): string {
 		const providerString = provider ? `-${provider}` : '';
 		return `${this.stack.getName()}-${this.name}${providerString}`;
 	}
 
-	// Find the template for a function from a given set of repositories
+	/**
+	 * Find the template for a function from a given set of repositories
+	 * @param s the service to find the template for
+	 * @param repos the repositories to search in for the template
+	 */
 	static async findTemplateForService(s: Service, repos: Repository[]): Promise<Template> {
 		const [repoName, tmplName] = s.descriptor.runtime.split('/');
 
@@ -84,7 +109,11 @@ export class Service {
 		return repo.getTemplate(tmplName);
 	}
 
-	// Stage the files for a function ready to build
+	/**
+	 * Stage the source and other files for a service, ready to build
+	 * @param s the service to stage
+	 * @param repos the repositories to search for the service's template files
+	 */
 	static async stage(s: Service, repos: Repository[]): Promise<void> {
 		const serviceStaging = s.getStagingDirectory();
 		const template = await Service.findTemplateForService(s, repos);
