@@ -39,8 +39,13 @@ interface AwsExtentions {
 	};
 }
 
-export function createApi(api: NamedObject<NitricAPI>, funcs: DeployedService[]): DeployedAPI {
-	const { name, ...rest } = api;
+/**
+ * Create an AWS Api Gateway V2 API
+ * @param api definition to convert to AWS API config
+ * @param services to be deployed behind this API
+ */
+export function createApi(api: NamedObject<NitricAPI>, services: DeployedService[]): DeployedAPI {
+	const { ...rest } = api;
 
 	const targetNames = uniq(
 		Object.keys(api.paths).reduce((acc, p) => {
@@ -59,7 +64,7 @@ export function createApi(api: NamedObject<NitricAPI>, funcs: DeployedService[])
 	);
 
 	const transformedDoc = pulumi
-		.all(funcs.map((f) => f.awsLambda.invokeArn.apply((arn) => `${f.name}||${arn}`)))
+		.all(services.map((f) => f.awsLambda.invokeArn.apply((arn) => `${f.name}||${arn}`)))
 		.apply((nameArnPairs) => {
 			const transformedApi = {
 				...rest,
@@ -124,8 +129,8 @@ export function createApi(api: NamedObject<NitricAPI>, funcs: DeployedService[])
 		autoDeploy: true,
 	});
 
-	// generate lambda permissions
-	funcs
+	// Generate lambda permissions enabling the API Gateway to invoke the functions it targets
+	services
 		.filter((f) => targetNames.includes(f.name))
 		.forEach((f) => {
 			new lambda.Permission(`${f.name}APIPermission`, {

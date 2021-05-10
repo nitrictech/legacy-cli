@@ -16,6 +16,11 @@ import { NitricSchedule, NamedObject } from '@nitric/cli-common';
 import { DeployedTopic } from '../types';
 import { cloudwatch } from '@pulumi/aws';
 
+/**
+ * Create an AWS CloudWatch rule to trigger events on a given schedule to specific topics
+ * @param schedule to create
+ * @param topics to publish the scheduled event message to
+ */
 export function createSchedule(schedule: NamedObject<NitricSchedule>, topics: DeployedTopic[]): void {
 	const targetTopic = topics.find((t) => t.name === schedule.target.id);
 

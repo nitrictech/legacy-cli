@@ -33,7 +33,7 @@ describe('initWorkflow', () => {
 			new Preferences({
 				clientId: 'testing',
 				analyticsEnabled: true,
-			})
+			}),
 		);
 
 		promptSpy = jest.spyOn(inquirer, 'prompt').mockResolvedValue({
@@ -52,7 +52,7 @@ describe('initWorkflow', () => {
 			requiresInitSpy = jest.spyOn(Preferences, 'requiresInit').mockReturnValueOnce(true);
 			await Preferences.initWorkflow();
 		});
-	
+
 		afterAll(() => {
 			requiresInitSpy.mockClear();
 			consoleLogSpy.mockClear();
@@ -88,10 +88,9 @@ describe('initWorkflow', () => {
 		it('should init the users preferences with their analytics opt in status', () => {
 			expect(preferencesInitSpy).toBeCalled();
 			expect(preferencesInitSpy).toBeCalledWith({
-				analyticsOptIn: true
+				analyticsOptIn: true,
 			});
 		});
-
 	});
 
 	describe('when preferences are already initialialized', () => {
@@ -134,7 +133,7 @@ describe('init', () => {
 
 	it('should write new preference data to the default preferences file', () => {
 		expect(writeToFileSpy).toBeCalled();
-		expect(writeToFileSpy).toBeCalledWith(PREFERENCES_FILE, expect.any(Preferences))
+		expect(writeToFileSpy).toBeCalledWith(PREFERENCES_FILE, expect.any(Preferences));
 	});
 });
 
@@ -142,10 +141,12 @@ describe('fromDefault', () => {
 	let fromFileSpy: jest.SpyInstance;
 
 	beforeAll(() => {
-		fromFileSpy = jest.spyOn(Preferences, 'fromFile').mockResolvedValue(new Preferences({
-			analyticsEnabled: true,
-			clientId: "test",
-		}));
+		fromFileSpy = jest.spyOn(Preferences, 'fromFile').mockResolvedValue(
+			new Preferences({
+				analyticsEnabled: true,
+				clientId: 'test',
+			}),
+		);
 	});
 
 	afterAll(() => {
@@ -201,7 +202,6 @@ describe('fromDefault', () => {
 });
 
 describe('requiresInit', () => {
-
 	describe('running out of CI mode', () => {
 		beforeAll(() => {
 			Config.get().ciMode = false;
@@ -209,15 +209,15 @@ describe('requiresInit', () => {
 		});
 
 		it('should return true if the default preferences does not exist', () => {
-			expect(Preferences.requiresInit()).toBe(true)
+			expect(Preferences.requiresInit()).toBe(true);
 		});
-	});	
+	});
 
 	describe('running in CI mode', () => {
 		beforeAll(() => {
 			Config.get().ciMode = true;
 		});
-		
+
 		it('should return false', () => {
 			expect(Preferences.requiresInit()).toBe(false);
 		});

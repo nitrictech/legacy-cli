@@ -20,7 +20,7 @@ import EventEmitter from 'eventemitter3';
 export abstract class Task<T> extends EventEmitter {
 	private _name: string;
 
-	protected constructor(name: string) {
+	constructor(name: string) {
 		super();
 		this._name = name;
 	}

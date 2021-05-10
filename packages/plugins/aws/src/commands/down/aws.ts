@@ -19,16 +19,24 @@ import path from 'path';
 import { Down } from '../../tasks/down';
 
 export default class AwsDown extends BaseCommand {
-	static description = 'Delete a CloudFormation Stack on AWS that was deployed by $ nitric deploy:aws';
+	static description = 'Delete a stack from AWS that was deployed using `$ nitric deploy:aws`';
 
 	static examples = [`$ nitric down:aws`];
 
 	static flags = {
 		...BaseCommand.flags,
-		file: flags.string({ char: 'f' }),
+		file: flags.string({
+			char: 'f',
+			description: 'file containing the stack definition of the stack to be torn down',
+		}),
 	};
 
-	static args = [{ name: 'dir' }];
+	static args = [
+		{
+			name: 'dir',
+			description: 'project stack directory',
+		},
+	];
 
 	async do(): Promise<any> {
 		const { args, flags } = this.parse(AwsDown);

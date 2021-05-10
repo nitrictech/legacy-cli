@@ -17,7 +17,12 @@ import { lambda, iam, sns, ecr } from '@pulumi/aws';
 import { DeployedTopic, DeployedService } from '../types';
 import * as docker from '@pulumi/docker';
 
-// Creates a Lambda Function using pulumi
+/**
+ * Creates a Lambda Function to execute a Nitric Service
+ * @param service to be created as a Lambda
+ * @param topics to subscribe this function to
+ * @param token for ECR used to upload container image for the function
+ */
 export function createLambdaFunction(
 	service: Service,
 	topics: DeployedTopic[],

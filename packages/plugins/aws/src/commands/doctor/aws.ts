@@ -19,10 +19,10 @@ import { CheckPulumiPlugins, InstallAWSPulumiPlugin } from '../../tasks/doctor';
 
 /**
  * Nitric AWS Doctor command
- * Will Check pre-requisite software and configurations for deploying to AWS
+ * Will Check prerequisite software and configurations for deploying to AWS
  */
 export default class AwsDoctor extends BaseCommand {
-	static description = 'Checks environment for configuration for deployment to AWS';
+	static description = 'check environment for configuration for deployment to AWS';
 
 	static examples = [`$ nitric doctor:aws`];
 

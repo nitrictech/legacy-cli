@@ -15,6 +15,9 @@
 import { Task } from '@nitric/cli-common';
 import execa from 'execa';
 
+/**
+ * Check for the Pulumi plugins required to deploy to AWS and prompt if missing.
+ */
 export class CheckPulumiPlugins extends Task<boolean> {
 	constructor() {
 		super('Checking For Pulumi AWS Plugin');
@@ -28,7 +31,9 @@ export class CheckPulumiPlugins extends Task<boolean> {
 				return true;
 			}
 		} catch (e) {
-			throw new Error('Pulumi is no installed, please run nitric doctor to install pre-requisite software');
+			throw new Error(
+				'Pulumi is not installed or could not be executed, please run `nitric doctor` to install prerequisite software',
+			);
 		}
 
 		return false;
