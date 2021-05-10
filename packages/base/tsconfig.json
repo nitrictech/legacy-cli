@@ -15,7 +15,4 @@
     "src/**/*",
     "types/*.d.ts"
   ],
-  "exclude": [
-    "src/**/*.test.ts",
-  ]
 }

@@ -98,7 +98,7 @@
   "repository": "packages/cli",
   "scripts": {
     "license:check": "licensee --production",
-    "prepackage": "rm -rf lib && tsc -b && oclif-dev manifest && oclif-dev readme",
+    "prepackage": "rm -rf lib && tsc -p tsconfig.build.json && oclif-dev manifest && oclif-dev readme",
     "postpackage": "rm -f oclif.manifest.json",
     "package:linux": "pkg . --output ./dist/nitric-linux-x64 -t node12-linux-x64",
     "package:macos": "pkg . --output ./dist/nitric-macos-x64 -t node12-macos-x64",

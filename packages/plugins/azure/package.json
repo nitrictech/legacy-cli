@@ -61,7 +61,7 @@
   "repository": "https://github.com/nitrictech/cli",
   "scripts": {
     "postpack": "rm -f oclif.manifest.json",
-    "prepack": "rm -rf lib && tsc -b && oclif-dev manifest && oclif-dev readme",
+    "prepack": "rm -rf lib && tsc -p tsconfig.build.json && oclif-dev manifest && oclif-dev readme",
     "test": "tsc --emitDeclarationOnly && jest --passWithNoTests",
     "version": "oclif-dev readme && git add README.md",
     "license:check": "licensee --production"
