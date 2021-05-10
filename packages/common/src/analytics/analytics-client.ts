@@ -23,6 +23,8 @@ export class AnalyticsClient {
 
 	constructor(enabled: boolean, clientId?: string) {
 		if (enabled && clientId) {
+			// TODO: Replace with configuration
+			// and pull API key in remotely
 			this.visitor = analytics('UA-196426669-2', clientId);
 		}
 	}
