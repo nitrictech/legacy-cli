@@ -15,6 +15,8 @@ import { Preferences } from './preferences';
 import { block } from '../utils';
 import { PREFERENCES_FILE } from '../paths';
 import inquirer from 'inquirer';
+import fs from 'fs';
+import { Config } from '../config';
 
 describe('initWorkflow', () => {
 	let consoleLogSpy: jest.SpyInstance;
@@ -129,5 +131,67 @@ describe('init', () => {
 	it('should write new preference data to the default preferences file', () => {
 		expect(writeToFileSpy).toBeCalled();
 		expect(writeToFileSpy).toBeCalledWith(PREFERENCES_FILE, expect.any(Preferences))
+	});
+});
+
+describe('fromDefault', () => {
+	let fromFileSpy: jest.SpyInstance;
+
+	beforeAll(() => {
+		fromFileSpy = jest.spyOn(Preferences, 'fromFile').mockResolvedValue(new Preferences({
+			analyticsEnabled: true,
+			clientId: "test",
+		}));
+	});
+
+	afterAll(() => {
+		fromFileSpy.mockRestore();
+	});
+
+	describe('when running in CI Mode', () => {
+		let prefs: Preferences;
+		beforeAll(async () => {
+			Config.get().ciMode = true;
+			prefs = await Preferences.fromDefault();
+		});
+
+		it('should have disabled analytics', () => {
+			expect(prefs.analyticsEnabled).toBe(false);
+		});
+
+		it('should have an undefined clientId', () => {
+			expect(prefs.clientId).toBe(undefined);
+		});
+	});
+
+	describe('when running out of CI Mode', () => {
+		beforeAll(() => {
+			Config.get().ciMode = false;
+		});
+
+		describe('when the preferences file exists', () => {
+			beforeAll(async () => {
+				jest.spyOn(fs, 'existsSync').mockReturnValueOnce(true);
+				await Preferences.fromDefault();
+			});
+
+			it('should call Preferences.fromFile', () => {
+				expect(fromFileSpy).toBeCalled();
+			});
+
+			it('the file path should be the default preferences file', () => {
+				expect(fromFileSpy).toBeCalledWith(PREFERENCES_FILE);
+			});
+		});
+
+		describe('when the preferences file does not exist', () => {
+			beforeAll(() => {
+				jest.spyOn(fs, 'existsSync').mockReturnValueOnce(false);
+			});
+
+			it('should throw an error', () => {
+				expect(Preferences.fromDefault).rejects.toThrowError('Preferences file not initialized!');
+			});
+		});
 	});
 });
