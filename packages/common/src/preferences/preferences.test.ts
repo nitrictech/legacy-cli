@@ -122,6 +122,9 @@ describe('init', () => {
 
 	beforeAll(() => {
 		writeToFileSpy = jest.spyOn(Preferences, 'writeToFile').mockResolvedValueOnce();
+		jest.spyOn(fs.promises, 'mkdir').mockImplementationOnce(async () => {
+			// NO_OP
+		});
 		Preferences.init({
 			analyticsOptIn: true,
 		});
