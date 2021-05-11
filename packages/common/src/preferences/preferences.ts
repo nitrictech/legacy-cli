@@ -18,6 +18,7 @@ import YAML from 'yaml';
 import inquirer from 'inquirer';
 import { block } from '../utils';
 import { Config } from '../config';
+import path from 'path';
 
 /**
  * Interface for structuring CLI user preferences
@@ -144,6 +145,9 @@ export class Preferences {
 		};
 
 		const preferences = new Preferences(data);
+
+
+		await fs.promises.mkdir(path.dirname(PREFERENCES_FILE), { recursive: true });
 
 		await Preferences.writeToFile(PREFERENCES_FILE, preferences);
 
