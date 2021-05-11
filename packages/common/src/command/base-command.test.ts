@@ -26,6 +26,8 @@ class MockCommand extends BaseCommand {
 	static hasRun = false;
 	static shouldError = false;
 
+	static flags = BaseCommand.flags;
+
 	async do(): Promise<void> {
 		MockCommand.hasRun = true;
 
