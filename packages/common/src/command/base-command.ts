@@ -66,7 +66,7 @@ export abstract class BaseCommand extends Command {
 	async run(): Promise<any> {
 		const {
 			flags: { ci },
-		} = this.parse(BaseCommand);
+		} = this.parse(this.ctor);
 
 		// Set global config CI mode the the provided ci flag...
 		Config.get().ciMode = ci;
