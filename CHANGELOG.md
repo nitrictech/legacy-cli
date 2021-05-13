@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.40](https://github.com/nitrictech/cli/compare/v0.0.39...v0.0.40) (2021-05-13)
+
+
+### Bug Fixes
+
+* Ensure NITRIC_HOME directory created before preferences is written. ([6b78bb3](https://github.com/nitrictech/cli/commit/6b78bb37ea462923aacbb2e7f284e3374d38e4cb))
+* resolve unknown arguments error for base command parsing. ([6be0182](https://github.com/nitrictech/cli/commit/6be0182f6027ba67ba4029092e03be524d3ca627))
+
 ### [0.0.39](https://github.com/nitrictech/cli/compare/v0.0.38...v0.0.39) (2021-05-10)
 
 

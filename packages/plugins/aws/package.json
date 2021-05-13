@@ -1,7 +1,7 @@
 {
   "name": "@nitric/plugin-aws",
   "description": "An AWS plugin for Nitric",
-  "version": "0.0.39",
+  "version": "0.0.40",
   "author": "Nitric <https://github.com/nitric-dev>",
   "bugs": "https://github.com/nitric-dev/cli/issues",
   "dependencies": {
