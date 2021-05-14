@@ -67,10 +67,10 @@ describe('initWorkflow', () => {
 		it('should print an analytics opt in prompt for the user', () => {
 			expect(consoleLogSpy).toBeCalledTimes(1);
 			expect(consoleLogSpy).toBeCalledWith(block`
-			At Nitric we're striving to provide the best possible developer experience for all of our tools.
-			To help us do this we'd like to collect anonymous analytics to help us track plugins & features used, issues and performance metrics.
+At Nitric we're striving to provide the best possible developer experience for all of our tools.
+To help us do this we'd like to collect anonymous analytics to help us track plugins & features used, issues and performance metrics.
 
-			Note: this doesn't include any personal data, source code or other sensitive information about your projects.
+Note: this doesn't include any personal data, source code or other sensitive information about your projects.
 		`);
 		});
 
