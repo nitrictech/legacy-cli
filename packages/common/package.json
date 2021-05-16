@@ -19,6 +19,7 @@
   "dependencies": {
     "@oclif/command": "^1",
     "@oclif/config": "^1",
+    "common-tags": "^1.8.0",
     "enquirer": "^2.3.0",
     "eventemitter3": "^4.0.7",
     "execa": "^5.0.0",
