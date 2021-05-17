@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.41](https://github.com/nitrictech/cli/compare/v0.0.40...v0.0.41) (2021-05-17)
+
+
+### Bug Fixes
+
+* **nit-368:** remove spaces before message ([db3aa50](https://github.com/nitrictech/cli/commit/db3aa500d0c0a4f979d33a2643ac9f19335c1923))
+
 ### [0.0.40](https://github.com/nitrictech/cli/compare/v0.0.39...v0.0.40) (2021-05-13)
 
 
