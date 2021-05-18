@@ -82,19 +82,20 @@ export class Deploy extends Task<void> {
 
 						const deployedSites = await Promise.all(stack.getSites().map(createSite));
 
-						const deployedServices = stack
+						const deployedServices = await Promise.all(stack
 							.getServices()
-							.map((svc) => createLambdaFunction(svc, deployedTopics, authToken));
+							.map((svc) => createLambdaFunction(svc, deployedTopics, authToken)));
 
 						// Deploy APIs
 						const deployedApis = mapObject(apis).map((api) => createApi(api, deployedServices));
 
 						if (entrypoints) {
 							createEntrypoints(stack.getName(), entrypoints, deployedSites, deployedApis, deployedServices);
-						}
+						}						
 					} catch (e) {
 						fs.appendFileSync(errorFile, e.stack);
-						pulumi.log.error('There we an error deploying the stack please check error logs for more detail');
+						pulumi.log.error('There was an error deploying the stack please check error logs for more detail');
+						throw e;
 					}
 				},
 			});
@@ -107,6 +108,10 @@ export class Deploy extends Task<void> {
 					fs.appendFileSync(logFile, out);
 				},
 			});
+
+			if (upRes.stderr) {
+				fs.appendFileSync(errorFile, upRes.stderr);
+			}
 
 			if (upRes.summary && upRes.summary.resourceChanges) {
 				const changes = Object.entries(upRes.summary.resourceChanges)

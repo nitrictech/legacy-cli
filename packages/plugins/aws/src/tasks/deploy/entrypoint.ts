@@ -210,13 +210,13 @@ function entrypointsToBehaviours(
  * Creates a front-end for nitric application ingress
  * This includes single origin presentation for Static-sites & APIs
  */
-export async function createEntrypoints(
+export function createEntrypoints(
 	stackName: string,
 	entrypoints: NitricEntrypoints,
 	deployedSites: DeployedSite[],
 	deployedApis: DeployedAPI[],
 	deployedServices: DeployedService[],
-): Promise<cloudfront.Distribution> {
+): cloudfront.Distribution {
 	const defaultEntrypoint = entrypoints['/'];
 
 	if (!defaultEntrypoint) {
