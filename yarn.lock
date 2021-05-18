@@ -985,7 +985,7 @@ __metadata:
     "@oclif/config": ^1
     "@oclif/dev-cli": ^1
     "@oclif/plugin-help": ^3.2.2
-    "@pulumi/aws": ^4.1.0
+    "@pulumi/aws": ^4.4.1
     "@pulumi/docker": ^3.0.0
     "@pulumi/pulumi": ^3.1.0
     "@types/lodash": ^4.14.168
@@ -1421,9 +1421,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@pulumi/aws@npm:^4.1.0":
-  version: 4.1.0
-  resolution: "@pulumi/aws@npm:4.1.0"
+"@pulumi/aws@npm:^4.4.1":
+  version: 4.4.1
+  resolution: "@pulumi/aws@npm:4.4.1"
   dependencies:
     "@pulumi/pulumi": ^3.0.0
     aws-sdk: ^2.0.0
@@ -1431,7 +1431,7 @@ __metadata:
     mime: ^2.0.0
     read-package-tree: ^5.2.1
     resolve: ^1.7.1
-  checksum: 1e2dfd2b0dccce12907a81e7763723734f423ce9cbd1127dccb3ee0dc47323c2ad5d39594f11be662b2d254fce7083d730de84afaddf43ba7dea19e083fb1787
+  checksum: 93ff8ee95ec385d9c428f0950e7b06e14347041d4c581e0a6a5cd1ecde68d8a5cac008ee74cd927ffa805b07b61be2ee4e9fcf727050c56105318adcc6cefcbd
   languageName: node
   linkType: hard
 

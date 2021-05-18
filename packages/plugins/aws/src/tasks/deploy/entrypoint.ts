@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { cloudfront, types, apigatewayv2, lambda } from '@pulumi/aws';
+import { cloudfront, types, apigatewayv2, lambda, apigateway } from '@pulumi/aws';
 import { NitricEntrypoints } from '@nitric/cli-common';
 import { DeployedAPI, DeployedService, DeployedSite } from '../types';
 import * as pulumi from '@pulumi/pulumi';
@@ -23,53 +23,62 @@ import YAML from 'yaml';
  *
  * @param deployedService to create the gateway for
  */
-function createApiGatewayForFunction(deployedService: DeployedService): apigatewayv2.Stage {
+function createApiGatewayForFunction(deployedService: DeployedService): apigatewayv2.Api {
 	// Grant apigateway permission to execute the lambda
-	const body = deployedService.awsLambda.invokeArn.apply((invokeArn) =>
-		YAML.stringify({
-			openapi: '3.0.1',
-			info: {
-				version: '1.0',
-				title: `${deployedService.name}Proxy`,
-			},
-			paths: {
-				$default: {
-					'x-amazon-apigateway-any-method': {
-						'x-amazon-apigateway-integration': {
-							type: 'aws_proxy',
-							httpMethod: 'POST',
-							payloadFormatVersion: '2.0',
-							uri: invokeArn,
-						},
-						isDefaultRoute: true,
-						responses: {},
-					},
-				},
-			},
-		}),
-	);
+	//const body = deployedService.awsLambda.invokeArn.apply((invokeArn) =>
+	//	YAML.stringify({
+	//		openapi: '3.0.1',
+	//		info: {
+	//			version: '1.0',
+	//			title: `${deployedService.name}Proxy`,
+	//		},
+	//		paths: {
+	//			$default: {
+	//				'x-amazon-apigateway-any-method': {
+	//					'x-amazon-apigateway-integration': {
+	//						type: 'aws_proxy',
+	//						httpMethod: 'POST',
+	//						payloadFormatVersion: '2.0',
+	//						uri: invokeArn,
+	//					},
+	//					isDefaultRoute: true,
+	//					responses: {},
+	//				},
+	//			},
+	//		},
+	//	}),
+	//);
 
-	// Create the lambda proxy API for invocation via cloudfront
-	const lambdaAPI = new apigatewayv2.Api(`${deployedService.name}ProxyApi`, {
-		body,
-		protocolType: 'HTTP',
+	//// Create the lambda proxy API for invocation via cloudfront
+	//const lambdaAPI = new apigatewayv2.Api(`${deployedService.name}ProxyApi`, {
+	//	body,
+	//	protocolType: 'HTTP',
+	//});
+
+	//// Create a deployment for this API
+	//const deployment = new apigatewayv2.Stage(`${deployedService.name}ProxyDeployment`, {
+	//	apiId: lambdaAPI.id,
+	//	name: '$default',
+	//	autoDeploy: true,
+	//});
+
+	pulumi.log.info("Begining deployment of API proxy", deployedService.awsLambda);
+
+	const api = new apigatewayv2.Api(`${deployedService.name}ProxyApi`, {
+		target: deployedService.awsLambda.arn,
+		protocolType: "HTTP"
 	});
 
-	// Create a deployment for this API
-	const deployment = new apigatewayv2.Stage(`${deployedService.name}ProxyDeployment`, {
-		apiId: lambdaAPI.id,
-		name: '$default',
-		autoDeploy: true,
-	});
+	pulumi.log.info("Ending Deployment of api gateway proxy", api);
 
 	new lambda.Permission(`${deployedService.name}ProxyPermission`, {
 		action: 'lambda:InvokeFunction',
 		function: deployedService.awsLambda,
 		principal: 'apigateway.amazonaws.com',
-		sourceArn: pulumi.interpolate`${lambdaAPI.executionArn}/*/*`,
+		sourceArn: pulumi.interpolate`${api.executionArn}/*/*`,
 	});
 
-	return deployment;
+	return api;
 }
 
 /**
@@ -138,7 +147,7 @@ function originsFromEntrypoints(
 				const apiGateway = createApiGatewayForFunction(deployedService);
 
 				// Then we extract the domain name from the created api gateway...
-				const domainName = apiGateway.invokeUrl.apply((url) => new URL(url).host);
+				const domainName = apiGateway.apiEndpoint.apply((url) => new URL(url).host);
 
 				//// Craft and API origin here...
 				return {
