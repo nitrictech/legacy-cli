@@ -16,6 +16,7 @@ import { Service } from '@nitric/cli-common';
 import { lambda, iam, sns, ecr } from '@pulumi/aws';
 import { DeployedTopic, DeployedService } from '../types';
 import * as docker from '@pulumi/docker';
+import * as pulumi from "@pulumi/pulumi";
 
 /**
  * Creates a Lambda Function to execute a Nitric Service
@@ -23,11 +24,11 @@ import * as docker from '@pulumi/docker';
  * @param topics to subscribe this function to
  * @param token for ECR used to upload container image for the service
  */
-export function createLambdaFunction(
+export async function createLambdaFunction(
 	service: Service,
 	topics: DeployedTopic[],
 	token: ecr.GetAuthorizationTokenResult,
-): DeployedService {
+): Promise<DeployedService> {
 	const nitricFunc = service.asNitricService();
 	// Ensure an image repository is available
 	const repository = new ecr.Repository(service.getImageTagName());
@@ -49,8 +50,6 @@ export function createLambdaFunction(
 			password: token.password,
 		},
 	});
-	// repository.repositoryUrl
-	// Build and deploy container
 
 	const lambdaRole = new iam.Role(`${service.getName()}LambdaRole`, {
 		assumeRolePolicy: iam.assumeRolePolicyForPrincipal(iam.Principals.LambdaPrincipal),
@@ -109,9 +108,16 @@ export function createLambdaFunction(
 		}),
 	});
 
+	const imageName = await new Promise<string>(res => {
+		image.imageName.apply(name => {
+			pulumi.log.info(`Image name: ${name}`);
+			res(name);
+		})
+	});
+
 	const lfunction = new lambda.Function(service.getName(), {
-		imageUri: image.imageName, // generateEcrRepositoryUri(account, region, stackName, func) + ':latest',
-		memorySize: 128,
+		imageUri: imageName,
+		memorySize: 512,
 		timeout: 15,
 		packageType: 'Image',
 		role: lambdaRole.arn,
