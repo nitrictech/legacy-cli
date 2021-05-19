@@ -217,11 +217,15 @@ export function createEntrypoints(
 		},
 		// TODO: Determine price class
 		priceClass: 'PriceClass_All',
+		// TODO: Make this configurable through entrypoints extensions
 		restrictions: {
 			geoRestriction: {
-				restrictionType: 'whitelist',
-				locations: ['AU'],
-			},
+				restrictionType: 'none',
+			}
+			//geoRestriction: {
+			//	restrictionType: 'whitelist',
+			//	locations: ['AU'],
+			//},
 		},
 	});
 }
