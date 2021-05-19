@@ -212,6 +212,7 @@ export function createEntrypoints(
 		defaultCacheBehavior,
 		orderedCacheBehaviors,
 		origins,
+		// TODO: Make viewer cert configurable
 		viewerCertificate: {
 			cloudfrontDefaultCertificate: true,
 		},
@@ -222,10 +223,6 @@ export function createEntrypoints(
 			geoRestriction: {
 				restrictionType: 'none',
 			}
-			//geoRestriction: {
-			//	restrictionType: 'whitelist',
-			//	locations: ['AU'],
-			//},
 		},
 	});
 }
