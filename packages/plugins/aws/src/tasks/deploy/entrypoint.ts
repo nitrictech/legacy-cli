@@ -30,6 +30,10 @@ function createApiGatewayForFunction(deployedService: DeployedService): apigatew
 		protocolType: "HTTP"
 	});
 
+	// This is a gateing log statement
+	// it appears to eliminate a race condition between the new
+	// lambda permission and the above api gateway
+	// TODO: Determine if this can be fixed with depends on
 	pulumi.log.info("Deployed Api Gateway Proxy", api);
 
 	new lambda.Permission(`${deployedService.name}ProxyPermission`, {
