@@ -204,7 +204,7 @@ export function createEntrypoints(
 		enabled: true,
 		// Assume for now default will be index
 		// TODO: Make this configurable via nitric.yaml
-		defaultRootObject: 'index.html',
+		// defaultRootObject: '/',
 		defaultCacheBehavior,
 		orderedCacheBehaviors,
 		origins,
