@@ -30,7 +30,7 @@ function createApiGatewayForFunction(deployedService: DeployedService): apigatew
 		protocolType: "HTTP"
 	});
 
-	pulumi.log.info("Ending Deployment of api gateway proxy", api);
+	pulumi.log.info("Deployed Api Gateway Proxy", api);
 
 	new lambda.Permission(`${deployedService.name}ProxyPermission`, {
 		action: 'lambda:InvokeFunction',
