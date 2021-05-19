@@ -23,7 +23,7 @@ import * as pulumi from '@pulumi/pulumi';
  * @param deployedService to create the gateway for
  */
 function createApiGatewayForFunction(deployedService: DeployedService): apigatewayv2.Api {
-	pulumi.log.info("Begining deployment of API proxy", deployedService.awsLambda);
+	pulumi.log.info("Beginning deployment of API proxy", deployedService.awsLambda);
 
 	const api = new apigatewayv2.Api(`${deployedService.name}ProxyApi`, {
 		target: deployedService.awsLambda.arn,
