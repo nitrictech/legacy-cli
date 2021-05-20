@@ -12,12 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Task, Stack, mapObject } from '@nitric/cli-common';
+import { Task, Stack, mapObject, NitricServiceImage } from '@nitric/cli-common';
 import * as pulumi from '@pulumi/pulumi';
 import { LocalWorkspace } from '@pulumi/pulumi/automation';
 import * as digitalocean from '@pulumi/digitalocean';
-import { createFunction } from './function';
 import fs from 'fs';
+import { NitricServiceAppPlatform } from '../../resources';
 
 const REGISTRY_LIMITS: Record<string, number> = {
 	starter: 1,
@@ -31,10 +31,7 @@ interface DeployOptions {
 	// Currently each digital ocean account
 	// may only have one docker container registry
 	registryName: string;
-
 	token: string;
-	//orgName: string;
-	//adminEmail: string;
 }
 
 export class Deploy extends Task<void> {
@@ -124,20 +121,36 @@ export class Deploy extends Task<void> {
 							const otherEntrypoints = normalizedEntrypoints.filter(({ type }) => type !== 'service');
 
 							if (otherEntrypoints.length > 0) {
-								pulumi.log.warn('Non function entrypoints are not supported for digital ocean deployments');
+								pulumi.log.warn('Non service entrypoints are not supported for digital ocean deployments');
 							}
 
 							// This currently assumes that the registry is empty
 							if (services.length > REGISTRY_LIMITS[containerRegistry.subscriptionTierSlug]) {
 								pulumi.log.error(
-									'Provided registry cannot support the number of functions in this stack, look at upgrading your DOCR subscription tier',
+									'Provided registry cannot support the number of services in this stack, look at upgrading your DOCR subscription tier',
 								);
+								throw new Error("Insufficent Resources");
 							}
 
 							// Create the functions
 							const results = stack
 								.getServices()
-								.map((f) => createFunction(f, registryName, token, functionEntrypoints));
+								.map((s) => {
+									const image = new NitricServiceImage(`${s.getName()}`, {
+										service: s,
+										username: token,
+										password: token,
+										server: 'registry.digitalocean.com',
+										imageName: pulumi.interpolate`registry.digitalocean.com/${registryName}/${s.getName()}`,
+										nitricProvider: 'do'
+									});
+
+									return new NitricServiceAppPlatform(s.getName(), {
+										service: s,
+										image,
+										entrypoints: functionEntrypoints,
+									})
+								});
 
 							const app = new digitalocean.App(stack.getName(), {
 								spec: {
