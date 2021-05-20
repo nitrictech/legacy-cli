@@ -98,12 +98,12 @@ export default class AwsDeploy extends BaseCommand {
 		const stack = await Stack.fromFile(stackDefinitionPath);
 
 		try {
-			const results = await new Listr<{[DEPLOY_TASK_KEY]:  DeployResult}>([
+			const results = await new Listr<any>([
 				wrapTaskForListr(new StageStackTask({ stack })),
 				wrapTaskForListr(new Deploy({ stack, account: accountId, region })),
 			]).run();
 
-			const deployResult = results[DEPLOY_TASK_KEY];
+			const deployResult = results[DEPLOY_TASK_KEY] as DeployResult;
 
 			console.log(deployResult);
 

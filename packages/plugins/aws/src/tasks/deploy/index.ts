@@ -56,7 +56,7 @@ export const DEPLOY_TASK_KEY = 'Deploying Nitric Stack to AWS';
 /**
  * Deploys the given Nitric Stack
  */
-export class Deploy extends Task<void> {
+export class Deploy extends Task<DeployResult> {
 	private stack: Stack;
 	private region: string;
 
