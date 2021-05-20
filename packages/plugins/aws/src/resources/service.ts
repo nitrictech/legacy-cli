@@ -13,8 +13,7 @@
 // limitations under the License.
 import * as pulumi from "@pulumi/pulumi";
 import * as aws from "@pulumi/aws";
-import { Service } from "@nitric/cli-common";
-import { NitricServiceImage } from "./image";
+import { Service, NitricServiceImage } from "@nitric/cli-common";
 import { NitricSnsTopic } from "./topic";
 
 interface NitricServiceAwsLambdaArgs {
