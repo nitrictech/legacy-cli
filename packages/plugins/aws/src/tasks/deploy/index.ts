@@ -17,7 +17,6 @@ import * as pulumi from '@pulumi/pulumi';
 
 import { LocalWorkspace } from '@pulumi/pulumi/automation';
 import { ecr } from '@pulumi/aws';
-import { createEntrypoints } from './entrypoint';
 import fs from 'fs';
 import { 
 	NitricSnsTopic, 
@@ -134,8 +133,6 @@ export class Deploy extends Task<void> {
 								apis: deployedApis,
 								sites: deployedSites,
 							});
-
-							createEntrypoints(stack.getName(), entrypoints, deployedSites, deployedApis, deployedServices);
 						}						
 					} catch (e) {
 						fs.appendFileSync(errorFile, e.stack);
