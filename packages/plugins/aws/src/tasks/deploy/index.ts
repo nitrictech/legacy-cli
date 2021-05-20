@@ -25,7 +25,8 @@ import {
 	NitricServiceAWSLambda,
 	NitricServiceImage,
 	NitricApiAwsApiGateway,
-	NitricEntrypointCloudFront
+	NitricEntrypointCloudFront,
+	NitricBucketS3
 } from '../../resources';
 
 /**
@@ -68,7 +69,7 @@ export class Deploy extends Task<DeployResult> {
 
 	async do(): Promise<DeployResult> {
 		const { stack, region } = this;
-		const { topics = {}, schedules = {}, apis = {}, entrypoints } = stack.asNitricStack();
+		const { topics = {}, buckets = {}, schedules = {}, apis = {}, entrypoints } = stack.asNitricStack();
 		const logFile = await stack.getLoggingFile('deploy:aws');
 		const errorFile = await stack.getLoggingFile('error:aws');
 		let result = {} as DeployResult;
@@ -92,6 +93,10 @@ export class Deploy extends Task<DeployResult> {
 						// Deploy Nitric Topics
 						const deployedTopics = mapObject(topics).map(t => new NitricSnsTopic(t.name, {
 							topic: t,
+						}));
+
+						mapObject(buckets).forEach(bucket => new NitricBucketS3(bucket.name, {
+							bucket,
 						}));
 
 						// Deploy Nitric Schedules
