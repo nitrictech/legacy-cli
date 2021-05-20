@@ -1,7 +1,7 @@
 {
   "name": "@nitric/plugin-azure",
   "description": "Azure plugin for Nitric",
-  "version": "0.0.41",
+  "version": "0.0.42",
   "author": "Nitric <https://github.com/nitrictech>",
   "bugs": "https://github.com/nitrictech/cli/issues",
   "dependencies": {

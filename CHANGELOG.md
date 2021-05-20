@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.42](https://github.com/nitrictech/cli/compare/v0.0.41...v0.0.42) (2021-05-20)
+
+
+### Bug Fixes
+
+* Remove default root object. ([9dbf818](https://github.com/nitrictech/cli/commit/9dbf81883ef67cbe5fad3138c770a53b1f87008f))
+* Working deployment. ([ede610e](https://github.com/nitrictech/cli/commit/ede610e2dd299984510e9878f249685b5f875fc4))
+
 ### [0.0.41](https://github.com/nitrictech/cli/compare/v0.0.40...v0.0.41) (2021-05-17)
 
 
