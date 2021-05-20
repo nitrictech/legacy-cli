@@ -13,17 +13,21 @@
 // limitations under the License.
 
 import { Task, Stack, mapObject } from '@nitric/cli-common';
-import { createLambdaFunction } from './lambda';
-import { createSchedule } from './eb-rule';
-import { createApi } from './api';
-import { createTopic } from './topic';
 import * as pulumi from '@pulumi/pulumi';
 
 import { LocalWorkspace } from '@pulumi/pulumi/automation';
 import { ecr } from '@pulumi/aws';
-import { createSite } from './site';
 import { createEntrypoints } from './entrypoint';
 import fs from 'fs';
+import { 
+	NitricSnsTopic, 
+	NitricScheduleEventBridge,
+	NitricSiteS3,
+	NitricServiceAWSLambda,
+	NitricServiceImage,
+	NitricApiAwsApiGateway,
+	NitricEntrypointCloudFront
+} from '../../resources';
 
 /**
  * Common Task Options
@@ -72,24 +76,65 @@ export class Deploy extends Task<void> {
 					// Now we can start deploying with Pulumi
 					try {
 						const authToken = await ecr.getAuthorizationToken();
-						// Create topics
-						// There are a few dependencies on this
+						
+						// Deploy Nitric Topics
+						const deployedTopics = mapObject(topics).map(t => new NitricSnsTopic(t.name, {
+							topic: t,
+						}));
 
-						const deployedTopics = mapObject(topics).map(createTopic);
+						// Deploy Nitric Schedules
+						mapObject(schedules).forEach((schedule) => new NitricScheduleEventBridge(schedule.name, {
+							schedule,
+							topics: deployedTopics,
+						}));
 
-						// Deploy schedules
-						mapObject(schedules).forEach((schedule) => createSchedule(schedule, deployedTopics));
+						// Deploy Nitric Sites
+						const deployedSites = stack.getSites().map((s) => 
+							new NitricSiteS3(s.getName(), {
+								site: s,
+								acl: "public-read",
+								indexDocument: "index.html",
+							})
+						);
 
-						const deployedSites = await Promise.all(stack.getSites().map(createSite));
+						// Deploy Nitric Services
+						const deployedServices = stack.getServices().map(s => {
+							// create a new repository for each service...
+							const repository = new ecr.Repository(s.getImageTagName());
 
-						const deployedServices = await Promise.all(stack
-							.getServices()
-							.map((svc) => createLambdaFunction(svc, deployedTopics, authToken)));
+							const image = new NitricServiceImage(s.getName(), {
+								service: s,
+								server: authToken.proxyEndpoint,
+								username: authToken.userName,
+								password: authToken.password,
+								imageName: repository.repositoryUrl,
+								nitricProvider: "aws",
+							});
 
-						// Deploy APIs
-						const deployedApis = mapObject(apis).map((api) => createApi(api, deployedServices));
+							return new NitricServiceAWSLambda(s.getName(), {
+								service: s,
+								topics: deployedTopics,
+								image: image,
+							});
+						});
+
+						// Deploy Nitric APIs
+						const deployedApis = mapObject(apis).map(api => 
+							new NitricApiAwsApiGateway(api.name, {
+								api,
+								services: deployedServices,
+							})
+						);
 
 						if (entrypoints) {
+							new NitricEntrypointCloudFront(stack.getName(), {
+								stackName: stack.getName(),
+								entrypoints: entrypoints,
+								services: deployedServices,
+								apis: deployedApis,
+								sites: deployedSites,
+							});
+
 							createEntrypoints(stack.getName(), entrypoints, deployedSites, deployedApis, deployedServices);
 						}						
 					} catch (e) {
