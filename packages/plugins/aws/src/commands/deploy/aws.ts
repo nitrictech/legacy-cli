@@ -105,8 +105,6 @@ export default class AwsDeploy extends BaseCommand {
 
 			const deployResult = results[DEPLOY_TASK_KEY] as DeployResult;
 
-			console.log(deployResult);
-
 			if (deployResult.entrypoint) {
 				cli.url(`Your application entrypoint is available at: ${deployResult.entrypoint}`, deployResult.entrypoint);
 			}

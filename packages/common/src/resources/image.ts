@@ -13,7 +13,7 @@
 // limitations under the License.
 import * as pulumi from "@pulumi/pulumi";
 import * as docker from "@pulumi/docker";
-import { Service } from "@nitric/cli-common";
+import { Service } from "../stack";
 
 // TODO: Make this common
 type MembraneProviders = "dev" | "aws" | "gcp" | "azure" | "do";
@@ -28,7 +28,7 @@ interface NitricServiceImageArgs {
 }
 
 /**
- * 
+ * Image deployment for a Nitric Service
  */
 export class NitricServiceImage extends pulumi.ComponentResource {
 	/**

@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Task, Stack, mapObject } from '@nitric/cli-common';
+import { Task, Stack, mapObject, NitricServiceImage } from '@nitric/cli-common';
 import * as pulumi from '@pulumi/pulumi';
 
 import { LocalWorkspace } from '@pulumi/pulumi/automation';
@@ -23,7 +23,6 @@ import {
 	NitricScheduleEventBridge,
 	NitricSiteS3,
 	NitricServiceAWSLambda,
-	NitricServiceImage,
 	NitricApiAwsApiGateway,
 	NitricEntrypointCloudFront,
 	NitricBucketS3
@@ -184,7 +183,11 @@ export class Deploy extends Task<DeployResult> {
 				this.update(changes);
 			}
 
-			result = Object.keys(upRes.outputs).map(k => upRes.outputs[k].value) as DeployResult;
+			result = Object.keys(upRes.outputs).reduce((acc, k) => ({
+				...acc,
+				[k]: upRes.outputs[k].value
+			}), {}
+			) as DeployResult;
 		} catch (e) {
 			fs.appendFileSync(errorFile, e.stack);
 			throw new Error('An error occurred during deployment, please see latest aws:error log for more details');
