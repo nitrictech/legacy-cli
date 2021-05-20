@@ -43,6 +43,16 @@ interface DeployOptions extends CommonOptions {
 	stack: Stack;
 }
 
+export interface DeployResult {
+	entrypoint?: string,
+}
+
+interface ProgramResult {
+	entrypoint?: pulumi.Output<string>;
+}
+
+export const DEPLOY_TASK_KEY = 'Deploying Nitric Stack to AWS';
+
 /**
  * Deploys the given Nitric Stack
  */
@@ -51,16 +61,17 @@ export class Deploy extends Task<void> {
 	private region: string;
 
 	constructor({ stack, region }: DeployOptions) {
-		super('Deploying Nitric Stack');
+		super(DEPLOY_TASK_KEY);
 		this.stack = stack;
 		this.region = region;
 	}
 
-	async do(): Promise<void> {
+	async do(): Promise<DeployResult> {
 		const { stack, region } = this;
 		const { topics = {}, schedules = {}, apis = {}, entrypoints } = stack.asNitricStack();
 		const logFile = await stack.getLoggingFile('deploy:aws');
 		const errorFile = await stack.getLoggingFile('error:aws');
+		let result = {} as DeployResult;
 
 		this.update('Defining functions');
 
@@ -72,6 +83,8 @@ export class Deploy extends Task<void> {
 				projectName: stack.getName(),
 				// generate our pulumi program on the fly from the POST body
 				program: async () => {
+					const result = {} as ProgramResult;
+
 					// Now we can start deploying with Pulumi
 					try {
 						const authToken = await ecr.getAuthorizationToken();
@@ -126,19 +139,23 @@ export class Deploy extends Task<void> {
 						);
 
 						if (entrypoints) {
-							new NitricEntrypointCloudFront(stack.getName(), {
+							const entrypoint = new NitricEntrypointCloudFront(stack.getName(), {
 								stackName: stack.getName(),
 								entrypoints: entrypoints,
 								services: deployedServices,
 								apis: deployedApis,
 								sites: deployedSites,
 							});
+
+							result.entrypoint = pulumi.interpolate`https://${entrypoint.cloudfront.domainName}`;
 						}						
 					} catch (e) {
 						fs.appendFileSync(errorFile, e.stack);
 						pulumi.log.error('There was an error deploying the stack please check error logs for more detail');
 						throw e;
 					}
+
+					return result;
 				},
 			});
 			await pulumiStack.setConfig('aws:region', { value: region });
@@ -161,10 +178,13 @@ export class Deploy extends Task<void> {
 					.join(', ');
 				this.update(changes);
 			}
+
+			result = Object.keys(upRes.outputs).map(k => upRes.outputs[k].value) as DeployResult;
 		} catch (e) {
 			fs.appendFileSync(errorFile, e.stack);
 			throw new Error('An error occurred during deployment, please see latest aws:error log for more details');
-			// console.log(e);
 		}
+
+		return result;
 	}
 }
