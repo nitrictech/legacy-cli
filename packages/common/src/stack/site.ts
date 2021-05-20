@@ -76,4 +76,14 @@ export class Site {
 			}
 		}
 	}
+
+	static buildSync(site: Site): void {
+		if (site.descriptor.buildScripts) {
+			const workingDir = site.getPath();
+
+			for (const script of site.descriptor.buildScripts) {
+				execa.commandSync(script, { cwd: workingDir });
+			}
+		}
+	}
 }
