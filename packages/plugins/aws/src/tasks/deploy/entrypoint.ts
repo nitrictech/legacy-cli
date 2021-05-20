@@ -16,60 +16,34 @@ import { cloudfront, types, apigatewayv2, lambda } from '@pulumi/aws';
 import { NitricEntrypoints } from '@nitric/cli-common';
 import { DeployedAPI, DeployedService, DeployedSite } from '../types';
 import * as pulumi from '@pulumi/pulumi';
-import YAML from 'yaml';
 
 /**
  * Create an API Gateway for a single function, enabling it to be the target of an entrypoint.
  *
  * @param deployedService to create the gateway for
  */
-function createApiGatewayForFunction(deployedService: DeployedService): apigatewayv2.Stage {
-	// Grant apigateway permission to execute the lambda
-	const body = deployedService.awsLambda.invokeArn.apply((invokeArn) =>
-		YAML.stringify({
-			openapi: '3.0.1',
-			info: {
-				version: '1.0',
-				title: `${deployedService.name}Proxy`,
-			},
-			paths: {
-				$default: {
-					'x-amazon-apigateway-any-method': {
-						'x-amazon-apigateway-integration': {
-							type: 'aws_proxy',
-							httpMethod: 'POST',
-							payloadFormatVersion: '2.0',
-							uri: invokeArn,
-						},
-						isDefaultRoute: true,
-						responses: {},
-					},
-				},
-			},
-		}),
-	);
+function createApiGatewayForFunction(deployedService: DeployedService): apigatewayv2.Api {
+	pulumi.log.info("Beginning deployment of API proxy", deployedService.awsLambda);
 
-	// Create the lambda proxy API for invocation via cloudfront
-	const lambdaAPI = new apigatewayv2.Api(`${deployedService.name}ProxyApi`, {
-		body,
-		protocolType: 'HTTP',
+	const api = new apigatewayv2.Api(`${deployedService.name}ProxyApi`, {
+		target: deployedService.awsLambda.arn,
+		protocolType: "HTTP"
 	});
 
-	// Create a deployment for this API
-	const deployment = new apigatewayv2.Stage(`${deployedService.name}ProxyDeployment`, {
-		apiId: lambdaAPI.id,
-		name: '$default',
-		autoDeploy: true,
-	});
+	// This is a gateing log statement
+	// it appears to eliminate a race condition between the new
+	// lambda permission and the above api gateway
+	// TODO: Determine if this can be fixed with depends on
+	pulumi.log.info("Deployed Api Gateway Proxy", api);
 
 	new lambda.Permission(`${deployedService.name}ProxyPermission`, {
 		action: 'lambda:InvokeFunction',
 		function: deployedService.awsLambda,
 		principal: 'apigateway.amazonaws.com',
-		sourceArn: pulumi.interpolate`${lambdaAPI.executionArn}/*/*`,
+		sourceArn: pulumi.interpolate`${api.executionArn}/*/*`,
 	});
 
-	return deployment;
+	return api;
 }
 
 /**
@@ -138,7 +112,7 @@ function originsFromEntrypoints(
 				const apiGateway = createApiGatewayForFunction(deployedService);
 
 				// Then we extract the domain name from the created api gateway...
-				const domainName = apiGateway.invokeUrl.apply((url) => new URL(url).host);
+				const domainName = apiGateway.apiEndpoint.apply((url) => new URL(url).host);
 
 				//// Craft and API origin here...
 				return {
@@ -210,13 +184,13 @@ function entrypointsToBehaviours(
  * Creates a front-end for nitric application ingress
  * This includes single origin presentation for Static-sites & APIs
  */
-export async function createEntrypoints(
+export function createEntrypoints(
 	stackName: string,
 	entrypoints: NitricEntrypoints,
 	deployedSites: DeployedSite[],
 	deployedApis: DeployedAPI[],
 	deployedServices: DeployedService[],
-): Promise<cloudfront.Distribution> {
+): cloudfront.Distribution {
 	const defaultEntrypoint = entrypoints['/'];
 
 	if (!defaultEntrypoint) {
@@ -234,20 +208,21 @@ export async function createEntrypoints(
 		enabled: true,
 		// Assume for now default will be index
 		// TODO: Make this configurable via nitric.yaml
-		defaultRootObject: 'index.html',
+		// defaultRootObject: '/',
 		defaultCacheBehavior,
 		orderedCacheBehaviors,
 		origins,
+		// TODO: Make viewer cert configurable
 		viewerCertificate: {
 			cloudfrontDefaultCertificate: true,
 		},
 		// TODO: Determine price class
 		priceClass: 'PriceClass_All',
+		// TODO: Make this configurable through entrypoints extensions
 		restrictions: {
 			geoRestriction: {
-				restrictionType: 'whitelist',
-				locations: ['AU'],
-			},
+				restrictionType: 'none',
+			}
 		},
 	});
 }
