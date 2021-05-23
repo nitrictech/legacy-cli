@@ -26,6 +26,7 @@ interface GoogleExtensions {
  */
 export class NitricApiGcpApiGateway extends pulumi.ComponentResource {
 
+	public readonly name: string;
 	public readonly hostname: pulumi.Output<string>;
 	public readonly url: pulumi.Output<string>;
 
@@ -33,6 +34,8 @@ export class NitricApiGcpApiGateway extends pulumi.ComponentResource {
 		super("nitric:bucket:CloudStorage", name, {}, opts);
 		const { api, services } = args;
 		const defaultResourceOptions: pulumi.ResourceOptions = { parent: this };
+
+		this.name = name;
 
 		// Replace Nitric API Extensions with google api gateway extensions
 		const spec = pulumi
@@ -123,6 +126,7 @@ export class NitricApiGcpApiGateway extends pulumi.ComponentResource {
 		this.url = gateway.defaultHostname.apply(n => `https://${n}`);
 
 		this.registerOutputs({
+			name: this.name,
 			hostname: this.hostname,
 			url: this.url,
 		});

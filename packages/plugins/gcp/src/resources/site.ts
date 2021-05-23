@@ -12,13 +12,15 @@ interface NitricSiteCloudStorageArgs {
  * Nitric Static Site deployed to Google Cloud Storage
  */
 export class NitricSiteCloudStorage extends pulumi.ComponentResource {
-
+	public readonly name: string;
 	public readonly storage: gcp.storage.Bucket;
 
 	constructor(name: string, args: NitricSiteCloudStorageArgs, opts?: pulumi.ComponentResourceOptions) {
 		super("nitric:bucket:CloudStorage", name, {}, opts);
 		const { site } = args;
 		const defaultResourceOptions: pulumi.ResourceOptions = { parent: this };
+
+		this.name = site.getName();
 
 		Site.buildSync(site)
 
@@ -51,6 +53,7 @@ export class NitricSiteCloudStorage extends pulumi.ComponentResource {
 
 		this.registerOutputs({
 			storage: this.storage,
+			name: this.name,
 		});
 	}
 }
