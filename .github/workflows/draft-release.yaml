@@ -55,12 +55,40 @@ jobs:
         body: See CHANGELOG.md for changes
         draft: true
         prerelease: false
-    
-    # Signal the releases repostory to prepare a release
-    - name: Prepare Release
-      uses: peter-evans/repository-dispatch@v1
+
+    - name: Build Binaries
+        id: build_binaries
+        run: yarn workspace @nitric/cli package:all
+
+    - name: Upload Linux Binary
+      id: upload-linux-binary
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
       with:
-        token: ${{ secrets.RELEASE_TOKEN }}
-        repository: nitrictech/cli-releases
-        event-type: prepare-release
-        client-payload: '{"tag": "${{ steps.bump_tag.outputs.TAG_REF }}"}'
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./packages/base/dist/nitric-linux-x64
+        asset_name: nitric-linux-x64
+        asset_content_type:  application/octet-stream
+
+    - name: Upload MacOS Binary
+      id: upload-macos-binary
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./packages/base/dist/nitric-macos-x64
+        asset_name: nitric-macos-x64
+        asset_content_type: application/octet-stream
+
+    - name: Upload Windows Binary
+      id: upload-windows-binary
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./packages/base/dist/nitric-win-x64.exe
+        asset_name: nitric-windows-x64
+        asset_content_type: application/octet-stream
