@@ -112,7 +112,7 @@ export class NitricEntrypointsGoogleCloudLB extends pulumi.ComponentResource {
 						cloudRun: {
 							service: deployedFunction.cloudrun.name,
 						},
-					});
+					}, defaultResourceOptions);
 
 					const backend = new gcp.compute.BackendService(`${ep.name}`, {
 						// Link the NEG to the backend
@@ -120,7 +120,7 @@ export class NitricEntrypointsGoogleCloudLB extends pulumi.ComponentResource {
 						// TODO: Determine CDN requirements for API gateways
 						enableCdn: true,
 						protocol: 'HTTPS',
-					});
+					}, defaultResourceOptions);
 
 					return {
 						name: ep.name,
@@ -171,7 +171,7 @@ export class NitricEntrypointsGoogleCloudLB extends pulumi.ComponentResource {
 					pathRules,
 				},
 			],
-		});
+		}, defaultResourceOptions);
 
 		// Reserve a public IP address with google
 		const ipAddress = new gcp.compute.GlobalAddress(`${stackName}address`, {});
@@ -181,7 +181,7 @@ export class NitricEntrypointsGoogleCloudLB extends pulumi.ComponentResource {
 		const privateKey = new tls.PrivateKey(`${stackName}pk`, {
 			algorithm: 'RSA',
 			rsaBits: 2048,
-		});
+		}, defaultResourceOptions);
 
 		const certificate = new tls.SelfSignedCert(`${stackName}ssc`, {
 			privateKeyPem: privateKey.privateKeyPem,
@@ -194,28 +194,28 @@ export class NitricEntrypointsGoogleCloudLB extends pulumi.ComponentResource {
 				},
 			],
 			validityPeriodHours: 8760,
-		});
+		}, defaultResourceOptions);
 
 		const sslCertificate = new gcp.compute.SSLCertificate(`${stackName}gcpcert`, {
 			namePrefix: `${stackName}-certificate-`,
 			certificate: certificate.certPem,
 			privateKey: privateKey.privateKeyPem,
-		});
+		}, defaultResourceOptions);
 
 		const httpProxy = new gcp.compute.TargetHttpsProxy(`${stackName}proxy`, {
 			description: `Load Balancer for ${stackName}`,
 			urlMap: urlMap.id,
 			sslCertificates: [sslCertificate.id],
-		});
+		}, defaultResourceOptions);
 
 		// Connect a front end to the load balancer
 		new gcp.compute.GlobalForwardingRule(`${stackName}fwdrule`, {
 			target: httpProxy.id,
 			portRange: '443',
 			ipAddress: ipAddress.address,
-		});
+		}, defaultResourceOptions);
 
-		this.url = pulumi.interpolate`https://${ipAddress.address}`
+		this.url = pulumi.interpolate`https://${ipAddress.address}`;
 
 		this.registerOutputs({
 			url: this.url,
