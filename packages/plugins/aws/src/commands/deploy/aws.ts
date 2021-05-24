@@ -13,12 +13,13 @@
 // limitations under the License.
 
 import { flags } from '@oclif/command';
-import { Deploy } from '../../tasks/deploy';
+import { Deploy, DEPLOY_TASK_KEY, DeployResult } from '../../tasks/deploy';
 import { BaseCommand, wrapTaskForListr, Stack, StageStackTask } from '@nitric/cli-common';
 import { Listr } from 'listr2';
 import path from 'path';
 import AWS from 'aws-sdk';
 import inquirer from 'inquirer';
+import cli from 'cli-ux';
 
 /**
  * Command to deploy a stack to Amazon Web Services Cloud (AWS)
@@ -97,10 +98,17 @@ export default class AwsDeploy extends BaseCommand {
 		const stack = await Stack.fromFile(stackDefinitionPath);
 
 		try {
-			await new Listr([
+			const results = await new Listr<any>([
 				wrapTaskForListr(new StageStackTask({ stack })),
 				wrapTaskForListr(new Deploy({ stack, account: accountId, region })),
 			]).run();
+
+			const deployResult = results[DEPLOY_TASK_KEY] as DeployResult;
+
+			if (deployResult.entrypoint) {
+				cli.url(`Your application entrypoint is available at: ${deployResult.entrypoint}`, deployResult.entrypoint);
+			}
+			
 		} catch (error) {
 			// eat this error to avoid duplicate console output.
 		}

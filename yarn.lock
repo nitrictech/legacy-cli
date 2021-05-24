@@ -895,6 +895,8 @@ __metadata:
   dependencies:
     "@oclif/command": ^1
     "@oclif/config": ^1
+    "@pulumi/docker": ^3.0.0
+    "@pulumi/pulumi": ^3.1.0
     "@types/inquirer": ^7.3.1
     "@types/jest": ^26.0.15
     "@types/node": ^10

@@ -11,20 +11,10 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
-import { NitricTopic, NamedObject } from '@nitric/cli-common';
-import { sns } from '@pulumi/aws';
-import { DeployedTopic } from '../types';
-
-/**
- * Create an SNS topic for Nitric Topic
- * @param topic to be created
- */
-export function createTopic(topic: NamedObject<NitricTopic>): DeployedTopic {
-	return {
-		...topic,
-		awsTopic: new sns.Topic(topic.name, {
-			name: topic.name,
-		}),
-	};
-}
+export * from './api';
+export * from './bucket';
+export * from './entrypoint';
+export * from './schedule';
+export * from './service';
+export * from './site';
+export * from './topic';

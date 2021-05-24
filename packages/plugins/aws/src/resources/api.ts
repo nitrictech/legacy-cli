@@ -11,13 +11,12 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
-import { NitricAPI, NamedObject } from '@nitric/cli-common';
+import * as pulumi from "@pulumi/pulumi";
+import * as aws from "@pulumi/aws";
 import { OpenAPIV3 } from 'openapi-types';
 import { uniq } from 'lodash';
-import { DeployedAPI, DeployedService } from '../types';
-import { apigatewayv2, lambda } from '@pulumi/aws';
-import * as pulumi from '@pulumi/pulumi';
+import { NamedObject, NitricAPI } from "@nitric/cli-common";
+import { NitricServiceAWSLambda } from "./service";
 
 type method = 'get' | 'post' | 'put' | 'patch' | 'delete';
 const METHOD_KEYS: method[] = ['get', 'post', 'put', 'patch', 'delete'];
@@ -39,32 +38,54 @@ interface AwsExtentions {
 	};
 }
 
+interface NitricApiAwsApiGatewayArgs {
+	api: NamedObject<NitricAPI>;
+	// TODO: Create more abstract service type here...
+	services: NitricServiceAWSLambda[];
+}
+
 /**
- * Create an AWS Api Gateway V2 API
- * @param api definition to convert to AWS API config
- * @param services to be deployed behind the API
+ * 
  */
-export function createApi(api: NamedObject<NitricAPI>, services: DeployedService[]): DeployedAPI {
-	const { ...rest } = api;
+export class NitricApiAwsApiGateway extends pulumi.ComponentResource {
+	/**
+	 * The APIs nitric name
+	 */
+	public readonly name: string;
 
-	const targetNames = uniq(
-		Object.keys(api.paths).reduce((acc, p) => {
-			const path = api.paths[p]!;
+	/**
+	 * The deployed API
+	 */
+	public readonly api: aws.apigatewayv2.Api;
+	
 
-			return [
-				...acc,
-				...Object.keys(path)
-					.filter((k) => METHOD_KEYS.includes(k as method))
-					.map((m) => {
-						const method = path[m as method]!;
-						return method['x-nitric-target'].name;
-					}),
-			];
-		}, [] as string[]),
-	);
+	constructor(name, args: NitricApiAwsApiGatewayArgs, opts?: pulumi.ComponentResourceOptions) {
+		super("nitric:docker:Image", name, {}, opts);
+		
+		const defaultResourceOptions: pulumi.ResourceOptions = { parent: this };
+		const { api, services } = args;
+		const { name: nitricName, ...rest } = api;
 
-	const transformedDoc = pulumi
-		.all(services.map((f) => f.awsLambda.invokeArn.apply((arn) => `${f.name}||${arn}`)))
+		this.name = name;
+
+		const targetNames = uniq(
+			Object.keys(api.paths).reduce((acc, p) => {
+				const path = api.paths[p]!;
+	
+				return [
+					...acc,
+					...Object.keys(path)
+						.filter((k) => METHOD_KEYS.includes(k as method))
+						.map((m) => {
+							const method = path[m as method]!;
+							return method['x-nitric-target'].name;
+						}),
+				];
+			}, [] as string[]),
+		);
+
+		const transformedDoc = pulumi
+		.all(services.map((s) => s.lambda.invokeArn.apply((arn) => `${s.name}||${arn}`)))
 		.apply((nameArnPairs) => {
 			const transformedApi = {
 				...rest,
@@ -117,32 +138,33 @@ export function createApi(api: NamedObject<NitricAPI>, services: DeployedService
 			return JSON.stringify(transformedApi);
 		});
 
-	const deployedApi = new apigatewayv2.Api(api.name, {
-		body: transformedDoc,
-		protocolType: 'HTTP',
-	});
-
-	// stage
-	const stage = new apigatewayv2.Stage(`${api.name}DefaultStage`, {
-		apiId: deployedApi.id,
-		name: '$default',
-		autoDeploy: true,
-	});
-
-	// Generate lambda permissions enabling the API Gateway to invoke the functions it targets
-	services
-		.filter((f) => targetNames.includes(f.name))
-		.forEach((f) => {
-			new lambda.Permission(`${f.name}APIPermission`, {
-				action: 'lambda:InvokeFunction',
-				function: f.awsLambda,
-				principal: 'apigateway.amazonaws.com',
-				sourceArn: pulumi.interpolate`${deployedApi.executionArn}/*/*/*`,
+		this.api = new aws.apigatewayv2.Api(api.name, {
+			body: transformedDoc,
+			protocolType: 'HTTP',
+		}, defaultResourceOptions);
+	
+		// stage
+		new aws.apigatewayv2.Stage(`${api.name}DefaultStage`, {
+			apiId: this.api.id,
+			name: '$default',
+			autoDeploy: true,
+		}, defaultResourceOptions);
+	
+		// Generate lambda permissions enabling the API Gateway to invoke the functions it targets
+		services
+			.filter((f) => targetNames.includes(f.name))
+			.forEach((f) => {
+				new aws.lambda.Permission(`${f.name}APIPermission`, {
+					action: 'lambda:InvokeFunction',
+					function: f.lambda,
+					principal: 'apigateway.amazonaws.com',
+					sourceArn: pulumi.interpolate`${this.api.executionArn}/*/*/*`,
+				}, defaultResourceOptions);
 			});
-		});
 
-	return {
-		...api,
-		apiGateway: stage,
-	};
+		this.registerOutputs({
+			name: this.name,
+			api: this.api,
+		});
+	}
 }

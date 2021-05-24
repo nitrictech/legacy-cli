@@ -33,3 +33,17 @@ export async function crawlDirectory(dir: string, f: (_: string) => Promise<void
 		}
 	}
 }
+
+export function crawlDirectorySync(dir: string, f: (_: string) => void): void {
+	const files = fs.readdirSync(dir);
+	for (const file of files) {
+		const filePath = `${dir}/${file}`;
+		const stat = fs.statSync(filePath);
+		if (stat.isDirectory()) {
+			crawlDirectorySync(filePath, f);
+		}
+		if (stat.isFile()) {
+			f(filePath);
+		}
+	}
+}

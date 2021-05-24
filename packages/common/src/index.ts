@@ -88,3 +88,4 @@ export * from './paths';
 export * from './analytics';
 export * from './config';
 export * from './preferences';
+export * from './resources';

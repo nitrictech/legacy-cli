@@ -12,18 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Task, Stack, mapObject } from '@nitric/cli-common';
-import { createLambdaFunction } from './lambda';
-import { createSchedule } from './eb-rule';
-import { createApi } from './api';
-import { createTopic } from './topic';
+import { Task, Stack, mapObject, NitricServiceImage } from '@nitric/cli-common';
 import * as pulumi from '@pulumi/pulumi';
 
 import { LocalWorkspace } from '@pulumi/pulumi/automation';
 import { ecr } from '@pulumi/aws';
-import { createSite } from './site';
-import { createEntrypoints } from './entrypoint';
 import fs from 'fs';
+import { 
+	NitricSnsTopic, 
+	NitricScheduleEventBridge,
+	NitricSiteS3,
+	NitricServiceAWSLambda,
+	NitricApiAwsApiGateway,
+	NitricEntrypointCloudFront,
+	NitricBucketS3
+} from '../../resources';
 
 /**
  * Common Task Options
@@ -40,24 +43,35 @@ interface DeployOptions extends CommonOptions {
 	stack: Stack;
 }
 
+export interface DeployResult {
+	entrypoint?: string,
+}
+
+interface ProgramResult {
+	entrypoint?: pulumi.Output<string>;
+}
+
+export const DEPLOY_TASK_KEY = 'Deploying Nitric Stack to AWS';
+
 /**
  * Deploys the given Nitric Stack
  */
-export class Deploy extends Task<void> {
+export class Deploy extends Task<DeployResult> {
 	private stack: Stack;
 	private region: string;
 
 	constructor({ stack, region }: DeployOptions) {
-		super('Deploying Nitric Stack');
+		super(DEPLOY_TASK_KEY);
 		this.stack = stack;
 		this.region = region;
 	}
 
-	async do(): Promise<void> {
+	async do(): Promise<DeployResult> {
 		const { stack, region } = this;
-		const { topics = {}, schedules = {}, apis = {}, entrypoints } = stack.asNitricStack();
+		const { topics = {}, buckets = {}, schedules = {}, apis = {}, entrypoints } = stack.asNitricStack();
 		const logFile = await stack.getLoggingFile('deploy:aws');
 		const errorFile = await stack.getLoggingFile('error:aws');
+		let result = {} as DeployResult;
 
 		this.update('Defining functions');
 
@@ -69,34 +83,83 @@ export class Deploy extends Task<void> {
 				projectName: stack.getName(),
 				// generate our pulumi program on the fly from the POST body
 				program: async () => {
+					const result = {} as ProgramResult;
+
 					// Now we can start deploying with Pulumi
 					try {
 						const authToken = await ecr.getAuthorizationToken();
-						// Create topics
-						// There are a few dependencies on this
+						
+						// Deploy Nitric Topics
+						const deployedTopics = mapObject(topics).map(t => new NitricSnsTopic(t.name, {
+							topic: t,
+						}));
 
-						const deployedTopics = mapObject(topics).map(createTopic);
+						mapObject(buckets).forEach(bucket => new NitricBucketS3(bucket.name, {
+							bucket,
+						}));
 
-						// Deploy schedules
-						mapObject(schedules).forEach((schedule) => createSchedule(schedule, deployedTopics));
+						// Deploy Nitric Schedules
+						mapObject(schedules).forEach((schedule) => new NitricScheduleEventBridge(schedule.name, {
+							schedule,
+							topics: deployedTopics,
+						}));
 
-						const deployedSites = await Promise.all(stack.getSites().map(createSite));
+						// Deploy Nitric Sites
+						const deployedSites = stack.getSites().map((s) => 
+							new NitricSiteS3(s.getName(), {
+								site: s,
+								acl: "public-read",
+								indexDocument: "index.html",
+							})
+						);
 
-						const deployedServices = await Promise.all(stack
-							.getServices()
-							.map((svc) => createLambdaFunction(svc, deployedTopics, authToken)));
+						// Deploy Nitric Services
+						const deployedServices = stack.getServices().map(s => {
+							// create a new repository for each service...
+							const repository = new ecr.Repository(s.getImageTagName());
 
-						// Deploy APIs
-						const deployedApis = mapObject(apis).map((api) => createApi(api, deployedServices));
+							const image = new NitricServiceImage(s.getName(), {
+								service: s,
+								server: authToken.proxyEndpoint,
+								username: authToken.userName,
+								password: authToken.password,
+								imageName: repository.repositoryUrl,
+								nitricProvider: "aws",
+							});
+
+							return new NitricServiceAWSLambda(s.getName(), {
+								service: s,
+								topics: deployedTopics,
+								image: image,
+							});
+						});
+
+						// Deploy Nitric APIs
+						const deployedApis = mapObject(apis).map(api => 
+							new NitricApiAwsApiGateway(api.name, {
+								api,
+								services: deployedServices,
+							})
+						);
 
 						if (entrypoints) {
-							createEntrypoints(stack.getName(), entrypoints, deployedSites, deployedApis, deployedServices);
+							const entrypoint = new NitricEntrypointCloudFront(stack.getName(), {
+								stackName: stack.getName(),
+								entrypoints: entrypoints,
+								services: deployedServices,
+								apis: deployedApis,
+								sites: deployedSites,
+							});
+
+							result.entrypoint = pulumi.interpolate`https://${entrypoint.cloudfront.domainName}`;
 						}						
 					} catch (e) {
 						fs.appendFileSync(errorFile, e.stack);
 						pulumi.log.error('There was an error deploying the stack please check error logs for more detail');
 						throw e;
 					}
+
+					return result;
 				},
 			});
 			await pulumiStack.setConfig('aws:region', { value: region });
@@ -119,10 +182,17 @@ export class Deploy extends Task<void> {
 					.join(', ');
 				this.update(changes);
 			}
+
+			result = Object.keys(upRes.outputs).reduce((acc, k) => ({
+				...acc,
+				[k]: upRes.outputs[k].value
+			}), {}
+			) as DeployResult;
 		} catch (e) {
 			fs.appendFileSync(errorFile, e.stack);
 			throw new Error('An error occurred during deployment, please see latest aws:error log for more details');
-			// console.log(e);
 		}
+
+		return result;
 	}
 }
