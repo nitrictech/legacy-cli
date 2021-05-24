@@ -29,9 +29,15 @@ import {
 
 import fs from 'fs';
 
+export interface DeployResult {
+	entrypoint?: string,
+}
+
 interface CommonOptions {
 	gcpProject: string;
 }
+
+export const DEPLOY_TASK_KEY = 'Deploying Nitric Stack to GCP';
 
 interface DeployOptions extends CommonOptions {
 	stack: Stack;
@@ -41,19 +47,19 @@ interface DeployOptions extends CommonOptions {
 /**
  * Deploy Nitric Stack to GCP Project
  */
-export class Deploy extends Task<void> {
+export class Deploy extends Task<DeployResult> {
 	private stack: Stack;
 	private gcpProject: string;
 	private region: string;
 
 	constructor({ stack, gcpProject, region }: DeployOptions) {
-		super('Deploying Infrastructure');
+		super(DEPLOY_TASK_KEY);
 		this.stack = stack;
 		this.gcpProject = gcpProject;
 		this.region = region;
 	}
 
-	async do(): Promise<void> {
+	async do(): Promise<DeployResult> {
 		const { stack, gcpProject, region } = this;
 		const { buckets = {}, apis = {}, topics = {}, schedules = {}, entrypoints } = stack.asNitricStack();
 		const auth = new google.auth.GoogleAuth({
@@ -62,6 +68,7 @@ export class Deploy extends Task<void> {
 		const authClient = await auth.getClient();
 		const logFile = await stack.getLoggingFile('deploy:gcp');
 		const errorFile = await stack.getLoggingFile('error:gcp');
+		let result = {} as DeployResult;
 
 		try {
 			// Upload the stack
@@ -71,6 +78,8 @@ export class Deploy extends Task<void> {
 				projectName: stack.getName(),
 				// generate our pulumi program on the fly from the POST body
 				program: async () => {
+					let deploymentResult: { entrypoint?: pulumi.Output<string> } = {};
+
 					// Now we can start deploying with Pulumi
 					try {
 						// deploy the buckets
@@ -105,33 +114,44 @@ export class Deploy extends Task<void> {
 						}));
 
 						if (entrypoints) {
-							new NitricEntrypointsGoogleCloudLB(stack.getName(), {
+							const entrypoint = new NitricEntrypointsGoogleCloudLB(stack.getName(), {
 								entrypoints,
 								services: deployedServices,
 								apis: deployedApis,
 								sites: deployedSites,
 								stackName: stack.getName(),
 							});
+
+							deploymentResult.entrypoint = entrypoint.url;
 						}
 					} catch (e) {
 						pulumi.log.error('An error occurred, see latest gcp:error log for details');
 						fs.appendFileSync(errorFile, e);
 					}
+
+					return deploymentResult;
 				},
 			});
 			await pulumiStack.setConfig('gcp:project', { value: gcpProject });
 			await pulumiStack.setConfig('gcp:region', { value: region });
 			const update = this.update.bind(this);
 			// deploy the stack, tailing the logs to console
-			await pulumiStack.up({
+			const upRes = await pulumiStack.up({
 				onOutput: (out: string) => {
 					update(out);
 					fs.appendFileSync(logFile, out);
 				},
 			});
+
+			result = Object.keys(upRes.outputs).reduce((acc, k) => ({
+				...acc,
+				[k]: upRes.outputs[k].value
+			}), {}) as DeployResult;
 		} catch (e) {
 			fs.appendFileSync(errorFile, e);
 			throw new Error('An error occurred, see latest gcp:error log for details');
 		}
+
+		return result;
 	}
 }
