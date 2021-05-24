@@ -11,30 +11,34 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-import * as pulumi from "@pulumi/pulumi";
-import * as aws from "@pulumi/aws";
-import { NamedObject, NitricTopic } from "@nitric/cli-common";
+import * as pulumi from '@pulumi/pulumi';
+import * as aws from '@pulumi/aws';
+import { NamedObject, NitricTopic } from '@nitric/cli-common';
 
 interface NitricSnsTopicArgs {
 	topic: NamedObject<NitricTopic>;
 }
 
+/**
+ * Nitric SNS based Topic
+ */
 export class NitricSnsTopic extends pulumi.ComponentResource {
 	public readonly name: string;
 	public readonly sns: aws.sns.Topic;
 
 	constructor(name, args: NitricSnsTopicArgs, opts?: pulumi.ComponentResourceOptions) {
-		super("nitric:topic:SNS", name, {}, opts);
+		super('nitric:topic:SNS', name, {}, opts);
 
 		const defaultResourceOptions: pulumi.ResourceOptions = { parent: this };
 		const { topic: topicDef } = args;
 
 		this.name = topicDef.name;
 		this.sns = new aws.sns.Topic(
-			topicDef.name, {
+			topicDef.name,
+			{
 				name: topicDef.name,
 			},
-			defaultResourceOptions
+			defaultResourceOptions,
 		);
 
 		// Finalize the deployment
