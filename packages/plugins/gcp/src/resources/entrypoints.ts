@@ -144,11 +144,13 @@ export class NitricEntrypointsGoogleCloudLB extends pulumi.ComponentResource {
 
 		const defaultBackend = backends.find((b) => b.name === defaultEntrypoint.name)!.backend;
 
+		pulumi.log.info(`default backend: ${defaultEntrypoint.name}`, defaultBackend);
+
 		const pathRules =
 			otherEntrypoints.length > 0
 				? otherEntrypoints.map((ep) => {
 						const backend = backends.find((b) => b.name === ep.name)!.backend;
-
+						pulumi.log.info(`other backend: ${ep.name}`, backend);
 						return {
 							paths: [`${ep.path}*`],
 							service: backend.id,
@@ -202,12 +204,16 @@ export class NitricEntrypointsGoogleCloudLB extends pulumi.ComponentResource {
 			privateKey: privateKey.privateKeyPem,
 		}, defaultResourceOptions);
 
+		pulumi.log.info("Connecting URL map to HTTP proxy", urlMap);
+
 		const httpProxy = new gcp.compute.TargetHttpsProxy(`${stackName}proxy`, {
 			description: `Load Balancer for ${stackName}`,
 			urlMap: urlMap.id,
 			sslCertificates: [sslCertificate.id],
 		}, defaultResourceOptions);
 
+
+		pulumi.log.info("Connecting Proxy to forwarding rule", httpProxy);
 		// Connect a front end to the load balancer
 		new gcp.compute.GlobalForwardingRule(`${stackName}fwdrule`, {
 			target: httpProxy.id,
