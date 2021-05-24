@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.43](https://github.com/nitrictech/cli/compare/v0.0.42...v0.0.43) (2021-05-24)
+
+
+### Bug Fixes
+
+* Add missing bucket deployments. ([5971b07](https://github.com/nitrictech/cli/commit/5971b0722c03f0943283c1541f51a8dab3efde38))
+
 ### [0.0.42](https://github.com/nitrictech/cli/compare/v0.0.41...v0.0.42) (2021-05-20)
 
 
