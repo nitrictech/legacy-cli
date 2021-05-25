@@ -28,7 +28,7 @@ interface NitricEntrypointsGoogleCloudLBArgs {
 }
 
 /**
- * Nitric Entrypoints deployed using google cloud load balancers
+ * Nitric Entrypoints deployed using Google Cloud load balancers
  */
 export class NitricEntrypointsGoogleCloudLB extends pulumi.ComponentResource {
 	public readonly url: pulumi.Output<string>;

@@ -20,7 +20,7 @@ interface NitricBucketCloudStorageArgs {
 }
 
 /**
- * Nitric Service deployed to Google Cloud Run
+ * Nitric Storage Bucket deployed to Google Cloud Storage
  */
 export class NitricBucketCloudStorage extends pulumi.ComponentResource {
 	public readonly storage: gcp.storage.Bucket;

@@ -35,7 +35,7 @@ interface GoogleExtensions {
 }
 
 /**
- * Nitric Service deployed to Google Cloud Run
+ * Nitric API deployed to Google Cloud API Gateway
  */
 export class NitricApiGcpApiGateway extends pulumi.ComponentResource {
 	public readonly name: string;
