@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.45](https://github.com/nitrictech/cli/compare/v0.0.44...v0.0.45) (2021-05-25)
+
+
+### Bug Fixes
+
+* allow unhandled exceptions to bubble up and print ([f07f24f](https://github.com/nitrictech/cli/commit/f07f24f97f7c33b16193c6bc6ccfea7c6b966516))
+
 ### [0.0.44](https://github.com/nitrictech/cli/compare/v0.0.43...v0.0.44) (2021-05-25)
 
 
