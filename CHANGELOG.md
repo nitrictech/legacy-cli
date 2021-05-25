@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.44](https://github.com/nitrictech/cli/compare/v0.0.43...v0.0.44) (2021-05-25)
+
+
+### Features
+
+* Add additional output results for gcp deployment. ([d7931e2](https://github.com/nitrictech/cli/commit/d7931e23caef19b664367211f346634c735dae0c))
+
 ### [0.0.43](https://github.com/nitrictech/cli/compare/v0.0.42...v0.0.43) (2021-05-24)
 
 
