@@ -1,3 +1,16 @@
+// Copyright 2021, Nitric Technologies Pty Ltd.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 import { NitricEntrypoints } from '@nitric/cli-common';
 import * as pulumi from '@pulumi/pulumi';
 import * as gcp from '@pulumi/gcp';
@@ -106,21 +119,29 @@ export class NitricEntrypointsGoogleCloudLB extends pulumi.ComponentResource {
 						throw new Error(`Entrypoint: ${ep.path} contained target ${ep.path} that does not exist!`);
 					}
 
-					const serverlessNEG = new gcp.compute.RegionNetworkEndpointGroup(`${ep.name}neg`, {
-						networkEndpointType: 'SERVERLESS',
-						region: deployedFunction.cloudrun.location,
-						cloudRun: {
-							service: deployedFunction.cloudrun.name,
+					const serverlessNEG = new gcp.compute.RegionNetworkEndpointGroup(
+						`${ep.name}neg`,
+						{
+							networkEndpointType: 'SERVERLESS',
+							region: deployedFunction.cloudrun.location,
+							cloudRun: {
+								service: deployedFunction.cloudrun.name,
+							},
 						},
-					}, defaultResourceOptions);
+						defaultResourceOptions,
+					);
 
-					const backend = new gcp.compute.BackendService(`${ep.name}`, {
-						// Link the NEG to the backend
-						backends: [{ group: serverlessNEG.id }],
-						// TODO: Determine CDN requirements for API gateways
-						enableCdn: true,
-						protocol: 'HTTPS',
-					}, defaultResourceOptions);
+					const backend = new gcp.compute.BackendService(
+						`${ep.name}`,
+						{
+							// Link the NEG to the backend
+							backends: [{ group: serverlessNEG.id }],
+							// TODO: Determine CDN requirements for API gateways
+							enableCdn: true,
+							protocol: 'HTTPS',
+						},
+						defaultResourceOptions,
+					);
 
 					return {
 						name: ep.name,
@@ -158,68 +179,91 @@ export class NitricEntrypointsGoogleCloudLB extends pulumi.ComponentResource {
 				  })
 				: undefined;
 
-		const urlMap = new gcp.compute.URLMap(`${stackName}-ep-url-map`, {
-			defaultService: defaultBackend.id,
-			hostRules: [
-				{
-					hosts: ['*'],
-					pathMatcher: 'ep-matchers',
-				},
-			],
-			pathMatchers: [
-				{
-					name: 'ep-matchers',
-					defaultService: defaultBackend.id,
-					pathRules,
-				},
-			],
-		}, defaultResourceOptions);
+		const urlMap = new gcp.compute.URLMap(
+			`${stackName}-ep-url-map`,
+			{
+				defaultService: defaultBackend.id,
+				hostRules: [
+					{
+						hosts: ['*'],
+						pathMatcher: 'ep-matchers',
+					},
+				],
+				pathMatchers: [
+					{
+						name: 'ep-matchers',
+						defaultService: defaultBackend.id,
+						pathRules,
+					},
+				],
+			},
+			defaultResourceOptions,
+		);
 
 		// Reserve a public IP address with google
 		const ipAddress = new gcp.compute.GlobalAddress(`${stackName}address`, {});
 		// Create SSL Certificate
 		// FIXME: This will be for development deployments ONLY
 		// a proper certificate will need to be configured for production deployments
-		const privateKey = new tls.PrivateKey(`${stackName}pk`, {
-			algorithm: 'RSA',
-			rsaBits: 2048,
-		}, defaultResourceOptions);
+		const privateKey = new tls.PrivateKey(
+			`${stackName}pk`,
+			{
+				algorithm: 'RSA',
+				rsaBits: 2048,
+			},
+			defaultResourceOptions,
+		);
 
-		const certificate = new tls.SelfSignedCert(`${stackName}ssc`, {
-			privateKeyPem: privateKey.privateKeyPem,
-			keyAlgorithm: 'RSA',
-			allowedUses: ['nonRepudiation', 'digitalSignature', 'keyEncipherment'],
-			subjects: [
-				{
-					commonName: ipAddress.address,
-					organization: 'Nitric Pty Ltd',
-				},
-			],
-			validityPeriodHours: 8760,
-		}, defaultResourceOptions);
+		const certificate = new tls.SelfSignedCert(
+			`${stackName}ssc`,
+			{
+				privateKeyPem: privateKey.privateKeyPem,
+				keyAlgorithm: 'RSA',
+				allowedUses: ['nonRepudiation', 'digitalSignature', 'keyEncipherment'],
+				subjects: [
+					{
+						commonName: ipAddress.address,
+						organization: 'Nitric Pty Ltd',
+					},
+				],
+				validityPeriodHours: 8760,
+			},
+			defaultResourceOptions,
+		);
 
-		const sslCertificate = new gcp.compute.SSLCertificate(`${stackName}gcpcert`, {
-			namePrefix: `${stackName}-certificate-`,
-			certificate: certificate.certPem,
-			privateKey: privateKey.privateKeyPem,
-		}, defaultResourceOptions);
+		const sslCertificate = new gcp.compute.SSLCertificate(
+			`${stackName}gcpcert`,
+			{
+				namePrefix: `${stackName}-certificate-`,
+				certificate: certificate.certPem,
+				privateKey: privateKey.privateKeyPem,
+			},
+			defaultResourceOptions,
+		);
 
-		pulumi.log.info("Connecting URL map to HTTP proxy", urlMap);
+		pulumi.log.info('Connecting URL map to HTTP proxy', urlMap);
 
-		const httpProxy = new gcp.compute.TargetHttpsProxy(`${stackName}proxy`, {
-			description: `Load Balancer for ${stackName}`,
-			urlMap: urlMap.id,
-			sslCertificates: [sslCertificate.id],
-		}, defaultResourceOptions);
+		const httpProxy = new gcp.compute.TargetHttpsProxy(
+			`${stackName}proxy`,
+			{
+				description: `Load Balancer for ${stackName}`,
+				urlMap: urlMap.id,
+				sslCertificates: [sslCertificate.id],
+			},
+			defaultResourceOptions,
+		);
 
-
-		pulumi.log.info("Connecting Proxy to forwarding rule", httpProxy);
+		pulumi.log.info('Connecting Proxy to forwarding rule', httpProxy);
 		// Connect a front end to the load balancer
-		new gcp.compute.GlobalForwardingRule(`${stackName}fwdrule`, {
-			target: httpProxy.id,
-			portRange: '443',
-			ipAddress: ipAddress.address,
-		}, defaultResourceOptions);
+		new gcp.compute.GlobalForwardingRule(
+			`${stackName}fwdrule`,
+			{
+				target: httpProxy.id,
+				portRange: '443',
+				ipAddress: ipAddress.address,
+			},
+			defaultResourceOptions,
+		);
 
 		this.url = pulumi.interpolate`https://${ipAddress.address}`;
 

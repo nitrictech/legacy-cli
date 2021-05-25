@@ -1,8 +1,21 @@
-import { NitricAPI, NitricAPITarget } from "@nitric/cli-common";
-import * as pulumi from "@pulumi/pulumi";
+// Copyright 2021, Nitric Technologies Pty Ltd.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+import { NitricAPI, NitricAPITarget } from '@nitric/cli-common';
+import * as pulumi from '@pulumi/pulumi';
 import { OpenAPIV2 } from 'openapi-types';
-import * as gcp from "@pulumi/gcp";
-import { NitricServiceCloudRun } from "./service";
+import * as gcp from '@pulumi/gcp';
+import { NitricServiceCloudRun } from './service';
 import Converter from 'api-spec-converter';
 
 interface NitricApiGcpApiGatewayArgs {
@@ -25,22 +38,19 @@ interface GoogleExtensions {
  * Nitric Service deployed to Google Cloud Run
  */
 export class NitricApiGcpApiGateway extends pulumi.ComponentResource {
-
 	public readonly name: string;
 	public readonly hostname: pulumi.Output<string>;
 	public readonly url: pulumi.Output<string>;
 
 	constructor(name: string, args: NitricApiGcpApiGatewayArgs, opts?: pulumi.ComponentResourceOptions) {
-		super("nitric:bucket:CloudStorage", name, {}, opts);
+		super('nitric:bucket:CloudStorage', name, {}, opts);
 		const { api, services } = args;
 		const defaultResourceOptions: pulumi.ResourceOptions = { parent: this };
 
 		this.name = name;
 
 		// Replace Nitric API Extensions with google api gateway extensions
-		const spec = pulumi
-		.all(services.map(s => s.url.apply(url => `${s.name}||${url}`)))
-		.apply((nameUrlPairs) => {
+		const spec = pulumi.all(services.map((s) => s.url.apply((url) => `${s.name}||${url}`))).apply((nameUrlPairs) => {
 			const transformedApi = {
 				...api,
 				// Update the spec paths
@@ -94,36 +104,48 @@ export class NitricApiGcpApiGateway extends pulumi.ComponentResource {
 			return Buffer.from(JSON.stringify(transformedApi)).toString('base64');
 		});
 
-		const deployedApi = new gcp.apigateway.Api(name, {
-			apiId: name,
-		}, defaultResourceOptions);
-	
+		const deployedApi = new gcp.apigateway.Api(
+			name,
+			{
+				apiId: name,
+			},
+			defaultResourceOptions,
+		);
+
 		// Now we need to create the document provided and interpolate the deployed service targets
 		// i.e. their Urls...
 		// Deploy the config
-		const deployedConfig = new gcp.apigateway.ApiConfig(`${name}-config`, {
-			api: deployedApi.apiId,
-			displayName: `${name}-config`,
-			apiConfigId: `${name}-config`,
-			openapiDocuments: [
-				{
-					document: {
-						path: 'openapi.json',
-						contents: spec,
+		const deployedConfig = new gcp.apigateway.ApiConfig(
+			`${name}-config`,
+			{
+				api: deployedApi.apiId,
+				displayName: `${name}-config`,
+				apiConfigId: `${name}-config`,
+				openapiDocuments: [
+					{
+						document: {
+							path: 'openapi.json',
+							contents: spec,
+						},
 					},
-				},
-			],
-		}, defaultResourceOptions);
-	
+				],
+			},
+			defaultResourceOptions,
+		);
+
 		// Deploy the gateway
-		const gateway = new gcp.apigateway.Gateway(`${name}-gateway`, {
-			displayName: `${name}-gateway`,
-			gatewayId: `${name}-gateway`,
-			apiConfig: deployedConfig.id,
-		}, defaultResourceOptions);
+		const gateway = new gcp.apigateway.Gateway(
+			`${name}-gateway`,
+			{
+				displayName: `${name}-gateway`,
+				gatewayId: `${name}-gateway`,
+				apiConfig: deployedConfig.id,
+			},
+			defaultResourceOptions,
+		);
 
 		this.hostname = gateway.defaultHostname;
-		this.url = gateway.defaultHostname.apply(n => `https://${n}`);
+		this.url = gateway.defaultHostname.apply((n) => `https://${n}`);
 
 		this.registerOutputs({
 			name: this.name,

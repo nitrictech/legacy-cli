@@ -1,8 +1,20 @@
-import { NitricServiceImage, Service } from "@nitric/cli-common";
-import * as pulumi from "@pulumi/pulumi";
-import * as gcp from "@pulumi/gcp";
-import { NitricTopicPubsub } from "./topic";
-
+// Copyright 2021, Nitric Technologies Pty Ltd.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+import { NitricServiceImage, Service } from '@nitric/cli-common';
+import * as pulumi from '@pulumi/pulumi';
+import * as gcp from '@pulumi/gcp';
+import { NitricTopicPubsub } from './topic';
 
 interface NitricServiceCloudRunArgs {
 	service: Service;
@@ -15,13 +27,12 @@ interface NitricServiceCloudRunArgs {
  * Nitric Service deployed to Google Cloud Run
  */
 export class NitricServiceCloudRun extends pulumi.ComponentResource {
-
 	public readonly name: string;
 	public readonly cloudrun: gcp.cloudrun.Service;
 	public readonly url: pulumi.Output<string>;
 
 	constructor(name: string, args: NitricServiceCloudRunArgs, opts?: pulumi.ComponentResourceOptions) {
-		super("nitric:service:CloudRun", name, {}, opts);
+		super('nitric:service:CloudRun', name, {}, opts);
 		const { service, image, location, topics } = args;
 		const serviceDescriptor = service.asNitricService();
 		const defaultResourceOptions: pulumi.ResourceOptions = { parent: this };
@@ -31,29 +42,33 @@ export class NitricServiceCloudRun extends pulumi.ComponentResource {
 		this.name = service.getName();
 
 		// Deploy the service
-		this.cloudrun = new gcp.cloudrun.Service(service.getName(), {
-			location,
-			template: {
-				metadata: {
-					annotations: {
-						'autoscaling.knative.dev/minScale': `${minScale}`,
-						'autoscaling.knative.dev/maxScale': `${maxScale}`,
+		this.cloudrun = new gcp.cloudrun.Service(
+			service.getName(),
+			{
+				location,
+				template: {
+					metadata: {
+						annotations: {
+							'autoscaling.knative.dev/minScale': `${minScale}`,
+							'autoscaling.knative.dev/maxScale': `${maxScale}`,
+						},
+					},
+					spec: {
+						containers: [
+							{
+								image: image.imageUri,
+								ports: [
+									{
+										containerPort: 9001,
+									},
+								],
+							},
+						],
 					},
 				},
-				spec: {
-					containers: [
-						{
-							image: image.imageUri,
-							ports: [
-								{
-									containerPort: 9001,
-								},
-							],
-						},
-					],
-				},
 			},
-		}, defaultResourceOptions);
+			defaultResourceOptions,
+		);
 
 		this.url = this.cloudrun.statuses.apply((statuses) => statuses[0].url);
 
@@ -70,25 +85,29 @@ export class NitricServiceCloudRun extends pulumi.ComponentResource {
 			triggers.topics.forEach((sub) => {
 				const topic = topics.find((t) => t.name === sub);
 				if (topic) {
-					new gcp.pubsub.Subscription(`${name}-${sub}-sub`, {
-						topic: topic.pubsub.name,
-						// This is a measure of how much processing time the task really gets for subscriptions
-						// at the moment we rely on them returning to the membrane so it can return the status of the task processing
-						// any 200 response will ack the message
-						ackDeadlineSeconds: 0,
-						retryPolicy: {
-							// TODO: Make these properties configurable
-							minimumBackoff: '15s',
-							maximumBackoff: '600s',
-						},
-						pushConfig: {
-							oidcToken: {
-								serviceAccountEmail: invokerAccount.email,
+					new gcp.pubsub.Subscription(
+						`${name}-${sub}-sub`,
+						{
+							topic: topic.pubsub.name,
+							// This is a measure of how much processing time the task really gets for subscriptions
+							// at the moment we rely on them returning to the membrane so it can return the status of the task processing
+							// any 200 response will ack the message
+							ackDeadlineSeconds: 0,
+							retryPolicy: {
+								// TODO: Make these properties configurable
+								minimumBackoff: '15s',
+								maximumBackoff: '600s',
 							},
-							// Assume the 0th status contains the URL of the service
-							pushEndpoint: this.url,
+							pushConfig: {
+								oidcToken: {
+									serviceAccountEmail: invokerAccount.email,
+								},
+								// Assume the 0th status contains the URL of the service
+								pushEndpoint: this.url,
+							},
 						},
-					}, defaultResourceOptions);
+						defaultResourceOptions,
+					);
 				} else {
 					// TODO: Throw new error here about misconfiguration?
 					// As we are unable to locate the topic
