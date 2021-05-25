@@ -85,6 +85,7 @@ export abstract class BaseCommand extends Command {
 			results = await this.do();
 		} catch (e) {
 			cmd.error(e, true);
+			throw e; // re-throw so users get error feedback and can report issues.
 		} finally {
 			await cmd.stop();
 		}

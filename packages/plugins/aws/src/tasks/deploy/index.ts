@@ -18,14 +18,14 @@ import * as pulumi from '@pulumi/pulumi';
 import { LocalWorkspace } from '@pulumi/pulumi/automation';
 import { ecr } from '@pulumi/aws';
 import fs from 'fs';
-import { 
-	NitricSnsTopic, 
+import {
+	NitricSnsTopic,
 	NitricScheduleEventBridge,
 	NitricSiteS3,
 	NitricServiceAWSLambda,
 	NitricApiAwsApiGateway,
 	NitricEntrypointCloudFront,
-	NitricBucketS3
+	NitricBucketS3,
 } from '../../resources';
 
 /**
@@ -44,7 +44,7 @@ interface DeployOptions extends CommonOptions {
 }
 
 export interface DeployResult {
-	entrypoint?: string,
+	entrypoint?: string;
 }
 
 interface ProgramResult {
@@ -88,33 +88,43 @@ export class Deploy extends Task<DeployResult> {
 					// Now we can start deploying with Pulumi
 					try {
 						const authToken = await ecr.getAuthorizationToken();
-						
-						// Deploy Nitric Topics
-						const deployedTopics = mapObject(topics).map(t => new NitricSnsTopic(t.name, {
-							topic: t,
-						}));
 
-						mapObject(buckets).forEach(bucket => new NitricBucketS3(bucket.name, {
-							bucket,
-						}));
+						// Deploy Nitric Topics
+						const deployedTopics = mapObject(topics).map(
+							(t) =>
+								new NitricSnsTopic(t.name, {
+									topic: t,
+								}),
+						);
+
+						mapObject(buckets).forEach(
+							(bucket) =>
+								new NitricBucketS3(bucket.name, {
+									bucket,
+								}),
+						);
 
 						// Deploy Nitric Schedules
-						mapObject(schedules).forEach((schedule) => new NitricScheduleEventBridge(schedule.name, {
-							schedule,
-							topics: deployedTopics,
-						}));
+						mapObject(schedules).forEach(
+							(schedule) =>
+								new NitricScheduleEventBridge(schedule.name, {
+									schedule,
+									topics: deployedTopics,
+								}),
+						);
 
 						// Deploy Nitric Sites
-						const deployedSites = stack.getSites().map((s) => 
-							new NitricSiteS3(s.getName(), {
-								site: s,
-								acl: "public-read",
-								indexDocument: "index.html",
-							})
+						const deployedSites = stack.getSites().map(
+							(s) =>
+								new NitricSiteS3(s.getName(), {
+									site: s,
+									acl: 'public-read',
+									indexDocument: 'index.html',
+								}),
 						);
 
 						// Deploy Nitric Services
-						const deployedServices = stack.getServices().map(s => {
+						const deployedServices = stack.getServices().map((s) => {
 							// create a new repository for each service...
 							const repository = new ecr.Repository(s.getImageTagName());
 
@@ -124,7 +134,7 @@ export class Deploy extends Task<DeployResult> {
 								username: authToken.userName,
 								password: authToken.password,
 								imageName: repository.repositoryUrl,
-								nitricProvider: "aws",
+								nitricProvider: 'aws',
 							});
 
 							return new NitricServiceAWSLambda(s.getName(), {
@@ -135,11 +145,12 @@ export class Deploy extends Task<DeployResult> {
 						});
 
 						// Deploy Nitric APIs
-						const deployedApis = mapObject(apis).map(api => 
-							new NitricApiAwsApiGateway(api.name, {
-								api,
-								services: deployedServices,
-							})
+						const deployedApis = mapObject(apis).map(
+							(api) =>
+								new NitricApiAwsApiGateway(api.name, {
+									api,
+									services: deployedServices,
+								}),
 						);
 
 						if (entrypoints) {
@@ -152,7 +163,7 @@ export class Deploy extends Task<DeployResult> {
 							});
 
 							result.entrypoint = pulumi.interpolate`https://${entrypoint.cloudfront.domainName}`;
-						}						
+						}
 					} catch (e) {
 						fs.appendFileSync(errorFile, e.stack);
 						pulumi.log.error('There was an error deploying the stack please check error logs for more detail');
@@ -183,10 +194,12 @@ export class Deploy extends Task<DeployResult> {
 				this.update(changes);
 			}
 
-			result = Object.keys(upRes.outputs).reduce((acc, k) => ({
-				...acc,
-				[k]: upRes.outputs[k].value
-			}), {}
+			result = Object.keys(upRes.outputs).reduce(
+				(acc, k) => ({
+					...acc,
+					[k]: upRes.outputs[k].value,
+				}),
+				{},
 			) as DeployResult;
 		} catch (e) {
 			fs.appendFileSync(errorFile, e.stack);

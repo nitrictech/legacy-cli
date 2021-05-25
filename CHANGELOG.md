@@ -11,83 +11,73 @@ All notable changes to this project will be documented in this file. See [standa
 
 ### [0.0.43](https://github.com/nitrictech/cli/compare/v0.0.42...v0.0.43) (2021-05-24)
 
-
 ### Bug Fixes
 
-* Add missing bucket deployments. ([5971b07](https://github.com/nitrictech/cli/commit/5971b0722c03f0943283c1541f51a8dab3efde38))
+- Add missing bucket deployments. ([5971b07](https://github.com/nitrictech/cli/commit/5971b0722c03f0943283c1541f51a8dab3efde38))
 
 ### [0.0.42](https://github.com/nitrictech/cli/compare/v0.0.41...v0.0.42) (2021-05-20)
 
-
 ### Bug Fixes
 
-* Remove default root object. ([9dbf818](https://github.com/nitrictech/cli/commit/9dbf81883ef67cbe5fad3138c770a53b1f87008f))
-* Working deployment. ([ede610e](https://github.com/nitrictech/cli/commit/ede610e2dd299984510e9878f249685b5f875fc4))
+- Remove default root object. ([9dbf818](https://github.com/nitrictech/cli/commit/9dbf81883ef67cbe5fad3138c770a53b1f87008f))
+- Working deployment. ([ede610e](https://github.com/nitrictech/cli/commit/ede610e2dd299984510e9878f249685b5f875fc4))
 
 ### [0.0.41](https://github.com/nitrictech/cli/compare/v0.0.40...v0.0.41) (2021-05-17)
 
-
 ### Bug Fixes
 
-* **nit-368:** remove spaces before message ([db3aa50](https://github.com/nitrictech/cli/commit/db3aa500d0c0a4f979d33a2643ac9f19335c1923))
+- **nit-368:** remove spaces before message ([db3aa50](https://github.com/nitrictech/cli/commit/db3aa500d0c0a4f979d33a2643ac9f19335c1923))
 
 ### [0.0.40](https://github.com/nitrictech/cli/compare/v0.0.39...v0.0.40) (2021-05-13)
 
-
 ### Bug Fixes
 
-* Ensure NITRIC_HOME directory created before preferences is written. ([6b78bb3](https://github.com/nitrictech/cli/commit/6b78bb37ea462923aacbb2e7f284e3374d38e4cb))
-* resolve unknown arguments error for base command parsing. ([6be0182](https://github.com/nitrictech/cli/commit/6be0182f6027ba67ba4029092e03be524d3ca627))
+- Ensure NITRIC_HOME directory created before preferences is written. ([6b78bb3](https://github.com/nitrictech/cli/commit/6b78bb37ea462923aacbb2e7f284e3374d38e4cb))
+- resolve unknown arguments error for base command parsing. ([6be0182](https://github.com/nitrictech/cli/commit/6be0182f6027ba67ba4029092e03be524d3ca627))
 
 ### [0.0.39](https://github.com/nitrictech/cli/compare/v0.0.38...v0.0.39) (2021-05-10)
 
-
 ### Bug Fixes
 
-* catch more errors in run command, cleanup remaining commands ([a7c3eb5](https://github.com/nitrictech/cli/commit/a7c3eb560081319aa2b614df1141943985c84c3b))
+- catch more errors in run command, cleanup remaining commands ([a7c3eb5](https://github.com/nitrictech/cli/commit/a7c3eb560081319aa2b614df1141943985c84c3b))
 
 ### [0.0.38](https://github.com/nitrictech/cli/compare/v0.0.37...v0.0.38) (2021-05-10)
 
-
 ### Features
 
-* Add ci mode to the CLI to enable a non-interactive DX. ([0fda8d6](https://github.com/nitrictech/cli/commit/0fda8d6d045eef787fb0bcd0e3d1452c95559da6))
-* Finalize first cut of GA CLI integration. ([bd3cae5](https://github.com/nitrictech/cli/commit/bd3cae5b9bb6adf8ac058827af0f62ed42a85dc8))
-* WIP Analytics integration for oclif commands. ([9c83777](https://github.com/nitrictech/cli/commit/9c8377759e904846e7ca7721f351fa9c991fbea6))
-* WIP start for google analytics CLI integration. ([937d753](https://github.com/nitrictech/cli/commit/937d75359a8d5699af1039e118ab68309ba8855d))
-* Wrap commands in BaseCommand. ([2483022](https://github.com/nitrictech/cli/commit/2483022f3dafa07dc3c7139e3cd82faec255d478))
-
+- Add ci mode to the CLI to enable a non-interactive DX. ([0fda8d6](https://github.com/nitrictech/cli/commit/0fda8d6d045eef787fb0bcd0e3d1452c95559da6))
+- Finalize first cut of GA CLI integration. ([bd3cae5](https://github.com/nitrictech/cli/commit/bd3cae5b9bb6adf8ac058827af0f62ed42a85dc8))
+- WIP Analytics integration for oclif commands. ([9c83777](https://github.com/nitrictech/cli/commit/9c8377759e904846e7ca7721f351fa9c991fbea6))
+- WIP start for google analytics CLI integration. ([937d753](https://github.com/nitrictech/cli/commit/937d75359a8d5699af1039e118ab68309ba8855d))
+- Wrap commands in BaseCommand. ([2483022](https://github.com/nitrictech/cli/commit/2483022f3dafa07dc3c7139e3cd82faec255d478))
 
 ### Bug Fixes
 
-* Add missing peer dependency for cli-common. ([8cf883c](https://github.com/nitrictech/cli/commit/8cf883c7eb7f939270c8e44c3d3ad3b0c072e240))
-* Common typings. ([da7ae00](https://github.com/nitrictech/cli/commit/da7ae002ae0c5a2ecce6234682d50860410008c3))
-* Fix static method references in Preferences. ([ca03c2f](https://github.com/nitrictech/cli/commit/ca03c2f09c726405a36de935296a0f2198bf3545))
-* **azure:** use new ci flag to mark non-interactive. ([d435dd4](https://github.com/nitrictech/cli/commit/d435dd41f522f577a9aff634a46dab5f98b74acf))
-* replace remaining 'run' functions with 'do' ([f4ab4f9](https://github.com/nitrictech/cli/commit/f4ab4f90d237e3f6bfc869f690230e612dcf7fba))
+- Add missing peer dependency for cli-common. ([8cf883c](https://github.com/nitrictech/cli/commit/8cf883c7eb7f939270c8e44c3d3ad3b0c072e240))
+- Common typings. ([da7ae00](https://github.com/nitrictech/cli/commit/da7ae002ae0c5a2ecce6234682d50860410008c3))
+- Fix static method references in Preferences. ([ca03c2f](https://github.com/nitrictech/cli/commit/ca03c2f09c726405a36de935296a0f2198bf3545))
+- **azure:** use new ci flag to mark non-interactive. ([d435dd4](https://github.com/nitrictech/cli/commit/d435dd41f522f577a9aff634a46dab5f98b74acf))
+- replace remaining 'run' functions with 'do' ([f4ab4f9](https://github.com/nitrictech/cli/commit/f4ab4f90d237e3f6bfc869f690230e612dcf7fba))
 
 ### [0.0.37](https://github.com/nitrictech/cli/compare/v0.0.36...v0.0.37) (2021-05-08)
 
-
 ### Bug Fixes
 
-* fix empty arrays default to null in stack definition ([4de0dba](https://github.com/nitrictech/cli/commit/4de0dbaec3ef67dbe5b245fd766557fed215c7a7))
+- fix empty arrays default to null in stack definition ([4de0dba](https://github.com/nitrictech/cli/commit/4de0dbaec3ef67dbe5b245fd766557fed215c7a7))
 
 ### [0.0.36](https://github.com/nitrictech/cli/compare/v0.0.35...v0.0.36) (2021-05-07)
 
-
 ### Features
 
-* Update repostory download. ([22bda35](https://github.com/nitrictech/cli/commit/22bda35f47d020c0581c982e8917f78e67ffacda))
-* WIP stack definition refactor. ([f68c84b](https://github.com/nitrictech/cli/commit/f68c84b84f968ecfaa0fed3689a515a48bd6b3a2))
-
+- Update repostory download. ([22bda35](https://github.com/nitrictech/cli/commit/22bda35f47d020c0581c982e8917f78e67ffacda))
+- WIP stack definition refactor. ([f68c84b](https://github.com/nitrictech/cli/commit/f68c84b84f968ecfaa0fed3689a515a48bd6b3a2))
 
 ### Bug Fixes
 
-* Ensure DO App creation waits on image push. ([4dd69a3](https://github.com/nitrictech/cli/commit/4dd69a36f537ae3ce2984d9ca037cf29f5df573e))
-* Fix syntax error in method call. ([8414d4c](https://github.com/nitrictech/cli/commit/8414d4c46af55b48825875518623f2e8a24cc537))
-* Missing NamedObject API type. ([98e2399](https://github.com/nitrictech/cli/commit/98e23991518f614b931dd0574eaa68e3ee97665e))
-* Type error in azure plugin. ([bc0f394](https://github.com/nitrictech/cli/commit/bc0f3947e211aebd823399a37cbfa42a44ca663f))
+- Ensure DO App creation waits on image push. ([4dd69a3](https://github.com/nitrictech/cli/commit/4dd69a36f537ae3ce2984d9ca037cf29f5df573e))
+- Fix syntax error in method call. ([8414d4c](https://github.com/nitrictech/cli/commit/8414d4c46af55b48825875518623f2e8a24cc537))
+- Missing NamedObject API type. ([98e2399](https://github.com/nitrictech/cli/commit/98e23991518f614b931dd0574eaa68e3ee97665e))
+- Type error in azure plugin. ([bc0f394](https://github.com/nitrictech/cli/commit/bc0f3947e211aebd823399a37cbfa42a44ca663f))
 
 ### [0.0.35](https://github.com/nitrictech/cli/compare/v0.0.34...v0.0.35) (2021-05-04)
 

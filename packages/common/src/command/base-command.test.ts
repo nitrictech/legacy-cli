@@ -136,7 +136,11 @@ describe('BaseCommand', () => {
 	describe('error run', () => {
 		beforeAll(async () => {
 			MockCommand.shouldError = true;
-			await MockCommand.run(['--ci']);
+			try {
+				await MockCommand.run(['--ci']);
+			} catch {
+				// eat error, it's expected.
+			}
 		});
 
 		afterAll(() => {

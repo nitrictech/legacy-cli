@@ -108,7 +108,6 @@ export default class AwsDeploy extends BaseCommand {
 			if (deployResult.entrypoint) {
 				cli.url(`Your application entrypoint is available at: ${deployResult.entrypoint}`, deployResult.entrypoint);
 			}
-			
 		} catch (error) {
 			// eat this error to avoid duplicate console output.
 		}
