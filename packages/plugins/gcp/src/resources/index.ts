@@ -11,22 +11,10 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
-import { NamedObject, NitricTopic } from '@nitric/cli-common';
-import { pubsub } from '@pulumi/gcp';
-import { DeployedTopic } from '../types';
-
-/**
- * Create a GCP PubSub topic for a Nitric Topic
- * @param topic to deploy
- */
-export function createTopic(topic: NamedObject<NitricTopic>): DeployedTopic {
-	const pubsubTopic = new pubsub.Topic(topic.name, {
-		name: topic.name,
-	});
-
-	return {
-		...topic,
-		pubsub: pubsubTopic,
-	};
-}
+export * from './api';
+export * from './bucket';
+export * from './entrypoints';
+export * from './schedule';
+export * from './service';
+export * from './site';
+export * from './topic';

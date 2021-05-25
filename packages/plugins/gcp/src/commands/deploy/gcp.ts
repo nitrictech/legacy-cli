@@ -13,9 +13,10 @@
 // limitations under the License.
 
 import { flags } from '@oclif/command';
-import { Deploy } from '../../tasks/deploy';
+import { Deploy, DeployResult, DEPLOY_TASK_KEY } from '../../tasks/deploy';
 import { BaseCommand, wrapTaskForListr, Stack, StageStackTask } from '@nitric/cli-common';
 import { Listr } from 'listr2';
+import cli from 'cli-ux';
 import path from 'path';
 import { google } from 'googleapis';
 import inquirer from 'inquirer';
@@ -128,7 +129,7 @@ export default class GcpDeploy extends BaseCommand {
 			throw new Error('Project must be provided');
 		}
 
-		new Listr<any>([
+		const results = new Listr<any>([
 			wrapTaskForListr(
 				// Stage the stak ready for building...
 				new StageStackTask({ stack }),
@@ -141,5 +142,11 @@ export default class GcpDeploy extends BaseCommand {
 				}),
 			),
 		]).run();
+
+		const deployResult = results[DEPLOY_TASK_KEY] as DeployResult;
+
+		if (deployResult.entrypoint) {
+			cli.url(`Your application entrypoint is available at: ${deployResult.entrypoint}`, deployResult.entrypoint);
+		}
 	}
 }

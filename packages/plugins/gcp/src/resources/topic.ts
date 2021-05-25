@@ -11,40 +11,40 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-import * as pulumi from '@pulumi/pulumi';
-import * as aws from '@pulumi/aws';
 import { NamedObject, NitricTopic } from '@nitric/cli-common';
+import * as pulumi from '@pulumi/pulumi';
+import * as gcp from '@pulumi/gcp';
 
-interface NitricSnsTopicArgs {
+interface NitricTopicPubsubArgs {
 	topic: NamedObject<NitricTopic>;
 }
 
 /**
- * Nitric SNS based Topic
+ * Nitric Topic deployed to Google Cloud PubSub
  */
-export class NitricSnsTopic extends pulumi.ComponentResource {
+export class NitricTopicPubsub extends pulumi.ComponentResource {
 	public readonly name: string;
-	public readonly sns: aws.sns.Topic;
+	public readonly pubsub: gcp.pubsub.Topic;
 
-	constructor(name, args: NitricSnsTopicArgs, opts?: pulumi.ComponentResourceOptions) {
-		super('nitric:topic:SNS', name, {}, opts);
-
+	constructor(name: string, args: NitricTopicPubsubArgs, opts?: pulumi.ComponentResourceOptions) {
+		super('nitric:topic:PubSub', name, {}, opts);
+		const { topic } = args;
 		const defaultResourceOptions: pulumi.ResourceOptions = { parent: this };
-		const { topic: topicDef } = args;
 
-		this.name = topicDef.name;
-		this.sns = new aws.sns.Topic(
-			topicDef.name,
+		this.name = topic.name;
+
+		// Deploy the service
+		this.pubsub = new gcp.pubsub.Topic(
+			topic.name,
 			{
-				name: topicDef.name,
+				name: topic.name,
 			},
 			defaultResourceOptions,
 		);
 
-		// Finalize the deployment
 		this.registerOutputs({
-			sns: this.sns,
 			name: this.name,
+			pubsub: this.pubsub,
 		});
 	}
 }
