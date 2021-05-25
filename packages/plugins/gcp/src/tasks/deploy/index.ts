@@ -30,7 +30,7 @@ import {
 import fs from 'fs';
 
 export interface DeployResult {
-	entrypoint?: string,
+	entrypoint?: string;
 }
 
 interface CommonOptions {
@@ -83,16 +83,16 @@ export class Deploy extends Task<DeployResult> {
 					// Now we can start deploying with Pulumi
 					try {
 						// deploy the buckets
-						mapObject(buckets).map(bucket => new NitricBucketCloudStorage(bucket.name, { bucket }));
+						mapObject(buckets).map((bucket) => new NitricBucketCloudStorage(bucket.name, { bucket }));
 
 						// deploy the topics
-						const deployedTopics = mapObject(topics).map(topic => new NitricTopicPubsub(topic.name, { topic }));
+						const deployedTopics = mapObject(topics).map((topic) => new NitricTopicPubsub(topic.name, { topic }));
 						// deploy the services
 						const { token: imageDeploymentToken } = await authClient.getAccessToken();
 
-						const deployedSites =  stack.getSites().map(site => new NitricSiteCloudStorage(site.getName(), { site }));
+						const deployedSites = stack.getSites().map((site) => new NitricSiteCloudStorage(site.getName(), { site }));
 
-						const deployedServices = stack.getServices().map(service => {
+						const deployedServices = stack.getServices().map((service) => {
 							// Build and push the image
 							const image = new NitricServiceImage(service.getName(), {
 								imageName: pulumi.interpolate`gcr.io/${gcpProject}/${service.getImageTagName()}`,
@@ -102,16 +102,25 @@ export class Deploy extends Task<DeployResult> {
 								password: imageDeploymentToken!,
 								service,
 							});
-							return new NitricServiceCloudRun(service.getName(), { service, topics: deployedTopics, image, location: region })
+							return new NitricServiceCloudRun(service.getName(), {
+								service,
+								topics: deployedTopics,
+								image,
+								location: region,
+							});
 						});
 
 						// deploy the schedules
-						mapObject(schedules).map((s) =>  new NitricScheduleCloudScheduler(s.name, { schedule: s, topics: deployedTopics }));
+						mapObject(schedules).map(
+							(s) => new NitricScheduleCloudScheduler(s.name, { schedule: s, topics: deployedTopics }),
+						);
 						// deploy apis
-						const deployedApis = await Promise.all(mapObject(apis).map(async ({ name, ...spec }) => {
-							const convertedSpec = await NitricApiGcpApiGateway.convertNitricAPIv2(spec);
-							return new NitricApiGcpApiGateway(name, { api: convertedSpec, services: deployedServices  });
-						}));
+						const deployedApis = await Promise.all(
+							mapObject(apis).map(async ({ name, ...spec }) => {
+								const convertedSpec = await NitricApiGcpApiGateway.convertNitricAPIv2(spec);
+								return new NitricApiGcpApiGateway(name, { api: convertedSpec, services: deployedServices });
+							}),
+						);
 
 						if (entrypoints) {
 							const entrypoint = new NitricEntrypointsGoogleCloudLB(stack.getName(), {
@@ -143,10 +152,13 @@ export class Deploy extends Task<DeployResult> {
 				},
 			});
 
-			result = Object.keys(upRes.outputs).reduce((acc, k) => ({
-				...acc,
-				[k]: upRes.outputs[k].value
-			}), {}) as DeployResult;
+			result = Object.keys(upRes.outputs).reduce(
+				(acc, k) => ({
+					...acc,
+					[k]: upRes.outputs[k].value,
+				}),
+				{},
+			) as DeployResult;
 		} catch (e) {
 			fs.appendFileSync(errorFile, e);
 			throw new Error('An error occurred, see latest gcp:error log for details');
