@@ -58,7 +58,9 @@ jobs:
 
     - name: Build Binaries
       id: build_binaries
-      run: yarn workspace @nitric/cli package:all
+      run: |
+        yarn build:common
+        yarn workspace @nitric/cli package:all
 
     - name: Upload Linux Binary
       id: upload-linux-binary
