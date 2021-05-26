@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Site, Stack, Task } from '@nitric/cli-common';
+import { NamedObject, NitricEntrypoint, Site, Stack, Task } from '@nitric/cli-common';
 import Docker, { Container, ContainerCreateOptions, Network, NetworkInspectInfo } from 'dockerode';
 import tar from 'tar-fs';
 import fs from 'fs';
@@ -35,23 +35,23 @@ export async function stageStackEntrypoint(stack: Stack, nginxConf: string): Pro
 /**
  * Creates a nginx configuration to act as a single host entrypoint
  * For nitric resources
- * @param entrypoints
+ * @param stack
  */
-export function createNginxConfig(stack: Stack): string {
-	const { entrypoints } = stack.asNitricStack();
+export function createNginxConfig(entrypoint: NamedObject<NitricEntrypoint>, stack: Stack): string {
+	// const { entrypoints } = stack.asNitricStack();
 
-	if (!entrypoints) {
-		throw new Error('Cannot create nginx config for stack with no entrypoints');
-	}
+	// if (!entrypoints) {
+	// 	throw new Error('Cannot create nginx config for stack with no entrypoints');
+	// }
 
-	const eps = Object.keys(entrypoints).map((e) => ({
-		path: e,
-		...entrypoints[e],
+	const paths = Object.keys(entrypoint.paths).map((p) => ({
+		path: p,
+		...entrypoint.paths[p],
 	}));
 
-	const sites = eps.filter((e) => e.type === 'site');
-	const apis = eps.filter((e) => e.type === 'api');
-	const services = eps.filter((e) => e.type === 'service');
+	const sites = paths.filter((e) => e.type === 'site');
+	const apis = paths.filter((e) => e.type === 'api');
+	const services = paths.filter((e) => e.type === 'service');
 
 	return `
 	events {}
@@ -62,7 +62,7 @@ export function createNginxConfig(stack: Stack): string {
 				.map(
 					(s) => `
 				location ${s.path} {
-					root /www/${s.name};
+					root /www/${s.target};
 				}
 			`,
 				)
@@ -72,7 +72,7 @@ export function createNginxConfig(stack: Stack): string {
 				.map(
 					(a) => `
 				location ${a.path} {
-					proxy_pass http://${stack.getName()}-${a.name}:8080;
+					proxy_pass http://${stack.getName()}-${a.target}:8080;
 				}
 			`,
 				)
@@ -82,7 +82,7 @@ export function createNginxConfig(stack: Stack): string {
 				.map(
 					(a) => `
 				location ${a.path} {
-					proxy_pass http://${a.name}:9001;
+					proxy_pass http://${a.target}:9001;
 				}
 			`,
 				)
@@ -95,24 +95,26 @@ export function createNginxConfig(stack: Stack): string {
 /**
  * Options when running entrypoints for local testing
  */
-interface RunEntrypointsTaskOptions {
+export interface RunEntrypointTaskOptions {
+	entrypoint: NamedObject<NitricEntrypoint>;
 	stack: Stack;
 	network?: Network;
-	docker: Docker;
 	port?: number;
 }
 
 /**
  * Run local http entrypoint(s) as containers for developments/testing purposes.
  */
-export class RunEntrypointsTask extends Task<Container> {
+export class RunEntrypointTask extends Task<Container> {
+	private entrypoint: NamedObject<NitricEntrypoint>;
 	private stack: Stack;
 	private network?: Network;
 	private docker: Docker;
 	private port?: number;
 
-	constructor({ stack, docker, network, port }: RunEntrypointsTaskOptions) {
-		super('Starting Entrypoints');
+	constructor({ entrypoint, stack, network, port }: RunEntrypointTaskOptions, docker: Docker) {
+		super(`${entrypoint.name} - ${port}`);
+		this.entrypoint = entrypoint;
 		this.stack = stack;
 		this.network = network;
 		this.docker = docker;
@@ -139,8 +141,10 @@ export class RunEntrypointsTask extends Task<Container> {
 		// Pull nginx
 		await streamToPromise(await docker.pull('nginx'));
 
+		this.stack.asNitricStack().entrypoints;
+
 		const dockerOptions = {
-			name: `${stack.getName()}-entrypoints`,
+			name: `${stack.getName()}-${this.entrypoint.name}`,
 			// Pull nginx
 			Image: 'nginx',
 			ExposedPorts: {
@@ -162,7 +166,7 @@ export class RunEntrypointsTask extends Task<Container> {
 		const container = await docker.createContainer(dockerOptions);
 
 		// Get the nginx configuration from our nitric entrypoints
-		const configuration = createNginxConfig(stack);
+		const configuration = createNginxConfig(this.entrypoint, stack);
 
 		// Stage the file...
 		await stageStackEntrypoint(stack, configuration);
