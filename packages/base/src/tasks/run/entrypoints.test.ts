@@ -49,7 +49,7 @@ describe('createNginxConfig', () => {
 			name: 'dummy-stack',
 		});
 		it('Should throw an error', () => {
-			expect(() => EPS.createNginxConfig(stack)).toThrowError(
+			expect(() => EPS.createNginxConfig({ name: 'missing-entrypoint', paths: {} }, stack)).toThrowError(
 				'Cannot create nginx config for stack with no entrypoints',
 			);
 		});
@@ -59,15 +59,20 @@ describe('createNginxConfig', () => {
 		const stack = new Stack('nitric.yaml', {
 			name: 'dummy-stack',
 			entrypoints: {
-				'/': {
-					name: 'test',
-					type: 'site',
+				main: {
+					paths: {
+						'/': {
+							target: 'test',
+							type: 'site',
+						},
+					},
 				},
 			},
 		});
 
 		it('Should describe an nginx config with a root entrypoint', () => {
-			const config = EPS.createNginxConfig(stack);
+			const entrypoint = stack.asNitricStack().entrypoints!.main;
+			const config = EPS.createNginxConfig({ name: 'main', ...entrypoint }, stack);
 
 			expect(config).toContain(`
 				location / {
@@ -81,15 +86,20 @@ describe('createNginxConfig', () => {
 		const stack = new Stack('nitric.yaml', {
 			name: 'dummy-stack',
 			entrypoints: {
-				'/': {
-					name: 'test',
-					type: 'api',
+				main: {
+					paths: {
+						'/': {
+							target: 'test',
+							type: 'api',
+						},
+					},
 				},
 			},
 		});
 
 		it('Should describe an nginx config with a proxy_pass entrypoint', () => {
-			const config = EPS.createNginxConfig(stack);
+			const entrypoint = stack.asNitricStack().entrypoints!.main;
+			const config = EPS.createNginxConfig({ name: 'main', ...entrypoint }, stack);
 
 			expect(config).toContain(`
 				location / {
@@ -115,14 +125,19 @@ describe('stageStackEntrypoints', () => {
 		const stack = new Stack('nitric.yaml', {
 			name: 'dummy-stack',
 			entrypoints: {
-				'/': {
-					name: 'test',
-					type: 'api',
+				main: {
+					paths: {
+						'/': {
+							target: 'test',
+							type: 'api',
+						},
+					},
 				},
 			},
 		});
 		// TODO: We should probably mock this out...
-		const config = EPS.createNginxConfig(stack);
+		const entrypoint = stack.asNitricStack().entrypoints!.main;
+		const config = EPS.createNginxConfig({ name: 'main', ...entrypoint }, stack);
 
 		beforeAll(() => {
 			EPS.stageStackEntrypoint(stack, config);
@@ -211,27 +226,35 @@ describe('RunEntrypointsTask', () => {
 				},
 			},
 			entrypoints: {
-				'/': {
-					name: 'test',
-					type: 'site',
+				main: {
+					paths: {
+						'/': {
+							target: 'test',
+							type: 'site',
+						},
+					},
 				},
 			},
 		});
 
 		// Do a single run of the run entrypoints task
 		beforeAll(async () => {
-			await new EPS.RunEntrypointsTask({
-				port: 1234,
-				docker: mockDocker,
-				stack: testStack,
-			}).do();
+			const entrypoint = testStack.asNitricStack().entrypoints!.main;
+			await new EPS.RunEntrypointTask(
+				{
+					entrypoint: { name: 'main', ...entrypoint },
+					port: 1234,
+					stack: testStack,
+				},
+				mockDocker,
+			).do();
 		});
 
 		it('should create a new nginx docker container', () => {
 			expect(createContainerMock).toBeCalledTimes(1);
 			expect(createContainerMock).toBeCalledWith(
 				expect.objectContaining({
-					name: 'test-entrypoints',
+					name: 'test-main',
 					Image: 'nginx',
 				}),
 			);

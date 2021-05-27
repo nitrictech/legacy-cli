@@ -154,18 +154,17 @@ export class Deploy extends Task<DeployResult> {
 						);
 
 						if (entrypoints) {
-							const eps = Object.entries(entrypoints).map(([ name, entrypoint ]) => {
+							const eps = Object.entries(entrypoints).map(([name, entrypoint]) => {
 								return new NitricEntrypointCloudFront(name, {
 									stackName: stack.getName(),
-									entrypoints: entrypoint,
+									entrypoint: entrypoint,
 									services: deployedServices,
 									apis: deployedApis,
 									sites: deployedSites,
 								});
 							});
-							
 
-							result.entrypoints = eps.map(ep => pulumi.interpolate`https://${ep.cloudfront.domainName}`);
+							result.entrypoints = eps.map((ep) => pulumi.interpolate`https://${ep.cloudfront.domainName}`);
 						}
 					} catch (e) {
 						fs.appendFileSync(errorFile, e.stack);

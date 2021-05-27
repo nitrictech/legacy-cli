@@ -38,11 +38,11 @@ export async function stageStackEntrypoint(stack: Stack, nginxConf: string): Pro
  * @param stack
  */
 export function createNginxConfig(entrypoint: NamedObject<NitricEntrypoint>, stack: Stack): string {
-	// const { entrypoints } = stack.asNitricStack();
+	const { entrypoints } = stack.asNitricStack();
 
-	// if (!entrypoints) {
-	// 	throw new Error('Cannot create nginx config for stack with no entrypoints');
-	// }
+	if (!entrypoints) {
+		throw new Error('Cannot create nginx config for stack with no entrypoints');
+	}
 
 	const paths = Object.keys(entrypoint.paths).map((p) => ({
 		path: p,
