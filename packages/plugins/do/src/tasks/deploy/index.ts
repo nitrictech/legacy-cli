@@ -12,13 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Task, Stack, mapObject } from '@nitric/cli-common';
+import { Task, Stack, mapObject, NitricServiceImage } from '@nitric/cli-common';
 import * as pulumi from '@pulumi/pulumi';
 import { LocalWorkspace } from '@pulumi/pulumi/automation';
 import * as digitalocean from '@pulumi/digitalocean';
 import { createServiceSpec } from './function';
 import fs from 'fs';
-import { NitricServiceDockerImage } from '../../resources/service';
 
 const REGISTRY_LIMITS: Record<string, number> = {
 	starter: 1,
@@ -116,11 +115,17 @@ export class Deploy extends Task<void> {
 							}
 
 							const serviceImages = services.map((service) => {
-								return new NitricServiceDockerImage(service.getName(), {
-									service,
-									registryName,
-									token,
-								});
+								return {
+									serviceName: service.getName(),
+									image: new NitricServiceImage(service.getName(), {
+										service,
+										username: token,
+										password: token,
+										imageName: pulumi.interpolate`registry.digitalocean.com/${registryName}/${service.getName()}`,
+										server: 'registry.digitalocean.com',
+										nitricProvider: 'do',
+									}),
+								};
 							});
 
 							// Deploy a Digital Ocean "App" for each entrypoint, add the targets as containers.
@@ -151,10 +156,10 @@ export class Deploy extends Task<void> {
 
 								// Create the functions
 								const results = serviceImages
-									.filter((image) => {
-										return servicePaths.find(({ target }) => target == image.name) != undefined;
+									.filter(({ serviceName }) => {
+										return servicePaths.find(({ target }) => target == serviceName) != undefined;
 									})
-									.map((image) => createServiceSpec(image, entrypoint));
+									.map(({ serviceName, image }) => createServiceSpec(serviceName, image, entrypoint));
 
 								const app = new digitalocean.App(stack.getName(), {
 									spec: {
@@ -162,6 +167,7 @@ export class Deploy extends Task<void> {
 										// TODO: Configure region
 										region: region,
 										services: results.map((r) => r.spec),
+										domainNames: Object.entries(entrypoint.domains || {}).map(([name]) => ({ name })),
 									},
 								});
 
