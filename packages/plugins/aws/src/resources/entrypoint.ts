@@ -13,14 +13,14 @@
 // limitations under the License.
 import * as pulumi from '@pulumi/pulumi';
 import * as aws from '@pulumi/aws';
-import { NitricEntrypoints } from '@nitric/cli-common';
+import { NitricEntrypoint } from '@nitric/cli-common';
 import { NitricSiteS3 } from './site';
 import { NitricApiAwsApiGateway } from './api';
 import { NitricServiceAWSLambda } from './service';
 
 interface NitricEntrypointCloudfrontArgs {
 	stackName: string;
-	entrypoints: NitricEntrypoints;
+	entrypoint: NitricEntrypoint;
 	sites: NitricSiteS3[];
 	apis: NitricApiAwsApiGateway[];
 	services: NitricServiceAWSLambda[];
@@ -39,17 +39,17 @@ export class NitricEntrypointCloudFront extends pulumi.ComponentResource {
 		super('nitric:entrypoints:CloudFront', name, {}, opts);
 
 		const defaultResourceOptions: pulumi.ResourceOptions = { parent: this };
-		const { entrypoints, stackName, sites, apis, services } = args;
+		const { entrypoint, stackName, sites, apis, services } = args;
 		const oai = new aws.cloudfront.OriginAccessIdentity(`${stackName}OAI`, {}, defaultResourceOptions);
 
 		// Create the origins
-		const origins = Object.keys(entrypoints).map((key) => {
-			const { type, name } = entrypoints[key];
+		const origins = Object.keys(entrypoint.paths).map((key) => {
+			const { type, target } = entrypoint.paths[key];
 
 			switch (type) {
 				case 'api': {
 					// Search deployed APIs for the name
-					const deployedApi = apis.find((a) => a.name === name);
+					const deployedApi = apis.find((a) => a.name === target);
 
 					if (!deployedApi) {
 						throw new Error(`Target API ${name} configured in entrypoints but does not exist`);
@@ -69,7 +69,7 @@ export class NitricEntrypointCloudFront extends pulumi.ComponentResource {
 					};
 				}
 				case 'site': {
-					const deployedSite = sites.find((s) => s.name === name);
+					const deployedSite = sites.find((s) => s.name === target);
 
 					if (!deployedSite) {
 						throw new Error(`Target Site ${name} configured in entrypoints but does not exist`);
@@ -85,7 +85,7 @@ export class NitricEntrypointCloudFront extends pulumi.ComponentResource {
 					};
 				}
 				case 'service': {
-					const deployedService = services.find((s) => s.name === name);
+					const deployedService = services.find((s) => s.name === target);
 
 					if (!deployedService) {
 						throw new Error(`Target Function ${name} configured in entrypoints but does not exist`);
@@ -133,13 +133,14 @@ export class NitricEntrypointCloudFront extends pulumi.ComponentResource {
 		});
 
 		const { defaultCacheBehavior, orderedCacheBehaviors } = NitricEntrypointCloudFront.entrypointsToBehaviours(
-			entrypoints,
+			entrypoint,
 		);
 		// Create a new cloudfront distribution
 		this.cloudfront = new aws.cloudfront.Distribution(
 			`${stackName}Distribution`,
 			{
 				enabled: true,
+				aliases: Object.keys(entrypoint.domains || {}),
 				// Assume for now default will be index
 				// TODO: Make this configurable via nitric.yaml
 				// defaultRootObject: '/',
@@ -168,16 +169,16 @@ export class NitricEntrypointCloudFront extends pulumi.ComponentResource {
 	}
 
 	static entrypointsToBehaviours(
-		entrypoints: NitricEntrypoints,
+		entrypoints: NitricEntrypoint,
 	): {
 		defaultCacheBehavior: aws.types.input.cloudfront.DistributionDefaultCacheBehavior;
 		orderedCacheBehaviors: aws.types.input.cloudfront.DistributionOrderedCacheBehavior[];
 	} {
-		const defaultEntrypoint = entrypoints['/'];
-		const otherEntrypoints = Object.keys(entrypoints)
+		const defaultEntrypoint = entrypoints.paths['/'];
+		const otherEntrypoints = Object.keys(entrypoints.paths)
 			.filter((k) => k !== '/')
 			.map((k) => ({
-				...entrypoints[k],
+				...entrypoints.paths[k],
 				path: k,
 			}));
 
@@ -185,7 +186,7 @@ export class NitricEntrypointCloudFront extends pulumi.ComponentResource {
 			defaultCacheBehavior: {
 				allowedMethods: ['DELETE', 'GET', 'HEAD', 'OPTIONS', 'PATCH', 'POST', 'PUT'],
 				cachedMethods: ['GET', 'HEAD'],
-				targetOriginId: defaultEntrypoint.name,
+				targetOriginId: defaultEntrypoint.target,
 				forwardedValues: {
 					queryString: true,
 					cookies: {
@@ -198,7 +199,7 @@ export class NitricEntrypointCloudFront extends pulumi.ComponentResource {
 				pathPattern: `${e.path}*`,
 				allowedMethods: ['DELETE', 'GET', 'HEAD', 'OPTIONS', 'PATCH', 'POST', 'PUT'],
 				cachedMethods: ['GET', 'HEAD'],
-				targetOriginId: e.name,
+				targetOriginId: e.target,
 				forwardedValues: {
 					queryString: true,
 					cookies: {

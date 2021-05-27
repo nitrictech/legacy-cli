@@ -48,7 +48,7 @@ export interface DeployResult {
 }
 
 interface ProgramResult {
-	entrypoint?: pulumi.Output<string>;
+	entrypoints?: pulumi.Output<string>[];
 }
 
 export const DEPLOY_TASK_KEY = 'Deploying Nitric Stack to AWS';
@@ -154,15 +154,18 @@ export class Deploy extends Task<DeployResult> {
 						);
 
 						if (entrypoints) {
-							const entrypoint = new NitricEntrypointCloudFront(stack.getName(), {
-								stackName: stack.getName(),
-								entrypoints: entrypoints,
-								services: deployedServices,
-								apis: deployedApis,
-								sites: deployedSites,
+							const eps = Object.entries(entrypoints).map(([ name, entrypoint ]) => {
+								return new NitricEntrypointCloudFront(name, {
+									stackName: stack.getName(),
+									entrypoints: entrypoint,
+									services: deployedServices,
+									apis: deployedApis,
+									sites: deployedSites,
+								});
 							});
+							
 
-							result.entrypoint = pulumi.interpolate`https://${entrypoint.cloudfront.domainName}`;
+							result.entrypoints = eps.map(ep => pulumi.interpolate`https://${ep.cloudfront.domainName}`);
 						}
 					} catch (e) {
 						fs.appendFileSync(errorFile, e.stack);
