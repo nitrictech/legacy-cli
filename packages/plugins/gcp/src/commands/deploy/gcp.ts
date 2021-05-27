@@ -131,7 +131,7 @@ export default class GcpDeploy extends BaseCommand {
 
 		const results = new Listr<any>([
 			wrapTaskForListr(
-				// Stage the stak ready for building...
+				// Stage the stack ready for building...
 				new StageStackTask({ stack }),
 			),
 			wrapTaskForListr(
@@ -145,8 +145,12 @@ export default class GcpDeploy extends BaseCommand {
 
 		const deployResult = results[DEPLOY_TASK_KEY] as DeployResult;
 
-		if (deployResult.entrypoint) {
-			cli.url(`Your application entrypoint is available at: ${deployResult.entrypoint}`, deployResult.entrypoint);
+		// Print deployed entrypoint urls to console
+		if (deployResult.entrypoints) {
+			cli.table(deployResult.entrypoints, {
+				entrypoint: {},
+				url: {},
+			});
 		}
 	}
 }

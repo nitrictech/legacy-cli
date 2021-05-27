@@ -11,7 +11,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-import { NitricEntrypoints } from '@nitric/cli-common';
+import { NitricEntrypoint } from '@nitric/cli-common';
 import * as pulumi from '@pulumi/pulumi';
 import * as gcp from '@pulumi/gcp';
 import * as tls from '@pulumi/tls';
@@ -19,9 +19,9 @@ import { NitricSiteCloudStorage } from './site';
 import { NitricApiGcpApiGateway } from './api';
 import { NitricServiceCloudRun } from './service';
 
-interface NitricEntrypointsGoogleCloudLBArgs {
+interface NitricEntrypointGoogleCloudLBArgs {
 	stackName: string;
-	entrypoints: NitricEntrypoints;
+	entrypoint: NitricEntrypoint;
 	sites: NitricSiteCloudStorage[];
 	apis: NitricApiGcpApiGateway[];
 	services: NitricServiceCloudRun[];
@@ -30,30 +30,32 @@ interface NitricEntrypointsGoogleCloudLBArgs {
 /**
  * Nitric Entrypoints deployed using Google Cloud load balancers
  */
-export class NitricEntrypointsGoogleCloudLB extends pulumi.ComponentResource {
+export class NitricEntrypointGoogleCloudLB extends pulumi.ComponentResource {
 	public readonly url: pulumi.Output<string>;
 
-	constructor(name: string, args: NitricEntrypointsGoogleCloudLBArgs, opts?: pulumi.ComponentResourceOptions) {
+	constructor(name: string, args: NitricEntrypointGoogleCloudLBArgs, opts?: pulumi.ComponentResourceOptions) {
 		super('nitric:bucket:CloudStorage', name, {}, opts);
-		const { stackName, entrypoints, sites, apis, services } = args;
+		const { stackName, entrypoint, sites, apis, services } = args;
 		const defaultResourceOptions: pulumi.ResourceOptions = { parent: this };
 
-		const normalizedEntrypoints = Object.keys(entrypoints).map((epPath) => ({
-			path: epPath,
-			...entrypoints[epPath],
+		const normalizedPaths = Object.entries(entrypoint.paths).map(([path, opts]) => ({
+			path,
+			...opts,
 		}));
 
-		const backends = normalizedEntrypoints.map((ep) => {
-			switch (ep.type) {
+		const backends = normalizedPaths.map((entrypointPath) => {
+			switch (entrypointPath.type) {
 				case 'api': {
-					const deployedApi = apis.find((a) => a.name === ep.name);
+					const deployedApi = apis.find((a) => a.name === entrypointPath.path);
 
 					if (!deployedApi) {
-						throw new Error(`Entrypoint: ${ep.path} contained target ${ep.name} that does not exist!`);
+						throw new Error(
+							`Entrypoint: ${entrypointPath.path} contained target ${entrypointPath.path} that does not exist!`,
+						);
 					}
 
 					const apiGatewayNEG = new gcp.compute.GlobalNetworkEndpointGroup(
-						`${ep.name}-neg`,
+						`${entrypointPath.path}-neg`,
 						{
 							networkEndpointType: 'INTERNET_FQDN_PORT',
 							//defaultPort: 443,
@@ -63,7 +65,7 @@ export class NitricEntrypointsGoogleCloudLB extends pulumi.ComponentResource {
 
 					// Add the api gateways endpoint to the above group
 					new gcp.compute.GlobalNetworkEndpoint(
-						`${ep.name}-ne`,
+						`${entrypointPath.path}-ne`,
 						{
 							globalNetworkEndpointGroup: apiGatewayNEG.name,
 							fqdn: deployedApi.hostname,
@@ -73,7 +75,7 @@ export class NitricEntrypointsGoogleCloudLB extends pulumi.ComponentResource {
 					);
 
 					const backend = new gcp.compute.BackendService(
-						`${ep.name}`,
+						`${entrypointPath.path}`,
 						{
 							// Link the NEG to the backend
 							backends: [{ group: apiGatewayNEG.id }],
@@ -86,19 +88,21 @@ export class NitricEntrypointsGoogleCloudLB extends pulumi.ComponentResource {
 					);
 
 					return {
-						name: ep.name,
+						name: entrypointPath.path,
 						backend,
 					};
 				}
 				case 'site': {
-					const deployedSite = sites.find((s) => s.name === ep.name);
+					const deployedSite = sites.find((s) => s.name === entrypointPath.path);
 
 					if (!deployedSite) {
-						throw new Error(`Entrypoint: ${ep.path} contained target ${ep.name} that does not exist!`);
+						throw new Error(
+							`Entrypoint: ${entrypointPath.path} contained target ${entrypointPath.path} that does not exist!`,
+						);
 					}
 
 					const backend = new gcp.compute.BackendBucket(
-						`${ep.name}`,
+						`${entrypointPath.path}`,
 						{
 							bucketName: deployedSite.storage.name,
 							// Enable CDN for sites
@@ -108,19 +112,21 @@ export class NitricEntrypointsGoogleCloudLB extends pulumi.ComponentResource {
 					);
 
 					return {
-						name: ep.name,
+						name: entrypointPath.path,
 						backend,
 					};
 				}
 				case 'service': {
-					const deployedFunction = services.find((s) => s.name === ep.name);
+					const deployedFunction = services.find((s) => s.name === entrypointPath.path);
 
 					if (!deployedFunction) {
-						throw new Error(`Entrypoint: ${ep.path} contained target ${ep.path} that does not exist!`);
+						throw new Error(
+							`Entrypoint: ${entrypointPath.path} contained target ${entrypointPath.path} that does not exist!`,
+						);
 					}
 
 					const serverlessNEG = new gcp.compute.RegionNetworkEndpointGroup(
-						`${ep.name}neg`,
+						`${entrypointPath.path}neg`,
 						{
 							networkEndpointType: 'SERVERLESS',
 							region: deployedFunction.cloudrun.location,
@@ -132,7 +138,7 @@ export class NitricEntrypointsGoogleCloudLB extends pulumi.ComponentResource {
 					);
 
 					const backend = new gcp.compute.BackendService(
-						`${ep.name}`,
+						`${entrypointPath.path}`,
 						{
 							// Link the NEG to the backend
 							backends: [{ group: serverlessNEG.id }],
@@ -144,20 +150,20 @@ export class NitricEntrypointsGoogleCloudLB extends pulumi.ComponentResource {
 					);
 
 					return {
-						name: ep.name,
+						name: entrypointPath.path,
 						backend,
 					};
 				}
 				default:
-					throw new Error(`Unsupported entrypoint type: ${ep.type}`);
+					throw new Error(`Unsupported entrypoint type: ${entrypointPath.type}`);
 			}
 		});
 
 		// Create the URL Map
-		const defaultEntrypoint = entrypoints['/'];
-		const otherEntrypoints = Object.keys(entrypoints)
+		const defaultEntrypoint = entrypoint['/'];
+		const otherEntrypoints = Object.keys(entrypoint)
 			.filter((k) => k !== '/')
-			.map((k) => ({ path: k, ...entrypoints[k] }));
+			.map((k) => ({ path: k, ...entrypoint[k] }));
 
 		if (!defaultEntrypoint) {
 			throw new Error("A default entrypoint '/' is required");
@@ -223,7 +229,7 @@ export class NitricEntrypointsGoogleCloudLB extends pulumi.ComponentResource {
 				subjects: [
 					{
 						commonName: ipAddress.address,
-						organization: 'Nitric Pty Ltd',
+						organization: 'self-signed',
 					},
 				],
 				validityPeriodHours: 8760,
@@ -231,6 +237,22 @@ export class NitricEntrypointsGoogleCloudLB extends pulumi.ComponentResource {
 			defaultResourceOptions,
 		);
 
+		// let sslCertificate;
+		// if (entrypoint.domains && Object.keys(entrypoint.domains).length > 0) {
+		// 	sslCertificate = new gcp.compute.ManagedSslCertificate(
+		// 		`${stackName}gcpcert`,
+		// 		{
+		// 			managed: {
+		// 				domains: Object.keys(entrypoint.domains),
+		// 			},
+		// 		},
+		// 		defaultResourceOptions,
+		// 	);
+		// } else {
+		//
+		// }
+		// Self-signed for development purposes
+		// TODO: Support this for production deployments too.
 		const sslCertificate = new gcp.compute.SSLCertificate(
 			`${stackName}gcpcert`,
 			{
@@ -246,8 +268,9 @@ export class NitricEntrypointsGoogleCloudLB extends pulumi.ComponentResource {
 		const httpProxy = new gcp.compute.TargetHttpsProxy(
 			`${stackName}proxy`,
 			{
-				description: `Load Balancer for ${stackName}`,
+				description: `Load Balancer for ${stackName}:${name}`,
 				urlMap: urlMap.id,
+
 				sslCertificates: [sslCertificate.id],
 			},
 			defaultResourceOptions,

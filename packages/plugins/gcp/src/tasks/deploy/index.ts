@@ -20,7 +20,7 @@ import * as pulumi from '@pulumi/pulumi';
 import {
 	NitricApiGcpApiGateway,
 	NitricBucketCloudStorage,
-	NitricEntrypointsGoogleCloudLB,
+	NitricEntrypointGoogleCloudLB,
 	NitricScheduleCloudScheduler,
 	NitricServiceCloudRun,
 	NitricSiteCloudStorage,
@@ -28,9 +28,20 @@ import {
 } from '../../resources';
 
 import fs from 'fs';
+import { Output } from '@pulumi/pulumi';
+
+export interface ProgramResult {
+	entrypoints?: {
+		entrypoint: Output<string>;
+		url: Output<string>;
+	}[];
+}
 
 export interface DeployResult {
-	entrypoint?: string;
+	entrypoints?: {
+		entrypoint: string;
+		url: string;
+	}[];
 }
 
 interface CommonOptions {
@@ -78,7 +89,7 @@ export class Deploy extends Task<DeployResult> {
 				projectName: stack.getName(),
 				// generate our pulumi program on the fly from the POST body
 				program: async () => {
-					let deploymentResult: { entrypoint?: pulumi.Output<string> } = {};
+					const deploymentResult: ProgramResult = {};
 
 					// Now we can start deploying with Pulumi
 					try {
@@ -123,15 +134,20 @@ export class Deploy extends Task<DeployResult> {
 						);
 
 						if (entrypoints) {
-							const entrypoint = new NitricEntrypointsGoogleCloudLB(stack.getName(), {
-								entrypoints,
-								services: deployedServices,
-								apis: deployedApis,
-								sites: deployedSites,
-								stackName: stack.getName(),
-							});
+							deploymentResult.entrypoints = Object.entries(entrypoints).map(([name, entrypoint]) => {
+								const deployedEntrypoint = new NitricEntrypointGoogleCloudLB(stack.getName(), {
+									entrypoint,
+									services: deployedServices,
+									apis: deployedApis,
+									sites: deployedSites,
+									stackName: stack.getName(),
+								});
 
-							deploymentResult.entrypoint = entrypoint.url;
+								return {
+									entrypoint: pulumi.output(name),
+									url: deployedEntrypoint.url,
+								};
+							});
 						}
 					} catch (e) {
 						pulumi.log.error('An error occurred, see latest gcp:error log for details');
