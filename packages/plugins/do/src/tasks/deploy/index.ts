@@ -158,7 +158,7 @@ export class Deploy extends Task<void> {
 
 								const app = new digitalocean.App(stack.getName(), {
 									spec: {
-										name: stack.getName(),
+										name: `${stack.getName()}-${name}`,
 										// TODO: Configure region
 										region: region,
 										services: results.map((r) => r.spec),
