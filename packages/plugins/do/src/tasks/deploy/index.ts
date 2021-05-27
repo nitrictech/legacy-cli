@@ -16,8 +16,9 @@ import { Task, Stack, mapObject } from '@nitric/cli-common';
 import * as pulumi from '@pulumi/pulumi';
 import { LocalWorkspace } from '@pulumi/pulumi/automation';
 import * as digitalocean from '@pulumi/digitalocean';
-import { createFunction } from './function';
+import { createServiceSpec } from './function';
 import fs from 'fs';
+import { NitricServiceDockerImage } from '../../resources/service';
 
 const REGISTRY_LIMITS: Record<string, number> = {
 	starter: 1,
@@ -107,50 +108,68 @@ export class Deploy extends Task<void> {
 								name: registryName,
 							});
 
-							const normalizedEntrypoints = Object.keys(entrypoints).map((ep) => ({
-								path: ep,
-								...entrypoints[ep],
-							}));
-
-							if (normalizedEntrypoints.length < 1) {
-								throw new Error('Entrypoints must be defined for digital ocean deployments');
-							}
-
-							if (!normalizedEntrypoints.find(({ path }) => path === '/')) {
-								throw new Error('Entrypoints must contain a default route /');
-							}
-
-							const functionEntrypoints = normalizedEntrypoints.filter(({ type }) => type === 'service');
-							const otherEntrypoints = normalizedEntrypoints.filter(({ type }) => type !== 'service');
-
-							if (otherEntrypoints.length > 0) {
-								pulumi.log.warn('Non function entrypoints are not supported for digital ocean deployments');
-							}
-
-							// This currently assumes that the registry is empty
+							// TODO: This currently assumes that the registry is empty
 							if (services.length > REGISTRY_LIMITS[containerRegistry.subscriptionTierSlug]) {
 								pulumi.log.error(
 									'Provided registry cannot support the number of functions in this stack, look at upgrading your DOCR subscription tier',
 								);
 							}
 
-							// Create the functions
-							const results = stack
-								.getServices()
-								.map((f) => createFunction(f, registryName, token, functionEntrypoints));
-
-							const app = new digitalocean.App(stack.getName(), {
-								spec: {
-									name: stack.getName(),
-									// TODO: Configure region
-									region: region,
-									services: results.map((r) => r.spec),
-								},
+							const serviceImages = services.map((service) => {
+								return new NitricServiceDockerImage(service.getName(), {
+									service,
+									registryName,
+									token,
+								});
 							});
 
-							return {
-								liveUrl: app.liveUrl,
-							};
+							// Deploy a Digital Ocean "App" for each entrypoint, add the targets as containers.
+							return Object.entries(entrypoints).map(([name, entrypoint]) => {
+								const normalizedPaths = Object.entries(entrypoint.paths).map(([path, opts]) => ({
+									path,
+									...opts,
+								}));
+
+								if (normalizedPaths.length < 1) {
+									throw new Error(`Entrypoint [${name}] contains no paths`);
+								}
+
+								if (!normalizedPaths.find(({ path }) => path === '/')) {
+									throw new Error(`Entrypoint [${name}] must contain a default path /`);
+								}
+
+								const servicePaths = normalizedPaths.filter(({ type }) => type === 'service');
+								const otherPaths = normalizedPaths.filter(({ type }) => type !== 'service');
+
+								if (otherPaths.length > 0) {
+									pulumi.log.warn(
+										`Entrypoint [${name}] contains non-function paths [${otherPaths
+											.map(({ path }) => path)
+											.join(', ')}], which are not supported for digital ocean deployments`,
+									);
+								}
+
+								// Create the functions
+								const results = serviceImages
+									.filter((image) => {
+										return servicePaths.find(({ target }) => target == image.name) != undefined;
+									})
+									.map((image) => createServiceSpec(image, entrypoint));
+
+								const app = new digitalocean.App(stack.getName(), {
+									spec: {
+										name: stack.getName(),
+										// TODO: Configure region
+										region: region,
+										services: results.map((r) => r.spec),
+									},
+								});
+
+								return {
+									name,
+									liveUrl: app.liveUrl,
+								};
+							});
 						}
 					} catch (e) {
 						// console.error(e);
