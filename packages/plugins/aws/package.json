@@ -67,6 +67,7 @@
     "prepack": "rm -rf lib && tsc -p tsconfig.build.json && oclif-dev manifest && oclif-dev readme",
     "test": "tsc --emitDeclarationOnly && jest --passWithNoTests",
     "version": "oclif-dev readme && git add README.md",
+    "npm:publish": "yarn npm publish --tolerate-republish",
     "license:check": "licensee --production"
   }
 }
