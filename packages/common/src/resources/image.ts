@@ -63,6 +63,11 @@ export class NitricServiceImage extends pulumi.ComponentResource {
 					args: {
 						PROVIDER: nitricProvider,
 					},
+					env: {
+						// shm-size is incompatible with Buildkit, so must be disabled.
+						// See: https://github.com/docker/buildx/issues/418
+						DOCKER_BUILDKIT: '0',
+					},
 					// Create a reasonable shared memory space for image builds
 					extraOptions: ['--shm-size', '1G'],
 				},
