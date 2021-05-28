@@ -108,6 +108,7 @@
     "postpack": "rm -f oclif.manifest.json",
     "prepack": "rm -rf lib && tsc --project tsconfig.build.json && oclif-dev manifest && oclif-dev readme",
     "test": "tsc --emitDeclarationOnly && jest",
+    "npm:publish": "yarn npm publish --tolerate-republish",
     "version": "oclif-dev readme && git add README.md",
     "nitric": "./bin/run"
   },
