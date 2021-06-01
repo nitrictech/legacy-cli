@@ -14,7 +14,7 @@
 
 import { flags } from '@oclif/command';
 import { Deploy, DeployResult, DEPLOY_TASK_KEY } from '../../tasks/deploy';
-import { BaseCommand, wrapTaskForListr, Stack, StageStackTask } from '@nitric/cli-common';
+import { BaseCommand, wrapTaskForListr, Stack } from '@nitric/cli-common';
 import { Listr } from 'listr2';
 import cli from 'cli-ux';
 import path from 'path';

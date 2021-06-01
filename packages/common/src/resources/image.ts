@@ -53,7 +53,10 @@ export class NitricServiceImage extends pulumi.ComponentResource {
 		const { imageName, username, password, server, service, nitricProvider } = args;
 
 		const defaultResourceOptions: pulumi.ResourceOptions = { parent: this };
-		const templateDir = path.join(service.getStack().getDirectory(), `./.nitric/templates/${service.asNitricService().runtime}/`);
+		const templateDir = path.join(
+			service.getStack().getDirectory(),
+			`./.nitric/templates/${service.asNitricService().runtime}/`,
+		);
 
 		//const dockerfile = path.relative(service.getDirectory(), path.join(templateDir, './Dockerfile'));
 		const dockerfile = path.join(templateDir, './Dockerfile');

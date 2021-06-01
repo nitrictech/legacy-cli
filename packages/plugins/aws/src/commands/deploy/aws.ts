@@ -14,7 +14,7 @@
 
 import { flags } from '@oclif/command';
 import { Deploy, DEPLOY_TASK_KEY, DeployResult } from '../../tasks/deploy';
-import { BaseCommand, wrapTaskForListr, Stack, StageStackTask } from '@nitric/cli-common';
+import { BaseCommand, wrapTaskForListr, Stack } from '@nitric/cli-common';
 import { Listr } from 'listr2';
 import path from 'path';
 import AWS from 'aws-sdk';
@@ -98,9 +98,7 @@ export default class AwsDeploy extends BaseCommand {
 		const stack = await Stack.fromFile(stackDefinitionPath);
 
 		try {
-			const results = await new Listr<any>([
-				wrapTaskForListr(new Deploy({ stack, account: accountId, region })),
-			]).run();
+			const results = await new Listr<any>([wrapTaskForListr(new Deploy({ stack, account: accountId, region }))]).run();
 
 			const deployResult = results[DEPLOY_TASK_KEY] as DeployResult;
 
