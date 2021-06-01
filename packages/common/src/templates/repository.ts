@@ -66,7 +66,7 @@ export class Repository {
 	 */
 	getTemplates(): Template[] {
 		return this.templateDescriptors.map(
-			(td) => new Template(td.name, td.lang, path.join(this.path, td.path), td.codeDir),
+			(td) => new Template(this.name, td.name, td.lang, path.join(this.path, td.path)),
 		);
 	}
 
@@ -95,7 +95,7 @@ export class Repository {
 			throw new Error(`Template ${templateName} does not exist in repository ${this.name}`);
 		}
 
-		return new Template(descriptor.name, descriptor.lang, path.join(this.path, descriptor.path), descriptor.codeDir);
+		return new Template(this.name, descriptor.name, descriptor.lang, path.join(this.path, descriptor.path));
 	}
 
 	/**

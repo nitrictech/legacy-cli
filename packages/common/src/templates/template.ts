@@ -21,22 +21,25 @@ import streamToPromise from 'stream-to-promise';
  * Class representation of a nitric template
  */
 export class Template {
+	private repoName: string;
 	private name: string;
 	private lang: string;
 	// Absolute path of this template
 	private path: string;
-	// path relative to the template directory
-	private codePath?: string;
 
-	constructor(name: string, lang: string, path: string, codePath?: string) {
+	constructor(repoName: string, name: string, lang: string, path: string) {
+		this.repoName = repoName;
 		this.name = name;
 		this.lang = lang;
 		this.path = path;
-		this.codePath = codePath;
 	}
 
 	getName(): string {
 		return this.name;
+	}
+
+	getFullName(): string {
+		return `${this.repoName}/${this.name}`;
 	}
 
 	getLang(): string {
@@ -47,29 +50,10 @@ export class Template {
 		return this.path;
 	}
 
-	getCodePath(): string {
-		const codePath = this.codePath || './function';
+	getTemplatePath(): string {
+		const codePath = './template';
 
 		return path.join(this.path, codePath);
-	}
-
-	/**
-	 *
-	 * @param template Copies the wrapper code and dockerfile of the given template
-	 * @param path
-	 */
-	static async copyRuntimeTo(template: Template, toDir: string): Promise<void | Buffer> {
-		const inPath = template.getPath();
-		//TODO: should probably do something to make sure the file exists
-		// Make a copy of the function template, using the new name in the output directory
-		const outPath = toDir;
-		const codePath = template.codePath || './function';
-		const outStream = tar.extract(outPath, {
-			// Don't incude the code dir
-			ignore: (name) => name.includes(path.normalize(codePath)),
-		});
-		tar.pack(inPath).pipe(outStream);
-		return streamToPromise(outStream);
 	}
 
 	/**
@@ -90,12 +74,30 @@ export class Template {
 	}
 
 	/**
-	 *
-	 * @param template Copies the code directory of a given template to a given path
+	 * Copies a template to a given path
+	 * This is designed to pull a template into a users code repository for
+	 * consistent building of their project (allows versioing of templates with projects).
+	 * 
+	 * @param template Template to copy
+	 * @param path Path to copy template to 
+	 */
+	static async copyTo(template: Template, path: string): Promise<void | Buffer> {
+		const inPath = template.getPath();
+		//TODO: should probably do something to make sure the file exists
+		// Make a copy of the function template, using the new name in the output directory
+		const outStream = tar.extract(path);
+		tar.pack(inPath).pipe(outStream);
+		return await streamToPromise(outStream);
+	}
+
+	/**
+	 * Copies only the template subdirectory of a given runtime template
+	 * 
+	 * @param template Copies the template sub-directory of a given template to a given path
 	 * @param path
 	 */
-	static async copyCodeTo(template: Template, path: string): Promise<void | Buffer> {
-		const inPath = template.getCodePath();
+	static async copyTemplateTo(template: Template, path: string): Promise<void | Buffer> {
+		const inPath = template.getTemplatePath();
 		//TODO: should probably do something to make sure the file exists
 		// Make a copy of the function template, using the new name in the output directory
 		const outPath = path;
