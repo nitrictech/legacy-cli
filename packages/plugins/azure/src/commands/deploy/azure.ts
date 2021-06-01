@@ -163,7 +163,6 @@ export default class AzureDeploy extends BaseCommand {
 		const stack = await Stack.fromFile(path.join(dir, file));
 
 		new Listr([
-			wrapTaskForListr(new StageStackTask({ stack })),
 			wrapTaskForListr(new Deploy({ stack, region, orgName, adminEmail })),
 		]).run();
 	}

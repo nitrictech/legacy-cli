@@ -38,7 +38,7 @@ export class MakeFunctionTask extends Task<void> {
 	}
 
 	private async pullTemplate(stack: Stack): Promise<void> {
-		if(!(await stack.hasTemplate(this.template))) {
+		if (!(await stack.hasTemplate(this.template))) {
 			const repos = Repository.fromDefaultDirectory();
 			const [repoName, templateName] = this.template.split('/');
 			const repo = repos.find((repo) => repo.getName() === repoName);
@@ -50,7 +50,7 @@ export class MakeFunctionTask extends Task<void> {
 			this.update(`${this.template} template available locally`);
 
 			await stack.pullTemplate(template);
-		} 
+		}
 	}
 
 	/**

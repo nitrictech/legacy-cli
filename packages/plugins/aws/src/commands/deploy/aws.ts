@@ -99,7 +99,6 @@ export default class AwsDeploy extends BaseCommand {
 
 		try {
 			const results = await new Listr<any>([
-				wrapTaskForListr(new StageStackTask({ stack })),
 				wrapTaskForListr(new Deploy({ stack, account: accountId, region })),
 			]).run();
 

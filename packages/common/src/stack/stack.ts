@@ -164,7 +164,7 @@ export class Stack {
 	}
 
 	async makeTemplatesDirectory(): Promise<string> {
-		return await this.makeRelativeDirectory(`./${NITRIC_DIRECTORY}/templates/`)
+		return await this.makeRelativeDirectory(`./${NITRIC_DIRECTORY}/templates/`);
 	}
 
 	async getTemplatesDirectory(): Promise<string> {
@@ -178,7 +178,6 @@ export class Stack {
 	async pullTemplate(template: Template): Promise<void> {
 		const templateDir = await this.getTemplatesDirectory();
 		const templatePath = path.join(templateDir, template.getFullName());
-		console.log("making directory:", templatePath);
 		await this.makeRelativeDirectory(templatePath);
 		await Template.copyTo(template, templatePath);
 	}
@@ -186,9 +185,9 @@ export class Stack {
 	async getTemplate(templateName: string): Promise<Template> {
 		const hasTemplate = await this.hasTemplate(templateName);
 		if (hasTemplate) {
-			const [repoName, tName] = templateName.split("/");
+			const [repoName, tName] = templateName.split('/');
 			const templatesDir = await this.getTemplatesDirectory();
-			return new Template(repoName, tName, "any", path.join(templatesDir, templateName));
+			return new Template(repoName, tName, 'any', path.join(templatesDir, templateName));
 		} else {
 			throw new Error(`Stack does not have template: ${templateName}`);
 		}

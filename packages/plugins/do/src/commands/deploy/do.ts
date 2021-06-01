@@ -84,7 +84,6 @@ export default class DoDeploy extends BaseCommand {
 
 		try {
 			await new Listr([
-				wrapTaskForListr(new StageStackTask({ stack })),
 				wrapTaskForListr(new Deploy({ stack, registryName: containerRegistry, region, token })),
 			]).run();
 		} catch (error) {

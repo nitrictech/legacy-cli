@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import tar from 'tar-fs';
-import { dockerodeEvtToString, NitricImage, Task, STAGING_DIR, Service, Stack, Template } from '@nitric/cli-common';
+import { dockerodeEvtToString, NitricImage, Task, Service, Stack, Template } from '@nitric/cli-common';
 import Docker from 'dockerode';
 import path from 'path';
 import rimraf from 'rimraf';
@@ -41,7 +41,7 @@ export class BuildServiceTask extends Task<NitricImage> {
 		const docker = new Docker();
 		// temporarily copy to template runtime into the users code directory
 		// FIXME: Currently dockerode does not support dockerfiles specified outsode of build context\
-		const runtimeStagingDirectory = path.join(this.service.getDirectory(), './.nitric/')
+		const runtimeStagingDirectory = path.join(this.service.getDirectory(), './.nitric/');
 		const template = await this.stack.getTemplate(this.service.asNitricService().runtime);
 		await Template.copyRuntimeTo(template, runtimeStagingDirectory);
 
@@ -96,8 +96,9 @@ export class BuildServiceTask extends Task<NitricImage> {
 				throw new Error(message);
 			}
 		} finally {
+			// Remove the staged runtime files
+			// from the users code...
 			rimraf.sync(runtimeStagingDirectory);
 		}
 	}
-
 }

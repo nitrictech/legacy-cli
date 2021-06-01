@@ -131,10 +131,6 @@ export default class GcpDeploy extends BaseCommand {
 
 		const results = new Listr<any>([
 			wrapTaskForListr(
-				// Stage the stak ready for building...
-				new StageStackTask({ stack }),
-			),
-			wrapTaskForListr(
 				new Deploy({
 					gcpProject: project,
 					stack,

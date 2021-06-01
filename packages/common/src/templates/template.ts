@@ -96,9 +96,9 @@ export class Template {
 	 * Copies a template to a given path
 	 * This is designed to pull a template into a users code repository for
 	 * consistent building of their project (allows versioing of templates with projects).
-	 * 
+	 *
 	 * @param template Template to copy
-	 * @param path Path to copy template to 
+	 * @param path Path to copy template to
 	 */
 	static async copyTo(template: Template, path: string): Promise<void | Buffer> {
 		const inPath = template.getPath();
@@ -111,7 +111,7 @@ export class Template {
 
 	/**
 	 * Copies only the template subdirectory of a given runtime template
-	 * 
+	 *
 	 * @param template Copies the template sub-directory of a given template to a given path
 	 * @param path
 	 */
