@@ -74,6 +74,25 @@ export class Template {
 	}
 
 	/**
+	 *
+	 * @param template Copies the wrapper code and dockerfile of the given template
+	 * @param path
+	 */
+	static async copyRuntimeTo(template: Template, toDir: string): Promise<void | Buffer> {
+		const inPath = template.getPath();
+		//TODO: should probably do something to make sure the file exists
+		// Make a copy of the function template, using the new name in the output directory
+		const outPath = toDir;
+		const codePath = './template';
+		const outStream = tar.extract(outPath, {
+			// Don't incude the code dir
+			ignore: (name) => name.includes(path.normalize(codePath)),
+		});
+		tar.pack(inPath).pipe(outStream);
+		return streamToPromise(outStream);
+	}
+
+	/**
 	 * Copies a template to a given path
 	 * This is designed to pull a template into a users code repository for
 	 * consistent building of their project (allows versioing of templates with projects).
