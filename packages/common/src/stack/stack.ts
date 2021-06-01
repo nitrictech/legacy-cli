@@ -253,33 +253,4 @@ export class Stack {
 	static async fromDirectory(dir: string): Promise<Stack> {
 		return Stack.fromFile(path.join(dir, './nitric.yaml'));
 	}
-
-	/**
-	 * Stage the stack after deleting any existing staging files.
-	 * TODO: We'll want to decompose this into more functions
-	 * @param stack to stage
-	 */
-	//static async stage(stack: Stack): Promise<void> {
-	//	const repos = Repository.fromDefaultDirectory();
-
-	//	const stackStagingDirectory = stack.getStagingDirectory();
-
-	//	// Clean staging directory
-	//	if (fs.existsSync(stackStagingDirectory)) {
-	//		await new Promise<void>((res, rej) => {
-	//			rimraf(stackStagingDirectory, (err) => {
-	//				if (err) {
-	//					rej(err);
-	//				} else {
-	//					res();
-	//				}
-	//			});
-	//		});
-	//	}
-
-	//	await fs.promises.mkdir(stackStagingDirectory, { recursive: true });
-
-	//	// Stage each function
-	//	await Promise.all(stack.getServices().map(async (s) => Service.stage(s, repos)));
-	//}
 }

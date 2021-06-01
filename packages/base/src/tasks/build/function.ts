@@ -48,15 +48,11 @@ export class BuildServiceTask extends Task<NitricImage> {
 		const ignoreFiles = await Template.getDockerIgnoreFiles(template);
 
 		try {
-			const pack = tar.pack(
-				this.service.getDirectory(),
-				{
-					ignore: (name) =>
+			const pack = tar.pack(this.service.getDirectory(), {
+				ignore: (name) =>
 					// Simple filter before more complex multimatch
-					ignoreFiles.filter(f => name.includes(f)).length > 0 ||
-					match(name, ignoreFiles).length > 0,
-				}
-			);
+					ignoreFiles.filter((f) => name.includes(f)).length > 0 || match(name, ignoreFiles).length > 0,
+			});
 			const dockerfile = './.nitric/Dockerfile';
 			//throw new Error(dockerfile);
 
