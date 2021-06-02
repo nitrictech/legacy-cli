@@ -22,15 +22,21 @@ interface NitricDomain<Ext extends Record<string, any> = {}> {
   ext?: Ext; 
 }
 
-export interface NitricEntrypoint {
+export interface NitricEntrypoint<
+	PathExtensions = Record<string, any>,
+	DomainExtensions = Record<string, any>,
+> {
 	domains?: {
-		[key: string]: NitricDomain;
+		[key: string]: NitricDomain<DomainExtensions>;
 	};
 	paths: {
-		[key: string]: NitricEntrypointPath;
+		[key: string]: NitricEntrypointPath<PathExtensions>;
 	};
 }
 
-export interface NitricEntrypoints {
-	[key: string]: NitricEntrypoint;
+export interface NitricEntrypoints<
+	PathExtensions = Record<string, any>,
+	DomainExtensions = Record<string, any>,
+> {
+	[key: string]: NitricEntrypoint<PathExtensions, DomainExtensions>;
 }

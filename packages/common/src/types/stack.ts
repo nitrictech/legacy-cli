@@ -24,37 +24,47 @@ import { NitricService } from './service';
 /**
  * A Nitric application stack descriptor
  */
-export interface NitricStack {
+export interface NitricStack<
+	ServiceExtensions = Record<string, any>,
+	BucketExtensions = Record<string, any>,
+	TopicExtensions = Record<string, any>,
+	QueueExtensions = Record<string, any>,
+	ScheduleExtensions = Record<string, any>,
+	ApiExtensions = Record<string, any>,
+	SiteExtensions = Record<string, any>,
+	EntrypointExtensions = Record<string, any>,
+	DomainExtensions = Record<string, any>,
+> {
 	// Name of the Nitric Stack
 	name: string;
 	// Functions that will be deployed
 	services?: {
-		[name: string]: NitricService;
+		[name: string]: NitricService<ServiceExtensions>;
 	};
 	// Buckets that will be deployed
 	buckets?: {
-		[name: string]: NitricBucket;
+		[name: string]: NitricBucket<BucketExtensions>;
 	};
 	// Topics that will be created
 	topics?: {
-		[name: string]: NitricTopic;
+		[name: string]: NitricTopic<TopicExtensions>;
 	};
 	// Queues that will be created
 	queues?: {
-		[name: string]: NitricQueue;
+		[name: string]: NitricQueue<QueueExtensions>;
 	};
 	// Schedules that will be configured
 	schedules?: {
-		[name: string]: NitricSchedule;
+		[name: string]: NitricSchedule<ScheduleExtensions>;
 	};
 	// APIs to be deployed
 	apis?: {
-		[name: string]: NitricAPI;
+		[name: string]: NitricAPI<ApiExtensions>;
 	};
 	// Static sites to be deployed
 	sites?: {
-		[name: string]: NitricStaticSite;
+		[name: string]: NitricStaticSite<SiteExtensions>;
 	};
 	// Define entrypoints for routing/egress in the nitric application
-	entrypoints?: NitricEntrypoints;
+	entrypoints?: NitricEntrypoints<EntrypointExtensions, DomainExtensions>;
 }
