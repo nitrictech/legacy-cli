@@ -18,7 +18,7 @@ import { NitricQueue } from './queue';
 import { NitricSchedule } from './schedule';
 import { NitricAPI } from './api';
 import { NitricStaticSite } from './static-site';
-import { NitricEntrypoints } from './entrypoints';
+import { NitricEntrypoint } from './entrypoints';
 import { NitricService } from './service';
 
 /**
@@ -33,7 +33,6 @@ export interface NitricStack<
 	ApiExtensions = Record<string, any>,
 	SiteExtensions = Record<string, any>,
 	EntrypointExtensions = Record<string, any>,
-	DomainExtensions = Record<string, any>,
 > {
 	// Name of the Nitric Stack
 	name: string;
@@ -66,5 +65,7 @@ export interface NitricStack<
 		[name: string]: NitricStaticSite<SiteExtensions>;
 	};
 	// Define entrypoints for routing/egress in the nitric application
-	entrypoints?: NitricEntrypoints<EntrypointExtensions, DomainExtensions>;
+	entrypoints?: {
+		[name: string]: NitricEntrypoint<EntrypointExtensions>;
+	};
 }

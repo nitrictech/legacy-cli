@@ -135,12 +135,41 @@ export class NitricEntrypointCloudFront extends pulumi.ComponentResource {
 		const { defaultCacheBehavior, orderedCacheBehaviors } = NitricEntrypointCloudFront.entrypointsToBehaviours(
 			entrypoint,
 		);
+
+		let viewerCertificate: aws.types.input.cloudfront.DistributionViewerCertificate = {
+			cloudfrontDefaultCertificate: true,
+		};
+
+		if (entrypoint.domains) {
+			// Deploy a viewer certificate to ACM for this domain
+			// we'll use DNS validation for maximum flexiblity and notify the user of the cname record they need
+			// to update their DNS that manages their domain...
+
+			// Single cert for the distribution
+			const cert = new aws.acm.Certificate(`${name}Certificate`, {
+				domainName: "",
+				subjectAlternativeNames: 
+			}, defaultResourceOptions);
+
+			const certValidation = new aws.acm.CertificateValidation(`${name}CertificateValidation`, {
+				certificateArn: cert.arn,
+			}, defaultResourceOptions);
+
+			viewerCertificate = {
+				acmCertificateArn: certValidation.certificateArn,
+			};
+		}
+
+		const aliases = entrypoint.domains 
+			? Object.keys(entrypoint.domains)
+			: undefined;
+
 		// Create a new cloudfront distribution
 		this.cloudfront = new aws.cloudfront.Distribution(
-			`${stackName}Distribution`,
+			`${name}Distribution`,
 			{
 				enabled: true,
-				aliases: Object.keys(entrypoint.domains || {}),
+				aliases,
 				// Assume for now default will be index
 				// TODO: Make this configurable via nitric.yaml
 				// defaultRootObject: '/',
@@ -148,9 +177,7 @@ export class NitricEntrypointCloudFront extends pulumi.ComponentResource {
 				orderedCacheBehaviors,
 				origins,
 				// TODO: Make viewer cert configurable
-				viewerCertificate: {
-					cloudfrontDefaultCertificate: true,
-				},
+				viewerCertificate,
 				// TODO: Determine price class
 				priceClass: 'PriceClass_All',
 				// TODO: Make this configurable through entrypoints extensions

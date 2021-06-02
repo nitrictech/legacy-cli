@@ -36,8 +36,7 @@ export class Stack<
 	ScheduleExtensions = Record<string, any>,
 	ApiExtensions = Record<string, any>,
 	SiteExtensions = Record<string, any>,
-	EntrypointExtensions = Record<string, any>,
-	DomainExtensions = Record<string, any>,
+	EntrypointExtensions = Record<string, any>
 > {
 	private file: string;
 	private name: string;
@@ -49,8 +48,7 @@ export class Stack<
 		ScheduleExtensions,
 		ApiExtensions,
 		SiteExtensions,
-		EntrypointExtensions,
-		DomainExtensions
+		EntrypointExtensions
 	>;
 
 	constructor(
@@ -63,8 +61,7 @@ export class Stack<
 			ScheduleExtensions,
 			ApiExtensions,
 			SiteExtensions,
-			EntrypointExtensions,
-			DomainExtensions
+			EntrypointExtensions
 		>
 	) {
 		this.name = descriptor.name;
@@ -92,8 +89,7 @@ export class Stack<
 		ScheduleExtensions,
 		ApiExtensions,
 		SiteExtensions,
-		EntrypointExtensions,
-		DomainExtensions
+		EntrypointExtensions
 	> {
 		return Object.keys(this.descriptor)
 			.filter((k) => this.descriptor[k] != undefined || !noUndefined)
@@ -105,8 +101,7 @@ export class Stack<
 				ScheduleExtensions,
 				ApiExtensions,
 				SiteExtensions,
-				EntrypointExtensions,
-				DomainExtensions
+				EntrypointExtensions
 			>;
 	}
 
