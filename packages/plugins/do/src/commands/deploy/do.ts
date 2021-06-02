@@ -111,8 +111,8 @@ export default class DoDeploy extends BaseCommand {
 			});
 
 			cli.log(block`
-				If any of the above apps require config, you will need to update the managed DNS 
-				for the domains you provided with CNAME(s) that target the corresponing "Default URL"
+				If any of the above apps require DNS config, you will need to update the managed DNS 
+				for the domains you provided with CNAME(s) that target the corresponing "Default URL".
 			`);
 		} catch (error) {
 			// eat this error to avoid duplicate console output.
