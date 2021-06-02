@@ -34,6 +34,7 @@ export class NitricEntrypointCloudFront extends pulumi.ComponentResource {
 	 * The deployed distribution
 	 */
 	public readonly cloudfront: aws.cloudfront.Distribution;
+	public readonly validationOptions?: pulumi.Output<aws.types.output.acm.CertificateDomainValidationOption[]>;
 
 	constructor(name, args: NitricEntrypointCloudfrontArgs, opts?: pulumi.ComponentResourceOptions) {
 		super('nitric:entrypoints:CloudFront', name, {}, opts);
@@ -159,6 +160,9 @@ export class NitricEntrypointCloudFront extends pulumi.ComponentResource {
 				certificateArn: cert.arn,
 			}, defaultResourceOptions);
 
+			// Need to map these validation options in order to let the user know they need to do this...
+			this.validationOptions = cert.domainValidationOptions;
+
 			viewerCertificate = {
 				acmCertificateArn: certValidation.certificateArn,
 			};
@@ -193,6 +197,7 @@ export class NitricEntrypointCloudFront extends pulumi.ComponentResource {
 		);
 
 		this.registerOutputs({
+			validationOptions: this.validationOptions,
 			cloudfront: this.cloudfront,
 		});
 	}

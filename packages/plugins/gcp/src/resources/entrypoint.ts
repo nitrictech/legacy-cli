@@ -32,6 +32,7 @@ interface NitricEntrypointGoogleCloudLBArgs {
  */
 export class NitricEntrypointGoogleCloudLB extends pulumi.ComponentResource {
 	public readonly url: pulumi.Output<string>;
+	public readonly ipAddress: pulumi.Output<string>;
 
 	constructor(name: string, args: NitricEntrypointGoogleCloudLBArgs, opts?: pulumi.ComponentResourceOptions) {
 		super('nitric:bucket:CloudStorage', name, {}, opts);
@@ -220,6 +221,8 @@ export class NitricEntrypointGoogleCloudLB extends pulumi.ComponentResource {
 				},
 				defaultResourceOptions,
 			);
+
+			this.url = pulumi.interpolate`https://${entrypoint.domains[0]}`;
 		} else {
 			// Reserve a public IP address with google
 			ipAddress = new gcp.compute.GlobalAddress(`${stackName}address`, {});
@@ -263,6 +266,8 @@ export class NitricEntrypointGoogleCloudLB extends pulumi.ComponentResource {
 				},
 				defaultResourceOptions,
 			);
+
+			this.url = pulumi.interpolate`https://${forwardingRule.ipAddress}`;
 		}
 		
 
@@ -291,10 +296,11 @@ export class NitricEntrypointGoogleCloudLB extends pulumi.ComponentResource {
 			defaultResourceOptions,
 		);
 
-		this.url = pulumi.interpolate`https://${forwardingRule.ipAddress}`;
+		this.ipAddress = forwardingRule.ipAddress,
 
 		this.registerOutputs({
 			url: this.url,
+			ipAddress: this.ipAddress,
 		});
 	}
 }
