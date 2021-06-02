@@ -131,11 +131,12 @@ export default class Doctor extends BaseCommand {
 		}
 
 		if (missingTemplates) {
-			const autoFixRepos = await cli.confirm('Install the official template repository? [y/n]');
+			const autoFixRepos = await cli.confirm('Install the official template repositories? [y/n]');
 
 			if (autoFixRepos) {
 				await new UpdateStoreTask().run();
-				await new AddRepositoryTask({ alias: 'official' }).run();
+				await new AddRepositoryTask({ alias: 'function' }).run();
+				await new AddRepositoryTask({ alias: 'server' }).run();
 			} else {
 				cli.info(
 					block`At least one template repository is required, make a new project or run ${chalk.cyan(

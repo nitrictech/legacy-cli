@@ -167,7 +167,7 @@ describe('Doctor Command:', () => {
 					expect(confirmSpy).toHaveBeenNthCalledWith(1, expect.stringContaining('install missing software?'));
 					expect(confirmSpy).toHaveBeenNthCalledWith(
 						2,
-						expect.stringContaining('Install the official template repository?'),
+						expect.stringContaining('Install the official template repositories?'),
 					);
 				});
 			});
