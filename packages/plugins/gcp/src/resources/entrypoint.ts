@@ -206,62 +206,65 @@ export class NitricEntrypointGoogleCloudLB extends pulumi.ComponentResource {
 			defaultResourceOptions,
 		);
 
-		// Reserve a public IP address with google
-		const ipAddress = new gcp.compute.GlobalAddress(`${stackName}address`, {});
-		// Create SSL Certificate
-		// FIXME: This will be for development deployments ONLY
-		// a proper certificate will need to be configured for production deployments
-		const privateKey = new tls.PrivateKey(
-			`${stackName}pk`,
-			{
-				algorithm: 'RSA',
-				rsaBits: 2048,
-			},
-			defaultResourceOptions,
-		);
-
-		const certificate = new tls.SelfSignedCert(
-			`${stackName}ssc`,
-			{
-				privateKeyPem: privateKey.privateKeyPem,
-				keyAlgorithm: 'RSA',
-				allowedUses: ['nonRepudiation', 'digitalSignature', 'keyEncipherment'],
-				subjects: [
-					{
-						commonName: ipAddress.address,
-						organization: 'self-signed',
-					},
-				],
-				validityPeriodHours: 8760,
-			},
-			defaultResourceOptions,
-		);
+		let certificate: gcp.compute.ManagedSslCertificate | gcp.compute.SSLCertificate;
+		let ipAddress: gcp.compute.GlobalAddress | undefined;
 
 		// let sslCertificate;
-		// if (entrypoint.domains && Object.keys(entrypoint.domains).length > 0) {
-		// 	sslCertificate = new gcp.compute.ManagedSslCertificate(
-		// 		`${stackName}gcpcert`,
-		// 		{
-		// 			managed: {
-		// 				domains: Object.keys(entrypoint.domains),
-		// 			},
-		// 		},
-		// 		defaultResourceOptions,
-		// 	);
-		// } else {
-		//
-		// }
-		// Self-signed for development purposes
-		// TODO: Support this for production deployments too.
-		const sslCertificate = new gcp.compute.SSLCertificate(
-			`${stackName}gcpcert`,
-			{
-				namePrefix: `${stackName}-certificate-`,
-				certificate: certificate.certPem,
-				privateKey: privateKey.privateKeyPem,
-			},
-			defaultResourceOptions,
-		);
+		if (entrypoint.domains && entrypoint.domains.length > 0) {
+			certificate = new gcp.compute.ManagedSslCertificate(
+				`${stackName}gcpcert`,
+				{
+					managed: {
+						domains: entrypoint.domains,
+					},
+				},
+				defaultResourceOptions,
+			);
+		} else {
+			// Reserve a public IP address with google
+			ipAddress = new gcp.compute.GlobalAddress(`${stackName}address`, {});
+			// Create SSL Certificate
+			// FIXME: This will be for development deployments ONLY
+			// a proper certificate will need to be configured for production deployments
+			const privateKey = new tls.PrivateKey(
+				`${stackName}pk`,
+				{
+					algorithm: 'RSA',
+					rsaBits: 2048,
+				},
+				defaultResourceOptions,
+			);
+
+			const selfSignedCert = new tls.SelfSignedCert(
+				`${stackName}ssc`,
+				{
+					privateKeyPem: privateKey.privateKeyPem,
+					keyAlgorithm: 'RSA',
+					allowedUses: ['nonRepudiation', 'digitalSignature', 'keyEncipherment'],
+					subjects: [
+						{
+							commonName: ipAddress.address,
+							organization: 'self-signed',
+						},
+					],
+					validityPeriodHours: 8760,
+				},
+				defaultResourceOptions,
+			);
+
+			// Self-signed for development purposes
+			// TODO: Support this for production deployments too.
+			certificate = new gcp.compute.SSLCertificate(
+				`${stackName}gcpcert`,
+				{
+					namePrefix: `${stackName}-certificate-`,
+					certificate: selfSignedCert.certPem,
+					privateKey: privateKey.privateKeyPem,
+				},
+				defaultResourceOptions,
+			);
+		}
+		
 
 		pulumi.log.info('Connecting URL map to HTTP proxy', urlMap);
 
@@ -271,24 +274,24 @@ export class NitricEntrypointGoogleCloudLB extends pulumi.ComponentResource {
 				description: `Load Balancer for ${stackName}:${name}`,
 				urlMap: urlMap.id,
 
-				sslCertificates: [sslCertificate.id],
+				sslCertificates: [certificate.id],
 			},
 			defaultResourceOptions,
 		);
 
 		pulumi.log.info('Connecting Proxy to forwarding rule', httpProxy);
 		// Connect a front end to the load balancer
-		new gcp.compute.GlobalForwardingRule(
+		const forwardingRule = new gcp.compute.GlobalForwardingRule(
 			`${stackName}fwdrule`,
 			{
 				target: httpProxy.id,
 				portRange: '443',
-				ipAddress: ipAddress.address,
+				ipAddress: ipAddress && ipAddress.address,
 			},
 			defaultResourceOptions,
 		);
 
-		this.url = pulumi.interpolate`https://${ipAddress.address}`;
+		this.url = pulumi.interpolate`https://${forwardingRule.ipAddress}`;
 
 		this.registerOutputs({
 			url: this.url,

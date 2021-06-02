@@ -141,6 +141,7 @@ export class NitricEntrypointCloudFront extends pulumi.ComponentResource {
 		};
 		let aliases: string[] | undefined = undefined;
 
+		// Customize domains and view certificate for frontend
 		if (entrypoint.domains && entrypoint.domains.length > 0) {
 			// Deploy a viewer certificate to ACM for this domain
 			// we'll use DNS validation for maximum flexiblity and notify the user of the cname record they need
