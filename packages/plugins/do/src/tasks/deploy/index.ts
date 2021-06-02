@@ -167,7 +167,7 @@ export class Deploy extends Task<void> {
 										// TODO: Configure region
 										region: region,
 										services: results.map((r) => r.spec),
-										domainNames: Object.entries(entrypoint.domains || {}).map(([name]) => ({ name })),
+										domainNames: (entrypoint.domains || []).map((name) => ({ name })),
 									},
 								});
 
