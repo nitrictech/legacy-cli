@@ -13,11 +13,12 @@
 // limitations under the License.
 
 import { flags } from '@oclif/command';
-import { Deploy } from '../../tasks/deploy';
-import { BaseCommand, wrapTaskForListr, Stack, StageStackTask } from '@nitric/cli-common';
+import { Deploy, DeployResults, DEPLOY_TASK_KEY } from '../../tasks/deploy';
+import { BaseCommand, wrapTaskForListr, Stack, StageStackTask, block } from '@nitric/cli-common';
 import { Listr } from 'listr2';
 import path from 'path';
 import inquirer from 'inquirer';
+import { cli } from 'cli-ux';
 
 export default class DoDeploy extends BaseCommand {
 	static description = 'Deploy a Nitric application to Digital Ocean';
@@ -83,10 +84,36 @@ export default class DoDeploy extends BaseCommand {
 		const stack = await Stack.fromFile(stackDefinitionPath);
 
 		try {
-			await new Listr([
+			const results = await new Listr<any>([
 				wrapTaskForListr(new StageStackTask({ stack })),
 				wrapTaskForListr(new Deploy({ stack, registryName: containerRegistry, region, token })),
 			]).run();
+
+			const deployResults = results[DEPLOY_TASK_KEY] as DeployResults;
+
+			cli.table(Object.entries(deployResults), {
+				name: {
+					header: "App Name",
+					get: ([name]): string => name, 
+				},
+				liveUrl: {
+					header: "Live URL",
+					get: ([, { liveUrl }]): string | undefined => liveUrl
+				},
+				defaultUrl: {
+					header: "Default URL",
+					get: ([, { defaultIngress }]): string | undefined => defaultIngress
+				},
+				configNeeded: {
+					header: "DNS Required",
+					get: ([, { requiresConfig }]): boolean => requiresConfig || false
+				}
+			});
+
+			cli.log(block`
+				If any of the above apps require config, you will need to update the managed DNS 
+				for the domains you provided with CNAME(s) that target the corresponing "Default URL"
+			`);
 		} catch (error) {
 			// eat this error to avoid duplicate console output.
 		}

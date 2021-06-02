@@ -31,27 +31,35 @@ interface DeployOptions {
 	// Currently each digital ocean account
 	// may only have one docker container registry
 	registryName: string;
-
 	token: string;
-	//orgName: string;
-	//adminEmail: string;
 }
 
-export class Deploy extends Task<void> {
+export interface DeployResults {
+	// The name in this case will be the name of the deployed DO App
+	[name: string]: {
+		liveUrl?: string;
+		defaultIngress?: string;
+		requiresConfig?: boolean;
+	};
+}
+
+export const DEPLOY_TASK_KEY = 'Deploying to Digital Ocean';
+
+export class Deploy extends Task<DeployResults> {
 	private stack: Stack;
 	private region: string;
 	private registryName: string;
 	private token: string;
 
 	constructor({ stack, region, registryName, token }: DeployOptions) {
-		super('Deploying to Digital Ocean');
+		super(DEPLOY_TASK_KEY);
 		this.stack = stack;
 		this.region = region;
 		this.registryName = registryName;
 		this.token = token;
 	}
 
-	async do(): Promise<void> {
+	async do(): Promise<DeployResults> {
 		const { stack, region, registryName, token } = this;
 		const {
 			buckets = {},
@@ -100,6 +108,10 @@ export class Deploy extends Task<void> {
 							pulumi.log.warn('Static sites currently not supported for digital ocean deployments');
 						}
 
+						if (Object.keys(entrypoints || {}).length < 0) {
+							throw new Error('Digital ocean stacks MUST specify at least one entrypoint!');
+						}
+
 						const services = stack.getServices();
 
 						if (services.length > 0) {
@@ -128,8 +140,12 @@ export class Deploy extends Task<void> {
 								};
 							});
 
+							if (Object.keys(entrypoints || {}).length > 1) {
+								pulumi.log.warn("Multiple entrypoints will result in multiple digital ocean apps being created!");
+							}
+
 							// Deploy a Digital Ocean "App" for each entrypoint, add the targets as containers.
-							return Object.entries(entrypoints).map(([name, entrypoint]) => {
+							const deployResults = Object.entries(entrypoints).map(([name, entrypoint]) => {
 								const normalizedPaths = Object.entries(entrypoint.paths).map(([path, opts]) => ({
 									path,
 									...opts,
@@ -148,7 +164,7 @@ export class Deploy extends Task<void> {
 
 								if (otherPaths.length > 0) {
 									pulumi.log.warn(
-										`Entrypoint [${name}] contains non-function paths [${otherPaths
+										`Entrypoint [${name}] contains non-service paths [${otherPaths
 											.map(({ path }) => path)
 											.join(', ')}], which are not supported for digital ocean deployments`,
 									);
@@ -164,21 +180,27 @@ export class Deploy extends Task<void> {
 								const app = new digitalocean.App(stack.getName(), {
 									spec: {
 										name: `${stack.getName()}-${name}`,
-										// TODO: Configure region
 										region: region,
 										services: results.map((r) => r.spec),
 										domainNames: (entrypoint.domains || []).map((name) => ({ name })),
 									},
 								});
 
+								const requiresConfig = pulumi.all([app.liveUrl, app.defaultIngress]).apply(([liveUrl, defaultIngress]) => liveUrl !== defaultIngress); 
+
 								return {
-									name,
-									liveUrl: app.liveUrl,
+									[name]: {
+										liveUrl: app.liveUrl,
+										// notify users of required updates if a set of domains is provided...
+										defaultIngress: app.defaultIngress,
+										requiresConfig,
+									}
 								};
 							});
+
+							return deployResults.reduce((acc, res) => ({ ...acc, ...res }), {});
 						}
 					} catch (e) {
-						// console.error(e);
 						fs.appendFileSync(errorFile, e.stack);
 						throw e;
 					}
@@ -195,10 +217,14 @@ export class Deploy extends Task<void> {
 					fs.appendFileSync(logFile, out);
 				},
 			});
-			console.log(upRes.outputs);
+
+			return Object.entries(upRes.outputs).reduce((acc, [key, val]) => ({
+				...acc,
+				[key]: val.value,
+			}), {});
 		} catch (e) {
 			fs.appendFileSync(errorFile, e.stack);
-			console.log(e);
+			throw ("An error ocurred during deployment see latest do:error logs");
 		}
 	}
 }
