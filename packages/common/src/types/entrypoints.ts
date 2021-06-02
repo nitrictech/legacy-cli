@@ -12,14 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export interface NitricEntrypointPath {
+export interface NitricEntrypointPath<Ext extends Record<string, any> = {}> {
 	target: string;
 	type: 'site' | 'api' | 'service';
+	ext?: Ext;
+}
+
+interface NitricDomain<Ext extends Record<string, any> = {}> {
+  ext?: Ext; 
 }
 
 export interface NitricEntrypoint {
 	domains?: {
-		[key: string]: {};
+		[key: string]: NitricDomain;
 	};
 	paths: {
 		[key: string]: NitricEntrypointPath;
