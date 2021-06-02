@@ -9,7 +9,7 @@
     "build": "yarn run clean && yarn run build:sources",
     "build:sources": "tsc --project tsconfig.build.json --outDir ./lib/",
     "test": "tsc --emitDeclarationOnly && jest",
-    "npm:publish": "yarn npm publish --tolerate-republish",
+    "npm:publish": "yarn npm publish --access public --tolerate-republish",
     "license:check": "licensee --production"
   },
   "contributors": [
