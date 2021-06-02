@@ -139,16 +139,19 @@ export class NitricEntrypointCloudFront extends pulumi.ComponentResource {
 		let viewerCertificate: aws.types.input.cloudfront.DistributionViewerCertificate = {
 			cloudfrontDefaultCertificate: true,
 		};
+		let aliases: string[] | undefined = undefined;
 
-		if (entrypoint.domains) {
+		if (entrypoint.domains && entrypoint.domains.length > 0) {
 			// Deploy a viewer certificate to ACM for this domain
 			// we'll use DNS validation for maximum flexiblity and notify the user of the cname record they need
 			// to update their DNS that manages their domain...
+			const [ domainName, ...subjectAlternativeNames ] = entrypoint.domains;
 
 			// Single cert for the distribution
 			const cert = new aws.acm.Certificate(`${name}Certificate`, {
-				domainName: "",
-				subjectAlternativeNames: 
+				domainName,
+				subjectAlternativeNames,
+				validationMethod: "DNS",
 			}, defaultResourceOptions);
 
 			const certValidation = new aws.acm.CertificateValidation(`${name}CertificateValidation`, {
@@ -158,11 +161,9 @@ export class NitricEntrypointCloudFront extends pulumi.ComponentResource {
 			viewerCertificate = {
 				acmCertificateArn: certValidation.certificateArn,
 			};
-		}
 
-		const aliases = entrypoint.domains 
-			? Object.keys(entrypoint.domains)
-			: undefined;
+			aliases = entrypoint.domains;
+		}
 
 		// Create a new cloudfront distribution
 		this.cloudfront = new aws.cloudfront.Distribution(
