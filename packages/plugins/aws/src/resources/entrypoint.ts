@@ -147,24 +147,36 @@ export class NitricEntrypointCloudFront extends pulumi.ComponentResource {
 			// Deploy a viewer certificate to ACM for this domain
 			// we'll use DNS validation for maximum flexiblity and notify the user of the cname record they need
 			// to update their DNS that manages their domain...
-			const [ domainName, ...subjectAlternativeNames ] = entrypoint.domains;
+			// For now we'll have to document that all additional SANs MUST be present in the issued certificate
+			const [ domain ] = entrypoint.domains;
+
+			// Here we will import the user provided certificate
+			const issuedCertificate = pulumi.output(aws.acm.getCertificate({
+				domain: domain,
+				mostRecent: true,
+				statuses: ["ISSUED", "AMAZON_ISSUED"],
+			}));
 
 			// Single cert for the distribution
-			const cert = new aws.acm.Certificate(`${name}Certificate`, {
-				domainName,
-				subjectAlternativeNames,
-				validationMethod: "DNS",
-			}, defaultResourceOptions);
+			//const cert = new aws.acm.Certificate(`${name}Certificate`, {
+			//	domainName,
+			//	subjectAlternativeNames,
+			//	validationMethod: "DNS",
+			//}, defaultResourceOptions);
 
-			const certValidation = new aws.acm.CertificateValidation(`${name}CertificateValidation`, {
-				certificateArn: cert.arn,
-			}, defaultResourceOptions);
+			//// XXX: This will actually halt the provisioning of the domain
+			//// until the certificate is valid
+			//const certValidation = new aws.acm.CertificateValidation(`${name}CertificateValidation`, {
+			//	certificateArn: cert.arn,
+			//}, defaultResourceOptions);
 
-			// Need to map these validation options in order to let the user know they need to do this...
-			this.validationOptions = cert.domainValidationOptions;
+			//// Need to map these validation options in order to let the user know they need to do this...
+			//this.validationOptions = cert.domainValidationOptions;
 
 			viewerCertificate = {
-				acmCertificateArn: certValidation.certificateArn,
+				// It's important to use the cert validation property here...
+				acmCertificateArn: issuedCertificate.arn,
+				sslSupportMethod: 'sni-only',
 			};
 
 			aliases = entrypoint.domains;

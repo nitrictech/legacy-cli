@@ -20,7 +20,6 @@ import path from 'path';
 import AWS from 'aws-sdk';
 import inquirer from 'inquirer';
 import cli from 'cli-ux';
-import { TargetGroupAttachment } from '@pulumi/aws/alb';
 
 /**
  * Command to deploy a stack to Amazon Web Services Cloud (AWS)
