@@ -14,12 +14,13 @@
 
 import { flags } from '@oclif/command';
 import { Deploy, DEPLOY_TASK_KEY, DeployResult } from '../../tasks/deploy';
-import { BaseCommand, wrapTaskForListr, Stack, StageStackTask } from '@nitric/cli-common';
+import { BaseCommand, wrapTaskForListr, Stack, StageStackTask, block } from '@nitric/cli-common';
 import { Listr } from 'listr2';
 import path from 'path';
 import AWS from 'aws-sdk';
 import inquirer from 'inquirer';
 import cli from 'cli-ux';
+import { TargetGroupAttachment } from '@pulumi/aws/alb';
 
 /**
  * Command to deploy a stack to Amazon Web Services Cloud (AWS)
@@ -105,8 +106,19 @@ export default class AwsDeploy extends BaseCommand {
 
 			const deployResult = results[DEPLOY_TASK_KEY] as DeployResult;
 
-			if (deployResult.entrypoint) {
-				cli.url(`Your application entrypoint is available at: ${deployResult.entrypoint}`, deployResult.entrypoint);
+			if(deployResult.dnsConfigs) {
+				cli.table(Object.entries(deployResult.dnsConfigs), {
+					domainName: {
+						get: ([name]): string => name
+					},
+					action: {
+						get: ([, { target, targetType, create }]): string => `Create ${targetType} ${create} targeting ${target}`
+					}
+				});
+
+				cli.log(block`
+				See above instructions for setting up configured domain names for this stack, validations for these domains will time out in 72 hours
+				`);
 			}
 		} catch (error) {
 			// eat this error to avoid duplicate console output.

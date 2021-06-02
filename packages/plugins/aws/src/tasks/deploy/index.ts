@@ -44,11 +44,25 @@ interface DeployOptions extends CommonOptions {
 }
 
 export interface DeployResult {
-	entrypoint?: string;
+	entrypoints?: string[];
+	dnsConfigs?: {
+		[name: string]: {
+			create: string;
+			target: string;
+			targetType: string;
+		};
+	};
 }
 
 interface ProgramResult {
 	entrypoints?: pulumi.Output<string>[];
+	dnsConfigs?: pulumi.Output<{
+		[name: string]: {
+			create: string;
+			target: string;
+			type: string;
+		};
+	}>;
 }
 
 export const DEPLOY_TASK_KEY = 'Deploying Nitric Stack to AWS';
@@ -163,6 +177,22 @@ export class Deploy extends Task<DeployResult> {
 									sites: deployedSites,
 								});
 							});
+
+							result.dnsConfigs = eps.reduce((acc, e) => {
+								return {
+									...acc,
+									...e.validationOptions?.apply(vo => vo.reduce((a, o) => {						
+										return {
+											...a,
+											[o.domainName]: {
+												create: o.resourceRecordName,
+												target: o.resourceRecordValue,
+												type: o.resourceRecordType,
+											},
+										};
+									}, {} as any))
+								};
+							}, {} as any);
 
 							result.entrypoints = eps.map((ep) => pulumi.interpolate`https://${ep.cloudfront.domainName}`);
 						}
