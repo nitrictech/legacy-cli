@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.47](https://github.com/nitrictech/cli/compare/v0.0.46...v0.0.47) (2021-06-02)
+
+
+### Bug Fixes
+
+* Remove autopull of official nitric template repository. ([96faf3f](https://github.com/nitrictech/cli/commit/96faf3f09958a020f14aa911217f6d500d416c7d))
+
 ### [0.0.46](https://github.com/nitrictech/cli/compare/v0.0.45...v0.0.46) (2021-05-28)
 
 ### [0.0.45](https://github.com/nitrictech/cli/compare/v0.0.44...v0.0.45) (2021-05-25)

@@ -1,7 +1,7 @@
 {
   "name": "@nitric/plugin-do",
   "description": "Digital Ocean CLI plugin for Nitric",
-  "version": "0.0.46",
+  "version": "0.0.47",
   "author": "Nitric <https://github.com/nitric-dev>",
   "bugs": "https://github.com/nitric-dev/cli/issues",
   "dependencies": {
