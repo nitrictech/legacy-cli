@@ -34,14 +34,21 @@ export class NitricEntrypointCloudFront extends pulumi.ComponentResource {
 	 * The deployed distribution
 	 */
 	public readonly cloudfront: aws.cloudfront.Distribution;
-	public readonly validationOptions?: pulumi.Output<aws.types.output.acm.CertificateDomainValidationOption[]>;
+	public readonly name: string;
+	public readonly domains?: string[];
+	// public readonly validationOptions?: pulumi.Output<aws.types.output.acm.CertificateDomainValidationOption[]>;
 
 	constructor(name, args: NitricEntrypointCloudfrontArgs, opts?: pulumi.ComponentResourceOptions) {
 		super('nitric:entrypoints:CloudFront', name, {}, opts);
 
+		
 		const defaultResourceOptions: pulumi.ResourceOptions = { parent: this };
 		const { entrypoint, stackName, sites, apis, services } = args;
 		const oai = new aws.cloudfront.OriginAccessIdentity(`${stackName}OAI`, {}, defaultResourceOptions);
+
+		this.name = name;
+		this.domains = entrypoint.domains;
+
 
 		// Create the origins
 		const origins = Object.keys(entrypoint.paths).map((key) => {
@@ -154,7 +161,7 @@ export class NitricEntrypointCloudFront extends pulumi.ComponentResource {
 			const issuedCertificate = pulumi.output(aws.acm.getCertificate({
 				domain: domain,
 				mostRecent: true,
-				statuses: ["ISSUED", "AMAZON_ISSUED"],
+				statuses: ["ISSUED"],
 			}));
 
 			// Single cert for the distribution
@@ -209,7 +216,9 @@ export class NitricEntrypointCloudFront extends pulumi.ComponentResource {
 		);
 
 		this.registerOutputs({
-			validationOptions: this.validationOptions,
+			// validationOptions: this.validationOptions,
+			name: this.name,
+			domains: this.domains,
 			cloudfront: this.cloudfront,
 		});
 	}

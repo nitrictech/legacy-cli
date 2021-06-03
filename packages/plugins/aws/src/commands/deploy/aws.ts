@@ -105,19 +105,22 @@ export default class AwsDeploy extends BaseCommand {
 
 			const deployResult = results[DEPLOY_TASK_KEY] as DeployResult;
 
-			if(deployResult.dnsConfigs) {
-				cli.table(Object.entries(deployResult.dnsConfigs), {
-					domainName: {
-						get: ([name]): string => name
+			if (deployResult.entrypoints) {
+				cli.log("Your application entrypoints should be available at:");
+
+				cli.table(deployResult.entrypoints, {
+					name: {
+						get: ({name}): string => name,
 					},
-					action: {
-						get: ([, { target, targetType, create }]): string => `Create ${targetType} ${create} targeting ${target}`
+					url: {
+						get: ({ url }): string => url,
+					},
+					domains: {
+						get: ({ domains = [] }): string => domains.join(", "),
 					}
 				});
 
-				cli.log(block`
-				See above instructions for setting up configured domain names for this stack, validations for these domains will time out in 72 hours
-				`);
+				cli.log(block`If you have specified any custom domains for these entrypoints you will need to add CNAME records for the hostnames in the urls above`);
 			}
 		} catch (error) {
 			// eat this error to avoid duplicate console output.
