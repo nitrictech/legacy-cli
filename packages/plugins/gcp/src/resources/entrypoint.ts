@@ -56,7 +56,7 @@ export class NitricEntrypointGoogleCloudLB extends pulumi.ComponentResource {
 					}
 
 					const apiGatewayNEG = new gcp.compute.GlobalNetworkEndpointGroup(
-						`${entrypointPath.path}-neg`,
+						`${entrypointPath.target}-neg`,
 						{
 							networkEndpointType: 'INTERNET_FQDN_PORT',
 							//defaultPort: 443,
@@ -66,7 +66,7 @@ export class NitricEntrypointGoogleCloudLB extends pulumi.ComponentResource {
 
 					// Add the api gateways endpoint to the above group
 					new gcp.compute.GlobalNetworkEndpoint(
-						`${entrypointPath.path}-ne`,
+						`${entrypointPath.target}-ne`,
 						{
 							globalNetworkEndpointGroup: apiGatewayNEG.name,
 							fqdn: deployedApi.hostname,
@@ -76,7 +76,7 @@ export class NitricEntrypointGoogleCloudLB extends pulumi.ComponentResource {
 					);
 
 					const backend = new gcp.compute.BackendService(
-						`${entrypointPath.path}`,
+						`${entrypointPath.target}`,
 						{
 							// Link the NEG to the backend
 							backends: [{ group: apiGatewayNEG.id }],
@@ -103,7 +103,7 @@ export class NitricEntrypointGoogleCloudLB extends pulumi.ComponentResource {
 					}
 
 					const backend = new gcp.compute.BackendBucket(
-						`${entrypointPath.path}`,
+						`${entrypointPath.target}`,
 						{
 							bucketName: deployedSite.storage.name,
 							// Enable CDN for sites
@@ -127,7 +127,7 @@ export class NitricEntrypointGoogleCloudLB extends pulumi.ComponentResource {
 					}
 
 					const serverlessNEG = new gcp.compute.RegionNetworkEndpointGroup(
-						`${entrypointPath.path}neg`,
+						`${entrypointPath.target}neg`,
 						{
 							networkEndpointType: 'SERVERLESS',
 							region: deployedFunction.cloudrun.location,
@@ -139,7 +139,7 @@ export class NitricEntrypointGoogleCloudLB extends pulumi.ComponentResource {
 					);
 
 					const backend = new gcp.compute.BackendService(
-						`${entrypointPath.path}`,
+						`${entrypointPath.target}`,
 						{
 							// Link the NEG to the backend
 							backends: [{ group: serverlessNEG.id }],
