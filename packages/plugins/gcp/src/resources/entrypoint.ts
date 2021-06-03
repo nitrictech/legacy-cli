@@ -47,11 +47,11 @@ export class NitricEntrypointGoogleCloudLB extends pulumi.ComponentResource {
 		const backends = normalizedPaths.map((entrypointPath) => {
 			switch (entrypointPath.type) {
 				case 'api': {
-					const deployedApi = apis.find((a) => a.name === entrypointPath.path);
+					const deployedApi = apis.find((a) => a.name === entrypointPath.target);
 
 					if (!deployedApi) {
 						throw new Error(
-							`Entrypoint: ${entrypointPath.path} contained target ${entrypointPath.path} that does not exist!`,
+							`Entrypoint: ${entrypointPath.path} contained target ${entrypointPath.target} that does not exist!`,
 						);
 					}
 
@@ -94,11 +94,11 @@ export class NitricEntrypointGoogleCloudLB extends pulumi.ComponentResource {
 					};
 				}
 				case 'site': {
-					const deployedSite = sites.find((s) => s.name === entrypointPath.path);
+					const deployedSite = sites.find((s) => s.name === entrypointPath.target);
 
 					if (!deployedSite) {
 						throw new Error(
-							`Entrypoint: ${entrypointPath.path} contained target ${entrypointPath.path} that does not exist!`,
+							`Entrypoint: ${entrypointPath.path} contained target ${entrypointPath.target} that does not exist!`,
 						);
 					}
 
@@ -118,11 +118,11 @@ export class NitricEntrypointGoogleCloudLB extends pulumi.ComponentResource {
 					};
 				}
 				case 'service': {
-					const deployedFunction = services.find((s) => s.name === entrypointPath.path);
+					const deployedFunction = services.find((s) => s.name === entrypointPath.target);
 
 					if (!deployedFunction) {
 						throw new Error(
-							`Entrypoint: ${entrypointPath.path} contained target ${entrypointPath.path} that does not exist!`,
+							`Entrypoint: ${entrypointPath.path} contained target ${entrypointPath.target} that does not exist!`,
 						);
 					}
 
@@ -267,7 +267,7 @@ export class NitricEntrypointGoogleCloudLB extends pulumi.ComponentResource {
 				defaultResourceOptions,
 			);
 
-			this.url = pulumi.interpolate`https://${forwardingRule.ipAddress}`;
+			this.url = pulumi.interpolate`https://${ipAddress}`;
 		}
 		
 
