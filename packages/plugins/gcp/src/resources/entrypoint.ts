@@ -177,7 +177,7 @@ export class NitricEntrypointGoogleCloudLB extends pulumi.ComponentResource {
 		const pathRules =
 			otherEntrypoints.length > 0
 				? otherEntrypoints.map((ep) => {
-						const backend = backends.find((b) => b.name === ep.name)!.backend;
+						const backend = backends.find((b) => b.name === ep.target)!.backend;
 						pulumi.log.info(`other backend: ${ep.target}`, backend);
 						return {
 							paths: [`${ep.path}*`],
@@ -269,7 +269,6 @@ export class NitricEntrypointGoogleCloudLB extends pulumi.ComponentResource {
 
 			this.url = pulumi.interpolate`https://${ipAddress}`;
 		}
-		
 
 		pulumi.log.info('Connecting URL map to HTTP proxy', urlMap);
 
@@ -296,11 +295,10 @@ export class NitricEntrypointGoogleCloudLB extends pulumi.ComponentResource {
 			defaultResourceOptions,
 		);
 
-		this.ipAddress = forwardingRule.ipAddress,
-
-		this.registerOutputs({
-			url: this.url,
-			ipAddress: this.ipAddress,
-		});
+		(this.ipAddress = forwardingRule.ipAddress),
+			this.registerOutputs({
+				url: this.url,
+				ipAddress: this.ipAddress,
+			});
 	}
 }
