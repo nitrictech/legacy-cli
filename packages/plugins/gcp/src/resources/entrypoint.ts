@@ -89,7 +89,7 @@ export class NitricEntrypointGoogleCloudLB extends pulumi.ComponentResource {
 					);
 
 					return {
-						name: entrypointPath.path,
+						name: entrypointPath.target,
 						backend,
 					};
 				}
@@ -113,7 +113,7 @@ export class NitricEntrypointGoogleCloudLB extends pulumi.ComponentResource {
 					);
 
 					return {
-						name: entrypointPath.path,
+						name: entrypointPath.target,
 						backend,
 					};
 				}
@@ -151,7 +151,7 @@ export class NitricEntrypointGoogleCloudLB extends pulumi.ComponentResource {
 					);
 
 					return {
-						name: entrypointPath.path,
+						name: entrypointPath.target,
 						backend,
 					};
 				}
