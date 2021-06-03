@@ -161,24 +161,24 @@ export class NitricEntrypointGoogleCloudLB extends pulumi.ComponentResource {
 		});
 
 		// Create the URL Map
-		const defaultEntrypoint = entrypoint['/'];
-		const otherEntrypoints = Object.keys(entrypoint)
+		const defaultEntrypoint = entrypoint.paths['/'];
+		const otherEntrypoints = Object.keys(entrypoint.paths)
 			.filter((k) => k !== '/')
-			.map((k) => ({ path: k, ...entrypoint[k] }));
+			.map((k) => ({ path: k, ...entrypoint.paths[k] }));
 
 		if (!defaultEntrypoint) {
 			throw new Error("A default entrypoint '/' is required");
 		}
 
-		const defaultBackend = backends.find((b) => b.name === defaultEntrypoint.name)!.backend;
+		const defaultBackend = backends.find((b) => b.name === defaultEntrypoint.target)!.backend;
 
-		pulumi.log.info(`default backend: ${defaultEntrypoint.name}`, defaultBackend);
+		pulumi.log.info(`default backend: ${defaultEntrypoint.target}`, defaultBackend);
 
 		const pathRules =
 			otherEntrypoints.length > 0
 				? otherEntrypoints.map((ep) => {
 						const backend = backends.find((b) => b.name === ep.name)!.backend;
-						pulumi.log.info(`other backend: ${ep.name}`, backend);
+						pulumi.log.info(`other backend: ${ep.target}`, backend);
 						return {
 							paths: [`${ep.path}*`],
 							service: backend.id,
