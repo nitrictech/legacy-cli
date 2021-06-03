@@ -62,6 +62,6 @@
     "test": "tsc --emitDeclarationOnly && jest --passWithNoTests",
     "version": "oclif-dev readme && git add README.md",
     "license:check": "licensee --production",
-    "npm:publish": "yarn npm publish --tolerate-republish"
+    "npm:publish": "yarn npm publish --access public --tolerate-republish"
   }
 }
