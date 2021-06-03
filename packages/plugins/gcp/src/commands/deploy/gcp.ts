@@ -129,7 +129,7 @@ export default class GcpDeploy extends BaseCommand {
 			throw new Error('Project must be provided');
 		}
 
-		const results = new Listr<any>([
+		const results = await new Listr<any>([
 			wrapTaskForListr(
 				// Stage the stack ready for building...
 				new StageStackTask({ stack }),
