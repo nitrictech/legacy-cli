@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.49](https://github.com/nitrictech/cli/compare/v0.0.48...v0.0.49) (2021-06-06)
+
+
+### Features
+
+* Remove references to stage stack task. ([8ba641c](https://github.com/nitrictech/cli/commit/8ba641c66b130333bde19f4b7c42170c70abde85))
+* Stage runtime as workaround for lack of external dockerfile support for dockerode. ([1c63ea7](https://github.com/nitrictech/cli/commit/1c63ea740e6d821c741ba7168ab6d83242d8cff6))
+* WIP templates pulling into nitric project stacks. ([26f0c20](https://github.com/nitrictech/cli/commit/26f0c2033563baf3a3d3e222831a7ac58950d5a9))
+
+
+### Bug Fixes
+
+* Add ignore for dockerode build. ([4ec2fc3](https://github.com/nitrictech/cli/commit/4ec2fc3622f6eb636211ce88d9b8f6e48a84af10))
+
 ### [0.0.48](https://github.com/nitrictech/cli/compare/v0.0.47...v0.0.48) (2021-06-03)
 
 ### [0.0.47](https://github.com/nitrictech/cli/compare/v0.0.46...v0.0.47) (2021-06-02)
