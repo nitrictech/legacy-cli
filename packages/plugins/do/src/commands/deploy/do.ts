@@ -14,7 +14,7 @@
 
 import { flags } from '@oclif/command';
 import { Deploy } from '../../tasks/deploy';
-import { BaseCommand, wrapTaskForListr, Stack, StageStackTask } from '@nitric/cli-common';
+import { BaseCommand, wrapTaskForListr, Stack } from '@nitric/cli-common';
 import { Listr } from 'listr2';
 import path from 'path';
 import inquirer from 'inquirer';
@@ -83,10 +83,7 @@ export default class DoDeploy extends BaseCommand {
 		const stack = await Stack.fromFile(stackDefinitionPath);
 
 		try {
-			await new Listr([
-				wrapTaskForListr(new StageStackTask({ stack })),
-				wrapTaskForListr(new Deploy({ stack, registryName: containerRegistry, region, token })),
-			]).run();
+			await new Listr([wrapTaskForListr(new Deploy({ stack, registryName: containerRegistry, region, token }))]).run();
 		} catch (error) {
 			// eat this error to avoid duplicate console output.
 		}

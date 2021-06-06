@@ -17,9 +17,6 @@ import { Stack } from './stack';
 import path from 'path';
 import { Repository, Template } from '../templates';
 import fs from 'fs';
-import tar from 'tar-fs';
-import streamToPromise from 'stream-to-promise';
-import match from 'multimatch';
 
 type omitMethods = 'getService' | 'getServices';
 
@@ -107,39 +104,5 @@ export class Service {
 		}
 
 		return repo.getTemplate(tmplName);
-	}
-
-	/**
-	 * Stage the source and other files for a service, ready to build
-	 * @param s the service to stage
-	 * @param repos the repositories to search for the service's template files
-	 */
-	static async stage(s: Service, repos: Repository[]): Promise<void> {
-		const serviceStaging = s.getStagingDirectory();
-		const template = await Service.findTemplateForService(s, repos);
-
-		const dockerIgnoreFiles = await Template.getDockerIgnoreFiles(template);
-
-		// TODO: Do we need to do this?
-		await fs.promises.mkdir(serviceStaging, { recursive: true });
-
-		await Template.copyRuntimeTo(template, serviceStaging);
-
-		// TODO: Should we rm or exclude the code directory of the Template, to ensure
-		// extra files don't make it through?
-		const functionPipe = tar.extract(`${serviceStaging}/function`);
-		// Now we need to copy the actual function code, the the above directory/function directory
-		const functionDirectory = s.getDirectory();
-
-		tar
-			.pack(functionDirectory, {
-				ignore: (name) =>
-					// Simple filter before more complex multimatch
-					// dockerIgnoreFiles.filter(f => name.includes(f)).length > 0 ||
-					match(name, dockerIgnoreFiles).length > 0,
-			})
-			.pipe(functionPipe);
-
-		await streamToPromise(functionPipe);
 	}
 }

@@ -76,8 +76,6 @@ export class NitricApiGcpApiGateway extends pulumi.ComponentResource {
 							// Discard the old key on the transformed API
 							const { 'x-nitric-target': _, ...rest } = p;
 
-							// console.log("invokeArn:", invokeArn);
-
 							return {
 								...acc,
 								// Inject the new method with translated nitric target
