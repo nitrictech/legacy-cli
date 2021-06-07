@@ -18,9 +18,7 @@ export interface NitricEntrypointPath<Ext extends Record<string, any> = {}> {
 	ext?: Ext;
 }
 
-export interface NitricEntrypoint<
-	EntrypointExtensions = Record<string, any>,
-> {
+export interface NitricEntrypoint<EntrypointExtensions = Record<string, any>> {
 	domains?: string[];
 	paths: {
 		[key: string]: NitricEntrypointPath<EntrypointExtensions>;

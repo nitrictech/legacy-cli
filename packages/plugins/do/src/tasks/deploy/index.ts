@@ -141,7 +141,7 @@ export class Deploy extends Task<DeployResults> {
 							});
 
 							if (Object.keys(entrypoints || {}).length > 1) {
-								pulumi.log.warn("Multiple entrypoints will result in multiple digital ocean apps being created!");
+								pulumi.log.warn('Multiple entrypoints will result in multiple digital ocean apps being created!');
 							}
 
 							// Deploy a Digital Ocean "App" for each entrypoint, add the targets as containers.
@@ -186,7 +186,9 @@ export class Deploy extends Task<DeployResults> {
 									},
 								});
 
-								const requiresConfig = pulumi.all([app.liveUrl, app.defaultIngress]).apply(([liveUrl, defaultIngress]) => liveUrl !== defaultIngress); 
+								const requiresConfig = pulumi
+									.all([app.liveUrl, app.defaultIngress])
+									.apply(([liveUrl, defaultIngress]) => liveUrl !== defaultIngress);
 
 								return {
 									[name]: {
@@ -194,7 +196,7 @@ export class Deploy extends Task<DeployResults> {
 										// notify users of required updates if a set of domains is provided...
 										defaultIngress: app.defaultIngress,
 										requiresConfig,
-									}
+									},
 								};
 							});
 
@@ -218,13 +220,16 @@ export class Deploy extends Task<DeployResults> {
 				},
 			});
 
-			return Object.entries(upRes.outputs).reduce((acc, [key, val]) => ({
-				...acc,
-				[key]: val.value,
-			}), {});
+			return Object.entries(upRes.outputs).reduce(
+				(acc, [key, val]) => ({
+					...acc,
+					[key]: val.value,
+				}),
+				{},
+			);
 		} catch (e) {
 			fs.appendFileSync(errorFile, e.stack);
-			throw ("An error ocurred during deployment see latest do:error logs");
+			throw 'An error ocurred during deployment see latest do:error logs';
 		}
 	}
 }

@@ -189,7 +189,7 @@ export class Deploy extends Task<DeployResult> {
 							//result.dnsConfigs = eps.reduce((acc, e) => {
 							//	return {
 							//		...acc,
-							//		...e.validationOptions?.apply(vo => vo.reduce((a, o) => {						
+							//		...e.validationOptions?.apply(vo => vo.reduce((a, o) => {
 							//			return {
 							//				...a,
 							//				[o.domainName]: {
@@ -203,7 +203,7 @@ export class Deploy extends Task<DeployResult> {
 							//}, {} as any);
 
 							result.entrypoints = eps.map((ep) => {
-								return ep.cloudfront.domainName.apply(domainName => ({
+								return ep.cloudfront.domainName.apply((domainName) => ({
 									name: ep.name,
 									url: `https://${domainName}`,
 									domains: ep.domains,

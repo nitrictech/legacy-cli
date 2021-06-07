@@ -40,8 +40,8 @@ export class Stack<
 	private file: string;
 	private name: string;
 	private descriptor: NitricStack<
-		ServiceExtensions, 
-		BucketExtensions, 
+		ServiceExtensions,
+		BucketExtensions,
 		TopicExtensions,
 		QueueExtensions,
 		ScheduleExtensions,
@@ -51,17 +51,17 @@ export class Stack<
 	>;
 
 	constructor(
-		file: string, 
+		file: string,
 		descriptor: NitricStack<
-			ServiceExtensions, 
-			BucketExtensions, 
+			ServiceExtensions,
+			BucketExtensions,
 			TopicExtensions,
 			QueueExtensions,
 			ScheduleExtensions,
 			ApiExtensions,
 			SiteExtensions,
 			EntrypointExtensions
-		>
+		>,
 	) {
 		this.name = descriptor.name;
 		this.descriptor = descriptor;
@@ -80,9 +80,11 @@ export class Stack<
 	 * @param noUndefined if true, removes undefined top level properties from the description.
 	 * Useful when writing to a config file such as YAML and empty optional properties are undesirable.
 	 */
-	asNitricStack(noUndefined = false): NitricStack<
-		ServiceExtensions, 
-		BucketExtensions, 
+	asNitricStack(
+		noUndefined = false,
+	): NitricStack<
+		ServiceExtensions,
+		BucketExtensions,
 		TopicExtensions,
 		QueueExtensions,
 		ScheduleExtensions,
@@ -93,15 +95,15 @@ export class Stack<
 		return Object.keys(this.descriptor)
 			.filter((k) => this.descriptor[k] != undefined || !noUndefined)
 			.reduce((acc, k) => ({ ...acc, [k]: this.descriptor[k] }), {}) as NitricStack<
-				ServiceExtensions, 
-				BucketExtensions, 
-				TopicExtensions,
-				QueueExtensions,
-				ScheduleExtensions,
-				ApiExtensions,
-				SiteExtensions,
-				EntrypointExtensions
-			>;
+			ServiceExtensions,
+			BucketExtensions,
+			TopicExtensions,
+			QueueExtensions,
+			ScheduleExtensions,
+			ApiExtensions,
+			SiteExtensions,
+			EntrypointExtensions
+		>;
 	}
 
 	/**

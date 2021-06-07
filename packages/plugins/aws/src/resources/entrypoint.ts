@@ -41,14 +41,12 @@ export class NitricEntrypointCloudFront extends pulumi.ComponentResource {
 	constructor(name, args: NitricEntrypointCloudfrontArgs, opts?: pulumi.ComponentResourceOptions) {
 		super('nitric:entrypoints:CloudFront', name, {}, opts);
 
-		
 		const defaultResourceOptions: pulumi.ResourceOptions = { parent: this };
 		const { entrypoint, stackName, sites, apis, services } = args;
 		const oai = new aws.cloudfront.OriginAccessIdentity(`${stackName}OAI`, {}, defaultResourceOptions);
 
 		this.name = name;
 		this.domains = entrypoint.domains;
-
 
 		// Create the origins
 		const origins = Object.keys(entrypoint.paths).map((key) => {
@@ -155,14 +153,16 @@ export class NitricEntrypointCloudFront extends pulumi.ComponentResource {
 			// we'll use DNS validation for maximum flexiblity and notify the user of the cname record they need
 			// to update their DNS that manages their domain...
 			// For now we'll have to document that all additional SANs MUST be present in the issued certificate
-			const [ domain ] = entrypoint.domains;
+			const [domain] = entrypoint.domains;
 
 			// Here we will import the user provided certificate
-			const issuedCertificate = pulumi.output(aws.acm.getCertificate({
-				domain: domain,
-				mostRecent: true,
-				statuses: ["ISSUED"],
-			}));
+			const issuedCertificate = pulumi.output(
+				aws.acm.getCertificate({
+					domain: domain,
+					mostRecent: true,
+					statuses: ['ISSUED'],
+				}),
+			);
 
 			// Single cert for the distribution
 			//const cert = new aws.acm.Certificate(`${name}Certificate`, {

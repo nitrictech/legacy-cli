@@ -103,22 +103,23 @@ export default class AwsDeploy extends BaseCommand {
 			const deployResult = results[DEPLOY_TASK_KEY] as DeployResult;
 
 			if (deployResult.entrypoints) {
-				cli.log("Your application entrypoints should be available at:");
+				cli.log('Your application entrypoints should be available at:');
 
 				cli.table(deployResult.entrypoints, {
 					name: {
-						get: ({name}): string => name,
+						get: ({ name }): string => name,
 					},
 					url: {
 						get: ({ url }): string => url,
 					},
 					domains: {
-						get: ({ domains = [] }): string => domains.join(", "),
-					}
+						get: ({ domains = [] }): string => domains.join(', '),
+					},
 				});
 
 				cli.log(
-          `If you have specified any custom domains for these entrypoints you will need to add CNAME records for the hostnames in the urls above`);
+					`If you have specified any custom domains for these entrypoints you will need to add CNAME records for the hostnames in the urls above`,
+				);
 			}
 		} catch (error) {
 			// eat this error to avoid duplicate console output.
