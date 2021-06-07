@@ -13,8 +13,8 @@
 // limitations under the License.
 
 import { flags } from '@oclif/command';
-import { Deploy, DeployResults, DEPLOY_TASK_KEY } from '../../tasks/deploy';
-import { BaseCommand, wrapTaskForListr, Stack, StageStackTask, block } from '@nitric/cli-common';
+import { Deploy } from '../../tasks/deploy';
+import { BaseCommand, wrapTaskForListr, Stack } from '@nitric/cli-common';
 import { Listr } from 'listr2';
 import path from 'path';
 import inquirer from 'inquirer';
@@ -84,10 +84,7 @@ export default class DoDeploy extends BaseCommand {
 		const stack = await Stack.fromFile(stackDefinitionPath);
 
 		try {
-			const results = await new Listr<any>([
-				wrapTaskForListr(new StageStackTask({ stack })),
-				wrapTaskForListr(new Deploy({ stack, registryName: containerRegistry, region, token })),
-			]).run();
+			const results = await new Listr([wrapTaskForListr(new Deploy({ stack, registryName: containerRegistry, region, token }))]).run();
 
 			const deployResults = results[DEPLOY_TASK_KEY] as DeployResults;
 

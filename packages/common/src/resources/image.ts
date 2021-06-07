@@ -14,6 +14,7 @@
 import * as pulumi from '@pulumi/pulumi';
 import * as docker from '@pulumi/docker';
 import { Service } from '../stack';
+import path from 'path';
 
 // TODO: Make this common
 type MembraneProviders = 'dev' | 'aws' | 'gcp' | 'azure' | 'do';
@@ -52,6 +53,13 @@ export class NitricServiceImage extends pulumi.ComponentResource {
 		const { imageName, username, password, server, service, nitricProvider } = args;
 
 		const defaultResourceOptions: pulumi.ResourceOptions = { parent: this };
+		const templateDir = path.join(
+			service.getStack().getDirectory(),
+			`./.nitric/templates/${service.asNitricService().runtime}/`,
+		);
+
+		//const dockerfile = path.relative(service.getDirectory(), path.join(templateDir, './Dockerfile'));
+		const dockerfile = path.join(templateDir, './Dockerfile');
 
 		const image = new docker.Image(
 			`${service.getImageTagName()}-image`,
@@ -59,7 +67,7 @@ export class NitricServiceImage extends pulumi.ComponentResource {
 				imageName,
 				build: {
 					// Staging directory
-					context: service.getStagingDirectory(),
+					context: service.getDirectory(),
 					args: {
 						PROVIDER: nitricProvider,
 					},
@@ -68,6 +76,7 @@ export class NitricServiceImage extends pulumi.ComponentResource {
 						// See: https://github.com/docker/buildx/issues/418
 						DOCKER_BUILDKIT: '0',
 					},
+					dockerfile,
 					// Create a reasonable shared memory space for image builds
 					extraOptions: ['--shm-size', '1G'],
 				},

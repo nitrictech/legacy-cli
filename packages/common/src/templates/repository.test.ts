@@ -63,6 +63,7 @@ describe('Repository', () => {
 						// The path should now include the repository path as a prefix
 						path: '/repos/testrepo/templates/testtemplate',
 						lang: 'mocklang',
+						repoName: 'testrepo',
 					},
 				]);
 			});
@@ -87,6 +88,7 @@ describe('Repository', () => {
 					// The path should now include the repository path as a prefix
 					path: '/repos/testrepo/templates/testtemplate',
 					lang: 'mocklang',
+					repoName: 'testrepo',
 				});
 			});
 		});

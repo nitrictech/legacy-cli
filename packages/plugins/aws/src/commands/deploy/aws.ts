@@ -14,7 +14,7 @@
 
 import { flags } from '@oclif/command';
 import { Deploy, DEPLOY_TASK_KEY, DeployResult } from '../../tasks/deploy';
-import { BaseCommand, wrapTaskForListr, Stack, StageStackTask, block } from '@nitric/cli-common';
+import { BaseCommand, wrapTaskForListr, Stack } from '@nitric/cli-common';
 import { Listr } from 'listr2';
 import path from 'path';
 import AWS from 'aws-sdk';
@@ -98,10 +98,7 @@ export default class AwsDeploy extends BaseCommand {
 		const stack = await Stack.fromFile(stackDefinitionPath);
 
 		try {
-			const results = await new Listr<any>([
-				wrapTaskForListr(new StageStackTask({ stack })),
-				wrapTaskForListr(new Deploy({ stack, account: accountId, region })),
-			]).run();
+			const results = await new Listr<any>([wrapTaskForListr(new Deploy({ stack, account: accountId, region }))]).run();
 
 			const deployResult = results[DEPLOY_TASK_KEY] as DeployResult;
 
@@ -120,7 +117,8 @@ export default class AwsDeploy extends BaseCommand {
 					}
 				});
 
-				cli.log(block`If you have specified any custom domains for these entrypoints you will need to add CNAME records for the hostnames in the urls above`);
+				cli.log(
+          `If you have specified any custom domains for these entrypoints you will need to add CNAME records for the hostnames in the urls above`);
 			}
 		} catch (error) {
 			// eat this error to avoid duplicate console output.

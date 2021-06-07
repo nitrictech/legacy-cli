@@ -37,28 +37,38 @@ export class MakeFunctionTask extends Task<void> {
 		this.dir = dir || name; // new function directory, relative to nitric file.
 	}
 
+	private async pullTemplate(stack: Stack): Promise<void> {
+		if (!(await stack.hasTemplate(this.template))) {
+			const repos = Repository.fromDefaultDirectory();
+			const [repoName, templateName] = this.template.split('/');
+			const repo = repos.find((repo) => repo.getName() === repoName);
+
+			if (!repo) {
+				throw new Error(`Repository ${repoName} is not available`);
+			}
+			const template = repo.getTemplate(templateName);
+			this.update(`${this.template} template available locally`);
+
+			await stack.pullTemplate(template);
+		}
+	}
+
 	/**
 	 * Make a new function directory in the project, containing the code scaffold from the chosen template
 	 */
-	private async makeFunction(): Promise<void> {
-		const repos = Repository.fromDefaultDirectory();
-		const [repoName, templateName] = this.template.split('/');
-		const repo = repos.find((repo) => repo.getName() === repoName);
-
-		if (!repo) {
-			throw new Error(`Repository ${repoName} is not available`);
-		}
-		const template = repo.getTemplate(templateName);
-		this.update(`${this.template} template available locally`);
-
+	private async makeFunction(stack: Stack): Promise<void> {
+		const template = await stack.getTemplate(this.template);
+		this.update(`${this.template} template available in stack`);
 		// Scaffold the new function using the code from the template
-		await Template.copyCodeTo(template, this.dir);
+		await Template.copyTemplateTo(template, this.dir);
 	}
 
 	async do(): Promise<void> {
 		this.update('Checking stack descriptor');
 		const nitricFile = this.file;
 		const stack = await Stack.fromFile(nitricFile);
+
+		await this.pullTemplate(stack);
 
 		this.update('Start Make');
 		const nitricProjectDirectory = path.dirname(nitricFile);
@@ -68,8 +78,8 @@ export class MakeFunctionTask extends Task<void> {
 			runtime: this.template,
 		});
 
-		this.update('Scaffolding function code');
-		await this.makeFunction();
+		this.update('Scaffolding template code');
+		await this.makeFunction(stack);
 
 		this.update(`Updating ${this.file}`);
 		await Stack.write(stack);

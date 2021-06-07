@@ -13,12 +13,14 @@
 // limitations under the License.
 
 import tar from 'tar-fs';
-import { dockerodeEvtToString, NitricImage, Task, STAGING_DIR, Service } from '@nitric/cli-common';
+import { dockerodeEvtToString, NitricImage, Task, Service, Stack, Template } from '@nitric/cli-common';
 import Docker from 'dockerode';
 import path from 'path';
+import rimraf from 'rimraf';
+import match from 'multimatch';
 
 interface BuildServiceTaskOptions {
-	stackName: string;
+	stack: Stack;
 	baseDir: string;
 	service: Service;
 	provider?: string;
@@ -26,65 +28,83 @@ interface BuildServiceTaskOptions {
 
 export class BuildServiceTask extends Task<NitricImage> {
 	private service: Service;
-	private readonly stackName: string;
+	private readonly stack: Stack;
 	private readonly provider: string;
 
-	constructor({ service, stackName, provider = 'local' }: BuildServiceTaskOptions) {
+	constructor({ service, stack, provider = 'local' }: BuildServiceTaskOptions) {
 		super(`${service.getName()}`);
 		this.service = service;
-		this.stackName = stackName;
+		this.stack = stack;
 		this.provider = provider;
 	}
 
 	async do(): Promise<NitricImage> {
 		const docker = new Docker();
-		const functionStagingDirectory = path.join(STAGING_DIR, this.stackName, this.service.getName());
-		// Tarball the required files for the image build
-		const pack = tar.pack(functionStagingDirectory);
+		// temporarily copy to template runtime into the users code directory
+		// FIXME: Currently dockerode does not support dockerfiles specified outsode of build context\
+		const runtimeStagingDirectory = path.join(this.service.getDirectory(), './.nitric/');
+		const template = await this.stack.getTemplate(this.service.asNitricService().runtime);
+		await Template.copyRuntimeTo(template, runtimeStagingDirectory);
+		const ignoreFiles = await Template.getDockerIgnoreFiles(template);
 
-		const options = {
-			buildargs: {
-				PROVIDER: this.provider,
-			},
-			t: this.service.getImageTagName(this.provider),
-			shmsize: 1000000000,
-		};
-
-		let stream: NodeJS.ReadableStream;
 		try {
-			stream = await docker.buildImage(pack, options);
-		} catch (error) {
-			if (error.errno && error.errno === -61) {
-				throw new Error('Unable to connect to docker, is it running locally?');
-			}
-			throw error;
-		}
+			const pack = tar.pack(this.service.getDirectory(), {
+				ignore: (name) =>
+					// Simple filter before more complex multimatch
+					ignoreFiles.filter((f) => name.includes(f)).length > 0 || match(name, ignoreFiles).length > 0,
+			});
+			const dockerfile = './.nitric/Dockerfile';
+			//throw new Error(dockerfile);
 
-		// Get build updates
-		const buildResults = await new Promise<any[]>((resolve, reject) => {
-			docker.modem.followProgress(
-				stream,
-				(errorInner: Error, resolveInner: Record<string, any>[]) =>
-					errorInner ? reject(errorInner) : resolve(resolveInner),
-				(event: any) => {
-					try {
-						this.update(dockerodeEvtToString(event));
-					} catch (error) {
-						reject(new Error(error.message.replace(/\n/g, '')));
-					}
+			const options = {
+				buildargs: {
+					PROVIDER: this.provider,
 				},
-			);
-		});
+				t: this.service.getImageTagName(this.provider),
+				shmsize: 1000000000,
+				dockerfile,
+			};
 
-		const filteredResults = buildResults.filter((obj) => 'aux' in obj && 'ID' in obj['aux']);
-		if (filteredResults.length > 0) {
-			const imageId = filteredResults[filteredResults.length - 1]['aux'].ID.split(':').pop() as string;
-			return { id: imageId, serviceName: this.service.getName() } as NitricImage;
-		} else {
-			const {
-				errorDetail: { message },
-			} = buildResults.pop() as any;
-			throw new Error(message);
+			let stream: NodeJS.ReadableStream;
+			try {
+				stream = await docker.buildImage(pack, options);
+			} catch (error) {
+				if (error.errno && error.errno === -61) {
+					throw new Error('Unable to connect to docker, is it running locally?');
+				}
+				throw error;
+			}
+
+			// Get build updates
+			const buildResults = await new Promise<any[]>((resolve, reject) => {
+				docker.modem.followProgress(
+					stream,
+					(errorInner: Error, resolveInner: Record<string, any>[]) =>
+						errorInner ? reject(errorInner) : resolve(resolveInner),
+					(event: any) => {
+						try {
+							this.update(dockerodeEvtToString(event));
+						} catch (error) {
+							reject(new Error(error.message.replace(/\n/g, '')));
+						}
+					},
+				);
+			});
+
+			const filteredResults = buildResults.filter((obj) => 'aux' in obj && 'ID' in obj['aux']);
+			if (filteredResults.length > 0) {
+				const imageId = filteredResults[filteredResults.length - 1]['aux'].ID.split(':').pop() as string;
+				return { id: imageId, serviceName: this.service.getName() } as NitricImage;
+			} else {
+				const {
+					errorDetail: { message },
+				} = buildResults.pop() as any;
+				throw new Error(message);
+			}
+		} finally {
+			// Remove the staged runtime files
+			// from the users code...
+			rimraf.sync(runtimeStagingDirectory);
 		}
 	}
 }

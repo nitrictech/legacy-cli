@@ -32,7 +32,7 @@ jobs:
       run: yarn build:common
 
     - name: Publish to NPM
-      run: yarn workspaces foreach --no-private npm publish --access restricted --tolerate-republish
+      run: yarn publish:all
       env:
         NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 

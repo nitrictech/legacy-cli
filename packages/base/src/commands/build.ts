@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import { flags } from '@oclif/command';
-import { wrapTaskForListr, Stack, NitricImage, StageStackTask, BaseCommand } from '@nitric/cli-common';
+import { wrapTaskForListr, Stack, NitricImage, BaseCommand } from '@nitric/cli-common';
 import { BuildServiceTask } from '../tasks';
 import { Listr, ListrTask } from 'listr2';
 import path from 'path';
@@ -21,7 +21,6 @@ import path from 'path';
 export function createBuildTasks(stack: Stack, directory: string, provider = 'local'): Listr {
 	return new Listr(
 		[
-			wrapTaskForListr(new StageStackTask({ stack })),
 			{
 				title: 'Building Functions',
 				task: (_, task): Listr =>
@@ -31,9 +30,9 @@ export function createBuildTasks(stack: Stack, directory: string, provider = 'lo
 							(service): ListrTask => ({
 								...wrapTaskForListr(
 									new BuildServiceTask({
+										stack,
 										service,
 										baseDir: directory,
-										stackName: stack.getName(),
 										provider,
 									}),
 								),

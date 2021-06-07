@@ -1,7 +1,7 @@
 {
   "name": "@nitric/plugin-gcp",
   "description": "GCP plugin for Nitric",
-  "version": "0.0.45",
+  "version": "0.0.49",
   "author": "Nitric <https://github.com/nitric-dev>",
   "bugs": "https://github.com/nitric-dev/cli/issues",
   "dependencies": {
@@ -66,6 +66,7 @@
     "prepack": "rm -rf lib && tsc -p tsconfig.build.json && oclif-dev manifest && oclif-dev readme",
     "test": "tsc --emitDeclarationOnly && jest --passWithNoTests",
     "version": "oclif-dev readme && git add README.md",
-    "license:check": "licensee --production"
+    "license:check": "licensee --production",
+    "npm:publish": "yarn npm publish --access public --tolerate-republish"
   }
 }

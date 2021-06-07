@@ -16,9 +16,8 @@ import path from 'path';
 import { NitricService, NitricStack } from '../types';
 import fs from 'fs';
 import YAML from 'yaml';
-import { Repository } from '../templates';
+import { Template } from '../templates';
 import { STAGING_DIR } from '../paths';
-import rimraf from 'rimraf';
 import { Site } from './site';
 import { findFileRead } from '../utils';
 import { Service } from './service';
@@ -193,6 +192,11 @@ export class Stack<
 		return dir;
 	}
 
+	async hasTemplate(templateName: string): Promise<boolean> {
+		const templateDir = await this.getTemplatesDirectory();
+		return fs.existsSync(path.join(templateDir, templateName));
+	}
+
 	/**
 	 * Create the nitric directory if it doesn't exist and return its path
 	 */
@@ -205,6 +209,36 @@ export class Stack<
 	 */
 	async makeLoggingDirectory(): Promise<string> {
 		return await this.makeRelativeDirectory(`./${NITRIC_DIRECTORY}/logs/`);
+	}
+
+	async makeTemplatesDirectory(): Promise<string> {
+		return await this.makeRelativeDirectory(`./${NITRIC_DIRECTORY}/templates/`);
+	}
+
+	async getTemplatesDirectory(): Promise<string> {
+		return await this.makeTemplatesDirectory();
+	}
+
+	/**
+	 * Pulls a template for local versioning as part of this stack
+	 * @param template
+	 */
+	async pullTemplate(template: Template): Promise<void> {
+		const templateDir = await this.getTemplatesDirectory();
+		const templatePath = path.join(templateDir, template.getFullName());
+		await this.makeRelativeDirectory(templatePath);
+		await Template.copyTo(template, templatePath);
+	}
+
+	async getTemplate(templateName: string): Promise<Template> {
+		const hasTemplate = await this.hasTemplate(templateName);
+		if (hasTemplate) {
+			const [repoName, tName] = templateName.split('/');
+			const templatesDir = await this.getTemplatesDirectory();
+			return new Template(repoName, tName, 'any', path.join(templatesDir, templateName));
+		} else {
+			throw new Error(`Stack does not have template: ${templateName}`);
+		}
 	}
 
 	/**
@@ -266,34 +300,5 @@ export class Stack<
 	 */
 	static async fromDirectory(dir: string): Promise<Stack> {
 		return Stack.fromFile(path.join(dir, './nitric.yaml'));
-	}
-
-	/**
-	 * Stage the stack after deleting any existing staging files.
-	 * TODO: We'll want to decompose this into more functions
-	 * @param stack to stage
-	 */
-	static async stage(stack: Stack): Promise<void> {
-		const repos = Repository.fromDefaultDirectory();
-
-		const stackStagingDirectory = stack.getStagingDirectory();
-
-		// Clean staging directory
-		if (fs.existsSync(stackStagingDirectory)) {
-			await new Promise<void>((res, rej) => {
-				rimraf(stackStagingDirectory, (err) => {
-					if (err) {
-						rej(err);
-					} else {
-						res();
-					}
-				});
-			});
-		}
-
-		await fs.promises.mkdir(stackStagingDirectory, { recursive: true });
-
-		// Stage each function
-		await Promise.all(stack.getServices().map(async (s) => Service.stage(s, repos)));
 	}
 }
