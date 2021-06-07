@@ -13,8 +13,8 @@
 // limitations under the License.
 
 import { flags } from '@oclif/command';
-import { Deploy } from '../../tasks/deploy';
-import { BaseCommand, wrapTaskForListr, Stack } from '@nitric/cli-common';
+import { Deploy, DEPLOY_TASK_KEY, DeployResults } from '../../tasks/deploy';
+import { BaseCommand, wrapTaskForListr, Stack, block } from '@nitric/cli-common';
 import { Listr } from 'listr2';
 import path from 'path';
 import inquirer from 'inquirer';
@@ -84,27 +84,29 @@ export default class DoDeploy extends BaseCommand {
 		const stack = await Stack.fromFile(stackDefinitionPath);
 
 		try {
-			const results = await new Listr([wrapTaskForListr(new Deploy({ stack, registryName: containerRegistry, region, token }))]).run();
+			const results = await new Listr([
+				wrapTaskForListr(new Deploy({ stack, registryName: containerRegistry, region, token })),
+			]).run();
 
 			const deployResults = results[DEPLOY_TASK_KEY] as DeployResults;
 
 			cli.table(Object.entries(deployResults), {
 				name: {
-					header: "App Name",
-					get: ([name]): string => name, 
+					header: 'App Name',
+					get: ([name]): string => name,
 				},
 				liveUrl: {
-					header: "Live URL",
-					get: ([, { liveUrl }]): string | undefined => liveUrl
+					header: 'Live URL',
+					get: ([, { liveUrl }]): string | undefined => liveUrl,
 				},
 				defaultUrl: {
-					header: "Default URL",
-					get: ([, { defaultIngress }]): string | undefined => defaultIngress
+					header: 'Default URL',
+					get: ([, { defaultIngress }]): string | undefined => defaultIngress,
 				},
 				configNeeded: {
-					header: "DNS Required",
-					get: ([, { requiresConfig }]): boolean => requiresConfig || false
-				}
+					header: 'DNS Required',
+					get: ([, { requiresConfig }]): boolean => requiresConfig || false,
+				},
 			});
 
 			cli.log(block`
