@@ -2,6 +2,38 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.50](https://github.com/nitrictech/cli/compare/v0.0.49...v0.0.50) (2021-06-07)
+
+
+### Features
+
+* Add certificate creation and validation for custom domains. ([c501dbe](https://github.com/nitrictech/cli/commit/c501dbe38be45dce5476841a0a4690dd74f1bc12))
+* add custom domains support for DO entrypoints ([fde501c](https://github.com/nitrictech/cli/commit/fde501cca7edbb42e930db59812ecf7ea17f16dd))
+* Add extensions for all stack items. ([87e4995](https://github.com/nitrictech/cli/commit/87e4995c295777758e5119e591dafd12f0f84fbb))
+* Add generic extensions to resources classes. ([8950c13](https://github.com/nitrictech/cli/commit/8950c1376501f833cd98cbc34ef959fa0b86aebb))
+* Add output results and cleanup to digital ocean deploy. ([bc7c123](https://github.com/nitrictech/cli/commit/bc7c123443014086c6d10b8e0e8024a0bcc4a54f))
+* Add outputs and instructions for AWS dns configurations. ([e881ef2](https://github.com/nitrictech/cli/commit/e881ef2a947183caec2969de651b50f4d3a4b5d4))
+* Make domains and paths extensible. ([65538c0](https://github.com/nitrictech/cli/commit/65538c02e0f7595b7e35089ab42ebe41cfc2dc9b))
+* support multiple entrypoints for local run ([00ca5e4](https://github.com/nitrictech/cli/commit/00ca5e45bda76e616713a21a6338c5929575f3b4))
+* support multiple entrypoints in gcp ([e0d5a9f](https://github.com/nitrictech/cli/commit/e0d5a9fbcb1873d6001f0d20f27ab0dbb51475cf))
+* Update AWS and GCP entrypoint outputs. ([b976ab2](https://github.com/nitrictech/cli/commit/b976ab24b8d19f221b9eff8b9ec49cc1f6ff187a))
+* Update aws entrypoints definitions. ([1169c9c](https://github.com/nitrictech/cli/commit/1169c9c95a145becbfc54056d28e309bd8627a0c))
+* Update types to simplify domains. ([e57e4ae](https://github.com/nitrictech/cli/commit/e57e4aeee1378603657c98db9817c4579be79077))
+
+
+### Bug Fixes
+
+* add mistakenly removed imports ([ae6a3f8](https://github.com/nitrictech/cli/commit/ae6a3f8b25952105ac31bdcbcf515ba086526bec))
+* **gcp:** Fix incorrect backend name. ([ab5ebe3](https://github.com/nitrictech/cli/commit/ab5ebe30e7febb08186c8e7f1d7d494721a55317))
+* **gcp:** fix incorrect resource names. ([92999da](https://github.com/nitrictech/cli/commit/92999da09b8d44ce1d2bda82f8bfef74d9df9cb9))
+* **gcp:** Fix non-default entrypoint normalization. ([b31594e](https://github.com/nitrictech/cli/commit/b31594eab8ddb1659c10dcf56fbdb2576ec4aa77))
+* **gcp:** fix target filtering. ([e73bb50](https://github.com/nitrictech/cli/commit/e73bb50031abcceea90cf4f275fc993cba973dd0))
+* **gcp:** Fix type error. ([64efe3e](https://github.com/nitrictech/cli/commit/64efe3eb5fcc380498a70d3cf79dc4d715dee21c))
+* add entrypoint suffix to do app name ([b4a1fc7](https://github.com/nitrictech/cli/commit/b4a1fc72be26b3409ce2bb5956ac4b3e000a33f8))
+* Await the deployment. ([291bb47](https://github.com/nitrictech/cli/commit/291bb47eff0753c04d401c0eb2b479f07a1fc7f6))
+* AWS cloudfront deploys to use pre-provisioned certificates. ([e6ab460](https://github.com/nitrictech/cli/commit/e6ab460d38634b6235fbb85a71095714d66c24eb))
+* don't use BuildKit for image builds ([f7a4c23](https://github.com/nitrictech/cli/commit/f7a4c2379df6084d8eb0e3d4cf48f99e579957f5))
+
 ### [0.0.49](https://github.com/nitrictech/cli/compare/v0.0.48...v0.0.49) (2021-06-06)
 
 
