@@ -20,12 +20,12 @@ import path from 'path';
 /**
  * A Nitric Static Site
  */
-export class Site {
+export class Site<SiteExtensions = Record<string, any>> {
 	private name: string;
 	private stack: Stack;
-	private descriptor: NitricStaticSite;
+	private descriptor: NitricStaticSite<SiteExtensions>;
 
-	constructor(stack: Stack, name: string, descriptor: NitricStaticSite) {
+	constructor(stack: Stack, name: string, descriptor: NitricStaticSite<SiteExtensions>) {
 		this.stack = stack;
 		this.name = name;
 		this.descriptor = descriptor;
@@ -48,7 +48,7 @@ export class Site {
 	/**
 	 * Return the descriptor for this site
 	 */
-	getDescriptor(): NitricStaticSite {
+	getDescriptor(): NitricStaticSite<SiteExtensions> {
 		return this.descriptor;
 	}
 

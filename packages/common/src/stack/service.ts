@@ -23,14 +23,14 @@ type omitMethods = 'getService' | 'getServices';
 /**
  * Represents a Nitric Service (Function/Container/etc.)
  */
-export class Service {
+export class Service<ServiceExtensions = Record<string, any>> {
 	// Back reference to the parent stack
 	// emit getFunction here to prevent recursion
 	private stack: Omit<Stack, omitMethods>;
 	private name: string;
-	private descriptor: NitricService;
+	private descriptor: NitricService<ServiceExtensions>;
 
-	constructor(stack: Stack, name: string, descriptor: NitricService) {
+	constructor(stack: Stack, name: string, descriptor: NitricService<ServiceExtensions>) {
 		this.stack = stack;
 		this.name = name;
 		this.descriptor = descriptor;
@@ -46,7 +46,7 @@ export class Service {
 	/**
 	 * Returns the descriptor for this service
 	 */
-	asNitricService(): NitricService {
+	asNitricService(): NitricService<ServiceExtensions> {
 		return this.descriptor;
 	}
 

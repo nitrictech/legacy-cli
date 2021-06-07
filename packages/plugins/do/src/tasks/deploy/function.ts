@@ -12,61 +12,30 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Service } from '@nitric/cli-common';
+import { NitricEntrypoint, NitricServiceImage } from '@nitric/cli-common';
 import * as digitalocean from '@pulumi/digitalocean';
-import * as pulumi from '@pulumi/pulumi';
-import * as docker from '@pulumi/docker';
-
-interface NormalizedFunctionEntrypoint {
-	path: string;
-	name: string;
-	type: 'service' | 'site' | 'api';
-}
 
 interface CreateFunctionResult {
 	spec: digitalocean.types.input.AppSpecService;
 }
 
-export function createFunction(
-	service: Service,
-	registryName: string,
-	token: string,
-	entrypoints: NormalizedFunctionEntrypoint[],
+export function createServiceSpec(
+	name: string,
+	image: NitricServiceImage,
+	entrypoint: NitricEntrypoint,
 ): CreateFunctionResult {
-	// Push the image
-	const image = new docker.Image(`${service.getImageTagName()}-image`, {
-		imageName: pulumi.interpolate`registry.digitalocean.com/${registryName}/${service.getName()}`,
-		build: {
-			// Staging directory
-			context: service.getStagingDirectory(),
-			args: {
-				PROVIDER: 'do',
-			},
-			// Create a reasonable shared memory space for image builds
-			extraOptions: ['--shm-size', '1G'],
-		},
-		registry: {
-			server: 'registry.digitalocean.com',
-			username: token,
-			password: token,
-		},
-	});
-
-	// Need to await the image, so we'll apply this to ensure there is a dependency on the deployment
-	// XXX: We MUST using imageName here as baseImageName is already known so it cannot be used as
-	// a dependency to wait on deployment
-	const imageName = image.imageName.apply((name) => name.split('/').pop()!.split(':')[0] as string);
-
 	return {
 		spec: {
-			name: service.getName(),
+			name: name,
 			httpPort: 9001,
 			image: {
 				registryType: 'DOCR',
 				// TODO: Apply docker deployed repository here...
-				repository: imageName,
+				repository: image.name,
 			},
-			routes: entrypoints.filter(({ name }) => name === service.getName()).map(({ path }) => ({ path })),
+			routes: Object.entries(entrypoint.paths)
+				.filter(([, opts]) => opts.target === name)
+				.map(([path]) => ({ path })),
 		},
 	};
 }

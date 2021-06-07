@@ -12,11 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Task, Stack, mapObject } from '@nitric/cli-common';
+import { Task, Stack, mapObject, NitricServiceImage } from '@nitric/cli-common';
 import * as pulumi from '@pulumi/pulumi';
 import { LocalWorkspace } from '@pulumi/pulumi/automation';
 import * as digitalocean from '@pulumi/digitalocean';
-import { createFunction } from './function';
+import { createServiceSpec } from './function';
 import fs from 'fs';
 
 const REGISTRY_LIMITS: Record<string, number> = {
@@ -31,27 +31,35 @@ interface DeployOptions {
 	// Currently each digital ocean account
 	// may only have one docker container registry
 	registryName: string;
-
 	token: string;
-	//orgName: string;
-	//adminEmail: string;
 }
 
-export class Deploy extends Task<void> {
+export interface DeployResults {
+	// The name in this case will be the name of the deployed DO App
+	[name: string]: {
+		liveUrl?: string;
+		defaultIngress?: string;
+		requiresConfig?: boolean;
+	};
+}
+
+export const DEPLOY_TASK_KEY = 'Deploying to Digital Ocean';
+
+export class Deploy extends Task<DeployResults> {
 	private stack: Stack;
 	private region: string;
 	private registryName: string;
 	private token: string;
 
 	constructor({ stack, region, registryName, token }: DeployOptions) {
-		super('Deploying to Digital Ocean');
+		super(DEPLOY_TASK_KEY);
 		this.stack = stack;
 		this.region = region;
 		this.registryName = registryName;
 		this.token = token;
 	}
 
-	async do(): Promise<void> {
+	async do(): Promise<DeployResults> {
 		const { stack, region, registryName, token } = this;
 		const {
 			buckets = {},
@@ -100,6 +108,10 @@ export class Deploy extends Task<void> {
 							pulumi.log.warn('Static sites currently not supported for digital ocean deployments');
 						}
 
+						if (Object.keys(entrypoints || {}).length < 0) {
+							throw new Error('Digital ocean stacks MUST specify at least one entrypoint!');
+						}
+
 						const services = stack.getServices();
 
 						if (services.length > 0) {
@@ -107,53 +119,90 @@ export class Deploy extends Task<void> {
 								name: registryName,
 							});
 
-							const normalizedEntrypoints = Object.keys(entrypoints).map((ep) => ({
-								path: ep,
-								...entrypoints[ep],
-							}));
-
-							if (normalizedEntrypoints.length < 1) {
-								throw new Error('Entrypoints must be defined for digital ocean deployments');
-							}
-
-							if (!normalizedEntrypoints.find(({ path }) => path === '/')) {
-								throw new Error('Entrypoints must contain a default route /');
-							}
-
-							const functionEntrypoints = normalizedEntrypoints.filter(({ type }) => type === 'service');
-							const otherEntrypoints = normalizedEntrypoints.filter(({ type }) => type !== 'service');
-
-							if (otherEntrypoints.length > 0) {
-								pulumi.log.warn('Non function entrypoints are not supported for digital ocean deployments');
-							}
-
-							// This currently assumes that the registry is empty
+							// TODO: This currently assumes that the registry is empty
 							if (services.length > REGISTRY_LIMITS[containerRegistry.subscriptionTierSlug]) {
 								pulumi.log.error(
 									'Provided registry cannot support the number of functions in this stack, look at upgrading your DOCR subscription tier',
 								);
 							}
 
-							// Create the functions
-							const results = stack
-								.getServices()
-								.map((f) => createFunction(f, registryName, token, functionEntrypoints));
-
-							const app = new digitalocean.App(stack.getName(), {
-								spec: {
-									name: stack.getName(),
-									// TODO: Configure region
-									region: region,
-									services: results.map((r) => r.spec),
-								},
+							const serviceImages = services.map((service) => {
+								return {
+									serviceName: service.getName(),
+									image: new NitricServiceImage(service.getName(), {
+										service,
+										username: token,
+										password: token,
+										imageName: pulumi.interpolate`registry.digitalocean.com/${registryName}/${service.getName()}`,
+										server: 'registry.digitalocean.com',
+										nitricProvider: 'do',
+									}),
+								};
 							});
 
-							return {
-								liveUrl: app.liveUrl,
-							};
+							if (Object.keys(entrypoints || {}).length > 1) {
+								pulumi.log.warn('Multiple entrypoints will result in multiple digital ocean apps being created!');
+							}
+
+							// Deploy a Digital Ocean "App" for each entrypoint, add the targets as containers.
+							const deployResults = Object.entries(entrypoints).map(([name, entrypoint]) => {
+								const normalizedPaths = Object.entries(entrypoint.paths).map(([path, opts]) => ({
+									path,
+									...opts,
+								}));
+
+								if (normalizedPaths.length < 1) {
+									throw new Error(`Entrypoint [${name}] contains no paths`);
+								}
+
+								if (!normalizedPaths.find(({ path }) => path === '/')) {
+									throw new Error(`Entrypoint [${name}] must contain a default path /`);
+								}
+
+								const servicePaths = normalizedPaths.filter(({ type }) => type === 'service');
+								const otherPaths = normalizedPaths.filter(({ type }) => type !== 'service');
+
+								if (otherPaths.length > 0) {
+									pulumi.log.warn(
+										`Entrypoint [${name}] contains non-service paths [${otherPaths
+											.map(({ path }) => path)
+											.join(', ')}], which are not supported for digital ocean deployments`,
+									);
+								}
+
+								// Create the functions
+								const results = serviceImages
+									.filter(({ serviceName }) => {
+										return servicePaths.find(({ target }) => target == serviceName) != undefined;
+									})
+									.map(({ serviceName, image }) => createServiceSpec(serviceName, image, entrypoint));
+
+								const app = new digitalocean.App(stack.getName(), {
+									spec: {
+										name: `${stack.getName()}-${name}`,
+										region: region,
+										services: results.map((r) => r.spec),
+										domainNames: (entrypoint.domains || []).map((name) => ({ name })),
+									},
+								});
+
+								const requiresConfig = pulumi
+									.all([app.liveUrl, app.defaultIngress])
+									.apply(([liveUrl, defaultIngress]) => liveUrl !== defaultIngress);
+
+								return {
+									[name]: {
+										liveUrl: app.liveUrl,
+										// notify users of required updates if a set of domains is provided...
+										defaultIngress: app.defaultIngress,
+										requiresConfig,
+									},
+								};
+							});
+
+							return deployResults.reduce((acc, res) => ({ ...acc, ...res }), {});
 						}
 					} catch (e) {
-						// console.error(e);
 						fs.appendFileSync(errorFile, e.stack);
 						throw e;
 					}
@@ -170,10 +219,17 @@ export class Deploy extends Task<void> {
 					fs.appendFileSync(logFile, out);
 				},
 			});
-			console.log(upRes.outputs);
+
+			return Object.entries(upRes.outputs).reduce(
+				(acc, [key, val]) => ({
+					...acc,
+					[key]: val.value,
+				}),
+				{},
+			);
 		} catch (e) {
 			fs.appendFileSync(errorFile, e.stack);
-			console.log(e);
+			throw 'An error ocurred during deployment see latest do:error logs';
 		}
 	}
 }

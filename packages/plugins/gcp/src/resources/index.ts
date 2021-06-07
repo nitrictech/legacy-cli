@@ -13,7 +13,7 @@
 // limitations under the License.
 export * from './api';
 export * from './bucket';
-export * from './entrypoints';
+export * from './entrypoint';
 export * from './schedule';
 export * from './service';
 export * from './site';

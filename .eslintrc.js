@@ -9,17 +9,17 @@ module.exports = {
 	extends: [
 		//   'airbnb',
 		'eslint:recommended',
-		// Disable rules that may conflict with prettier
-		'prettier',
 		'plugin:@typescript-eslint/eslint-recommended',
 		'plugin:@typescript-eslint/recommended',
+		// Disable rules that may conflict with prettier
+		'prettier',
 	],
 	rules: {
 		// disable the rule for all files
 		'@typescript-eslint/camelcase': 'off',
 		'no-mixed-spaces-and-tabs': [2, 'smart-tabs'],
 		'no-mixed-operators': 'off',
-		indent: ['error', 'tab'],
+		indent: ['error', 'tab', { SwitchCase: 1 }],
 	},
 	overrides: [
 		{

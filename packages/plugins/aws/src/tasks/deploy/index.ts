@@ -44,11 +44,33 @@ interface DeployOptions extends CommonOptions {
 }
 
 export interface DeployResult {
-	entrypoint?: string;
+	entrypoints?: {
+		name: string;
+		url: string;
+		domains?: string[];
+	}[];
+	//dnsConfigs?: {
+	//	[name: string]: {
+	//		create: string;
+	//		target: string;
+	//		targetType: string;
+	//	};
+	//};
 }
 
 interface ProgramResult {
-	entrypoint?: pulumi.Output<string>;
+	entrypoints?: pulumi.Output<{
+		name: string;
+		url: string;
+		domains?: string[];
+	}>[];
+	//dnsConfigs?: pulumi.Output<{
+	//	[name: string]: {
+	//		create: string;
+	//		target: string;
+	//		type: string;
+	//	};
+	//}>;
 }
 
 export const DEPLOY_TASK_KEY = 'Deploying Nitric Stack to AWS';
@@ -154,15 +176,39 @@ export class Deploy extends Task<DeployResult> {
 						);
 
 						if (entrypoints) {
-							const entrypoint = new NitricEntrypointCloudFront(stack.getName(), {
-								stackName: stack.getName(),
-								entrypoints: entrypoints,
-								services: deployedServices,
-								apis: deployedApis,
-								sites: deployedSites,
+							const eps = Object.entries(entrypoints).map(([name, entrypoint]) => {
+								return new NitricEntrypointCloudFront(name, {
+									stackName: stack.getName(),
+									entrypoint: entrypoint,
+									services: deployedServices,
+									apis: deployedApis,
+									sites: deployedSites,
+								});
 							});
 
-							result.entrypoint = pulumi.interpolate`https://${entrypoint.cloudfront.domainName}`;
+							//result.dnsConfigs = eps.reduce((acc, e) => {
+							//	return {
+							//		...acc,
+							//		...e.validationOptions?.apply(vo => vo.reduce((a, o) => {
+							//			return {
+							//				...a,
+							//				[o.domainName]: {
+							//					create: o.resourceRecordName,
+							//					target: o.resourceRecordValue,
+							//					type: o.resourceRecordType,
+							//				},
+							//			};
+							//		}, {} as any))
+							//	};
+							//}, {} as any);
+
+							result.entrypoints = eps.map((ep) => {
+								return ep.cloudfront.domainName.apply((domainName) => ({
+									name: ep.name,
+									url: `https://${domainName}`,
+									domains: ep.domains,
+								}));
+							});
 						}
 					} catch (e) {
 						fs.appendFileSync(errorFile, e.stack);

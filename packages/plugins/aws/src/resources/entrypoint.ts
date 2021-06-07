@@ -13,14 +13,14 @@
 // limitations under the License.
 import * as pulumi from '@pulumi/pulumi';
 import * as aws from '@pulumi/aws';
-import { NitricEntrypoints } from '@nitric/cli-common';
+import { NitricEntrypoint } from '@nitric/cli-common';
 import { NitricSiteS3 } from './site';
 import { NitricApiAwsApiGateway } from './api';
 import { NitricServiceAWSLambda } from './service';
 
 interface NitricEntrypointCloudfrontArgs {
 	stackName: string;
-	entrypoints: NitricEntrypoints;
+	entrypoint: NitricEntrypoint;
 	sites: NitricSiteS3[];
 	apis: NitricApiAwsApiGateway[];
 	services: NitricServiceAWSLambda[];
@@ -34,22 +34,28 @@ export class NitricEntrypointCloudFront extends pulumi.ComponentResource {
 	 * The deployed distribution
 	 */
 	public readonly cloudfront: aws.cloudfront.Distribution;
+	public readonly name: string;
+	public readonly domains?: string[];
+	// public readonly validationOptions?: pulumi.Output<aws.types.output.acm.CertificateDomainValidationOption[]>;
 
 	constructor(name, args: NitricEntrypointCloudfrontArgs, opts?: pulumi.ComponentResourceOptions) {
 		super('nitric:entrypoints:CloudFront', name, {}, opts);
 
 		const defaultResourceOptions: pulumi.ResourceOptions = { parent: this };
-		const { entrypoints, stackName, sites, apis, services } = args;
+		const { entrypoint, stackName, sites, apis, services } = args;
 		const oai = new aws.cloudfront.OriginAccessIdentity(`${stackName}OAI`, {}, defaultResourceOptions);
 
+		this.name = name;
+		this.domains = entrypoint.domains;
+
 		// Create the origins
-		const origins = Object.keys(entrypoints).map((key) => {
-			const { type, name } = entrypoints[key];
+		const origins = Object.keys(entrypoint.paths).map((key) => {
+			const { type, target } = entrypoint.paths[key];
 
 			switch (type) {
 				case 'api': {
 					// Search deployed APIs for the name
-					const deployedApi = apis.find((a) => a.name === name);
+					const deployedApi = apis.find((a) => a.name === target);
 
 					if (!deployedApi) {
 						throw new Error(`Target API ${name} configured in entrypoints but does not exist`);
@@ -69,7 +75,7 @@ export class NitricEntrypointCloudFront extends pulumi.ComponentResource {
 					};
 				}
 				case 'site': {
-					const deployedSite = sites.find((s) => s.name === name);
+					const deployedSite = sites.find((s) => s.name === target);
 
 					if (!deployedSite) {
 						throw new Error(`Target Site ${name} configured in entrypoints but does not exist`);
@@ -85,7 +91,7 @@ export class NitricEntrypointCloudFront extends pulumi.ComponentResource {
 					};
 				}
 				case 'service': {
-					const deployedService = services.find((s) => s.name === name);
+					const deployedService = services.find((s) => s.name === target);
 
 					if (!deployedService) {
 						throw new Error(`Target Function ${name} configured in entrypoints but does not exist`);
@@ -133,13 +139,62 @@ export class NitricEntrypointCloudFront extends pulumi.ComponentResource {
 		});
 
 		const { defaultCacheBehavior, orderedCacheBehaviors } = NitricEntrypointCloudFront.entrypointsToBehaviours(
-			entrypoints,
+			entrypoint,
 		);
+
+		let viewerCertificate: aws.types.input.cloudfront.DistributionViewerCertificate = {
+			cloudfrontDefaultCertificate: true,
+		};
+		let aliases: string[] | undefined = undefined;
+
+		// Customize domains and view certificate for frontend
+		if (entrypoint.domains && entrypoint.domains.length > 0) {
+			// Deploy a viewer certificate to ACM for this domain
+			// we'll use DNS validation for maximum flexiblity and notify the user of the cname record they need
+			// to update their DNS that manages their domain...
+			// For now we'll have to document that all additional SANs MUST be present in the issued certificate
+			const [domain] = entrypoint.domains;
+
+			// Here we will import the user provided certificate
+			const issuedCertificate = pulumi.output(
+				aws.acm.getCertificate({
+					domain: domain,
+					mostRecent: true,
+					statuses: ['ISSUED'],
+				}),
+			);
+
+			// Single cert for the distribution
+			//const cert = new aws.acm.Certificate(`${name}Certificate`, {
+			//	domainName,
+			//	subjectAlternativeNames,
+			//	validationMethod: "DNS",
+			//}, defaultResourceOptions);
+
+			//// XXX: This will actually halt the provisioning of the domain
+			//// until the certificate is valid
+			//const certValidation = new aws.acm.CertificateValidation(`${name}CertificateValidation`, {
+			//	certificateArn: cert.arn,
+			//}, defaultResourceOptions);
+
+			//// Need to map these validation options in order to let the user know they need to do this...
+			//this.validationOptions = cert.domainValidationOptions;
+
+			viewerCertificate = {
+				// It's important to use the cert validation property here...
+				acmCertificateArn: issuedCertificate.arn,
+				sslSupportMethod: 'sni-only',
+			};
+
+			aliases = entrypoint.domains;
+		}
+
 		// Create a new cloudfront distribution
 		this.cloudfront = new aws.cloudfront.Distribution(
-			`${stackName}Distribution`,
+			`${name}Distribution`,
 			{
 				enabled: true,
+				aliases,
 				// Assume for now default will be index
 				// TODO: Make this configurable via nitric.yaml
 				// defaultRootObject: '/',
@@ -147,9 +202,7 @@ export class NitricEntrypointCloudFront extends pulumi.ComponentResource {
 				orderedCacheBehaviors,
 				origins,
 				// TODO: Make viewer cert configurable
-				viewerCertificate: {
-					cloudfrontDefaultCertificate: true,
-				},
+				viewerCertificate,
 				// TODO: Determine price class
 				priceClass: 'PriceClass_All',
 				// TODO: Make this configurable through entrypoints extensions
@@ -163,21 +216,24 @@ export class NitricEntrypointCloudFront extends pulumi.ComponentResource {
 		);
 
 		this.registerOutputs({
+			// validationOptions: this.validationOptions,
+			name: this.name,
+			domains: this.domains,
 			cloudfront: this.cloudfront,
 		});
 	}
 
 	static entrypointsToBehaviours(
-		entrypoints: NitricEntrypoints,
+		entrypoints: NitricEntrypoint,
 	): {
 		defaultCacheBehavior: aws.types.input.cloudfront.DistributionDefaultCacheBehavior;
 		orderedCacheBehaviors: aws.types.input.cloudfront.DistributionOrderedCacheBehavior[];
 	} {
-		const defaultEntrypoint = entrypoints['/'];
-		const otherEntrypoints = Object.keys(entrypoints)
+		const defaultEntrypoint = entrypoints.paths['/'];
+		const otherEntrypoints = Object.keys(entrypoints.paths)
 			.filter((k) => k !== '/')
 			.map((k) => ({
-				...entrypoints[k],
+				...entrypoints.paths[k],
 				path: k,
 			}));
 
@@ -185,7 +241,7 @@ export class NitricEntrypointCloudFront extends pulumi.ComponentResource {
 			defaultCacheBehavior: {
 				allowedMethods: ['DELETE', 'GET', 'HEAD', 'OPTIONS', 'PATCH', 'POST', 'PUT'],
 				cachedMethods: ['GET', 'HEAD'],
-				targetOriginId: defaultEntrypoint.name,
+				targetOriginId: defaultEntrypoint.target,
 				forwardedValues: {
 					queryString: true,
 					cookies: {
@@ -198,7 +254,7 @@ export class NitricEntrypointCloudFront extends pulumi.ComponentResource {
 				pathPattern: `${e.path}*`,
 				allowedMethods: ['DELETE', 'GET', 'HEAD', 'OPTIONS', 'PATCH', 'POST', 'PUT'],
 				cachedMethods: ['GET', 'HEAD'],
-				targetOriginId: e.name,
+				targetOriginId: e.target,
 				forwardedValues: {
 					queryString: true,
 					cookies: {

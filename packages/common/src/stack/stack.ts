@@ -27,12 +27,42 @@ const NITRIC_DIRECTORY = '.nitric';
 /**
  * Represents a Nitric Project Stack, including resources and their configuration
  */
-export class Stack {
+export class Stack<
+	ServiceExtensions = Record<string, any>,
+	BucketExtensions = Record<string, any>,
+	TopicExtensions = Record<string, any>,
+	QueueExtensions = Record<string, any>,
+	ScheduleExtensions = Record<string, any>,
+	ApiExtensions = Record<string, any>,
+	SiteExtensions = Record<string, any>,
+	EntrypointExtensions = Record<string, any>
+> {
 	private file: string;
 	private name: string;
-	private descriptor: NitricStack;
+	private descriptor: NitricStack<
+		ServiceExtensions,
+		BucketExtensions,
+		TopicExtensions,
+		QueueExtensions,
+		ScheduleExtensions,
+		ApiExtensions,
+		SiteExtensions,
+		EntrypointExtensions
+	>;
 
-	constructor(file: string, descriptor: NitricStack) {
+	constructor(
+		file: string,
+		descriptor: NitricStack<
+			ServiceExtensions,
+			BucketExtensions,
+			TopicExtensions,
+			QueueExtensions,
+			ScheduleExtensions,
+			ApiExtensions,
+			SiteExtensions,
+			EntrypointExtensions
+		>,
+	) {
 		this.name = descriptor.name;
 		this.descriptor = descriptor;
 		this.file = file;
@@ -50,10 +80,30 @@ export class Stack {
 	 * @param noUndefined if true, removes undefined top level properties from the description.
 	 * Useful when writing to a config file such as YAML and empty optional properties are undesirable.
 	 */
-	asNitricStack(noUndefined = false): NitricStack {
+	asNitricStack(
+		noUndefined = false,
+	): NitricStack<
+		ServiceExtensions,
+		BucketExtensions,
+		TopicExtensions,
+		QueueExtensions,
+		ScheduleExtensions,
+		ApiExtensions,
+		SiteExtensions,
+		EntrypointExtensions
+	> {
 		return Object.keys(this.descriptor)
 			.filter((k) => this.descriptor[k] != undefined || !noUndefined)
-			.reduce((acc, k) => ({ ...acc, [k]: this.descriptor[k] }), {}) as NitricStack;
+			.reduce((acc, k) => ({ ...acc, [k]: this.descriptor[k] }), {}) as NitricStack<
+			ServiceExtensions,
+			BucketExtensions,
+			TopicExtensions,
+			QueueExtensions,
+			ScheduleExtensions,
+			ApiExtensions,
+			SiteExtensions,
+			EntrypointExtensions
+		>;
 	}
 
 	/**
@@ -68,7 +118,7 @@ export class Stack {
 	 * @param name of the new service, which much not already be present in the stack
 	 * @param svc the service descriptor to add
 	 */
-	addService(name: string, svc: NitricService): Stack {
+	addService(name: string, svc: NitricService<ServiceExtensions>): Stack {
 		const { descriptor } = this;
 		const { services = {} } = this.descriptor;
 

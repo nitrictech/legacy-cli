@@ -14,7 +14,7 @@
 
 import cli from 'cli-ux';
 import Build, { createBuildTasks } from './build';
-import { BaseCommand, Stack, wrapTaskForListr, NitricImage, NitricStack, NitricEntrypoints } from '@nitric/cli-common';
+import { BaseCommand, Stack, wrapTaskForListr, NitricImage, NitricStack } from '@nitric/cli-common';
 import { Listr, ListrTask, ListrContext, ListrRenderer } from 'listr2';
 import path from 'path';
 import Docker, { Container, Network, Volume } from 'dockerode';
@@ -22,7 +22,8 @@ import getPort from 'get-port';
 import {
 	CreateNetworkTask,
 	CreateVolumeTask,
-	RunEntrypointsTask,
+	RunEntrypointTask,
+	RunEntrypointTaskOptions,
 	RunGatewayTask,
 	RunGatewayTaskOptions,
 	RunServiceTask,
@@ -111,6 +112,24 @@ export function createServiceTasks(
 	);
 }
 
+export function createEntrypointTasks(
+	entrypoints: RunEntrypointTaskOptions[],
+	docker: Docker,
+	network: Docker.Network,
+): Array<ListrTask> {
+	return entrypoints.map((entrypoint) =>
+		wrapTaskForListr(
+			new RunEntrypointTask(
+				{
+					...entrypoint,
+					network,
+				},
+				docker,
+			),
+		),
+	);
+}
+
 /**
  * Get tasks to creat a local API Gateway for set of APIs
  * @param stackName of the project stack
@@ -177,6 +196,21 @@ export function createServiceContainerRunTasks(
 	};
 }
 
+export function createEntrypointContainerRunTasks(
+	entrypoints: RunEntrypointTaskOptions[],
+	docker: Docker,
+): (ctx, task) => Listr {
+	return (ctx, task: TaskWrapper<unknown, typeof ListrRenderer>): Listr => {
+		return task.newListr(createEntrypointTasks(entrypoints, docker, ctx.network), {
+			concurrent: true,
+			// Don't fail all on a single function failure...
+			exitOnError: false,
+			// Added to allow custom handling of SIGINT for run cmd cleanup.
+			registerSignalListeners: false,
+		});
+	};
+}
+
 /**
  * Top level listr run task displayed to the user
  * Will display tasks for creating docker resources
@@ -185,18 +219,17 @@ export function createRunTasks(
 	stack: Stack,
 	functions: RunServiceTaskOptions[],
 	apis: RunGatewayTaskOptions[],
+	entrypoints: RunEntrypointTaskOptions[],
 	docker: Docker,
-	entrypointPort: number,
-	entrypoints?: NitricEntrypoints,
 ): Listr {
-	const entrypointsTask = entrypoints
-		? [
-				wrapTaskForListr({
-					name: 'Starting Entrypoints Proxy',
-					factory: (ctx) => new RunEntrypointsTask({ stack, docker, network: ctx.network, port: entrypointPort }),
-				}),
-		  ]
-		: [];
+	// const entrypointsTask = entrypoints
+	// 	? [
+	// 			wrapTaskForListr({
+	// 				name: 'Starting Entrypoints Proxy',
+	// 				factory: (ctx) => new RunEntrypointsTask({ stack, docker, network: ctx.network, port: entrypointPort }),
+	// 			}),
+	// 	  ]
+	// 	: [];
 
 	return new Listr<ListrCtx>(
 		[
@@ -221,7 +254,10 @@ export function createRunTasks(
 				task: createGatewayContainerRunTasks(stack.getName(), apis, docker),
 			},
 			// Start the entrypoints (load balancer/CDN emulation)
-			...entrypointsTask,
+			{
+				title: 'Starting Entrypoints',
+				task: createEntrypointContainerRunTasks(entrypoints, docker),
+			},
 		],
 		{
 			// Added to allow custom handling of SIGINT for run cmd cleanup.
@@ -283,8 +319,9 @@ export default class Run extends BaseCommand {
 	 */
 	runContainers = async (stack: Stack, directory: string): Promise<void> => {
 		const nitricStack = stack.asNitricStack();
-		const { apis = {} } = nitricStack;
-		const namedApis = Object.keys(apis || {}).map((name) => ({ name, ...apis[name] }));
+		const { apis = {}, entrypoints = {} } = nitricStack;
+		const namedApis = Object.keys(apis).map((name) => ({ name, ...apis[name] }));
+		const namedEntrypoints = Object.entries(entrypoints).map(([name, entrypoint]) => ({ name, ...entrypoint }));
 
 		cli.action.stop();
 
@@ -320,16 +357,23 @@ export default class Run extends BaseCommand {
 			}),
 		);
 
-		const entrypointPort = await getPort({ port: portRange });
+		const runEntrypointOptions = await Promise.all(
+			namedEntrypoints.map(async (entrypoint) => {
+				return {
+					entrypoint,
+					stack,
+					port: await getPort({ port: portRange }),
+				} as RunEntrypointTaskOptions;
+			}),
+		);
 
 		// Capture the results of running tasks to setup docker network, volume and service containers
 		const runTaskResults = await createRunTasks(
 			stack,
 			runTaskOptions,
 			runGatewayOptions,
+			runEntrypointOptions,
 			this.docker,
-			entrypointPort,
-			nitricStack.entrypoints,
 		).run();
 
 		// Capture created docker resources for cleanup on run termination (see cleanup())
@@ -351,18 +395,24 @@ export default class Run extends BaseCommand {
 			port: {},
 		});
 
-		cli.table(runGatewayOptions, {
-			api: {
-				get: (row): string => row.api && row.api.name,
-			},
-			port: {},
-		});
+		if (nitricStack.apis) {
+			cli.table(runGatewayOptions, {
+				api: {
+					get: (row): string => row.api && row.api.name,
+				},
+				port: {},
+			});
+		}
 
 		if (nitricStack.entrypoints) {
-			cli.url(
-				`Your application entrypoint is available at http://localhost:${entrypointPort}`,
-				`http://localhost:${entrypointPort}`,
-			);
+			cli.table(runEntrypointOptions, {
+				entrypoint: {
+					get: (row): string => row.entrypoint.name,
+				},
+				url: {
+					get: (row): string => `http://localhost:${row.port}`,
+				},
+			});
 		}
 
 		cli.action.start('Functions Running press ctrl-C quit');
@@ -420,7 +470,7 @@ export default class Run extends BaseCommand {
 
 			cli.action.stop();
 		} catch (error) {
-			console.error(error);
+			cli.error(error);
 			throw error;
 		}
 	};

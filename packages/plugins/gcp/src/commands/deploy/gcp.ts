@@ -129,7 +129,7 @@ export default class GcpDeploy extends BaseCommand {
 			throw new Error('Project must be provided');
 		}
 
-		const results = new Listr<any>([
+		const results = await new Listr<any>([
 			wrapTaskForListr(
 				new Deploy({
 					gcpProject: project,
@@ -141,8 +141,12 @@ export default class GcpDeploy extends BaseCommand {
 
 		const deployResult = results[DEPLOY_TASK_KEY] as DeployResult;
 
-		if (deployResult.entrypoint) {
-			cli.url(`Your application entrypoint is available at: ${deployResult.entrypoint}`, deployResult.entrypoint);
+		// Print deployed entrypoint urls to console
+		if (deployResult.entrypoints) {
+			cli.table(deployResult.entrypoints, {
+				entrypoint: {},
+				url: {},
+			});
 		}
 	}
 }
