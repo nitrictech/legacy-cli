@@ -61,7 +61,8 @@ export class Template {
 	 * @param template
 	 */
 	static async getDockerIgnoreFiles(template: Template): Promise<string[]> {
-		const dockerIgnoreFile = path.join(template.path, '.dockerignore');
+		// The dockerignore file will be conventionally named to operate with docker buildkit
+		const dockerIgnoreFile = path.join(template.path, 'Dockerfile.dockerignore');
 
 		if (fs.existsSync(dockerIgnoreFile)) {
 			// Read the file and return its contents split by new line

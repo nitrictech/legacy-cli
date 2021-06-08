@@ -32,6 +32,7 @@ export function createServiceSpec(
 				registryType: 'DOCR',
 				// TODO: Apply docker deployed repository here...
 				repository: image.name,
+				tag: image.imageDigest,
 			},
 			routes: Object.entries(entrypoint.paths)
 				.filter(([, opts]) => opts.target === name)

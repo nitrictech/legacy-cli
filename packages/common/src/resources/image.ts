@@ -47,6 +47,11 @@ export class NitricServiceImage extends pulumi.ComponentResource {
 	 */
 	public readonly baseImageName: pulumi.Output<string>;
 
+	/**
+	 * Unique image digest
+	 */
+	public readonly imageDigest: pulumi.Output<string>;
+
 	constructor(name, args: NitricServiceImageArgs, opts?: pulumi.ComponentResourceOptions) {
 		super('nitric:docker:Image', name, {}, opts);
 
@@ -72,13 +77,9 @@ export class NitricServiceImage extends pulumi.ComponentResource {
 						PROVIDER: nitricProvider,
 					},
 					env: {
-						// shm-size is incompatible with Buildkit, so must be disabled.
-						// See: https://github.com/docker/buildx/issues/418
-						DOCKER_BUILDKIT: '0',
+						DOCKER_BUILDKIT: '1',
 					},
 					dockerfile,
-					// Create a reasonable shared memory space for image builds
-					extraOptions: ['--shm-size', '1G'],
 				},
 				registry: {
 					server,
@@ -93,11 +94,13 @@ export class NitricServiceImage extends pulumi.ComponentResource {
 
 		this.imageUri = image.imageName;
 		this.name = image.imageName.apply((name) => name.split('/').pop()!.split(':')[0] as string);
+		this.imageDigest = image.imageName.apply((name) => name.split('/').pop()!.split(':')[1] as string);
 		this.baseImageName = image.baseImageName;
 
 		this.registerOutputs({
 			name: this.name,
 			imageUri: this.imageUri,
+			imageDigest: this.imageDigest,
 			baseImageName: this.baseImageName,
 		});
 	}
