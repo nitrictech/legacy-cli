@@ -61,7 +61,6 @@ export class BuildServiceTask extends Task<NitricImage> {
 					PROVIDER: this.provider,
 				},
 				t: this.service.getImageTagName(this.provider),
-				shmsize: 1000000000,
 				dockerfile,
 			};
 
