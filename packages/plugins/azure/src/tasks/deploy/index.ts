@@ -54,7 +54,7 @@ export class Deploy extends Task<void> {
 			const logFile = await stack.getLoggingFile('deploy:azure');
 			const pulumiStack = await LocalWorkspace.createOrSelectStack({
 				// TODO: Incorporate additional stack detail. E.g. dev/test/prod
-				stackName: 'azure',
+				stackName: `${stack.getName()}-azure`,
 				projectName: stack.getName(),
 				// generate our pulumi program on the fly from the POST body
 				program: async () => {
