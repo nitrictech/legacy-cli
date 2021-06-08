@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.51](https://github.com/nitrictech/cli/compare/v0.0.50...v0.0.51) (2021-06-08)
+
+
+### Bug Fixes
+
+* **common:** Remove superfluous makeDirectory in stack.pullTemplate ([80e8ab1](https://github.com/nitrictech/cli/commit/80e8ab16aa5871772c57228da8a3f1e24046311d))
+
 ### [0.0.50](https://github.com/nitrictech/cli/compare/v0.0.49...v0.0.50) (2021-06-07)
 
 
