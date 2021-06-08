@@ -228,7 +228,6 @@ export class Stack<
 	async pullTemplate(template: Template): Promise<void> {
 		const templateDir = await this.getTemplatesDirectory();
 		const templatePath = path.join(templateDir, template.getFullName());
-		await this.makeRelativeDirectory(templatePath);
 		await Template.copyTo(template, templatePath);
 	}
 
