@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.52](https://github.com/nitrictech/cli/compare/v0.0.51...v0.0.52) (2021-06-08)
+
+
+### Features
+
+* Enable buildkit. ([a5b6e40](https://github.com/nitrictech/cli/commit/a5b6e40a56725272de3c8d9b009aadd96736fc6a))
+* **common:** Add imageDigest as output for NitricServiceImage. ([7173e51](https://github.com/nitrictech/cli/commit/7173e519ff8b524e0d122e8a824c71f3dfe4067c))
+* **plugin-do:** Add image digest as tag for service spec. ([55e6fad](https://github.com/nitrictech/cli/commit/55e6fade229939d247fc873fcbd0c2c2ac2ed9af))
+
 ### [0.0.51](https://github.com/nitrictech/cli/compare/v0.0.50...v0.0.51) (2021-06-08)
 
 
