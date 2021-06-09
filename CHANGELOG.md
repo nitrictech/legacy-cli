@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.53](https://github.com/nitrictech/cli/compare/v0.0.52...v0.0.53) (2021-06-09)
+
+
+### Bug Fixes
+
+* Scope stack deployments with stackname & provider. ([0889758](https://github.com/nitrictech/cli/commit/08897580607d1eb6cb9c2155396a934a40be145d))
+
 ### [0.0.52](https://github.com/nitrictech/cli/compare/v0.0.51...v0.0.52) (2021-06-08)
 
 
