@@ -39,7 +39,7 @@ export class Down extends Task<void> {
 		try {
 			const pulumiStack = await LocalWorkspace.selectStack({
 				projectName: stackName,
-				stackName: 'gcp',
+				stackName: `${stackName}-gcp`,
 				// generate our pulumi program on the fly from the POST body
 				program: async () => {
 					/*no op*/

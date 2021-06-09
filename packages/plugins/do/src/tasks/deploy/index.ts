@@ -78,7 +78,7 @@ export class Deploy extends Task<DeployResults> {
 			const pulumiStack = await LocalWorkspace.createOrSelectStack({
 				// TODO: Incorporate additional stack detail. E.g. dev/test/prod
 				stackName: 'do',
-				projectName: stack.getName(),
+				projectName: `${stack.getName()}-do`,
 				// generate our pulumi program on the fly from the POST body
 				program: async () => {
 					// Now we can start deploying with Pulumi
