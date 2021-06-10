@@ -15,26 +15,26 @@
 import { Stack, Task, Repository, Template } from '@nitric/cli-common';
 import path from 'path';
 
-interface MakeFunctionTaskOpts {
+interface MakeServiceTaskOpts {
 	template: string;
 	dir?: string;
 	file?: string;
 	name: string;
 }
 
-export class MakeFunctionTask extends Task<void> {
-	public readonly functionName: string;
+export class MakeServiceTask extends Task<void> {
+	public readonly serviceName: string;
 	public readonly template: string;
 	public readonly file: string;
 	public readonly dir: string;
 
-	constructor({ template, name, file = './nitric.yaml', dir }: MakeFunctionTaskOpts) {
+	constructor({ template, name, file = './nitric.yaml', dir }: MakeServiceTaskOpts) {
 		super(`Making Service ${name}`);
 		this.template = template;
-		this.functionName = name;
+		this.serviceName = name;
 		this.file = file; // nitric file
-		//TODO: refactor normalizeFunctionName
-		this.dir = dir || name; // new function directory, relative to nitric file.
+		//TODO: refactor normalizeServiceName
+		this.dir = dir || name; // new service directory, relative to nitric file.
 	}
 
 	private async pullTemplate(stack: Stack): Promise<void> {
@@ -54,12 +54,12 @@ export class MakeFunctionTask extends Task<void> {
 	}
 
 	/**
-	 * Make a new function directory in the project, containing the code scaffold from the chosen template
+	 * Make a new service directory in the project, containing the code scaffold from the chosen template
 	 */
-	private async makeFunction(stack: Stack): Promise<void> {
+	private async makeService(stack: Stack): Promise<void> {
 		const template = await stack.getTemplate(this.template);
 		this.update(`${this.template} template available in stack`);
-		// Scaffold the new function using the code from the template
+		// Scaffold the new service using the code from the template
 		await Template.copyTemplateTo(template, this.dir);
 	}
 
@@ -73,13 +73,13 @@ export class MakeFunctionTask extends Task<void> {
 		this.update('Start Make');
 		const nitricProjectDirectory = path.dirname(nitricFile);
 
-		stack.addService(this.functionName, {
+		stack.addService(this.serviceName, {
 			path: path.relative(nitricProjectDirectory, this.dir),
 			runtime: this.template,
 		});
 
 		this.update('Scaffolding template code');
-		await this.makeFunction(stack);
+		await this.makeService(stack);
 
 		this.update(`Updating ${this.file}`);
 		await Stack.write(stack);
