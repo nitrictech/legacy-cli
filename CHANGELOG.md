@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.54](https://github.com/nitrictech/cli/compare/v0.0.53...v0.0.54) (2021-06-10)
+
+
+### Bug Fixes
+
+* add repo name to add repo task output ([7c76e2e](https://github.com/nitrictech/cli/commit/7c76e2e3856823c478b107fbd7369630f749792d))
+* **make:project:** install the correct repos when they're missing ([7582808](https://github.com/nitrictech/cli/commit/75828088b0fd9008a70fb97ba768780bdac7f6a8))
+
 ### [0.0.53](https://github.com/nitrictech/cli/compare/v0.0.52...v0.0.53) (2021-06-09)
 
 
