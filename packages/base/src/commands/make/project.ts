@@ -18,6 +18,7 @@ import { MakeProjectTask, MakeFunctionTask, AddRepositoryTask, UpdateStoreTask }
 import { Listr, ListrTask } from 'listr2';
 import cli from 'cli-ux';
 import inquirer from 'inquirer';
+import { OFFICIAL_REPOSITORIES } from '../../constants';
 
 const projectNameRegex = /^[a-z]+(-[a-z]+)*$/g;
 
@@ -56,7 +57,9 @@ export default class Project extends BaseCommand {
 
 		if (repos.length == 0) {
 			// XXX: Should we offer to fetch the official repository
-			const fetchOfficial = await cli.confirm('No repositories found, install the official repository? [y/n]');
+			const fetchOfficial = await cli.confirm(
+				'No repositories found, install the official template repositories? [y/n]',
+			);
 			if (!fetchOfficial) {
 				// XXX: Is this true or should we default to none as the template?
 				throw new Error(
@@ -67,7 +70,7 @@ export default class Project extends BaseCommand {
 			// Update the store and add the official repository
 			await new Listr([
 				wrapTaskForListr(new UpdateStoreTask()),
-				wrapTaskForListr(new AddRepositoryTask({ alias: 'official' })),
+				...OFFICIAL_REPOSITORIES.map((repo) => wrapTaskForListr(new AddRepositoryTask({ alias: repo }))),
 			]).run();
 
 			// Refresh templates
