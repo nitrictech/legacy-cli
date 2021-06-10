@@ -27,7 +27,7 @@ export class AddRepositoryTask extends Task<void> {
 	private alias: string;
 
 	constructor({ alias, url }: AddRepositoryTaskOptions) {
-		super('Add Repository');
+		super(`Add Repository: ${alias}`);
 		this.alias = alias;
 		this.url = url;
 	}
