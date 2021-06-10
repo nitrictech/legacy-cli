@@ -92,13 +92,13 @@ export default class Project extends BaseCommand {
 			const { serviceName } = await inquirer.prompt([
 				{
 					name: 'serviceName',
-					message: 'Name for the example function?',
+					message: 'Name for the example service?',
 					type: 'input',
 					default: 'example',
 				},
 			]);
 
-			// Create an example function to go along with the project
+			// Create an example service to go along with the project
 			commands = [
 				wrapTaskForListr(
 					new MakeFunctionTask({

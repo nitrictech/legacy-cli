@@ -29,7 +29,7 @@ export class MakeFunctionTask extends Task<void> {
 	public readonly dir: string;
 
 	constructor({ template, name, file = './nitric.yaml', dir }: MakeFunctionTaskOpts) {
-		super(`Making Function ${name}`);
+		super(`Making Service ${name}`);
 		this.template = template;
 		this.functionName = name;
 		this.file = file; // nitric file

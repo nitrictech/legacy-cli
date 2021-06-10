@@ -22,7 +22,7 @@ export function createBuildTasks(stack: Stack, directory: string, provider = 'lo
 	return new Listr(
 		[
 			{
-				title: 'Building Functions',
+				title: 'Building Services',
 				task: (_, task): Listr =>
 					task.newListr(
 						// Create a sub-task to build each service in the project

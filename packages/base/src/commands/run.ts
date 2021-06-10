@@ -389,7 +389,7 @@ export default class Run extends BaseCommand {
 
 		// Present a list of service and api containers and their ports on the cli
 		cli.table(runTaskOptions, {
-			function: {
+			service: {
 				get: (row): string => row.image && row.image.serviceName,
 			},
 			port: {},
@@ -415,7 +415,7 @@ export default class Run extends BaseCommand {
 			});
 		}
 
-		cli.action.start('Functions Running press ctrl-C quit');
+		cli.action.start('Services Running press ctrl-C quit');
 	};
 
 	/**
