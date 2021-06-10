@@ -52,7 +52,7 @@ export default class AddRepository extends BaseCommand {
 			await new UpdateStoreTask().run();
 			cli.action.stop();
 		} catch (e) {
-			cli.error('There was an issue downloading the nitric template store');
+			cli.error(e);
 		}
 
 		// if alias is undefined we should prompt for it
