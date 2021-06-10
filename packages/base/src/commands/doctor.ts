@@ -20,6 +20,7 @@ import chalk from 'chalk';
 import stream from 'stream';
 import fs from 'fs';
 import { InstallPulumi, InstallDocker, UpdateStoreTask, AddRepositoryTask } from '../tasks';
+import { OFFICIAL_REPOSITORIES } from '../constants';
 
 interface Software {
 	name: string;
@@ -135,8 +136,7 @@ export default class Doctor extends BaseCommand {
 
 			if (autoFixRepos) {
 				await new UpdateStoreTask().run();
-				await new AddRepositoryTask({ alias: 'function' }).run();
-				await new AddRepositoryTask({ alias: 'server' }).run();
+				await Promise.all(OFFICIAL_REPOSITORIES.map((repo) => new AddRepositoryTask({ alias: repo }).run()));
 			} else {
 				cli.info(
 					block`At least one template repository is required, make a new project or run ${chalk.cyan(
