@@ -14,25 +14,25 @@
 
 import { flags } from '@oclif/command';
 import { wrapTaskForListr, Repository, BaseCommand } from '@nitric/cli-common';
-import { MakeFunctionTask } from '../../tasks';
+import { MakeServiceTask } from '../../tasks';
 import { Listr } from 'listr2';
 import inquirer from 'inquirer';
 
-interface MakeFunctionArgs {
+interface MakeServiceArgs {
 	template: string;
 	name: string;
 }
 
-export default class Function extends BaseCommand {
-	static description = 'add a new function to a project';
+export default class Service extends BaseCommand {
+	static description = 'Adds a new service to a project';
 
-	static examples = ['$ nitric make:function'];
+	static examples = ['$ nitric make:service'];
 
 	static flags = {
 		...BaseCommand.flags,
 		directory: flags.string({
 			char: 'd',
-			description: 'Directory within the project where the new function should be made',
+			description: 'Directory within the project where the new service should be made',
 		}),
 		file: flags.string({
 			char: 'f',
@@ -44,7 +44,7 @@ export default class Function extends BaseCommand {
 		{
 			name: 'template',
 			required: false,
-			description: 'Function template',
+			description: 'Service template',
 			// TODO: Handle case where no templates are available. Prompt to install template(s).
 			// Present available templates from locally installed repositories
 			choices: (): string[] => {
@@ -60,15 +60,15 @@ export default class Function extends BaseCommand {
 		{
 			name: 'name',
 			required: false,
-			description: 'Function name',
+			description: 'Service name',
 		},
 	];
 
 	async do(): Promise<void> {
-		const { args, flags } = this.parse(Function);
+		const { args, flags } = this.parse(Service);
 
 		// Prompt for args that weren't provided
-		const prompts = Function.args
+		const prompts = Service.args
 			.filter((arg) => !args[arg.name])
 			.map((arg) => {
 				const prompt = {
@@ -84,21 +84,21 @@ export default class Function extends BaseCommand {
 			});
 
 		const promptArgs = await inquirer.prompt(prompts);
-		const { template, name } = { ...args, ...promptArgs } as MakeFunctionArgs;
+		const { template, name } = { ...args, ...promptArgs } as MakeServiceArgs;
 		const { directory = `./${name}`, file = './nitric.yaml' } = flags;
 
-		// Normalize function name to lower kebab case
-		const functionName = (name as string)
+		// Normalize service name to lower kebab case
+		const serviceName = (name as string)
 			.toLowerCase()
 			.replace(/ /g, '-')
 			.replace(/[^-a-z\d]/g, '');
 
 		await new Listr([
 			wrapTaskForListr(
-				new MakeFunctionTask({
+				new MakeServiceTask({
 					template,
 					dir: directory,
-					name: functionName,
+					name: serviceName,
 					file,
 				}),
 			),
