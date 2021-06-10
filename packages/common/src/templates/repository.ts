@@ -19,6 +19,7 @@ import path from 'path';
 import YAML from 'yaml';
 import rimraf from 'rimraf';
 import { gitP } from 'simple-git';
+import which from 'which';
 
 /**
  * Represents a template description inside a repository file
@@ -111,16 +112,18 @@ export class Repository {
 
 	/**
 	 * Load all repositories from a given directory
-	 * @param path containing repository sub-directories
+	 * @param repoDirPath containing repository sub-directories
 	 */
-	static fromDirectory(path: string): Repository[] {
+	static fromDirectory(repoDirPath: string): Repository[] {
 		try {
 			return fs
-				.readdirSync(path, {
+				.readdirSync(repoDirPath, {
 					withFileTypes: true,
 				})
-				.filter((dirent) => dirent.isDirectory() && fs.existsSync(`${TEMPLATE_DIR}/${dirent.name}/repository.yaml`))
-				.map((dirent) => Repository.fromFile(`${TEMPLATE_DIR}/${dirent.name}/repository.yaml`));
+				.filter(
+					(dirent) => dirent.isDirectory() && fs.existsSync(path.join(TEMPLATE_DIR, dirent.name, 'repository.yaml')),
+				)
+				.map((dirent) => Repository.fromFile(path.join(TEMPLATE_DIR, dirent.name, 'repository.yaml')));
 		} catch (e) {
 			// Gracefully fail
 			// We will return a suggestion in the front end if no repositories are found
@@ -161,11 +164,20 @@ export class Repository {
 
 		await fs.promises.mkdir(repositoryPath, { recursive: true });
 
-		const git = gitP(repositoryPath);
+		if (!which.sync('git', { nothrow: true })) {
+			throw new Error(
+				"Git not found! Nitric CLI relies on Git to retrieve template repositories. Ensure it's installed and available on path.",
+			);
+		}
 
-		await git.clone(url, '.', {
-			'--depth': 1,
-		});
+		try {
+			const git = gitP(repositoryPath);
+			await git.clone(url, '.', {
+				'--depth': 1,
+			});
+		} catch (error) {
+			throw new Error(`Failed to add repository ${url}.\nDetails: ${error}`);
+		}
 
 		return Repository.fromFile(path.join(repositoryPath, './repository.yaml'));
 	}
