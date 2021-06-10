@@ -19,7 +19,7 @@ import os from 'os';
 import stream from 'stream';
 
 const WIN32_INSTALL = oneLine`
-  "%SystemRoot%\System32\WindowsPowerShell\v1.0\powershell.exe" 
+  "%SystemRoot%/System32/WindowsPowerShell/v1.0/powershell.exe" 
   -NoProfile -InputFormat None -ExecutionPolicy Bypass -Command 
   "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; $version = '<version>'; iex ((New-Object System.Net.WebClient).DownloadString('https://get.pulumi.com/install.ps1')).Replace('\${latestVersion}', $version)" && SET "PATH=%PATH%;%USERPROFILE%\.pulumi\bin
 `;
