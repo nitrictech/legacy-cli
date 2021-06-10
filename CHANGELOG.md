@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.58](https://github.com/nitrictech/cli/compare/v0.0.57...v0.0.58) (2021-06-10)
+
+
+### Bug Fixes
+
+* check that docker daemon is running for run and build commands ([4413c06](https://github.com/nitrictech/cli/commit/4413c060a3c844e1d3229420e7e7cf04d244532a))
+
 ### [0.0.57](https://github.com/nitrictech/cli/compare/v0.0.56...v0.0.57) (2021-06-10)
 
 ### [0.0.56](https://github.com/nitrictech/cli/compare/v0.0.55...v0.0.56) (2021-06-10)
