@@ -17,6 +17,7 @@ import { wrapTaskForListr, Stack, NitricImage, BaseCommand } from '@nitric/cli-c
 import { BuildServiceTask } from '../tasks';
 import { Listr, ListrTask } from 'listr2';
 import path from 'path';
+import execa from 'execa';
 
 export function createBuildTasks(stack: Stack, directory: string, provider = 'local'): Listr {
 	return new Listr(
@@ -93,6 +94,13 @@ export default class Build extends BaseCommand {
 		const { directory = '.' } = args;
 		const { file = './nitric.yaml', provider = 'local' } = flags;
 		const stack = await Stack.fromFile(path.join(directory, file));
+
+		// Check docker daemon is running
+		try {
+			execa.sync('docker', ['ps']);
+		} catch {
+			throw new Error("Docker daemon not found! Ensure it's running.");
+		}
 
 		try {
 			return await createBuildTasks(stack, directory, provider).run();
