@@ -14,7 +14,7 @@
 
 import { flags } from '@oclif/command';
 import { wrapTaskForListr, Repository, BaseCommand } from '@nitric/cli-common';
-import { MakeProjectTask, MakeFunctionTask, AddRepositoryTask, UpdateStoreTask } from '../../tasks';
+import { MakeProjectTask, MakeServiceTask, AddRepositoryTask, UpdateStoreTask } from '../../tasks';
 import { Listr, ListrTask } from 'listr2';
 import cli from 'cli-ux';
 import inquirer from 'inquirer';
@@ -101,7 +101,7 @@ export default class Project extends BaseCommand {
 			// Create an example service to go along with the project
 			commands = [
 				wrapTaskForListr(
-					new MakeFunctionTask({
+					new MakeServiceTask({
 						template: example,
 						dir: `./${name}/${serviceName}/`,
 						file: `./${name}/nitric.yaml`,
