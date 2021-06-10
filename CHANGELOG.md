@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.56](https://github.com/nitrictech/cli/compare/v0.0.55...v0.0.56) (2021-06-10)
+
+
+### Bug Fixes
+
+* check for git when installing template store ([f40610f](https://github.com/nitrictech/cli/commit/f40610f19b28d18f53ef7e4edab2cd659201a0a2))
+* use correct slashes for windows powershell pulumi install ([ed30e33](https://github.com/nitrictech/cli/commit/ed30e338c37bcb1d5a8f53711c6b8ea2a571b4c6))
+
 ### [0.0.55](https://github.com/nitrictech/cli/compare/v0.0.54...v0.0.55) (2021-06-10)
 
 
