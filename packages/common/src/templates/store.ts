@@ -18,6 +18,7 @@ import { gitP } from 'simple-git';
 import rimraf from 'rimraf';
 import fs from 'fs';
 import YAML from 'yaml';
+import which from 'which';
 
 const NITRIC_TEMPLATE_STORE = 'https://github.com/nitrictech/template-store';
 
@@ -93,11 +94,20 @@ export class Store {
 
 		await fs.promises.mkdir(NITRIC_STORE_DIR, { recursive: true });
 
-		const git = gitP(NITRIC_STORE_DIR);
+		if (!which.sync('git', { nothrow: true })) {
+			throw new Error(
+				"Git not found! Nitric CLI relies on Git to retrieve the template store. Ensure it's installed and available on path.",
+			);
+		}
 
-		await git.clone(url, '.', {
-			'--depth': 1,
-		});
+		try {
+			const git = gitP(NITRIC_STORE_DIR);
+			await git.clone(url, '.', {
+				'--depth': 1,
+			});
+		} catch (error) {
+			throw new Error(`Failed retrieve template store ${url}.\nDetails: ${error}`);
+		}
 
 		return Store.fromDefault();
 	}
