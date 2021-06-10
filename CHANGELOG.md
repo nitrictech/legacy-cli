@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.55](https://github.com/nitrictech/cli/compare/v0.0.54...v0.0.55) (2021-06-10)
+
+
+### Bug Fixes
+
+* improve error handling when Git is missing ([75502d9](https://github.com/nitrictech/cli/commit/75502d90ae258c0602843ce1c714e1c36a557bb0))
+* remove literal path separator from repo file path ([fe77865](https://github.com/nitrictech/cli/commit/fe77865f7a255ddde1fecb854e6ccb393aca928b))
+
 ### [0.0.54](https://github.com/nitrictech/cli/compare/v0.0.53...v0.0.54) (2021-06-10)
 
 
