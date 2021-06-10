@@ -19,6 +19,7 @@ import path from 'path';
 import YAML from 'yaml';
 import rimraf from 'rimraf';
 import { gitP } from 'simple-git';
+import which from 'which';
 
 /**
  * Represents a template description inside a repository file
@@ -161,11 +162,20 @@ export class Repository {
 
 		await fs.promises.mkdir(repositoryPath, { recursive: true });
 
-		const git = gitP(repositoryPath);
+		if (!which.sync('git', { nothrow: true })) {
+			throw new Error(
+				"Git not found! Nitric CLI relies on Git to retrieve template repositories. Ensure it's installed and available on path.",
+			);
+		}
 
-		await git.clone(url, '.', {
-			'--depth': 1,
-		});
+		try {
+			const git = gitP(repositoryPath);
+			await git.clone(url, '.', {
+				'--depth': 1,
+			});
+		} catch (error) {
+			throw new Error(`Failed to add repository ${url}.\nDetails: ${error}`);
+		}
 
 		return Repository.fromFile(path.join(repositoryPath, './repository.yaml'));
 	}
