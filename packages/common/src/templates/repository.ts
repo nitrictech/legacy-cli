@@ -112,16 +112,18 @@ export class Repository {
 
 	/**
 	 * Load all repositories from a given directory
-	 * @param path containing repository sub-directories
+	 * @param repoDirPath containing repository sub-directories
 	 */
-	static fromDirectory(path: string): Repository[] {
+	static fromDirectory(repoDirPath: string): Repository[] {
 		try {
 			return fs
-				.readdirSync(path, {
+				.readdirSync(repoDirPath, {
 					withFileTypes: true,
 				})
-				.filter((dirent) => dirent.isDirectory() && fs.existsSync(`${TEMPLATE_DIR}/${dirent.name}/repository.yaml`))
-				.map((dirent) => Repository.fromFile(`${TEMPLATE_DIR}/${dirent.name}/repository.yaml`));
+				.filter(
+					(dirent) => dirent.isDirectory() && fs.existsSync(path.join(TEMPLATE_DIR, dirent.name, 'repository.yaml')),
+				)
+				.map((dirent) => Repository.fromFile(path.join(TEMPLATE_DIR, dirent.name, 'repository.yaml')));
 		} catch (e) {
 			// Gracefully fail
 			// We will return a suggestion in the front end if no repositories are found
