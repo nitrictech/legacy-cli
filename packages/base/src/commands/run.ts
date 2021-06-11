@@ -20,6 +20,7 @@ import path from 'path';
 import execa from 'execa';
 import Docker, { Container, Network, Volume } from 'dockerode';
 import getPort from 'get-port';
+import exitHook from 'exit-hook';
 import {
 	CreateNetworkTask,
 	CreateVolumeTask,
@@ -498,7 +499,7 @@ export default class Run extends BaseCommand {
 			await runContainers(stack, directory);
 
 			// Cleanup docker resources before exiting
-			process.once('SIGINT', cleanup);
+			exitHook(cleanup);
 		} catch (error) {
 			const origErrs: string[] = error.errors && error.errors.length ? error.errors : [error.stack];
 			throw new Error(`Something went wrong, see error details.\n ${origErrs.join('\n')}`);
