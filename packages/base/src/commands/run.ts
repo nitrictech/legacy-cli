@@ -498,7 +498,7 @@ export default class Run extends BaseCommand {
 			await runContainers(stack, directory);
 
 			// Cleanup docker resources before exiting
-			process.on('SIGINT', cleanup);
+			process.once('SIGINT', cleanup);
 		} catch (error) {
 			const origErrs: string[] = error.errors && error.errors.length ? error.errors : [error.stack];
 			throw new Error(`Something went wrong, see error details.\n ${origErrs.join('\n')}`);
