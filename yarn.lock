@@ -944,6 +944,7 @@ __metadata:
     "@types/rimraf": ^3.0.0
     "@types/stream-to-promise": ^2.2.1
     "@types/tar-fs": ^2.0.0
+    async-exit-hook: ^2.0.1
     chalk: ^4.1.0
     cli-ux: ^5.5.0
     common-tags: ^1.8.0
@@ -954,7 +955,6 @@ __metadata:
     eslint-config-oclif-typescript: ^0.1
     eventemitter3: ^4.0.7
     execa: ^4.0.3
-    exit-hook: ^2.2.1
     get-port: ^5.1.1
     globby: ^10
     inquirer: ^7.3.3
@@ -2582,6 +2582,13 @@ __metadata:
   version: 2.0.0
   resolution: "astral-regex@npm:2.0.0"
   checksum: bf049ee7048b70af5473580020f98faf09159af31a7fa5e223099966dc90e9e87760bd34030e19a6dcac05b45614b428f559bd71f027344d123555e524cb95ac
+  languageName: node
+  linkType: hard
+
+"async-exit-hook@npm:^2.0.1":
+  version: 2.0.1
+  resolution: "async-exit-hook@npm:2.0.1"
+  checksum: d44d00b334d6c268ffb184615c5319c12339ab6284f568e4f9810757d12853e4e138106ffb16b78303a5c5cf6b2032411531085a4b84c6bb5f98ce5a4108b1e0
   languageName: node
   linkType: hard
 
@@ -5231,13 +5238,6 @@ __metadata:
     signal-exit: ^3.0.3
     strip-final-newline: ^2.0.0
   checksum: bf9664702c981ae922ce465bc60d9bfd583e9ad47ab1a89168665e1fb330cc72f7080fda606bac85454bdc341198f454072018e616f0d03aa1e4b671ef04b94e
-  languageName: node
-  linkType: hard
-
-"exit-hook@npm:^2.2.1":
-  version: 2.2.1
-  resolution: "exit-hook@npm:2.2.1"
-  checksum: f736cdb82667ec9f7a697426d572ffc2ce4d32721332f9ab5d3d9a37a9c3ebd4fd26c61043fca1fbc1d9a767b604d56c6c3a0761bb054db6f911048dccb552b0
   languageName: node
   linkType: hard
 
