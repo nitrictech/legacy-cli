@@ -1,69 +1,70 @@
 {
-  "name": "nitric-cli",
-  "version": "0.0.61",
-  "description": "CLI monorepo for the Nitric framework",
-  "author": "Nitric <https://github.com/nitric-dev>",
-  "scripts": {
-    "build:common": "yarn workspace @nitric/cli-common build",
-    "prepack:aws": "yarn workspace @nitric/plugin-aws prepack",
-    "prepack:gcp": "yarn workspace @nitric/plugin-gcp prepack",
-    "prepack:azure": "yarn workspace @nitric/plugin-azure prepack",
-    "prepack:do": "yarn workspace @nitric/plugin-do prepack",
-    "prepack": "yarn prepack:aws && yarn prepack:gcp && yarn prepack:azure && yarn prepack:do",
-    "build": "yarn build:common && yarn prepack",
-    "lint:deps": "yarn dlx @yarnpkg/doctor@2.1.3",
-    "test": "prettier \"./**/*.{ts,js,css,md}\" --write && ultra -r test",
-    "bump": "standard-version",
-    "license:check": "yarn workspaces foreach run license:check",
-    "license:header:check": "license-check-and-add check -f ./licenseconfig.json",
-    "license:add": "license-check-and-add add -f ./licenseconfig.json",
-    "license:remove": "license-check-and-add remove -f ./licenseconfig.json",
-    "publish:all": "yarn workspaces foreach --no-private run npm:publish"
-  },
-  "contributors": [
-    "Jye Cusch <jye.cusch@gmail.com>",
-    "Tim Holm <timothy.j.holm@gmail.com>"
-  ],
-  "license": "Apache-2.0",
-  "private": true,
-  "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "^2.27.0",
-    "@typescript-eslint/parser": "^2.27.0",
-    "eslint": "^6.8.0",
-    "eslint-config-airbnb": "^18.1.0",
-    "eslint-config-prettier": "^6.11.0",
-    "eslint-plugin-import": "^2.21.2",
-    "eslint-plugin-jsx-a11y": "^6.3.0",
-    "eslint-plugin-mocha": "^8.0.0",
-    "eslint-plugin-node": "^11.1.0",
-    "eslint-plugin-react": "^7.20.0",
-    "eslint-plugin-react-hooks": "^4",
-    "eslint-plugin-unicorn": "^23.0.0",
-    "globby": "^11.0.1",
-    "husky": "^4.2.5",
-    "jest": "26.6.3",
-    "license-check-and-add": "^4.0.2",
-    "lint-staged": "^10.1.3",
-    "prettier": "^2.0.4",
-    "standard-version": "^9.0.0",
-    "typescript": "^4.0.5",
-    "ultra-runner": "^3.5.0"
-  },
-  "workspaces": [
-    "packages/base",
-    "packages/common",
-    "packages/plugins/*"
-  ],
-  "husky": {
-    "hooks": {
-      "pre-commit": "lint-staged"
-    }
-  },
-  "lint-staged": {
-    "./**/*.{ts,js,css,md}": "prettier --write",
-    "./**/*.{ts,js}": "eslint --fix-dry-run"
-  },
-  "dependencies": {
-    "rimraf": "^3.0.2"
-  }
+	"name": "nitric-cli",
+	"version": "0.0.61",
+	"description": "CLI monorepo for the Nitric framework",
+	"author": "Nitric <https://github.com/nitric-dev>",
+	"scripts": {
+		"build:common": "yarn workspace @nitric/cli-common build",
+		"prepack:aws": "yarn workspace @nitric/plugin-aws prepack",
+		"prepack:gcp": "yarn workspace @nitric/plugin-gcp prepack",
+		"prepack:azure": "yarn workspace @nitric/plugin-azure prepack",
+		"prepack:do": "yarn workspace @nitric/plugin-do prepack",
+		"prepack": "yarn prepack:aws && yarn prepack:gcp && yarn prepack:azure && yarn prepack:do",
+		"build": "yarn build:common && yarn prepack",
+		"lint:deps": "yarn dlx @yarnpkg/doctor@2.1.3",
+		"test": "prettier \"./**/*.{ts,js,css,md}\" --write && ultra -r test",
+		"bump": "standard-version",
+		"license:check": "yarn workspaces foreach run license:check",
+		"license:header:check": "license-check-and-add check -f ./licenseconfig.json",
+		"license:add": "license-check-and-add add -f ./licenseconfig.json",
+		"license:remove": "license-check-and-add remove -f ./licenseconfig.json",
+		"publish:all": "yarn workspaces foreach --no-private run npm:publish",
+		"nitric": "yarn workspace @nitric/cli nitric"
+	},
+	"contributors": [
+		"Jye Cusch <jye.cusch@gmail.com>",
+		"Tim Holm <timothy.j.holm@gmail.com>"
+	],
+	"license": "Apache-2.0",
+	"private": true,
+	"devDependencies": {
+		"@typescript-eslint/eslint-plugin": "^2.27.0",
+		"@typescript-eslint/parser": "^2.27.0",
+		"eslint": "^6.8.0",
+		"eslint-config-airbnb": "^18.1.0",
+		"eslint-config-prettier": "^6.11.0",
+		"eslint-plugin-import": "^2.21.2",
+		"eslint-plugin-jsx-a11y": "^6.3.0",
+		"eslint-plugin-mocha": "^8.0.0",
+		"eslint-plugin-node": "^11.1.0",
+		"eslint-plugin-react": "^7.20.0",
+		"eslint-plugin-react-hooks": "^4",
+		"eslint-plugin-unicorn": "^23.0.0",
+		"globby": "^11.0.1",
+		"husky": "^4.2.5",
+		"jest": "26.6.3",
+		"license-check-and-add": "^4.0.2",
+		"lint-staged": "^10.1.3",
+		"prettier": "^2.0.4",
+		"standard-version": "^9.0.0",
+		"typescript": "^4.0.5",
+		"ultra-runner": "^3.5.0"
+	},
+	"workspaces": [
+		"packages/base",
+		"packages/common",
+		"packages/plugins/*"
+	],
+	"husky": {
+		"hooks": {
+			"pre-commit": "lint-staged"
+		}
+	},
+	"lint-staged": {
+		"./**/*.{ts,js,css,md}": "prettier --write",
+		"./**/*.{ts,js}": "eslint --fix-dry-run"
+	},
+	"dependencies": {
+		"rimraf": "^3.0.2"
+	}
 }
