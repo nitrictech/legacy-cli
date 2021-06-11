@@ -1,73 +1,77 @@
 {
-  "name": "@nitric/plugin-aws",
-  "description": "An AWS plugin for Nitric",
-  "version": "0.0.58",
-  "author": "Nitric <https://github.com/nitric-dev>",
-  "bugs": "https://github.com/nitric-dev/cli/issues",
-  "dependencies": {
-    "@nitric/cli-common": "workspace:*",
-    "@oclif/command": "^1",
-    "@oclif/config": "^1",
-    "@pulumi/aws": "^4.4.1",
-    "@pulumi/docker": "^3.0.0",
-    "@pulumi/pulumi": "^3.1.0",
-    "aws-sdk": "^2.589.0",
-    "cli-ux": "^5.5.1",
-    "dockerode": "^3.2.1",
-    "enquirer": "^2.3.0",
-    "execa": "^5.0.0",
-    "inquirer": "^7.3.3",
-    "listr2": "^3.6.2",
-    "lodash": "^4.17.20",
-    "mime": "^2.5.2",
-    "openapi-types": "^7.2.3",
-    "tslib": "^1",
-    "yaml": "^1.10.0"
-  },
-  "devDependencies": {
-    "@oclif/dev-cli": "^1",
-    "@oclif/plugin-help": "^3.2.2",
-    "@types/lodash": "^4.14.168",
-    "@types/mime": "^2.0.3",
-    "@types/node": "^10",
-    "eslint": "^5.13",
-    "eslint-config-oclif": "^3.1",
-    "eslint-config-oclif-typescript": "^0.1",
-    "globby": "^10",
-    "jest": "^26.6.1",
-    "licensee": "^8.2.0",
-    "ts-jest": "^26.4.3",
-    "ts-node": "^8",
-    "typescript": "^3.3"
-  },
-  "engines": {
-    "node": ">=8.0.0"
-  },
-  "files": [
-    "/lib",
-    "/npm-shrinkwrap.json",
-    "/oclif.manifest.json",
-    "/yarn.lock"
-  ],
-  "homepage": "https://nitric.io",
-  "keywords": [
-    "oclif-plugin"
-  ],
-  "license": "Apache-2.0",
-  "oclif": {
-    "commands": "./lib/commands",
-    "bin": "oclif-example",
-    "devPlugins": [
-      "@oclif/plugin-help"
-    ]
-  },
-  "repository": "https://github.com/nitric-dev/cli",
-  "scripts": {
-    "postpack": "rm -f oclif.manifest.json",
-    "prepack": "rm -rf lib && tsc -p tsconfig.build.json && oclif-dev manifest && oclif-dev readme",
-    "test": "tsc --emitDeclarationOnly && jest --passWithNoTests",
-    "version": "oclif-dev readme && git add README.md",
-    "npm:publish": "yarn npm publish --access public --tolerate-republish",
-    "license:check": "licensee --production"
-  }
+	"name": "@nitric/plugin-aws",
+	"description": "An AWS plugin for Nitric",
+	"version": "0.0.58",
+	"author": "Nitric <https://github.com/nitrictech>",
+	"bugs": "https://github.com/nitrictech/cli/issues",
+	"dependencies": {
+		"@nitric/cli-common": "workspace:*",
+		"@oclif/command": "^1",
+		"@oclif/config": "^1",
+		"@pulumi/aws": "^4.4.1",
+		"@pulumi/docker": "^3.0.0",
+		"@pulumi/pulumi": "^3.1.0",
+		"aws-sdk": "^2.589.0",
+		"cli-ux": "^5.5.1",
+		"dockerode": "^3.2.1",
+		"enquirer": "^2.3.0",
+		"execa": "^5.0.0",
+		"inquirer": "^7.3.3",
+		"listr2": "^3.6.2",
+		"lodash": "^4.17.20",
+		"mime": "^2.5.2",
+		"openapi-types": "^7.2.3",
+		"tslib": "^1",
+		"yaml": "^1.10.0"
+	},
+	"devDependencies": {
+		"@oclif/dev-cli": "^1",
+		"@oclif/plugin-help": "^3.2.2",
+		"@types/lodash": "^4.14.168",
+		"@types/mime": "^2.0.3",
+		"@types/node": "^10",
+		"eslint": "^5.13",
+		"eslint-config-oclif": "^3.1",
+		"eslint-config-oclif-typescript": "^0.1",
+		"globby": "^10",
+		"jest": "^26.6.1",
+		"licensee": "^8.2.0",
+		"ts-jest": "^26.4.3",
+		"ts-node": "^8",
+		"typescript": "^3.3"
+	},
+	"engines": {
+		"node": ">=8.0.0"
+	},
+	"files": [
+		"/lib",
+		"/npm-shrinkwrap.json",
+		"/oclif.manifest.json",
+		"/yarn.lock"
+	],
+	"homepage": "https://nitric.io",
+	"keywords": [
+		"oclif-plugin"
+	],
+	"license": "Apache-2.0",
+	"oclif": {
+		"commands": "./lib/commands",
+		"bin": "oclif-example",
+		"devPlugins": [
+			"@oclif/plugin-help"
+		]
+	},
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/nitrictech/cli.git",
+		"directory": "packages/plugins/aws"
+	},
+	"scripts": {
+		"postpack": "rm -f oclif.manifest.json",
+		"prepack": "rm -rf lib && tsc -p tsconfig.build.json && oclif-dev manifest && oclif-dev readme",
+		"test": "tsc --emitDeclarationOnly && jest --passWithNoTests",
+		"version": "oclif-dev readme && git add README.md",
+		"npm:publish": "yarn npm publish --access public --tolerate-republish",
+		"license:check": "licensee --production"
+	}
 }
