@@ -1,72 +1,76 @@
 {
-  "name": "@nitric/plugin-gcp",
-  "description": "GCP plugin for Nitric",
-  "version": "0.0.58",
-  "author": "Nitric <https://github.com/nitric-dev>",
-  "bugs": "https://github.com/nitric-dev/cli/issues",
-  "dependencies": {
-    "@nitric/cli-common": "workspace:*",
-    "@oclif/command": "^1",
-    "@oclif/config": "^1",
-    "@pulumi/docker": "^3.0.0",
-    "@pulumi/gcp": "^5.4.0",
-    "@pulumi/pulumi": "^3.3.0",
-    "@pulumi/tls": "^3.2.0",
-    "api-spec-converter": "^2.11.4",
-    "cli-ux": "^5.5.1",
-    "enquirer": "^2.3.0",
-    "execa": "^5.0.0",
-    "googleapis": "^61.0.0",
-    "inquirer": "^8.0.0",
-    "listr2": "^3.6.2",
-    "mime": "^2.5.2",
-    "tslib": "^1"
-  },
-  "devDependencies": {
-    "@oclif/dev-cli": "^1",
-    "@oclif/plugin-help": "^3.2.2",
-    "@types/jest": "^26.0.15",
-    "@types/mime": "^2.0.3",
-    "@types/node": "^10",
-    "eslint": "^5.13",
-    "eslint-config-oclif": "^3.1",
-    "eslint-config-oclif-typescript": "^0.1",
-    "globby": "^10",
-    "jest": "^26.6.1",
-    "licensee": "^8.2.0",
-    "openapi-types": "^7.2.3",
-    "ts-jest": "^26.4.3",
-    "ts-node": "^8",
-    "typescript": "^3.3"
-  },
-  "engines": {
-    "node": ">=8.0.0"
-  },
-  "files": [
-    "/lib",
-    "/npm-shrinkwrap.json",
-    "/oclif.manifest.json",
-    "/yarn.lock"
-  ],
-  "homepage": "https://nitric.io",
-  "keywords": [
-    "oclif-plugin"
-  ],
-  "license": "Apache-2.0",
-  "oclif": {
-    "commands": "./lib/commands",
-    "bin": "oclif-example",
-    "devPlugins": [
-      "@oclif/plugin-help"
-    ]
-  },
-  "repository": "https://github.com/nitric-dev/cli",
-  "scripts": {
-    "postpack": "rm -f oclif.manifest.json",
-    "prepack": "rm -rf lib && tsc -p tsconfig.build.json && oclif-dev manifest && oclif-dev readme",
-    "test": "tsc --emitDeclarationOnly && jest --passWithNoTests",
-    "version": "oclif-dev readme && git add README.md",
-    "license:check": "licensee --production",
-    "npm:publish": "yarn npm publish --access public --tolerate-republish"
-  }
+	"name": "@nitric/plugin-gcp",
+	"description": "GCP plugin for Nitric",
+	"version": "0.0.58",
+	"author": "Nitric <https://github.com/nitrictech>",
+	"bugs": "https://github.com/nitrictech/cli/issues",
+	"dependencies": {
+		"@nitric/cli-common": "workspace:*",
+		"@oclif/command": "^1",
+		"@oclif/config": "^1",
+		"@pulumi/docker": "^3.0.0",
+		"@pulumi/gcp": "^5.4.0",
+		"@pulumi/pulumi": "^3.3.0",
+		"@pulumi/tls": "^3.2.0",
+		"api-spec-converter": "^2.11.4",
+		"cli-ux": "^5.5.1",
+		"enquirer": "^2.3.0",
+		"execa": "^5.0.0",
+		"googleapis": "^61.0.0",
+		"inquirer": "^8.0.0",
+		"listr2": "^3.6.2",
+		"mime": "^2.5.2",
+		"tslib": "^1"
+	},
+	"devDependencies": {
+		"@oclif/dev-cli": "^1",
+		"@oclif/plugin-help": "^3.2.2",
+		"@types/jest": "^26.0.15",
+		"@types/mime": "^2.0.3",
+		"@types/node": "^10",
+		"eslint": "^5.13",
+		"eslint-config-oclif": "^3.1",
+		"eslint-config-oclif-typescript": "^0.1",
+		"globby": "^10",
+		"jest": "^26.6.1",
+		"licensee": "^8.2.0",
+		"openapi-types": "^7.2.3",
+		"ts-jest": "^26.4.3",
+		"ts-node": "^8",
+		"typescript": "^3.3"
+	},
+	"engines": {
+		"node": ">=8.0.0"
+	},
+	"files": [
+		"/lib",
+		"/npm-shrinkwrap.json",
+		"/oclif.manifest.json",
+		"/yarn.lock"
+	],
+	"homepage": "https://nitric.io",
+	"keywords": [
+		"oclif-plugin"
+	],
+	"license": "Apache-2.0",
+	"oclif": {
+		"commands": "./lib/commands",
+		"bin": "oclif-example",
+		"devPlugins": [
+			"@oclif/plugin-help"
+		]
+	},
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/nitrictech/cli.git",
+		"directory": "packages/plugins/gcp"
+	},
+	"scripts": {
+		"postpack": "rm -f oclif.manifest.json",
+		"prepack": "rm -rf lib && tsc -p tsconfig.build.json && oclif-dev manifest && oclif-dev readme",
+		"test": "tsc --emitDeclarationOnly && jest --passWithNoTests",
+		"version": "oclif-dev readme && git add README.md",
+		"license:check": "licensee --production",
+		"npm:publish": "yarn npm publish --access public --tolerate-republish"
+	}
 }

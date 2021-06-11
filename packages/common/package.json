@@ -1,57 +1,64 @@
 {
-  "name": "@nitric/cli-common",
-  "version": "0.0.58",
-  "description": "Common Nitric typings and utility functions",
-  "author": "Nitric <https://github.com/nitric-dev>",
-  "main": "lib/index.js",
-  "scripts": {
-    "clean": "rimraf ./lib/",
-    "build": "yarn run clean && yarn run build:sources",
-    "build:sources": "tsc --project tsconfig.build.json --outDir ./lib/",
-    "test": "tsc --emitDeclarationOnly && jest",
-    "npm:publish": "yarn npm publish --access public --tolerate-republish",
-    "license:check": "licensee --production"
-  },
-  "contributors": [
-    "Jye Cusch <jye.cusch@gmail.com>",
-    "Tim Holm <timothy.j.holm@gmail.com>"
-  ],
-  "license": "Apache-2.0",
-  "dependencies": {
-    "@oclif/command": "^1",
-    "@oclif/config": "^1",
-    "@pulumi/docker": "^3.0.0",
-    "@pulumi/pulumi": "^3.1.0",
-    "common-tags": "^1.8.0",
-    "enquirer": "^2.3.0",
-    "eventemitter3": "^4.0.7",
-    "execa": "^5.0.0",
-    "inquirer": "^8.0.0",
-    "listr2": "^3.6.2",
-    "multimatch": "^5.0.0",
-    "rimraf": "^3.0.2",
-    "simple-git": "^2.37.0",
-    "stream-to-promise": "^3.0.0",
-    "tar-fs": "^2.1.1",
-    "tslib": "^1",
-    "universal-analytics": "^0.4.23",
-    "uuid": "^8.3.2",
-    "yaml": "^1.10.0"
-  },
-  "files": [
-    "/lib"
-  ],
-  "devDependencies": {
-    "@types/inquirer": "^7.3.1",
-    "@types/jest": "^26.0.15",
-    "@types/node": "^10",
-    "@types/stream-to-promise": "^2.2.1",
-    "@types/universal-analytics": "^0.4.4",
-    "@types/uuid": "^8.3.0",
-    "jest": "^26.6.1",
-    "licensee": "^8.2.0",
-    "openapi-types": "^7.2.3",
-    "ts-jest": "^26.4.3",
-    "typescript": "^3.3"
-  }
+	"name": "@nitric/cli-common",
+	"version": "0.0.58",
+	"description": "Common Nitric typings and utility functions",
+	"author": "Nitric <https://github.com/nitrictech>",
+	"bugs": "https://github.com/nitrictech/cli/issues",
+	"homepage": "https://nitric.io",
+	"main": "lib/index.js",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/nitrictech/cli.git",
+		"directory": "packages/common"
+	},
+	"scripts": {
+		"clean": "rimraf ./lib/",
+		"build": "yarn run clean && yarn run build:sources",
+		"build:sources": "tsc --project tsconfig.build.json --outDir ./lib/",
+		"test": "tsc --emitDeclarationOnly && jest",
+		"npm:publish": "yarn npm publish --access public --tolerate-republish",
+		"license:check": "licensee --production"
+	},
+	"contributors": [
+		"Jye Cusch <jye.cusch@gmail.com>",
+		"Tim Holm <timothy.j.holm@gmail.com>"
+	],
+	"license": "Apache-2.0",
+	"dependencies": {
+		"@oclif/command": "^1",
+		"@oclif/config": "^1",
+		"@pulumi/docker": "^3.0.0",
+		"@pulumi/pulumi": "^3.1.0",
+		"common-tags": "^1.8.0",
+		"enquirer": "^2.3.0",
+		"eventemitter3": "^4.0.7",
+		"execa": "^5.0.0",
+		"inquirer": "^8.0.0",
+		"listr2": "^3.6.2",
+		"multimatch": "^5.0.0",
+		"rimraf": "^3.0.2",
+		"simple-git": "^2.37.0",
+		"stream-to-promise": "^3.0.0",
+		"tar-fs": "^2.1.1",
+		"tslib": "^1",
+		"universal-analytics": "^0.4.23",
+		"uuid": "^8.3.2",
+		"yaml": "^1.10.0"
+	},
+	"files": [
+		"/lib"
+	],
+	"devDependencies": {
+		"@types/inquirer": "^7.3.1",
+		"@types/jest": "^26.0.15",
+		"@types/node": "^10",
+		"@types/stream-to-promise": "^2.2.1",
+		"@types/universal-analytics": "^0.4.4",
+		"@types/uuid": "^8.3.0",
+		"jest": "^26.6.1",
+		"licensee": "^8.2.0",
+		"openapi-types": "^7.2.3",
+		"ts-jest": "^26.4.3",
+		"typescript": "^3.3"
+	}
 }
