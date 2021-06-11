@@ -21,6 +21,7 @@
 		"enquirer": "^2.3.0",
 		"eventemitter3": "^4.0.7",
 		"execa": "^4.0.3",
+		"exit-hook": "^2.2.1",
 		"get-port": "^5.1.1",
 		"inquirer": "^7.3.3",
 		"listr2": "^3.6.2",
