@@ -499,7 +499,11 @@ export default class Run extends BaseCommand {
 			await runContainers(stack, directory);
 
 			// Cleanup docker resources before exiting
-			exitHook((callback) => cleanup().then(callback));
+			exitHook(async (callback) => {
+				cli.action.start('Exiting, please wait');
+				await cleanup();
+				callback();
+			});
 		} catch (error) {
 			const origErrs: string[] = error.errors && error.errors.length ? error.errors : [error.stack];
 			throw new Error(`Something went wrong, see error details.\n ${origErrs.join('\n')}`);
