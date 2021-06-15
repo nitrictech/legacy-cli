@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.63](https://github.com/nitrictech/cli/compare/v0.0.62...v0.0.63) (2021-06-15)
+
+
+### Bug Fixes
+
+* add exiting please wait message ([30a5c0d](https://github.com/nitrictech/cli/commit/30a5c0dafb1e5b752f414c010915725e682bb95b))
+
 ### [0.0.62](https://github.com/nitrictech/cli/compare/v0.0.61...v0.0.62) (2021-06-11)
 
 ### [0.0.61](https://github.com/nitrictech/cli/compare/v0.0.60...v0.0.61) (2021-06-11)
