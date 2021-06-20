@@ -19,6 +19,7 @@ import fs from 'fs';
 import path from 'path';
 import getPort from 'get-port';
 import streamToPromise from 'stream-to-promise';
+import { DOCKER_LABEL_RUN_ID } from '../../constants';
 
 const HTTP_PORT = 80;
 const NGINX_CONFIG_FILE = 'nginx.conf';
@@ -100,6 +101,7 @@ export interface RunEntrypointTaskOptions {
 	stack: Stack;
 	network?: Network;
 	port?: number;
+	runId: string;
 }
 
 /**
@@ -111,18 +113,20 @@ export class RunEntrypointTask extends Task<Container> {
 	private network?: Network;
 	private docker: Docker;
 	private port?: number;
+	private runId: string;
 
-	constructor({ entrypoint, stack, network, port }: RunEntrypointTaskOptions, docker: Docker) {
+	constructor({ entrypoint, stack, network, port, runId }: RunEntrypointTaskOptions, docker: Docker) {
 		super(`${entrypoint.name} - ${port}`);
 		this.entrypoint = entrypoint;
 		this.stack = stack;
 		this.network = network;
 		this.docker = docker;
 		this.port = port;
+		this.runId = runId;
 	}
 
 	async do(): Promise<Container> {
-		const { stack, network, docker } = this;
+		const { stack, network, docker, runId } = this;
 
 		if (!this.port) {
 			// Find any open port if none provided.
@@ -151,6 +155,9 @@ export class RunEntrypointTask extends Task<Container> {
 				[`${HTTP_PORT}/tcp`]: {},
 			},
 			Volumes: {},
+			Labels: {
+				[DOCKER_LABEL_RUN_ID]: runId,
+			},
 			HostConfig: {
 				NetworkMode: networkName,
 				PortBindings: {

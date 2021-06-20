@@ -18,6 +18,7 @@ import fs from 'fs';
 import getPort from 'get-port';
 import streamToPromise from 'stream-to-promise';
 import tar from 'tar-fs';
+import { DOCKER_LABEL_RUN_ID } from '../../constants';
 
 const GATEWAY_PORT = 8080;
 const NITRIC_BASE_API_GATEWAY_IMAGE = 'nitricimages/dev-api-gateway';
@@ -31,6 +32,7 @@ export interface RunGatewayTaskOptions {
 	port?: number;
 	docker: Docker;
 	network?: Network;
+	runId: string;
 }
 
 /**
@@ -65,18 +67,20 @@ export class RunGatewayTask extends Task<Container> {
 	private port?: number;
 	private network?: Network;
 	private docker: Docker;
+	private runId: string;
 
-	constructor({ stackName, api, port, docker, network }: RunGatewayTaskOptions) {
+	constructor({ stackName, api, port, docker, network, runId }: RunGatewayTaskOptions) {
 		super('Creating API Gateways');
 		this.stackName = stackName;
 		this.api = api;
 		this.port = port;
 		this.docker = docker;
 		this.network = network;
+		this.runId = runId;
 	}
 
 	async do(): Promise<Container> {
-		const { stackName, api, network } = this;
+		const { stackName, api, network, runId } = this;
 
 		if (!this.port) {
 			this.port = await getPort();
@@ -97,13 +101,16 @@ export class RunGatewayTask extends Task<Container> {
 
 		// Build a new image for this specific API Gateway
 		const dockerOptions = {
-			name: `${stackName}-${api.name}`,
+			name: `${stackName}-${api.name}-${runId}`,
 			// Pull the image from public docker repo
 			Image: NITRIC_BASE_API_GATEWAY_IMAGE,
 			ExposedPorts: {
 				[`${GATEWAY_PORT}/tcp`]: {},
 			},
 			Volumes: {},
+			Labels: {
+				[DOCKER_LABEL_RUN_ID]: runId,
+			},
 			HostConfig: {
 				NetworkMode: networkName,
 				PortBindings: {

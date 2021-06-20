@@ -17,6 +17,7 @@ import getPort from 'get-port';
 import Docker, { Container, Network, NetworkInspectInfo, ContainerCreateOptions, Volume } from 'dockerode';
 import { createNitricLogDir, functionLogFilePath } from '../../utils';
 import fs from 'fs';
+import { DOCKER_LABEL_RUN_ID } from '../../constants';
 
 const GATEWAY_PORT = 9001;
 
@@ -29,6 +30,7 @@ export interface RunServiceTaskOptions {
 	subscriptions?: Record<string, string[]>;
 	network?: Network;
 	volume?: Volume;
+	runId: string;
 }
 
 /**
@@ -41,8 +43,9 @@ export class RunServiceTask extends Task<Container> {
 	private network: Network | undefined;
 	private volume: Volume | undefined;
 	private subscriptions: Record<string, string[]> | undefined;
+	private runId: string;
 
-	constructor({ image, port, network, subscriptions, volume }: RunServiceTaskOptions, docker?: Docker) {
+	constructor({ image, port, network, subscriptions, volume, runId }: RunServiceTaskOptions, docker?: Docker) {
 		super(`${image.serviceName} - ${image.id.substring(0, 12)}`);
 		this.image = image;
 		this.port = port;
@@ -50,10 +53,11 @@ export class RunServiceTask extends Task<Container> {
 		this.network = network;
 		this.volume = volume;
 		this.subscriptions = subscriptions;
+		this.runId = runId;
 	}
 
 	async do(): Promise<Container> {
-		const { network, subscriptions, volume } = this;
+		const { network, subscriptions, volume, runId } = this;
 
 		if (!this.port) {
 			// Find any open port if none provided.
@@ -71,12 +75,15 @@ export class RunServiceTask extends Task<Container> {
 		}
 
 		const dockerOptions = {
-			name: this.image.serviceName,
+			name: `${this.image.serviceName}-${runId}`,
 			Env: [`LOCAL_SUBSCRIPTIONS=${JSON.stringify(subscriptions)}`],
 			ExposedPorts: {
 				[`${GATEWAY_PORT}/tcp`]: {},
 			},
 			Volumes: {},
+			Labels: {
+				[DOCKER_LABEL_RUN_ID]: runId,
+			},
 			HostConfig: {
 				NetworkMode: networkName,
 				PortBindings: {

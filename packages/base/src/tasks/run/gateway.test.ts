@@ -63,7 +63,12 @@ describe('GatewayRunTask', () => {
 		let container: Container;
 
 		beforeAll(async () => {
-			container = await new RunGatewayTask({ stackName: 'test', api: MOCK_API, docker: new Docker() }).do();
+			container = await new RunGatewayTask({
+				stackName: 'test',
+				api: MOCK_API,
+				docker: new Docker(),
+				runId: 'test-run',
+			}).do();
 		});
 
 		it('should pull the dev-api-gateway container', () => {

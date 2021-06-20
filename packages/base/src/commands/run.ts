@@ -32,6 +32,7 @@ import {
 	RunServiceTaskOptions,
 } from '../tasks';
 import { TaskWrapper } from 'listr2/dist/lib/task-wrapper';
+import crypto from 'crypto';
 
 interface KnownListrCtx {
 	network: Network;
@@ -223,6 +224,7 @@ export function createRunTasks(
 	apis: RunGatewayTaskOptions[],
 	entrypoints: RunEntrypointTaskOptions[],
 	docker: Docker,
+	runId: string,
 ): Listr {
 	// const entrypointsTask = entrypoints
 	// 	? [
@@ -236,11 +238,11 @@ export function createRunTasks(
 	return new Listr<ListrCtx>(
 		[
 			// Create ephemeral docker network for this run
-			wrapTaskForListr(new CreateNetworkTask({ name: `${stack.getName()}-net`, docker }), 'network'),
+			wrapTaskForListr(new CreateNetworkTask({ name: `${stack.getName()}-net-${runId}`, docker }), 'network'),
 			// Create ephemeral docker volume for this run
 			wrapTaskForListr(
 				new CreateVolumeTask({
-					volumeName: `${stack.getName()}-vol`,
+					volumeName: `${stack.getName()}-vol-${runId}`,
 					dockerClient: docker,
 				}),
 				'volume',
@@ -319,7 +321,7 @@ export default class Run extends BaseCommand {
 	/**
 	 * Runs a container for each service, api and entrypoint in the Nitric Stack
 	 */
-	runContainers = async (stack: Stack, directory: string): Promise<void> => {
+	runContainers = async (stack: Stack, directory: string, runId: string): Promise<void> => {
 		const nitricStack = stack.asNitricStack();
 		const { apis = {}, entrypoints = {} } = nitricStack;
 		const namedApis = Object.keys(apis).map((name) => ({ name, ...apis[name] }));
@@ -343,16 +345,18 @@ export default class Run extends BaseCommand {
 			namedApis.map(async (api) => {
 				return {
 					stackName: nitricStack.name,
+					runId,
 					api,
 					port: await getPort({ port: portRange }),
 				} as RunGatewayTaskOptions;
 			}),
 		);
 
-		const runTaskOptions = await Promise.all(
+		const runServicesTaskOptions = await Promise.all(
 			images.map(async (image) => {
 				return {
 					image,
+					runId,
 					port: await getPort({ port: portRange }),
 					subscriptions: getContainerSubscriptions(nitricStack),
 				} as RunServiceTaskOptions;
@@ -364,6 +368,7 @@ export default class Run extends BaseCommand {
 				return {
 					entrypoint,
 					stack,
+					runId,
 					port: await getPort({ port: portRange }),
 				} as RunEntrypointTaskOptions;
 			}),
@@ -372,10 +377,11 @@ export default class Run extends BaseCommand {
 		// Capture the results of running tasks to setup docker network, volume and service containers
 		const runTaskResults = await createRunTasks(
 			stack,
-			runTaskOptions,
+			runServicesTaskOptions,
 			runGatewayOptions,
 			runEntrypointOptions,
 			this.docker,
+			runId,
 		).run();
 
 		// Capture created docker resources for cleanup on run termination (see cleanup())
@@ -390,7 +396,7 @@ export default class Run extends BaseCommand {
 		this.runningContainers = results;
 
 		// Present a list of service and api containers and their ports on the cli
-		cli.table(runTaskOptions, {
+		cli.table(runServicesTaskOptions, {
 			service: {
 				get: (row): string => row.image && row.image.serviceName,
 			},
@@ -494,9 +500,21 @@ export default class Run extends BaseCommand {
 			throw new Error("Docker daemon not found! Ensure it's running.");
 		}
 
+		// Generate a random 8 char string, used to avoid name collisions
+		// also assists with finding resources to delete on cleanup
+		const runId: string = await new Promise((res, rej) => {
+			crypto.randomBytes(4, (err, buffer) => {
+				if (err) {
+					rej(err);
+				} else {
+					res(buffer.toString('hex'));
+				}
+			});
+		});
+
 		// Run the stack
 		try {
-			await runContainers(stack, directory);
+			await runContainers(stack, directory, runId);
 
 			// Cleanup docker resources before exiting
 			exitHook(async (callback) => {
