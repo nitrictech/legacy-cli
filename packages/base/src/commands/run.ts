@@ -502,8 +502,8 @@ export default class Run extends BaseCommand {
 
 		// Generate a random 8 char string, used to avoid name collisions
 		// also assists with finding resources to delete on cleanup
-		const runId = await new Promise((res, rej) => {
-			crypto.randomBytes(4, function (err, buffer) {
+		const runId: string = await new Promise((res, rej) => {
+			crypto.randomBytes(4, (err, buffer) => {
 				if (err) {
 					rej(err);
 				} else {
