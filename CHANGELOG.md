@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.64](https://github.com/nitrictech/cli/compare/v0.0.63...v0.0.64) (2021-06-20)
+
+
+### Features
+
+* add unique run id to local run resources ([cc553f9](https://github.com/nitrictech/cli/commit/cc553f9d07eb99afad59aa8fab7c718fd29e0d65))
+
 ### [0.0.63](https://github.com/nitrictech/cli/compare/v0.0.62...v0.0.63) (2021-06-15)
 
 
