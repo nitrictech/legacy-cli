@@ -245,6 +245,7 @@ describe('RunEntrypointsTask', () => {
 					entrypoint: { name: 'main', ...entrypoint },
 					port: 1234,
 					stack: testStack,
+					runId: 'test-run',
 				},
 				mockDocker,
 			).do();

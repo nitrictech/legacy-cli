@@ -46,6 +46,7 @@ describe('Given a Nitric function is being run locally as a container', () => {
 				id: 'test-id',
 				serviceName: 'test-function',
 			},
+			runId: 'test-run',
 			// port: 3000, network: '', subscriptions: '', volume: '',
 		});
 
@@ -64,6 +65,7 @@ describe('Given a Nitric function is being run locally as a container', () => {
 					id: 'test-id',
 					serviceName: 'test-function',
 				},
+				runId: 'test-run',
 				// port: 3000, network: '', subscriptions: '', volume: '',
 			});
 
@@ -98,6 +100,7 @@ describe('Given a Nitric function is being run locally as a container', () => {
 				id: 'test-id',
 				serviceName: 'test-function',
 			},
+			runId: 'test-run',
 		};
 
 		test('The status code should be logged', async () => {
@@ -142,6 +145,7 @@ describe('Given a Nitric function is being run locally as a container', () => {
 						};
 					},
 				} as any,
+				runId: 'test-run',
 			});
 
 			const mockInstance = mocked(Docker, true).mock.instances[0];
@@ -178,6 +182,7 @@ describe('Given a Nitric function is being run locally as a container', () => {
 					},
 					// port: 3000,
 					network: new Network(null, 'dummy-network'),
+					runId: 'test-run',
 					// subscriptions: '',
 					// volume: '',
 				});
@@ -199,6 +204,7 @@ describe('Given a Nitric function is being run locally as a container', () => {
 					},
 					// port: 3000,
 					network: new Network(null, 'dummy-network'),
+					runId: 'test-run',
 					// subscriptions: '',
 					// volume: '',
 				});
@@ -235,6 +241,7 @@ describe('Given a Nitric function is being run locally as a container', () => {
 				volume: {
 					name: 'dummy-volume',
 				} as any,
+				runId: 'test-run',
 			});
 
 			const mockInstance = mocked(Docker, true).mock.instances[0];
