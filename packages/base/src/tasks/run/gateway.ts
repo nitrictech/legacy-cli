@@ -91,7 +91,7 @@ export class RunGatewayTask extends Task<Container> {
 			try {
 				networkName = ((await network?.inspect()) as NetworkInspectInfo).Name;
 			} catch (error) {
-				console.warn(`Failed to set custom docker network, defaulting to bridge network`);
+				console.warn(`Failed to set custom docker network for stack '${stackName}', defaulting to bridge network`);
 			}
 		}
 

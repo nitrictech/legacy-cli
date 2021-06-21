@@ -20,7 +20,6 @@ import path from 'path';
 import getPort from 'get-port';
 import streamToPromise from 'stream-to-promise';
 import { DOCKER_LABEL_RUN_ID } from '../../constants';
-import { cli } from 'cli-ux';
 
 const HTTP_PORT = 80;
 const NGINX_CONFIG_FILE = 'nginx.conf';
@@ -58,6 +57,7 @@ export function createNginxConfig(entrypoint: NamedObject<NitricEntrypoint>, sta
 		if (!path.type) {
 			throw new Error(`Missing type property for path '${path.path}' in entrypoint '${entrypoint.name}'`);
 		}
+		return path;
 	});
 
 	const sites = paths.filter((e) => e.type === 'site');

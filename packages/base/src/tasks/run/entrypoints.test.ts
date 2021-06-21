@@ -13,7 +13,7 @@
 // limitations under the License.
 
 //import jest from "jest";
-import { Stack, Site } from '@nitric/cli-common';
+import { Stack, Site, NitricEntrypoint } from '@nitric/cli-common';
 import * as EPS from './entrypoints';
 import fs from 'fs';
 import Docker from 'dockerode';
@@ -103,7 +103,7 @@ describe('createNginxConfig', () => {
 
 			expect(config).toContain(`
 				location / {
-					proxy_pass http://dummy-stack-test:8080;
+					proxy_pass http://api-test:8080;
 				}
 			`);
 		});
@@ -113,12 +113,15 @@ describe('createNginxConfig', () => {
 // Stage the nginx config
 describe('stageStackEntrypoints', () => {
 	let writeFileSpy: jest.SpyInstance;
+	let writeStagingDirSpy: jest.SpyInstance;
 	beforeAll(() => {
 		writeFileSpy = jest.spyOn(fs.promises, 'writeFile').mockImplementation(() => Promise.resolve());
+		writeStagingDirSpy = jest.spyOn(fs.promises, 'mkdir').mockImplementation(() => Promise.resolve());
 	});
 
 	afterAll(() => {
 		writeFileSpy.mockRestore();
+		writeStagingDirSpy.mockRestore();
 	});
 
 	describe('given any nginx config & stack', () => {
@@ -136,7 +139,7 @@ describe('stageStackEntrypoints', () => {
 			},
 		});
 		// TODO: We should probably mock this out...
-		const entrypoint = stack.asNitricStack().entrypoints!.main;
+		const entrypoint: NitricEntrypoint = stack.asNitricStack().entrypoints!.main;
 		const config = EPS.createNginxConfig({ name: 'main', ...entrypoint }, stack);
 
 		beforeAll(() => {
@@ -144,10 +147,12 @@ describe('stageStackEntrypoints', () => {
 		});
 
 		it('should write it to the stacks staging directory', () => {
+			expect(writeStagingDirSpy).toBeCalledTimes(1);
 			expect(writeFileSpy).toBeCalledTimes(1);
 		});
 
 		it('should write to the stacks staging directory', () => {
+			expect(writeStagingDirSpy).toBeCalledWith(stack.getStagingDirectory(), expect.anything());
 			expect(writeFileSpy).toBeCalledWith(`${stack.getStagingDirectory()}/nginx.conf`, expect.anything());
 		});
 
@@ -255,7 +260,7 @@ describe('RunEntrypointsTask', () => {
 			expect(createContainerMock).toBeCalledTimes(1);
 			expect(createContainerMock).toBeCalledWith(
 				expect.objectContaining({
-					name: 'test-main',
+					name: 'entry-main-test-run',
 					Image: 'nginx',
 				}),
 			);
