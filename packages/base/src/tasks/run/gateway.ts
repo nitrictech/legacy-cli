@@ -91,7 +91,7 @@ export class RunGatewayTask extends Task<Container> {
 			try {
 				networkName = ((await network?.inspect()) as NetworkInspectInfo).Name;
 			} catch (error) {
-				console.warn(`Failed to set custom docker network, defaulting to bridge network`);
+				console.warn(`Failed to set custom docker network for stack '${stackName}', defaulting to bridge network`);
 			}
 		}
 
@@ -101,7 +101,7 @@ export class RunGatewayTask extends Task<Container> {
 
 		// Build a new image for this specific API Gateway
 		const dockerOptions = {
-			name: `${stackName}-${api.name}-${runId}`,
+			name: `api-${api.name}-${runId}`,
 			// Pull the image from public docker repo
 			Image: NITRIC_BASE_API_GATEWAY_IMAGE,
 			ExposedPorts: {
@@ -119,6 +119,13 @@ export class RunGatewayTask extends Task<Container> {
 							HostPort: `${this.port}/tcp`,
 						},
 					],
+				},
+			},
+			NetworkingConfig: {
+				EndpointsConfig: {
+					[networkName]: {
+						Aliases: [`api-${api.name}`],
+					},
 				},
 			},
 		} as ContainerCreateOptions;

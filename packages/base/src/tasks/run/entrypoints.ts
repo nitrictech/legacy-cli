@@ -29,6 +29,7 @@ const NGINX_CONFIG_FILE = 'nginx.conf';
  */
 export async function stageStackEntrypoint(stack: Stack, nginxConf: string): Promise<void> {
 	// Get the staging directory for the stack
+	await fs.promises.mkdir(stack.getStagingDirectory(), { recursive: true });
 	const configFile = path.join(stack.getStagingDirectory(), NGINX_CONFIG_FILE);
 	await fs.promises.writeFile(configFile, nginxConf);
 }
@@ -45,10 +46,19 @@ export function createNginxConfig(entrypoint: NamedObject<NitricEntrypoint>, sta
 		throw new Error('Cannot create nginx config for stack with no entrypoints');
 	}
 
-	const paths = Object.keys(entrypoint.paths).map((p) => ({
-		path: p,
-		...entrypoint.paths[p],
-	}));
+	const paths = Object.keys(entrypoint.paths).map((p) => {
+		const path = {
+			path: p,
+			...entrypoint.paths[p],
+		};
+		if (!path.target) {
+			throw new Error(`Missing target property for path '${path.path}' in entrypoint '${entrypoint.name}'`);
+		}
+		if (!path.type) {
+			throw new Error(`Missing type property for path '${path.path}' in entrypoint '${entrypoint.name}'`);
+		}
+		return path;
+	});
 
 	const sites = paths.filter((e) => e.type === 'site');
 	const apis = paths.filter((e) => e.type === 'api');
@@ -73,7 +83,7 @@ export function createNginxConfig(entrypoint: NamedObject<NitricEntrypoint>, sta
 				.map(
 					(a) => `
 				location ${a.path} {
-					proxy_pass http://${stack.getName()}-${a.target}:8080;
+					proxy_pass http://api-${a.target}:8080;
 				}
 			`,
 				)
@@ -148,7 +158,7 @@ export class RunEntrypointTask extends Task<Container> {
 		this.stack.asNitricStack().entrypoints;
 
 		const dockerOptions = {
-			name: `${stack.getName()}-${this.entrypoint.name}`,
+			name: `entry-${this.entrypoint.name}-${runId}`,
 			// Pull nginx
 			Image: 'nginx',
 			ExposedPorts: {

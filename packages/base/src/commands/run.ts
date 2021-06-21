@@ -266,6 +266,9 @@ export function createRunTasks(
 		{
 			// Added to allow custom handling of SIGINT for run cmd cleanup.
 			registerSignalListeners: false,
+			rendererOptions: {
+				collapseErrors: false,
+			},
 		},
 	);
 }
