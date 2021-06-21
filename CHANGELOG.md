@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.65](https://github.com/nitrictech/cli/compare/v0.0.64...v0.0.65) (2021-06-21)
+
+
+### Bug Fixes
+
+* don't collapse errors on run ([3401796](https://github.com/nitrictech/cli/commit/34017968961db704e8730333982cddd0d919827c))
+* runIds for gateways and api names ([259af75](https://github.com/nitrictech/cli/commit/259af75dbeeb1b2201ce56c8e1813342375ca068))
+
 ### [0.0.64](https://github.com/nitrictech/cli/compare/v0.0.63...v0.0.64) (2021-06-20)
 
 
