@@ -17,6 +17,7 @@ import { BaseCommand, wrapTaskForListr, Stack } from '@nitric/cli-common';
 import { Listr } from 'listr2';
 import path from 'path';
 import { Down } from '../../tasks/down';
+import { constants } from '@nitric/cli-common';
 
 export default class DownCmd extends BaseCommand {
 	static description = 'tear down a stack previously deployed to Azure using `$ nitric deploy:azure`';
@@ -39,7 +40,7 @@ export default class DownCmd extends BaseCommand {
 		const stack = (await Stack.fromFile(stackDefinitionPath)).asNitricStack();
 
 		try {
-			await new Listr([wrapTaskForListr(new Down({ stack }))]).run();
+			await new Listr([wrapTaskForListr(new Down({ stack }))], constants.DEFAULT_LISTR_OPTIONS).run();
 		} catch (error) {
 			// eat this error to avoid duplicate console output.
 		}

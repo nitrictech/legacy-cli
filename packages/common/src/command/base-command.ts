@@ -15,6 +15,8 @@ import { Command, flags } from '@oclif/command';
 import { AnalyticsClient } from '../analytics';
 import { Preferences } from '../preferences';
 import { Config } from '../config';
+import { Stack } from '../stack';
+import fs from 'fs';
 
 /**
  * Base for all CLI Commands
@@ -70,6 +72,13 @@ export abstract class BaseCommand extends Command {
 
 		// Set global config CI mode the the provided ci flag...
 		Config.get().ciMode = ci;
+	
+		// Remove unhandled promise rejection listeners
+		// Tasks will provide a wrapper that catches and handles these...	
+		process.listeners('unhandledRejection').forEach((l) => {
+			process.removeListener('unhandledRejection', l);
+			return l;
+		});
 
 		const requiredInit = Preferences.requiresInit();
 
@@ -78,19 +87,24 @@ export abstract class BaseCommand extends Command {
 		const cmd = analyticsClient.command(this.ctor.name);
 		cmd.start();
 		let results: any = undefined;
+		// let exitStatus = 0;
 		try {
 			if (requiredInit) {
 				console.log('Running:', this.ctor.name);
 			}
 			results = await this.do();
+			return results;
 		} catch (e) {
 			cmd.error(e, true);
-			throw e; // re-throw so users get error feedback and can report issues.
+			const stack = await Stack.fromDirectory(".");
+			const file = await stack.getLoggingFile(`error:${this.ctor.name}`);
+			fs.appendFileSync(file, e);
+			fs.appendFileSync(file, e.stack);
+
+			throw new Error(`An error occurred, See ${file} for details`); // re-throw so users get error feedback and can report issues.
 		} finally {
 			await cmd.stop();
 		}
-
-		return results;
 	}
 
 	abstract do(): Promise<any>;

@@ -44,7 +44,7 @@ export function wrapTaskForListr<T>(
 			const result = await t.run(...args);
 			ctx[contextKey] = result;
 			return result;
-		},
+		}
 	};
 }
 
@@ -88,3 +88,4 @@ export * from './analytics';
 export * from './config';
 export * from './preferences';
 export * from './resources';
+export * as constants from './constants';

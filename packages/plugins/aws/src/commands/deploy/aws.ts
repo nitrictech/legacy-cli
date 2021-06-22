@@ -14,7 +14,7 @@
 
 import { flags } from '@oclif/command';
 import { Deploy, DEPLOY_TASK_KEY, DeployResult } from '../../tasks/deploy';
-import { BaseCommand, wrapTaskForListr, Stack } from '@nitric/cli-common';
+import { BaseCommand, wrapTaskForListr, Stack, constants } from '@nitric/cli-common';
 import { Listr } from 'listr2';
 import path from 'path';
 import AWS from 'aws-sdk';
@@ -97,32 +97,28 @@ export default class AwsDeploy extends BaseCommand {
 		const stackDefinitionPath = path.join(dir, file);
 		const stack = await Stack.fromFile(stackDefinitionPath);
 
-		try {
-			const results = await new Listr<any>([wrapTaskForListr(new Deploy({ stack, account: accountId, region }))]).run();
+		const results = await new Listr<any>([wrapTaskForListr(new Deploy({ stack, account: accountId, region }))], constants.DEFAULT_LISTR_OPTIONS).run();
 
-			const deployResult = results[DEPLOY_TASK_KEY] as DeployResult;
+		const deployResult = results[DEPLOY_TASK_KEY] as DeployResult;
 
-			if (deployResult.entrypoints) {
-				cli.log('Your application entrypoints should be available at:');
+		if (deployResult.entrypoints) {
+			cli.log('Your application entrypoints should be available at:');
 
-				cli.table(deployResult.entrypoints, {
-					name: {
-						get: ({ name }): string => name,
-					},
-					url: {
-						get: ({ url }): string => url,
-					},
-					domains: {
-						get: ({ domains = [] }): string => domains.join(', '),
-					},
-				});
+			cli.table(deployResult.entrypoints, {
+				name: {
+					get: ({ name }): string => name,
+				},
+				url: {
+					get: ({ url }): string => url,
+				},
+				domains: {
+					get: ({ domains = [] }): string => domains.join(', '),
+				},
+			});
 
-				cli.log(
-					`If you have specified any custom domains for these entrypoints you will need to add CNAME records for the hostnames in the urls above`,
-				);
-			}
-		} catch (error) {
-			// eat this error to avoid duplicate console output.
+			cli.log(
+				`If you have specified any custom domains for these entrypoints you will need to add CNAME records for the hostnames in the urls above`,
+			);
 		}
 	}
 }

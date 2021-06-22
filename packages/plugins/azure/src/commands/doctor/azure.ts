@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { BaseCommand, wrapTaskForListr } from '@nitric/cli-common';
+import { BaseCommand, constants, wrapTaskForListr } from '@nitric/cli-common';
 import cli from 'cli-ux';
 import { Listr } from 'listr2';
 import { CheckPulumiPluginTask, InstallPulumiPluginTask } from '../../tasks/doctor';
@@ -40,7 +40,7 @@ export default class AzureDoctor extends BaseCommand {
 				factory: () => new InstallPulumiPluginTask(),
 				skip: (ctx) => ctx.installed,
 			}),
-		]).run();
+		], constants.DEFAULT_LISTR_OPTIONS).run();
 
 		cli.info("Good to go 👍 You're ready to deploy to Azure with Nitric 🎉");
 	}
