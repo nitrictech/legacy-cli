@@ -147,7 +147,7 @@ export class RunServiceTask extends Task<Container> {
 				}
 
 				if (data && data.StatusCode) {
-					console.log('Status: ' + data.StatusCode);
+					console.log(`${this.name} exited with status code: ${data.StatusCode}`);
 				}
 			},
 		);
