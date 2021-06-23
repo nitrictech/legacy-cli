@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.67](https://github.com/nitrictech/cli/compare/v0.0.66...v0.0.67) (2021-06-23)
+
+
+### Bug Fixes
+
+* Handle promise rejections from pulumi tasks. ([c15696b](https://github.com/nitrictech/cli/commit/c15696b8dabe46785ab50f6be6de0c2d8b685d48))
+
 ### [0.0.66](https://github.com/nitrictech/cli/compare/v0.0.65...v0.0.66) (2021-06-23)
 
 
