@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { BaseCommand, wrapTaskForListr } from '@nitric/cli-common';
+import { BaseCommand, constants, wrapTaskForListr } from '@nitric/cli-common';
 import cli from 'cli-ux';
 import { Listr } from 'listr2';
 import { CheckPulumiPlugins, InstallAWSPulumiPlugin } from '../../tasks/doctor';
@@ -33,14 +33,17 @@ export default class AwsDoctor extends BaseCommand {
 	static args = [];
 
 	async do(): Promise<void> {
-		await new Listr<any>([
-			wrapTaskForListr(new CheckPulumiPlugins(), 'installed'),
-			wrapTaskForListr({
-				name: 'Install AWS Plugin',
-				factory: () => new InstallAWSPulumiPlugin(),
-				skip: (ctx) => ctx.installed,
-			}),
-		]).run();
+		await new Listr<any>(
+			[
+				wrapTaskForListr(new CheckPulumiPlugins(), 'installed'),
+				wrapTaskForListr({
+					name: 'Install AWS Plugin',
+					factory: () => new InstallAWSPulumiPlugin(),
+					skip: (ctx) => ctx.installed,
+				}),
+			],
+			constants.DEFAULT_LISTR_OPTIONS,
+		).run();
 
 		cli.info("Good to go 👍 You're ready to deploy to AWS with Nitric 🎉");
 	}

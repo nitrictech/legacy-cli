@@ -14,7 +14,7 @@
 
 import { flags } from '@oclif/command';
 import { Deploy, DeployResult, DEPLOY_TASK_KEY } from '../../tasks/deploy';
-import { BaseCommand, wrapTaskForListr, Stack } from '@nitric/cli-common';
+import { BaseCommand, wrapTaskForListr, Stack, constants } from '@nitric/cli-common';
 import { Listr } from 'listr2';
 import cli from 'cli-ux';
 import path from 'path';
@@ -129,15 +129,18 @@ export default class GcpDeploy extends BaseCommand {
 			throw new Error('Project must be provided');
 		}
 
-		const results = await new Listr<any>([
-			wrapTaskForListr(
-				new Deploy({
-					gcpProject: project,
-					stack,
-					region,
-				}),
-			),
-		]).run();
+		const results = await new Listr<any>(
+			[
+				wrapTaskForListr(
+					new Deploy({
+						gcpProject: project,
+						stack,
+						region,
+					}),
+				),
+			],
+			constants.DEFAULT_LISTR_OPTIONS,
+		).run();
 
 		const deployResult = results[DEPLOY_TASK_KEY] as DeployResult;
 

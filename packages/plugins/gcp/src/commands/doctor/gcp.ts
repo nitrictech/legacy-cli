@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { BaseCommand, wrapTaskForListr } from '@nitric/cli-common';
+import { BaseCommand, constants, wrapTaskForListr } from '@nitric/cli-common';
 import cli from 'cli-ux';
 import { Listr } from 'listr2';
 import { CheckPlugins, InstallGCPPulumiPlugin } from '../../tasks/doctor';
@@ -33,14 +33,17 @@ export default class Doctor extends BaseCommand {
 	static args = [];
 
 	async do(): Promise<void> {
-		await new Listr<any>([
-			wrapTaskForListr(new CheckPlugins(), 'installed'),
-			wrapTaskForListr({
-				name: 'Install GCP Plugin',
-				factory: () => new InstallGCPPulumiPlugin(),
-				skip: (ctx) => ctx.installed,
-			}),
-		]).run();
+		await new Listr<any>(
+			[
+				wrapTaskForListr(new CheckPlugins(), 'installed'),
+				wrapTaskForListr({
+					name: 'Install GCP Plugin',
+					factory: () => new InstallGCPPulumiPlugin(),
+					skip: (ctx) => ctx.installed,
+				}),
+			],
+			constants.DEFAULT_LISTR_OPTIONS,
+		).run();
 
 		cli.info("Good to go 👍 You're ready to deploy to GCP with Nitric 🎉");
 	}

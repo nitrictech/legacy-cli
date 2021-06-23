@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import { flags } from '@oclif/command';
-import { BaseCommand, wrapTaskForListr, Stack, NitricStack } from '@nitric/cli-common';
+import { BaseCommand, wrapTaskForListr, Stack, NitricStack, constants } from '@nitric/cli-common';
 import { Listr } from 'listr2';
 import path from 'path';
 import { Down } from '../../tasks/down';
@@ -82,12 +82,15 @@ export default class DownCmd extends BaseCommand {
 		const stackDefinitionPath = path.join(dir, file);
 		const stack: NitricStack = await (await Stack.fromFile(stackDefinitionPath)).asNitricStack();
 
-		await new Listr([
-			wrapTaskForListr(
-				new Down({
-					stackName: stack.name,
-				}),
-			),
-		]).run();
+		await new Listr(
+			[
+				wrapTaskForListr(
+					new Down({
+						stackName: stack.name,
+					}),
+				),
+			],
+			constants.DEFAULT_LISTR_OPTIONS,
+		).run();
 	}
 }

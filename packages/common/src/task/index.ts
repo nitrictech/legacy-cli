@@ -14,6 +14,8 @@
 
 import EventEmitter from 'eventemitter3';
 
+const REJECTION_TIMEOUT = 5000;
+
 /**
  * An abstract Task to be used by Listr
  */
@@ -39,6 +41,23 @@ export abstract class Task<T> extends EventEmitter {
 	 * Execute the task, typically following the setup of event listeners
 	 */
 	public async run(...args: any[]): Promise<T> {
-		return await this.do(...args);
+		// TODO: Restore the original handlers after deployment is done
+		try {
+			const rejectionPromise = new Promise<T>((_, reject) => {
+				process.once('unhandledRejection', (e) => {
+					// FIXME: Doing this at the moment to allow pulumi based tasks to try and achieve a stable state before exiting
+					// Right now stacks are hanging on dependent resources when they are failing
+					setTimeout(() => {
+						reject(e);
+					}, REJECTION_TIMEOUT);
+				});
+			});
+
+			const results = await Promise.race([this.do(...args), rejectionPromise]);
+
+			return results;
+		} catch (e) {
+			throw new Error(`${e.message}`);
+		}
 	}
 }
