@@ -971,6 +971,7 @@ __metadata:
     tar-fs: ^2.1.0
     ts-jest: ^26.4.3
     ts-node: ^8
+    tslib: ^1
     typescript: ^3.3
     which: ^2.0.2
     yaml: ^1.10.0
