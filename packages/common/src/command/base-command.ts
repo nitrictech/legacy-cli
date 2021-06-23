@@ -86,19 +86,16 @@ export abstract class BaseCommand extends Command {
 		const analyticsClient = await AnalyticsClient.defaultAnalyticsClient();
 		const cmd = analyticsClient.command(this.ctor.name);
 		cmd.start();
-		let results: any = undefined;
-		// let exitStatus = 0;
+
 		try {
 			if (requiredInit) {
 				console.log('Running:', this.ctor.name);
 			}
-			results = await this.do();
-			return results;
+			return await this.do();
 		} catch (e) {
 			cmd.error(e, true);
 			const stack = await Stack.fromDirectory('.');
 			const file = await stack.getLoggingFile(`error:${this.ctor.name}`);
-			fs.appendFileSync(file, e);
 			fs.appendFileSync(file, e.stack);
 
 			throw new Error(`An error occurred, See ${file} for details`); // re-throw so users get error feedback and can report issues.
