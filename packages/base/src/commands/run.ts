@@ -20,7 +20,8 @@ import path from 'path';
 import execa from 'execa';
 import Docker, { Container, Network, Volume } from 'dockerode';
 import getPort from 'get-port';
-import exitHook from 'async-exit-hook';
+import keypress from 'keypress';
+
 import {
 	CreateNetworkTask,
 	CreateVolumeTask,
@@ -426,7 +427,7 @@ export default class Run extends BaseCommand {
 			});
 		}
 
-		cli.action.start('Services Running press ctrl-C quit');
+		cli.action.start("Running, press 'Q' to clean up and exit");
 	};
 
 	/**
@@ -445,15 +446,15 @@ export default class Run extends BaseCommand {
 								await container.stop();
 							} catch (error) {
 								if (error.statusCode && error.statusCode === 304) {
-									cli.log(`container ${(await container.inspect()).Name} already stopped.`);
+									cli.log(`Container stop error: ${(await container.inspect()).Name} already stopped.`);
 								} else {
-									cli.log(error);
+									cli.log('Container stop error:', error);
 								}
 							} finally {
 								try {
 									await container.remove();
 								} catch (error) {
-									cli.log(error);
+									cli.log('Container remove error:', error);
 								}
 							}
 						}
@@ -466,7 +467,7 @@ export default class Run extends BaseCommand {
 				try {
 					await network.remove();
 				} catch (error) {
-					cli.log(error);
+					cli.log('Network remove error:', error);
 				}
 			}
 
@@ -475,13 +476,12 @@ export default class Run extends BaseCommand {
 				try {
 					await volume.remove();
 				} catch (error) {
-					cli.log(error);
+					cli.log('Volume remove error:', error);
 				}
 			}
-
 			cli.action.stop();
 		} catch (error) {
-			cli.error(error);
+			cli.error('Unexpected error:', error);
 			throw error;
 		}
 	};
@@ -519,12 +519,21 @@ export default class Run extends BaseCommand {
 		try {
 			await runContainers(stack, directory, runId);
 
-			// Cleanup docker resources before exiting
-			exitHook(async (callback) => {
-				cli.action.start('Exiting, please wait');
-				await cleanup();
-				callback();
+			// Wait for Q keypress to stop and quit
+			keypress(process.stdin);
+			const cleanUp = new Promise((res, rej) => {
+				process.stdin.on('keypress', (_, key) => {
+					if ((key && key.name == 'q') || (key.ctrl && key.name == 'c')) {
+						process.stdin.pause();
+						cli.action.start('Exiting, please wait');
+						cleanup().then(res).catch(rej);
+					}
+				});
 			});
+			process.stdin.setRawMode!(true);
+			process.stdin.resume();
+
+			await cleanUp;
 		} catch (error) {
 			const origErrs: string[] = error.errors && error.errors.length ? error.errors : [error.stack];
 			throw new Error(`Something went wrong, see error details.\n ${origErrs.join('\n')}`);

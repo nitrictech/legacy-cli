@@ -113,7 +113,7 @@ describe('Given a Nitric function is being run locally as a container', () => {
 
 			await runFunctionTask.do();
 			runCallback(null, { StatusCode: 'dummy status' }, null);
-			expect(logSpy).toBeCalledWith('Status: dummy status');
+			expect(logSpy).toBeCalledWith('test-function - test-id exited with status code: dummy status');
 		});
 
 		test('An error should be logged if it occurs', async () => {
