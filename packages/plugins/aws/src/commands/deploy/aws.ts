@@ -97,7 +97,10 @@ export default class AwsDeploy extends BaseCommand {
 		const stackDefinitionPath = path.join(dir, file);
 		const stack = await Stack.fromFile(stackDefinitionPath);
 
-		const results = await new Listr<any>([wrapTaskForListr(new Deploy({ stack, account: accountId, region }))], constants.DEFAULT_LISTR_OPTIONS).run();
+		const results = await new Listr<any>(
+			[wrapTaskForListr(new Deploy({ stack, account: accountId, region }))],
+			constants.DEFAULT_LISTR_OPTIONS,
+		).run();
 
 		const deployResult = results[DEPLOY_TASK_KEY] as DeployResult;
 

@@ -84,9 +84,10 @@ export default class DoDeploy extends BaseCommand {
 		const stack = await Stack.fromFile(stackDefinitionPath);
 
 		try {
-			const results = await new Listr([
-				wrapTaskForListr(new Deploy({ stack, registryName: containerRegistry, region, token })),
-			], constants.DEFAULT_LISTR_OPTIONS).run();
+			const results = await new Listr(
+				[wrapTaskForListr(new Deploy({ stack, registryName: containerRegistry, region, token }))],
+				constants.DEFAULT_LISTR_OPTIONS,
+			).run();
 
 			const deployResults = results[DEPLOY_TASK_KEY] as DeployResults;
 

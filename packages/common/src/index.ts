@@ -44,7 +44,7 @@ export function wrapTaskForListr<T>(
 			const result = await t.run(...args);
 			ctx[contextKey] = result;
 			return result;
-		}
+		},
 	};
 }
 

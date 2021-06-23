@@ -53,11 +53,7 @@ export abstract class Task<T> extends EventEmitter {
 				});
 			});
 
-			const results = await Promise.race([
-				this.do(...args),
-				rejectionPromise
-			]); 
-
+			const results = await Promise.race([this.do(...args), rejectionPromise]);
 
 			return results;
 		} catch (e) {

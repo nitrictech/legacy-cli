@@ -72,9 +72,9 @@ export abstract class BaseCommand extends Command {
 
 		// Set global config CI mode the the provided ci flag...
 		Config.get().ciMode = ci;
-	
+
 		// Remove unhandled promise rejection listeners
-		// Tasks will provide a wrapper that catches and handles these...	
+		// Tasks will provide a wrapper that catches and handles these...
 		process.listeners('unhandledRejection').forEach((l) => {
 			process.removeListener('unhandledRejection', l);
 			return l;
@@ -96,7 +96,7 @@ export abstract class BaseCommand extends Command {
 			return results;
 		} catch (e) {
 			cmd.error(e, true);
-			const stack = await Stack.fromDirectory(".");
+			const stack = await Stack.fromDirectory('.');
 			const file = await stack.getLoggingFile(`error:${this.ctor.name}`);
 			fs.appendFileSync(file, e);
 			fs.appendFileSync(file, e.stack);

@@ -33,14 +33,17 @@ export default class AwsDoctor extends BaseCommand {
 	static args = [];
 
 	async do(): Promise<void> {
-		await new Listr<any>([
-			wrapTaskForListr(new CheckPulumiPlugins(), 'installed'),
-			wrapTaskForListr({
-				name: 'Install AWS Plugin',
-				factory: () => new InstallAWSPulumiPlugin(),
-				skip: (ctx) => ctx.installed,
-			}),
-		], constants.DEFAULT_LISTR_OPTIONS).run();
+		await new Listr<any>(
+			[
+				wrapTaskForListr(new CheckPulumiPlugins(), 'installed'),
+				wrapTaskForListr({
+					name: 'Install AWS Plugin',
+					factory: () => new InstallAWSPulumiPlugin(),
+					skip: (ctx) => ctx.installed,
+				}),
+			],
+			constants.DEFAULT_LISTR_OPTIONS,
+		).run();
 
 		cli.info("Good to go 👍 You're ready to deploy to AWS with Nitric 🎉");
 	}

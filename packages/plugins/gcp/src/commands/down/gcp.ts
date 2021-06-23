@@ -82,12 +82,15 @@ export default class DownCmd extends BaseCommand {
 		const stackDefinitionPath = path.join(dir, file);
 		const stack: NitricStack = await (await Stack.fromFile(stackDefinitionPath)).asNitricStack();
 
-		await new Listr([
-			wrapTaskForListr(
-				new Down({
-					stackName: stack.name,
-				}),
-			),
-		], constants.DEFAULT_LISTR_OPTIONS).run();
+		await new Listr(
+			[
+				wrapTaskForListr(
+					new Down({
+						stackName: stack.name,
+					}),
+				),
+			],
+			constants.DEFAULT_LISTR_OPTIONS,
+		).run();
 	}
 }

@@ -129,15 +129,18 @@ export default class GcpDeploy extends BaseCommand {
 			throw new Error('Project must be provided');
 		}
 
-		const results = await new Listr<any>([
-			wrapTaskForListr(
-				new Deploy({
-					gcpProject: project,
-					stack,
-					region,
-				}),
-			),
-		], constants.DEFAULT_LISTR_OPTIONS).run();
+		const results = await new Listr<any>(
+			[
+				wrapTaskForListr(
+					new Deploy({
+						gcpProject: project,
+						stack,
+						region,
+					}),
+				),
+			],
+			constants.DEFAULT_LISTR_OPTIONS,
+		).run();
 
 		const deployResult = results[DEPLOY_TASK_KEY] as DeployResult;
 

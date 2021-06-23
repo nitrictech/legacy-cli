@@ -33,14 +33,17 @@ export default class AzureDoctor extends BaseCommand {
 	static args = [];
 
 	async do(): Promise<void> {
-		await new Listr<any>([
-			wrapTaskForListr(new CheckPulumiPluginTask(), 'installed'),
-			wrapTaskForListr({
-				name: 'Install Azure Plugin',
-				factory: () => new InstallPulumiPluginTask(),
-				skip: (ctx) => ctx.installed,
-			}),
-		], constants.DEFAULT_LISTR_OPTIONS).run();
+		await new Listr<any>(
+			[
+				wrapTaskForListr(new CheckPulumiPluginTask(), 'installed'),
+				wrapTaskForListr({
+					name: 'Install Azure Plugin',
+					factory: () => new InstallPulumiPluginTask(),
+					skip: (ctx) => ctx.installed,
+				}),
+			],
+			constants.DEFAULT_LISTR_OPTIONS,
+		).run();
 
 		cli.info("Good to go 👍 You're ready to deploy to Azure with Nitric 🎉");
 	}

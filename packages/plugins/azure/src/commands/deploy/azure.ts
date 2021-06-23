@@ -15,7 +15,7 @@
 import { flags } from '@oclif/command';
 import { Listr } from 'listr2';
 import inquirer from 'inquirer';
-import { BaseCommand, Stack, wrapTaskForListr } from '@nitric/cli-common';
+import { BaseCommand, Stack, wrapTaskForListr, constants } from '@nitric/cli-common';
 import path from 'path';
 import { Deploy } from '../../tasks/deploy';
 
@@ -162,6 +162,9 @@ export default class AzureDeploy extends BaseCommand {
 
 		const stack = await Stack.fromFile(path.join(dir, file));
 
-		new Listr([wrapTaskForListr(new Deploy({ stack, region, orgName, adminEmail }))], constants.DEFAULT_LISTR_OPTIONS).run();
+		new Listr(
+			[wrapTaskForListr(new Deploy({ stack, region, orgName, adminEmail }))],
+			constants.DEFAULT_LISTR_OPTIONS,
+		).run();
 	}
 }
