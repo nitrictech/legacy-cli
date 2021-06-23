@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.66](https://github.com/nitrictech/cli/compare/v0.0.65...v0.0.66) (2021-06-23)
+
+
+### Bug Fixes
+
+* **run:** Fix failure to cleanup running docker resources ([95b36f8](https://github.com/nitrictech/cli/commit/95b36f8c011f2fb0c7e9f56cf4e592973efd5b1e))
+* **run:** improve docker error status code logging ([8008567](https://github.com/nitrictech/cli/commit/80085673b0f7fb3be9dc47d84ca3429c1608d4ae))
+
 ### [0.0.65](https://github.com/nitrictech/cli/compare/v0.0.64...v0.0.65) (2021-06-21)
 
 
