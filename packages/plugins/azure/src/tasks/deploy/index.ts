@@ -22,7 +22,7 @@ import { createQueue } from './queue';
 import { createAPI } from './api';
 import * as pulumi from '@pulumi/pulumi';
 import fs from 'fs';
-//import { createSchedule } from './schedule';
+import path from 'path';
 
 interface DeployOptions {
 	stack: Stack;
@@ -49,9 +49,12 @@ export class Deploy extends Task<void> {
 		const { stack, orgName, adminEmail, region } = this;
 		const { buckets, apis = {}, topics = {}, schedules = {}, queues } = stack.asNitricStack();
 
+		// Use absolute path to log files, so it's easier for users to locate them if printed to the console.
+		const errorFile = path.resolve(await stack.getLoggingFile('error:azure'));
+		const logFile = path.resolve(await stack.getLoggingFile('deploy:azure'));
+
 		try {
 			// Upload the stack
-			const logFile = await stack.getLoggingFile('deploy:azure');
 			const pulumiStack = await LocalWorkspace.createOrSelectStack({
 				// TODO: Incorporate additional stack detail. E.g. dev/test/prod
 				stackName: `${stack.getName()}-azure`,
@@ -132,7 +135,8 @@ export class Deploy extends Task<void> {
 
 						mapObject(apis).map((a) => createAPI(resourceGroup, orgName, adminEmail, a, DeployedServices));
 					} catch (e) {
-						console.error(e);
+						pulumi.log.error(`An error occurred, see latest azure:error log for details: ${errorFile}`);
+						fs.appendFileSync(errorFile, e.stack || e.toString());
 						throw e;
 					}
 				},
@@ -149,7 +153,8 @@ export class Deploy extends Task<void> {
 			});
 			console.log(upRes);
 		} catch (e) {
-			console.log(e);
+			fs.appendFileSync(errorFile, e.stack || e.toString());
+			throw new Error(`An error occurred, see latest do:error log for details: ${errorFile}`);
 		}
 	}
 }
