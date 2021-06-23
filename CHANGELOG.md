@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.68](https://github.com/nitrictech/cli/compare/v0.0.67...v0.0.68) (2021-06-23)
+
+
+### Bug Fixes
+
+* Fix issue where errors weren't converted to strings before logging ([5aedf27](https://github.com/nitrictech/cli/commit/5aedf2735e468b2617430ecb3b43459cf2c09da0))
+
 ### [0.0.67](https://github.com/nitrictech/cli/compare/v0.0.66...v0.0.67) (2021-06-23)
 
 
