@@ -964,14 +964,13 @@ __metadata:
     multimatch: ^5.0.0
     node-emoji: ^1.10.0
     os: ^0.1.1
-    pkg: ^4.4.9
+    pkg: 4.4.9
     rimraf: ^3.0.2
     simple-git: ^2.31.0
     stream-to-promise: ^3.0.0
     tar-fs: ^2.1.0
     ts-jest: ^26.4.3
     ts-node: ^8
-    tslib: ^1
     typescript: ^3.3
     which: ^2.0.2
     yaml: ^1.10.0
@@ -10221,7 +10220,7 @@ fsevents@^2.1.2:
   languageName: node
   linkType: hard
 
-"pkg@npm:^4.4.9":
+"pkg@npm:4.4.9":
   version: 4.4.9
   resolution: "pkg@npm:4.4.9"
   dependencies:
