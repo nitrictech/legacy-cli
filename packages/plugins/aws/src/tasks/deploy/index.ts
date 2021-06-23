@@ -18,6 +18,7 @@ import * as pulumi from '@pulumi/pulumi';
 import { LocalWorkspace } from '@pulumi/pulumi/automation';
 import { ecr } from '@pulumi/aws';
 import fs from 'fs';
+import path from 'path';
 import {
 	NitricSnsTopic,
 	NitricScheduleEventBridge,
@@ -91,8 +92,9 @@ export class Deploy extends Task<DeployResult> {
 	async do(): Promise<DeployResult> {
 		const { stack, region } = this;
 		const { topics = {}, buckets = {}, schedules = {}, apis = {}, entrypoints } = stack.asNitricStack();
-		const logFile = await stack.getLoggingFile('deploy:aws');
-		const errorFile = await stack.getLoggingFile('error:aws');
+		// Use absolute path to log files, so it's easier for users to locate them if printed to the console.
+		const logFile = path.resolve(await stack.getLoggingFile('deploy:aws'));
+		const errorFile = path.resolve(await stack.getLoggingFile('error:aws'));
 		let result = {} as DeployResult;
 
 		this.update('Defining functions');
@@ -211,14 +213,15 @@ export class Deploy extends Task<DeployResult> {
 							});
 						}
 					} catch (e) {
-						fs.appendFileSync(errorFile, e.stack);
-						pulumi.log.error('There was an error deploying the stack please check error logs for more detail');
+						pulumi.log.error(`An error occurred, see latest aws:error log for details: ${errorFile}`);
+						fs.appendFileSync(errorFile, e.stack || e.toString());
 						throw e;
 					}
 
 					return result;
 				},
 			});
+
 			await pulumiStack.setConfig('aws:region', { value: region });
 			const update = this.update.bind(this);
 			// deploy the stack, tailing the logs to console
@@ -248,8 +251,8 @@ export class Deploy extends Task<DeployResult> {
 				{},
 			) as DeployResult;
 		} catch (e) {
-			fs.appendFileSync(errorFile, e.stack);
-			throw new Error('An error occurred during deployment, please see latest aws:error log for more details');
+			fs.appendFileSync(errorFile, e.stack || e.toString());
+			throw new Error(`An error occurred, see latest aws:error log for details: ${errorFile}`);
 		}
 
 		return result;

@@ -18,6 +18,7 @@ import { LocalWorkspace } from '@pulumi/pulumi/automation';
 import * as digitalocean from '@pulumi/digitalocean';
 import { createServiceSpec } from './function';
 import fs from 'fs';
+import path from 'path';
 
 const REGISTRY_LIMITS: Record<string, number> = {
 	starter: 1,
@@ -70,8 +71,10 @@ export class Deploy extends Task<DeployResults> {
 			queues = {},
 			entrypoints = {},
 		} = stack.asNitricStack();
-		const errorFile = await stack.getLoggingFile('error:do');
-		const logFile = await stack.getLoggingFile('deploy:do');
+
+		// Use absolute path to log files, so it's easier for users to locate them if printed to the console.
+		const errorFile = path.resolve(await stack.getLoggingFile('error:do'));
+		const logFile = path.resolve(await stack.getLoggingFile('deploy:do'));
 
 		try {
 			// Upload the stack
@@ -203,7 +206,8 @@ export class Deploy extends Task<DeployResults> {
 							return deployResults.reduce((acc, res) => ({ ...acc, ...res }), {});
 						}
 					} catch (e) {
-						fs.appendFileSync(errorFile, e.stack);
+						pulumi.log.error(`An error occurred, see latest do:error log for details: ${errorFile}`);
+						fs.appendFileSync(errorFile, e.stack || e.toString());
 						throw e;
 					}
 
@@ -228,8 +232,8 @@ export class Deploy extends Task<DeployResults> {
 				{},
 			);
 		} catch (e) {
-			fs.appendFileSync(errorFile, e.stack);
-			throw 'An error ocurred during deployment see latest do:error logs';
+			fs.appendFileSync(errorFile, e.stack || e.toString());
+			throw new Error(`An error occurred, see latest do:error log for details: ${errorFile}`);
 		}
 	}
 }

@@ -28,6 +28,7 @@ import {
 } from '../../resources';
 
 import fs from 'fs';
+import path from 'path';
 import { Output } from '@pulumi/pulumi';
 
 export interface ProgramResult {
@@ -77,8 +78,9 @@ export class Deploy extends Task<DeployResult> {
 			scopes: ['https://www.googleapis.com/auth/cloud-platform'],
 		});
 		const authClient = await auth.getClient();
-		const logFile = await stack.getLoggingFile('deploy:gcp');
-		const errorFile = await stack.getLoggingFile('error:gcp');
+		// Use absolute path to log files, so it's easier for users to locate them if printed to the console.
+		const logFile = path.resolve(await stack.getLoggingFile('deploy:gcp'));
+		const errorFile = path.resolve(await stack.getLoggingFile('error:gcp'));
 		let result = {} as DeployResult;
 
 		try {
@@ -150,8 +152,9 @@ export class Deploy extends Task<DeployResult> {
 							});
 						}
 					} catch (e) {
-						pulumi.log.error('An error occurred, see latest gcp:error log for details');
-						fs.appendFileSync(errorFile, e);
+						pulumi.log.error(`An error occurred, see latest gcp:error log for details: ${errorFile}`);
+						fs.appendFileSync(errorFile, e.stack || e.toString());
+						throw e;
 					}
 
 					return deploymentResult;
@@ -164,7 +167,7 @@ export class Deploy extends Task<DeployResult> {
 			const upRes = await pulumiStack.up({
 				onOutput: (out: string) => {
 					update(out);
-					fs.appendFileSync(logFile, out);
+					fs.appendFileSync(logFile, out.toString());
 				},
 			});
 
@@ -176,8 +179,8 @@ export class Deploy extends Task<DeployResult> {
 				{},
 			) as DeployResult;
 		} catch (e) {
-			fs.appendFileSync(errorFile, e);
-			throw new Error('An error occurred, see latest gcp:error log for details');
+			fs.appendFileSync(errorFile, e.stack || e.toString());
+			throw new Error(`An error occurred, see latest gcp:error log for details: ${errorFile}`);
 		}
 
 		return result;
