@@ -117,7 +117,8 @@
 	"pkg": {
 		"scripts": "lib/**/*.js",
 		"assets": [
-			"package.json"
+			"package.json",
+			"node_modules/@oclif/plugin-plugins/**/*"
 		],
 		"targets": [
 			"node14-linux-x64",
