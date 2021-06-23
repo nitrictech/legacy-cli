@@ -105,7 +105,7 @@
 		"license:check": "licensee --production",
 		"prepackage": "rm -rf lib && tsc -p tsconfig.build.json && oclif-dev manifest && oclif-dev readme",
 		"postpackage": "rm -f oclif.manifest.json",
-		"package:all": "yarn run prepackage && pkg . --out-path ./dist/",
+		"package:all": "yarn run prepackage && pkg . --out-path ./dist/ --no-bytecode --public-packages '*' --public",
 		"package": "yarn run prepackage && yarn run package:all && yarn run postpackage",
 		"postpack": "rm -f oclif.manifest.json",
 		"prepack": "rm -rf lib && tsc --project tsconfig.build.json && oclif-dev manifest && oclif-dev readme",
