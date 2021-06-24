@@ -18,3 +18,4 @@ export * from './schedule';
 export * from './service';
 export * from './site';
 export * from './topic';
+export * from './project';

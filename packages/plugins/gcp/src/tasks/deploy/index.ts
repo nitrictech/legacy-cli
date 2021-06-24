@@ -22,6 +22,7 @@ import {
 	NitricApiGcpApiGateway,
 	NitricBucketCloudStorage,
 	NitricEntrypointGoogleCloudLB,
+	NitricGcpProject,
 	NitricScheduleCloudScheduler,
 	NitricServiceCloudRun,
 	NitricSiteCloudStorage,
@@ -56,25 +57,6 @@ interface DeployOptions extends CommonOptions {
 	stack: Stack;
 	region: string;
 }
-
-// This is a list of service APIs required by nitric to operate
-// with the default set of services used by the GCP provider
-const ENABLE_SERVICE_APIS = [
-	// Enable IAM
-	"iam.googleapis.com",
-	// Enable cloud run
-	"run.googleapis.com",
-	// Enable pubsub
-	"pubsub.googleapis.com",
-	// Enable cloud scheduler
-	"cloudscheduler.googleapis.com",
-	// Enable cloud scheduler
-	"storage.googleapis.com",
-	// Enable Compute API (Networking/Load Balancing)
-	"compute.googleapis.com",
-	// Enable Container Registry API
-	"containerregistry.googleapis.com"
-];
 
 /**
  * Deploy Nitric Stack to GCP Project
@@ -115,14 +97,14 @@ export class Deploy extends Task<DeployResult> {
 
 					// Now we can start deploying with Pulumi
 					try {
-						const enabledServices = ENABLE_SERVICE_APIS.map(api => 
-							new gcp.projects.Service(`${gcpProject}-${api}`, {
-								project: gcpProject,
-								service: api,
-								disableOnDestroy: false,
-								disableDependentServices: true,
-							})
-						);
+
+						// Get the current google cloud project
+						const project = await gcp.organizations.getProject({});
+
+						// Setup project and permissions for nitric
+						new NitricGcpProject('project', {
+							project,
+						});
 
 						// deploy the buckets
 						mapObject(buckets).map((bucket) => 
