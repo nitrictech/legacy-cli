@@ -52,7 +52,7 @@
 		"globby": "^10",
 		"jest": "^26.6.1",
 		"licensee": "^8.2.0",
-		"pkg": "^4.4.9",
+		"pkg": "4.4.9",
 		"ts-jest": "^26.4.3",
 		"ts-node": "^8",
 		"typescript": "^3.3"
@@ -106,10 +106,7 @@
 		"license:check": "licensee --production",
 		"prepackage": "rm -rf lib && tsc -p tsconfig.build.json && oclif-dev manifest && oclif-dev readme",
 		"postpackage": "rm -f oclif.manifest.json",
-		"package:linux": "yarn run prepack && pkg . --output ./dist/nitric-linux-x64 -t node12-linux-x64",
-		"package:macos": "yarn run prepack && pkg . --output ./dist/nitric-macos-x64 -t node12-macos-x64",
-		"package:win": "yarn run prepack && pkg . --output ./dist/nitric-win-x64.exe -t node12-win-x64",
-		"package:all": "yarn run package:linux && yarn run package:macos && yarn run package:win",
+		"package:all": "yarn run prepackage && pkg . --out-path ./dist/ --no-bytecode --public-packages '*' --public",
 		"package": "yarn run prepackage && yarn run package:all && yarn run postpackage",
 		"postpack": "rm -f oclif.manifest.json",
 		"prepack": "rm -rf lib && tsc --project tsconfig.build.json && oclif-dev manifest && oclif-dev readme",
@@ -122,8 +119,14 @@
 		"scripts": "lib/**/*.js",
 		"assets": [
 			"package.json",
-			"../../node_modules/yarn/**/*"
-		]
+			"node_modules/@oclif/plugin-plugins/**/*"
+		],
+		"targets": [
+			"node14-linux-x64",
+			"node14-macos-x64",
+			"node14-win-x64"
+		],
+		"outputPath": "dist"
 	},
 	"types": "lib/index.d.ts"
 }
