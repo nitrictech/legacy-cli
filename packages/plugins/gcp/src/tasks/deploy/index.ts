@@ -16,6 +16,7 @@ import { google } from 'googleapis';
 import { Task, Stack, mapObject, NitricServiceImage } from '@nitric/cli-common';
 import { LocalWorkspace } from '@pulumi/pulumi/automation';
 import * as pulumi from '@pulumi/pulumi';
+import * as gcp from "@pulumi/gcp";
 
 import {
 	NitricApiGcpApiGateway,
@@ -56,6 +57,25 @@ interface DeployOptions extends CommonOptions {
 	region: string;
 }
 
+// This is a list of service APIs required by nitric to operate
+// with the default set of services used by the GCP provider
+const ENABLE_SERVICE_APIS = [
+	// Enable IAM
+	"iam.googleapis.com",
+	// Enable cloud run
+	"run.googleapis.com",
+	// Enable pubsub
+	"pubsub.googleapis.com",
+	// Enable cloud scheduler
+	"cloudscheduler.googleapis.com",
+	// Enable cloud scheduler
+	"storage.googleapis.com",
+	// Enable Compute API (Networking/Load Balancing)
+	"compute.googleapis.com",
+	// Enable Container Registry API
+	"containerregistry.googleapis.com"
+];
+
 /**
  * Deploy Nitric Stack to GCP Project
  */
@@ -95,15 +115,30 @@ export class Deploy extends Task<DeployResult> {
 
 					// Now we can start deploying with Pulumi
 					try {
+						const enabledServices = ENABLE_SERVICE_APIS.map(api => 
+							new gcp.projects.Service(`${gcpProject}-${api}`, {
+								project: gcpProject,
+								service: api,
+								disableOnDestroy: false,
+								disableDependentServices: true,
+							})
+						);
+
 						// deploy the buckets
-						mapObject(buckets).map((bucket) => new NitricBucketCloudStorage(bucket.name, { bucket }));
+						mapObject(buckets).map((bucket) => 
+							new NitricBucketCloudStorage(bucket.name, { bucket })
+						);
 
 						// deploy the topics
-						const deployedTopics = mapObject(topics).map((topic) => new NitricTopicPubsub(topic.name, { topic }));
+						const deployedTopics = mapObject(topics).map((topic) => 
+							new NitricTopicPubsub(topic.name, { topic })
+						);
 						// deploy the services
 						const { token: imageDeploymentToken } = await authClient.getAccessToken();
 
-						const deployedSites = stack.getSites().map((site) => new NitricSiteCloudStorage(site.getName(), { site }));
+						const deployedSites = stack.getSites().map((site) => 
+							new NitricSiteCloudStorage(site.getName(), { site })
+						);
 
 						const deployedServices = stack.getServices().map((service) => {
 							// Build and push the image
