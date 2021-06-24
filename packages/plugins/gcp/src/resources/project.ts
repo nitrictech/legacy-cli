@@ -37,7 +37,11 @@ const ENABLE_SERVICE_APIS = [
 	// Enable Compute API (Networking/Load Balancing)
 	"compute.googleapis.com",
 	// Enable Container Registry API
-	"containerregistry.googleapis.com"
+	"containerregistry.googleapis.com",
+	// Enable firestore API
+	"firestore.googleapis.com",
+	// Enable ApiGateway API
+	"apigateway.googleapis.com"
 ];
 
 /**
