@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.69](https://github.com/nitrictech/cli/compare/v0.0.68...v0.0.69) (2021-06-24)
+
+
+### Bug Fixes
+
+* Disable bytecode generation. ([9a5fe91](https://github.com/nitrictech/cli/commit/9a5fe912ba37e81067586781604e927341ec354f))
+* Include @oclif/plugin-plugins. ([208516d](https://github.com/nitrictech/cli/commit/208516d4a33c9ecb8a2a238a30a44cee83b2b114))
+
 ### [0.0.68](https://github.com/nitrictech/cli/compare/v0.0.67...v0.0.68) (2021-06-23)
 
 
