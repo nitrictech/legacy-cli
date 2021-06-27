@@ -134,6 +134,30 @@ export class NitricServiceAWSLambda extends pulumi.ComponentResource {
 			defaultResourceOptions,
 		);
 
+		new aws.iam.RolePolicy(
+			`${service.getName()}S3Access`,
+			{
+				role: lambdaRole.id,
+				policy: JSON.stringify({
+					Version: '2012-10-17',
+					Statement: [
+						{
+							Effect: 'Allow',
+							Action: [
+								's3:ListAllMyBuckets',
+								's3:GetObject',
+								's3:PutObject',
+								's3:DeleteObject'
+							],
+							// FIXME: Limit to known resources
+							Resource: '*',
+						},
+					],
+				}),
+			},
+			defaultResourceOptions,
+		);
+
 		this.lambda = new aws.lambda.Function(
 			service.getName(),
 			{
