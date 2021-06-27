@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.70](https://github.com/nitrictech/cli/compare/v0.0.69...v0.0.70) (2021-06-27)
+
+
+### Bug Fixes
+
+* **plugins/aws:** Add s3 permissions to nitric services ([4e0f1ec](https://github.com/nitrictech/cli/commit/4e0f1ec9ac277240f4c4a9ddcdd412dad6371df6))
+
 ### [0.0.69](https://github.com/nitrictech/cli/compare/v0.0.68...v0.0.69) (2021-06-24)
 
 
