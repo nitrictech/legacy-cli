@@ -145,6 +145,7 @@ export class NitricServiceAWSLambda extends pulumi.ComponentResource {
 							Effect: 'Allow',
 							Action: [
 								's3:ListAllMyBuckets',
+								's3:GetBucketTagging',
 								's3:GetObject',
 								's3:PutObject',
 								's3:DeleteObject'
