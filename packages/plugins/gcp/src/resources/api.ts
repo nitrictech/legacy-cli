@@ -49,6 +49,26 @@ export class NitricApiGcpApiGateway extends pulumi.ComponentResource {
 
 		this.name = name;
 
+		// Get service targets for IAM binding
+		const targetServices = Object.keys(api.paths).reduce((svcs, path) => {
+			const p = api.paths[path] as OpenAPIV2.PathItemObject<NitricAPITarget>;
+
+			const services = Object.keys(path)
+				.filter((k) => METHOD_KEYS.includes(k as method))
+				.reduce((acc, method) => {
+					const pathTarget = p[method as method]?.['x-nitric-target'];
+					const svc = services.find(({ name }) => name === pathTarget?.name);
+
+					if (svc && !acc.includes(svc)) {
+						acc.push(svc);
+					}
+
+					return acc;
+				}, svcs);
+
+			return svcs;
+		}, [] as NitricServiceCloudRun[]);
+
 		// Replace Nitric API Extensions with google api gateway extensions
 		const spec = pulumi.all(services.map((s) => s.url.apply((url) => `${s.name}||${url}`))).apply((nameUrlPairs) => {
 			const transformedApi = {
@@ -110,6 +130,26 @@ export class NitricApiGcpApiGateway extends pulumi.ComponentResource {
 			defaultResourceOptions,
 		);
 
+		// Create a new IAM account for invoking
+		const apiInvoker = new gcp.serviceaccount.Account(
+			`${name}-acct`,
+			{
+				// Limit to 30 characters for service account name
+				// as hard constraint in GCP
+				accountId: `${name}-acct`.substr(0, 30),
+			},
+			defaultResourceOptions
+		);
+
+		// Bind that IAM account as a member of all available service targets
+		targetServices.map(svc => {
+			new gcp.cloudrun.IamMember(`${name}-acct-binding`, {
+				service: svc.cloudrun.id,
+				member: pulumi.interpolate`serviceAccount:${apiInvoker.email}`,
+				role: 'roles/run.invoker'
+			}, defaultResourceOptions);
+		});
+
 		// Now we need to create the document provided and interpolate the deployed service targets
 		// i.e. their Urls...
 		// Deploy the config
@@ -127,6 +167,12 @@ export class NitricApiGcpApiGateway extends pulumi.ComponentResource {
 						},
 					},
 				],
+				gatewayConfig: {
+					backendConfig: {
+						// Add the service account for the invoker here...
+						googleServiceAccount: apiInvoker.email,
+					},
+				},
 			},
 			defaultResourceOptions,
 		);
