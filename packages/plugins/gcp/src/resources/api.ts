@@ -144,7 +144,7 @@ export class NitricApiGcpApiGateway extends pulumi.ComponentResource {
 		// Bind that IAM account as a member of all available service targets
 		targetServices.map(svc => {
 			new gcp.cloudrun.IamMember(`${name}-acct-binding`, {
-				service: svc.cloudrun.id,
+				service: svc.cloudrun.name,
 				member: pulumi.interpolate`serviceAccount:${apiInvoker.email}`,
 				role: 'roles/run.invoker'
 			}, defaultResourceOptions);
