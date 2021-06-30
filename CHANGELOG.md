@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.72](https://github.com/nitrictech/cli/compare/v0.0.71...v0.0.72) (2021-06-30)
+
+
+### Bug Fixes
+
+* use node readline instead of keypress and fix windows exit issues ([16ff5e2](https://github.com/nitrictech/cli/commit/16ff5e2aaa6df39c552914dae5132e85b3a00712))
+
 ### [0.0.71](https://github.com/nitrictech/cli/compare/v0.0.70...v0.0.71) (2021-06-28)
 
 
