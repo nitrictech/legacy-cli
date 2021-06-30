@@ -959,7 +959,6 @@ __metadata:
     globby: ^10
     inquirer: ^7.3.3
     jest: ^26.6.1
-    keypress: ^0.2.1
     licensee: ^8.2.0
     listr2: ^3.6.2
     multimatch: ^5.0.0
@@ -8393,13 +8392,6 @@ fsevents@^2.1.2:
     jwa: ^2.0.0
     safe-buffer: ^5.0.1
   checksum: fb7d2725da5f4a9669024e3e743a3c4bfc193265614e03d52ea24a5251717107491004892d3524fdee525341d91212928bc19b8253f42f0df3dc35bf478dc92e
-  languageName: node
-  linkType: hard
-
-"keypress@npm:^0.2.1":
-  version: 0.2.1
-  resolution: "keypress@npm:0.2.1"
-  checksum: 58e7a757c806feed7800789a926721351eba50201da6db0d9646a43c855efadac3efe69b9ed0ea53dcef3f0b4bf4e76b4d2ab72f51a60af16cb335dd5ad03c30
   languageName: node
   linkType: hard
 
