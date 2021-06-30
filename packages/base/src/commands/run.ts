@@ -20,7 +20,7 @@ import path from 'path';
 import execa from 'execa';
 import Docker, { Container, Network, Volume } from 'dockerode';
 import getPort from 'get-port';
-import keypress from 'keypress';
+import readline from 'readline';
 
 import {
 	CreateNetworkTask,
@@ -520,20 +520,25 @@ export default class Run extends BaseCommand {
 			await runContainers(stack, directory, runId);
 
 			// Wait for Q keypress to stop and quit
-			keypress(process.stdin);
+			readline.emitKeypressEvents(process.stdin);
+
 			const cleanUp = new Promise((res, rej) => {
 				process.stdin.on('keypress', (_, key) => {
-					if ((key && key.name == 'q') || (key.ctrl && key.name == 'c')) {
+					if (key && (key.name == 'q' || (key.ctrl && key.name == 'c'))) {
 						process.stdin.pause();
 						cli.action.start('Exiting, please wait');
 						cleanup().then(res).catch(rej);
 					}
 				});
 			});
+
 			process.stdin.setRawMode!(true);
 			process.stdin.resume();
 
 			await cleanUp;
+
+			// Is a must for windows
+			process.exit(0);
 		} catch (error) {
 			const origErrs: string[] = error.errors && error.errors.length ? error.errors : [error.stack];
 			throw new Error(`Something went wrong, see error details.\n ${origErrs.join('\n')}`);
