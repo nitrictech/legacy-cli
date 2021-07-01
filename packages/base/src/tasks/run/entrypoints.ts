@@ -18,6 +18,7 @@ import tar from 'tar-fs';
 import fs from 'fs';
 import path from 'path';
 import getPort from 'get-port';
+import os from 'os';
 import streamToPromise from 'stream-to-promise';
 import { DOCKER_LABEL_RUN_ID } from '../../constants';
 
@@ -101,6 +102,35 @@ export function createNginxConfig(entrypoint: NamedObject<NitricEntrypoint>, sta
 		}
 	}
 	`;
+}
+
+/**
+ * Starts an exec stream and Wraps the docker.modem.followProgress function on non-windows platforms
+ * For windows a workaround using exec.inspect is used to ensure we can capture the end of the stream
+ * @param exec
+ * @param docker
+ */
+export async function execStream(exec: Docker.Exec, docker: Docker): Promise<void> {
+	const execStream = await exec.start({});
+
+	await new Promise<void>((resolve) => {
+		if (os.platform() == 'win32') {
+			let output = '';
+			execStream.on('data', (chunk) => (output += chunk));
+
+			const interval = setInterval(async () => {
+				const { Running } = await exec.inspect();
+
+				if (!Running) {
+					clearInterval(interval);
+					execStream.destroy();
+					resolve();
+				}
+			}, 100);
+		} else {
+			docker.modem.followProgress(execStream, resolve);
+		}
+	});
 }
 
 /**
@@ -215,16 +245,20 @@ export class RunEntrypointTask extends Task<Container> {
 					WorkingDir: '/',
 				});
 
-				const execStream = await exec.start({});
+				await execStream(exec, docker);
 
-				await new Promise<void>((res) => {
-					docker.modem.followProgress(execStream, res, this.update);
-				});
-
-				return await container.putArchive(siteTar, {
+				await container.putArchive(siteTar, {
 					path: `/www/${s.getName()}`,
 					noOverwriteDirNonDir: false,
 				});
+
+				// Set permissions for www folder and files recursively
+				const execPermissions = await container.exec({
+					Cmd: ['chmod', '-R', '755', '/www/'],
+					WorkingDir: '/',
+				});
+
+				return await execStream(execPermissions, docker);
 			}),
 		);
 
