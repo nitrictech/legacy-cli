@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.73](https://github.com/nitrictech/cli/compare/v0.0.72...v0.0.73) (2021-07-01)
+
+
+### Bug Fixes
+
+* add execStream wrapper function to fix windows site run issue ([844b41d](https://github.com/nitrictech/cli/commit/844b41d60a257f4a6a60a30115ecd90ffb376277))
+* use path.join for staging directory ([0b0ad95](https://github.com/nitrictech/cli/commit/0b0ad9503e754761166389d96fb5d2b35086805e))
+
 ### [0.0.72](https://github.com/nitrictech/cli/compare/v0.0.71...v0.0.72) (2021-06-30)
 
 
