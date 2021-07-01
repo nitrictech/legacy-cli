@@ -176,7 +176,7 @@ export class Stack<
 	 * Get the directory used to perform build operations for this stack and its resources
 	 */
 	getStagingDirectory(): string {
-		return `${STAGING_DIR}/${this.name}`;
+		return path.join(STAGING_DIR, this.name);
 	}
 
 	/**
