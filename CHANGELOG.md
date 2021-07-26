@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.74](https://github.com/nitrictech/cli/compare/v0.0.73...v0.0.74) (2021-07-26)
+
+
+### Bug Fixes
+
+* **plugins/do:** Fix stack names for digital ocean plugins. ([3ceeb1e](https://github.com/nitrictech/cli/commit/3ceeb1e6ff30a52fd451f32369c8afe1b2b03588))
+
 ### [0.0.73](https://github.com/nitrictech/cli/compare/v0.0.72...v0.0.73) (2021-07-01)
 
 
