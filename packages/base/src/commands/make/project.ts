@@ -106,6 +106,7 @@ export default class Project extends BaseCommand {
 						dir: `./${name}/${serviceName}/`,
 						file: `./${name}/nitric.yaml`,
 						name: serviceName,
+						initialService: true, // required for creation of initial service path
 					}),
 				),
 			];
