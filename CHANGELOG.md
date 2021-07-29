@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.75](https://github.com/nitrictech/cli/compare/v0.0.74...v0.0.75) (2021-07-29)
+
+
+### Bug Fixes
+
+* ensure make:service creates service in correct directory relative to config ([7cb585a](https://github.com/nitrictech/cli/commit/7cb585a8ac8f6af3da9f5c8c0dabc8b6f6fc7807))
+
 ### [0.0.74](https://github.com/nitrictech/cli/compare/v0.0.73...v0.0.74) (2021-07-26)
 
 
