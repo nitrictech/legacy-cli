@@ -19,6 +19,7 @@ interface MakeServiceTaskOpts {
 	template: string;
 	dir?: string;
 	file?: string;
+	initialService?: boolean;
 	name: string;
 }
 
@@ -27,14 +28,17 @@ export class MakeServiceTask extends Task<void> {
 	public readonly template: string;
 	public readonly file: string;
 	public readonly dir: string;
+	public readonly initialService?: boolean;
 
-	constructor({ template, name, file = './nitric.yaml', dir }: MakeServiceTaskOpts) {
+	constructor({ template, name, file = './nitric.yaml', dir, initialService }: MakeServiceTaskOpts) {
 		super(`Making Service ${name}`);
 		this.template = template;
 		this.serviceName = name;
 		this.file = file; // nitric file
 		//TODO: refactor normalizeServiceName
+
 		this.dir = dir || name; // new service directory, relative to nitric file.
+		this.initialService = initialService;
 	}
 
 	private async pullTemplate(stack: Stack): Promise<void> {
@@ -59,8 +63,13 @@ export class MakeServiceTask extends Task<void> {
 	private async makeService(stack: Stack): Promise<void> {
 		const template = await stack.getTemplate(this.template);
 		this.update(`${this.template} template available in stack`);
+
 		// Scaffold the new service using the code from the template
-		await Template.copyTemplateTo(template, this.dir);
+		await Template.copyTemplateTo(
+			template,
+			// if initial service don't try and find the relative path as current working directory will be outside of project
+			this.initialService ? this.dir : path.relative(process.cwd(), path.join(stack.getDirectory(), this.dir)),
+		);
 	}
 
 	async do(): Promise<void> {
