@@ -31,6 +31,7 @@ const METHOD_KEYS: method[] = ['get', 'post', 'put', 'patch', 'delete'];
 interface GoogleExtensions {
 	'x-google-backend': {
 		address: string;
+		path_translation?: 'APPEND_PATH_TO_ADDRESS' | 'CONSTANT_ADDRESS';
 	};
 }
 
@@ -83,6 +84,7 @@ export class NitricApiGcpApiGateway extends pulumi.ComponentResource {
 									...(rest as OpenAPIV2.OperationObject),
 									'x-google-backend': {
 										address: url,
+										path_translation: 'APPEND_PATH_TO_ADDRESS',
 									},
 								} as any,
 							};
