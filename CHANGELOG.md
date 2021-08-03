@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.76](https://github.com/nitrictech/cli/compare/v0.0.75...v0.0.76) (2021-08-03)
+
+
+### Bug Fixes
+
+* **GCP:** preserve paths from API gateway to services ([c3259f8](https://github.com/nitrictech/cli/commit/c3259f8d10ac528f5415405158f4e0f635faaac0))
+
 ### [0.0.75](https://github.com/nitrictech/cli/compare/v0.0.74...v0.0.75) (2021-07-29)
 
 
