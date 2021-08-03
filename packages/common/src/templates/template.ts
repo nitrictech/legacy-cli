@@ -84,7 +84,7 @@ export class Template {
 		//TODO: should probably do something to make sure the file exists
 		// Make a copy of the function template, using the new name in the output directory
 		const outPath = toDir;
-		const codePath = './template';
+		const codePath = '.nitric/template';
 		const outStream = tar.extract(outPath, {
 			// Don't incude the code dir
 			ignore: (name) => name.includes(path.normalize(codePath)),
