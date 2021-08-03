@@ -1,7 +1,7 @@
 {
 	"name": "@nitric/cli",
 	"description": "CLI tool for nitric applications",
-	"version": "0.0.76",
+	"version": "0.0.77",
 	"author": "Nitric <https://github.com/nitrictech>",
 	"bin": {
 		"nitric": "./bin/run"

@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.77](https://github.com/nitrictech/cli/compare/v0.0.76...v0.0.77) (2021-08-03)
+
+
+### Bug Fixes
+
+* **cli-common:** Fix template runtime extraction exclusion path. ([c4d0acd](https://github.com/nitrictech/cli/commit/c4d0acd8d74f9987a959f7742428bfb149c649d6))
+
 ### [0.0.76](https://github.com/nitrictech/cli/compare/v0.0.75...v0.0.76) (2021-08-03)
 
 
