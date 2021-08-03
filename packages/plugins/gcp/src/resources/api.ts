@@ -44,7 +44,7 @@ export class NitricApiGcpApiGateway extends pulumi.ComponentResource {
 	public readonly url: pulumi.Output<string>;
 
 	constructor(name: string, args: NitricApiGcpApiGatewayArgs, opts?: pulumi.ComponentResourceOptions) {
-		super('nitric:bucket:CloudStorage', name, {}, opts);
+		super('nitric:api:GcpApiGateway', name, {}, opts);
 		const { api, services } = args;
 		const defaultResourceOptions: pulumi.ResourceOptions = { parent: this };
 

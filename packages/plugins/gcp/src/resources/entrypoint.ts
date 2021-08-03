@@ -35,7 +35,7 @@ export class NitricEntrypointGoogleCloudLB extends pulumi.ComponentResource {
 	public readonly ipAddress: pulumi.Output<string>;
 
 	constructor(name: string, args: NitricEntrypointGoogleCloudLBArgs, opts?: pulumi.ComponentResourceOptions) {
-		super('nitric:bucket:CloudStorage', name, {}, opts);
+		super('nitric:entrypoint:GoogleCloudLB', name, {}, opts);
 		const { stackName, entrypoint, sites, apis, services } = args;
 		const defaultResourceOptions: pulumi.ResourceOptions = { parent: this };
 

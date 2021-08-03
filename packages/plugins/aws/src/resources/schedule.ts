@@ -31,7 +31,7 @@ export class NitricScheduleEventBridge extends pulumi.ComponentResource {
 	public readonly name: string;
 
 	constructor(name, args: NitricScheduleEventBridgeArgs, opts?: pulumi.ComponentResourceOptions) {
-		super('nitric:site:S3', name, {}, opts);
+		super('nitric:schedule:EventBridge', name, {}, opts);
 
 		const defaultResourceOptions: pulumi.ResourceOptions = { parent: this };
 		const { schedule, topics } = args;

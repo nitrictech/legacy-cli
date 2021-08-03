@@ -33,7 +33,7 @@ export class NitricBucketS3 extends pulumi.ComponentResource {
 	public readonly s3: aws.s3.Bucket;
 
 	constructor(name, args: NitricBucketS3Args, opts?: pulumi.ComponentResourceOptions) {
-		super('nitric:site:S3', name, {}, opts);
+		super('nitric:bucket:S3', name, {}, opts);
 
 		const defaultResourceOptions: pulumi.ResourceOptions = { parent: this };
 		const { bucket } = args;

@@ -59,7 +59,7 @@ export class NitricApiAwsApiGateway extends pulumi.ComponentResource {
 	public readonly api: aws.apigatewayv2.Api;
 
 	constructor(name, args: NitricApiAwsApiGatewayArgs, opts?: pulumi.ComponentResourceOptions) {
-		super('nitric:docker:Image', name, {}, opts);
+		super('nitric:api:AwsApiGateway', name, {}, opts);
 
 		const defaultResourceOptions: pulumi.ResourceOptions = { parent: this };
 		const { api, services } = args;
