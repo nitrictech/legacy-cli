@@ -12,15 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './service';
-export * from './image';
-export * from './stack';
-export * from './bucket';
-export * from './collection';
-export * from './topic';
-export * from './queue';
-export * from './schedule';
-export * from './api';
-export * from './static-site';
-export * from './entrypoints';
-export * from './named-object';
+export interface NitricCollection<Ext extends Record<string, any> = {}> {
+	ext?: Ext;
+}

@@ -122,6 +122,7 @@ export class NitricServiceAWSLambda extends pulumi.ComponentResource {
 								'dynamodb:DeleteItem',
 								'dynamodb:GetItem',
 								'dynamodb:Query',
+								'dynamodb:Scan',
 								'dynamodb:UpdateItem',
 								'dynamodb:UpdateTable',
 								'dynamodb:ListTables',

@@ -27,6 +27,7 @@ import {
 	NitricApiAwsApiGateway,
 	NitricEntrypointCloudFront,
 	NitricBucketS3,
+	NitricCollectionDynamo,
 } from '../../resources';
 
 /**
@@ -91,7 +92,14 @@ export class Deploy extends Task<DeployResult> {
 
 	async do(): Promise<DeployResult> {
 		const { stack, region } = this;
-		const { topics = {}, buckets = {}, schedules = {}, apis = {}, entrypoints } = stack.asNitricStack();
+		const {
+			topics = {},
+			buckets = {},
+			collections = {},
+			schedules = {},
+			apis = {},
+			entrypoints,
+		} = stack.asNitricStack();
 		// Use absolute path to log files, so it's easier for users to locate them if printed to the console.
 		const logFile = path.resolve(await stack.getLoggingFile('deploy:aws'));
 		const errorFile = path.resolve(await stack.getLoggingFile('error:aws'));
@@ -120,14 +128,20 @@ export class Deploy extends Task<DeployResult> {
 									topic: t,
 								}),
 						);
-
+						// Deploy Storage Buckets
 						mapObject(buckets).forEach(
 							(bucket) =>
 								new NitricBucketS3(bucket.name, {
 									bucket,
 								}),
 						);
-
+						// Deploy Document Collections
+						mapObject(collections).forEach(
+							(collection) =>
+								new NitricCollectionDynamo(collection.name, {
+									collection,
+								}),
+						);
 						// Deploy Nitric Schedules
 						mapObject(schedules).forEach(
 							(schedule) =>
@@ -136,7 +150,6 @@ export class Deploy extends Task<DeployResult> {
 									topics: deployedTopics,
 								}),
 						);
-
 						// Deploy Nitric Sites
 						const deployedSites = stack.getSites().map(
 							(s) =>
@@ -146,7 +159,6 @@ export class Deploy extends Task<DeployResult> {
 									indexDocument: 'index.html',
 								}),
 						);
-
 						// Deploy Nitric Services
 						const deployedServices = stack.getServices().map((s) => {
 							// create a new repository for each service...
@@ -167,7 +179,6 @@ export class Deploy extends Task<DeployResult> {
 								image: image,
 							});
 						});
-
 						// Deploy Nitric APIs
 						const deployedApis = mapObject(apis).map(
 							(api) =>
@@ -176,7 +187,7 @@ export class Deploy extends Task<DeployResult> {
 									services: deployedServices,
 								}),
 						);
-
+						// Deploy Nitric Entrypoints
 						if (entrypoints) {
 							const eps = Object.entries(entrypoints).map(([name, entrypoint]) => {
 								return new NitricEntrypointCloudFront(name, {
