@@ -28,7 +28,7 @@ export class NitricScheduleCloudScheduler extends pulumi.ComponentResource {
 	public readonly job: gcp.cloudscheduler.Job;
 
 	constructor(name: string, args: NitricScheduleCloudSchedulerArgs, opts?: pulumi.ComponentResourceOptions) {
-		super('nitric:bucket:CloudStorage', name, {}, opts);
+		super('nitric:schedule:CloudScheduler', name, {}, opts);
 		const { schedule, topics } = args;
 		const defaultResourceOptions: pulumi.ResourceOptions = { parent: this };
 

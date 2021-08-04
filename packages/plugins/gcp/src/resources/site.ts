@@ -29,7 +29,7 @@ export class NitricSiteCloudStorage extends pulumi.ComponentResource {
 	public readonly storage: gcp.storage.Bucket;
 
 	constructor(name: string, args: NitricSiteCloudStorageArgs, opts?: pulumi.ComponentResourceOptions) {
-		super('nitric:bucket:CloudStorage', name, {}, opts);
+		super('nitric:site:CloudStorage', name, {}, opts);
 		const { site } = args;
 		const defaultResourceOptions: pulumi.ResourceOptions = { parent: this };
 
