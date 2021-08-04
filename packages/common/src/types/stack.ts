@@ -13,6 +13,7 @@
 // limitations under the License.
 
 import { NitricBucket } from './bucket';
+import { NitricCollection } from './collection';
 import { NitricTopic } from './topic';
 import { NitricQueue } from './queue';
 import { NitricSchedule } from './schedule';
@@ -27,6 +28,7 @@ import { NitricService } from './service';
 export interface NitricStack<
 	ServiceExtensions = Record<string, any>,
 	BucketExtensions = Record<string, any>,
+	CollectionExtensions = Record<string, any>,
 	TopicExtensions = Record<string, any>,
 	QueueExtensions = Record<string, any>,
 	ScheduleExtensions = Record<string, any>,
@@ -43,6 +45,10 @@ export interface NitricStack<
 	// Buckets that will be deployed
 	buckets?: {
 		[name: string]: NitricBucket<BucketExtensions>;
+	};
+	// Collections that will be deployed
+	collections?: {
+		[name: string]: NitricCollection<CollectionExtensions>;
 	};
 	// Topics that will be created
 	topics?: {

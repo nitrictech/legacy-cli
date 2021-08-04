@@ -13,47 +13,60 @@
 // limitations under the License.
 import * as pulumi from '@pulumi/pulumi';
 import * as aws from '@pulumi/aws';
-import { NamedObject, NitricBucket } from '@nitric/cli-common';
+import { NamedObject, NitricCollection } from '@nitric/cli-common';
 
-interface NitricBucketS3Args {
-	bucket: NamedObject<NitricBucket>;
+interface NitricCollectionDynamoArgs {
+	collection: NamedObject<NitricCollection>;
 }
 
 /**
- * Nitric S3 Bucket
+ * Nitric Document Collection, using DynamoDB
  */
-export class NitricBucketS3 extends pulumi.ComponentResource {
+export class NitricCollectionDynamo extends pulumi.ComponentResource {
 	/**
-	 * The name of the s3 site
+	 * The name of the document collection
 	 */
 	public readonly name: string;
 	/**
-	 * The deployed bucket
+	 * The deployed table
 	 */
-	public readonly s3: aws.s3.Bucket;
+	public readonly dynamo: aws.dynamodb.Table;
 
-	constructor(name, args: NitricBucketS3Args, opts?: pulumi.ComponentResourceOptions) {
-		super('nitric:bucket:S3', name, {}, opts);
+	constructor(name, args: NitricCollectionDynamoArgs, opts?: pulumi.ComponentResourceOptions) {
+		super('nitric:collection:DynamoDB', name, {}, opts);
 
 		const defaultResourceOptions: pulumi.ResourceOptions = { parent: this };
-		const { bucket } = args;
+		const { collection } = args;
 
-		this.name = bucket.name;
+		this.name = collection.name;
 
-		// Create a Bucket for storage
-		this.s3 = new aws.s3.Bucket(
+		// Create a DynamoDB Table to act as a Document Collection
+		this.dynamo = new aws.dynamodb.Table(
 			this.name,
 			{
+				attributes: [
+					{
+						name: '_pk',
+						type: 'S',
+					},
+					{
+						name: '_sk',
+						type: 'S',
+					},
+				],
+				hashKey: '_pk',
+				rangeKey: '_sk',
 				tags: {
-					'x-nitric-name': bucket.name,
+					'x-nitric-name': this.name,
 				},
+				billingMode: 'PAY_PER_REQUEST',
 			},
 			defaultResourceOptions,
 		);
 
 		this.registerOutputs({
 			name: this.name,
-			s3: this.s3,
+			dynamo: this.dynamo,
 		});
 	}
 }
