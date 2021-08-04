@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.78](https://github.com/nitrictech/cli/compare/v0.0.77...v0.0.78) (2021-08-04)
+
+
+### Bug Fixes
+
+* Ensure resource names are unique. ([0f9637b](https://github.com/nitrictech/cli/commit/0f9637b2c3906d89fbf385620cc5ed9f728f29f7))
+
 ### [0.0.77](https://github.com/nitrictech/cli/compare/v0.0.76...v0.0.77) (2021-08-03)
 
 

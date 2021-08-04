@@ -1,6 +1,6 @@
 {
 	"name": "@nitric/cli-common",
-	"version": "0.0.77",
+	"version": "0.0.78",
 	"description": "Common Nitric typings and utility functions",
 	"author": "Nitric <https://github.com/nitrictech>",
 	"bugs": "https://github.com/nitrictech/cli/issues",
