@@ -34,7 +34,7 @@ export interface NitricStack<
 	ScheduleExtensions = Record<string, any>,
 	ApiExtensions = Record<string, any>,
 	SiteExtensions = Record<string, any>,
-	EntrypointExtensions = Record<string, any>
+	EntrypointExtensions = Record<string, any>,
 > {
 	// Name of the Nitric Stack
 	name: string;
