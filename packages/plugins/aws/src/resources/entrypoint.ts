@@ -138,9 +138,8 @@ export class NitricEntrypointCloudFront extends pulumi.ComponentResource {
 			}
 		});
 
-		const { defaultCacheBehavior, orderedCacheBehaviors } = NitricEntrypointCloudFront.entrypointsToBehaviours(
-			entrypoint,
-		);
+		const { defaultCacheBehavior, orderedCacheBehaviors } =
+			NitricEntrypointCloudFront.entrypointsToBehaviours(entrypoint);
 
 		let viewerCertificate: aws.types.input.cloudfront.DistributionViewerCertificate = {
 			cloudfrontDefaultCertificate: true,
@@ -223,9 +222,7 @@ export class NitricEntrypointCloudFront extends pulumi.ComponentResource {
 		});
 	}
 
-	static entrypointsToBehaviours(
-		entrypoints: NitricEntrypoint,
-	): {
+	static entrypointsToBehaviours(entrypoints: NitricEntrypoint): {
 		defaultCacheBehavior: aws.types.input.cloudfront.DistributionDefaultCacheBehavior;
 		orderedCacheBehaviors: aws.types.input.cloudfront.DistributionOrderedCacheBehavior[];
 	} {

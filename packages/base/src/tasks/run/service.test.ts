@@ -71,16 +71,14 @@ describe('Given a Nitric function is being run locally as a container', () => {
 
 			const mockInstance = mocked(Docker, true).mock.instances[0];
 			const mockRun = mocked(mockInstance.run, true);
-			mockRun.mockImplementation(
-				async (_, __, ___, ____, callback): Promise<any> => {
-					runCallback = callback;
-					return {
-						on: jest.fn((_, __) => {
-							// never call the callback, simulating delayed start/failure.
-						}),
-					} as any;
-				},
-			);
+			mockRun.mockImplementation(async (_, __, ___, ____, callback): Promise<any> => {
+				runCallback = callback;
+				return {
+					on: jest.fn((_, __) => {
+						// never call the callback, simulating delayed start/failure.
+					}),
+				} as any;
+			});
 
 			return expect(runFunctionTask.do()).rejects.toEqual(
 				new Error(`Container for image test-id not started after 2 seconds.`),
@@ -158,9 +156,9 @@ describe('Given a Nitric function is being run locally as a container', () => {
 				expect.anything(),
 				undefined,
 				expect.objectContaining({
-					HostConfig: {
+					HostConfig: expect.objectContaining({
 						NetworkMode: 'dummy-network',
-					},
+					}),
 				}),
 				expect.anything(),
 			);
@@ -219,9 +217,9 @@ describe('Given a Nitric function is being run locally as a container', () => {
 					expect.anything(),
 					undefined,
 					expect.objectContaining({
-						HostConfig: {
+						HostConfig: expect.objectContaining({
 							NetworkMode: 'bridge',
-						},
+						}),
 					}),
 					expect.anything(),
 				);
@@ -229,7 +227,7 @@ describe('Given a Nitric function is being run locally as a container', () => {
 		});
 	});
 
-	describe('When a docker volume is provide', () => {
+	describe('When a docker volume is provided', () => {
 		test('The volume config should be passed to Docker', async () => {
 			expect.assertions(1);
 			const runFunctionTask = new RunServiceTask({
@@ -257,7 +255,7 @@ describe('Given a Nitric function is being run locally as a container', () => {
 					Volumes: {
 						['/nitric/']: {},
 					},
-					HostConfig: {
+					HostConfig: expect.objectContaining({
 						Mounts: [
 							{
 								Target: '/nitric/',
@@ -265,7 +263,7 @@ describe('Given a Nitric function is being run locally as a container', () => {
 								Type: 'volume',
 							},
 						],
-					},
+					}),
 				}),
 				expect.anything(),
 			);

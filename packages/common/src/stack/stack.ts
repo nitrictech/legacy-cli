@@ -21,6 +21,7 @@ import { STAGING_DIR } from '../paths';
 import { Site } from './site';
 import { findFileRead } from '../utils';
 import { Service } from './service';
+import { validateStack } from './schema';
 
 const NITRIC_DIRECTORY = '.nitric';
 
@@ -35,7 +36,7 @@ export class Stack<
 	ScheduleExtensions = Record<string, any>,
 	ApiExtensions = Record<string, any>,
 	SiteExtensions = Record<string, any>,
-	EntrypointExtensions = Record<string, any>
+	EntrypointExtensions = Record<string, any>,
 > {
 	private file: string;
 	private name: string;
@@ -269,6 +270,9 @@ export class Stack<
 		}
 
 		const stack = parser(content);
+		// validate the stack against the schema and throw in case of errors.
+		validateStack(stack);
+
 		return new Stack(filePath || file, stack);
 	}
 

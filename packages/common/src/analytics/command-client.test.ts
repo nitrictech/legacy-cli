@@ -16,7 +16,7 @@ import { CommandClient } from './command-client';
 
 jest.mock('universal-analytics');
 
-const MockedVisitor = (Visitor as unknown) as jest.Mock<typeof Visitor.prototype>;
+const MockedVisitor = Visitor as unknown as jest.Mock<typeof Visitor.prototype>;
 
 const mockedVisitor = new MockedVisitor();
 const mockCommandClient = new CommandClient('mock', mockedVisitor);

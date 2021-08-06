@@ -20,7 +20,7 @@ import { Config } from '../config';
 jest.mock('universal-analytics');
 jest.mock('../analytics/command-client');
 
-const MockedCommandClient = (CommandClient as unknown) as jest.Mock<typeof CommandClient.prototype>;
+const MockedCommandClient = CommandClient as unknown as jest.Mock<typeof CommandClient.prototype>;
 
 class MockCommand extends BaseCommand {
 	static hasRun = false;

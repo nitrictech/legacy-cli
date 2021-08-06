@@ -193,42 +193,38 @@ describe('Given executing nitric run', () => {
 		jest.spyOn(process.stdout, 'write').mockImplementation((str) => !!results.push(str));
 
 		// Mock listr2 for the BuildFunctionTask
-		mocked(Listr, true).mockImplementationOnce(
-			(tasks): Listr<unknown> => {
-				(tasks! as Array<any>).forEach((element) => {
-					element.task();
-				});
-				return {
-					run: () => {
-						// no need to run.
-						return [
-							{
-								func: {
-									name: 'dummy-func',
-								},
+		mocked(Listr, true).mockImplementationOnce((tasks): Listr<unknown> => {
+			(tasks! as Array<any>).forEach((element) => {
+				element.task();
+			});
+			return {
+				run: () => {
+					// no need to run.
+					return [
+						{
+							func: {
+								name: 'dummy-func',
 							},
-						];
-					},
-				} as any;
-			},
-		);
+						},
+					];
+				},
+			} as any;
+		});
 
 		// Mock listr for all other tasks, provide the context object, since it's used to get the network and volume to mount to containers
-		mocked(Listr, true).mockImplementation(
-			(tasks): Listr<unknown> => {
-				(tasks! as Array<any>).forEach((element) => {
-					element.task({ network: 'dummy-network', volume: 'dummy-volume' });
-				});
-				return {
-					run: () => {
-						// no need to run.
-						return {
-							network: 'dummy-network',
-						};
-					},
-				} as any;
-			},
-		);
+		mocked(Listr, true).mockImplementation((tasks): Listr<unknown> => {
+			(tasks! as Array<any>).forEach((element) => {
+				element.task({ network: 'dummy-network', volume: 'dummy-volume' });
+			});
+			return {
+				run: () => {
+					// no need to run.
+					return {
+						network: 'dummy-network',
+					};
+				},
+			} as any;
+		});
 	});
 
 	afterAll(() => {

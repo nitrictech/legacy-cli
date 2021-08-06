@@ -16,8 +16,7 @@
 		"build": "yarn run clean && yarn run build:sources",
 		"build:sources": "tsc --project tsconfig.build.json --outDir ./lib/",
 		"test": "tsc --emitDeclarationOnly && jest",
-		"npm:publish": "yarn npm publish --access public --tolerate-republish",
-		"license:check": "licensee --production"
+		"npm:publish": "yarn npm publish --access public --tolerate-republish"
 	},
 	"contributors": [
 		"Jye Cusch <jye.cusch@gmail.com>",
@@ -29,11 +28,13 @@
 		"@oclif/config": "^1",
 		"@pulumi/docker": "^3.0.0",
 		"@pulumi/pulumi": "^3.1.0",
+		"ajv": "^8.6.2",
 		"common-tags": "^1.8.0",
 		"enquirer": "^2.3.0",
 		"eventemitter3": "^4.0.7",
 		"execa": "^5.0.0",
 		"inquirer": "^8.0.0",
+		"json-schema": "^0.3.0",
 		"listr2": "^3.6.2",
 		"multimatch": "^5.0.0",
 		"rimraf": "^3.0.2",
@@ -56,9 +57,8 @@
 		"@types/universal-analytics": "^0.4.4",
 		"@types/uuid": "^8.3.0",
 		"jest": "^26.6.1",
-		"licensee": "^8.2.0",
 		"openapi-types": "^7.2.3",
 		"ts-jest": "^26.4.3",
-		"typescript": "^3.3"
+		"typescript": "^4.3"
 	}
 }

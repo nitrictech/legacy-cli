@@ -14,7 +14,7 @@
 		"lint:deps": "yarn dlx @yarnpkg/doctor@2.1.3",
 		"test": "prettier \"./**/*.{ts,js,css,md}\" --write && ultra -r test",
 		"bump": "standard-version",
-		"license:check": "yarn workspaces foreach run license:check",
+		"license:check": "node oss-check.js",
 		"license:header:check": "license-check-and-add check -f ./licenseconfig.json",
 		"license:add": "license-check-and-add add -f ./licenseconfig.json",
 		"license:remove": "license-check-and-add remove -f ./licenseconfig.json",
@@ -28,8 +28,8 @@
 	"license": "Apache-2.0",
 	"private": true,
 	"devDependencies": {
-		"@typescript-eslint/eslint-plugin": "^2.27.0",
-		"@typescript-eslint/parser": "^2.27.0",
+		"@typescript-eslint/eslint-plugin": "^4.29.0",
+		"@typescript-eslint/parser": "^4.29.0",
 		"eslint": "^6.8.0",
 		"eslint-config-airbnb": "^18.1.0",
 		"eslint-config-prettier": "^6.11.0",
@@ -47,7 +47,7 @@
 		"lint-staged": "^10.1.3",
 		"prettier": "^2.0.4",
 		"standard-version": "^9.0.0",
-		"typescript": "^4.0.5",
+		"typescript": "^4.3",
 		"ultra-runner": "^3.5.0"
 	},
 	"workspaces": [
@@ -65,6 +65,8 @@
 		"./**/*.{ts,js}": "eslint --fix-dry-run"
 	},
 	"dependencies": {
+		"legally": "^3.5.10",
 		"rimraf": "^3.0.2"
-	}
+	},
+	"packageManager": "yarn@2.4.2"
 }
