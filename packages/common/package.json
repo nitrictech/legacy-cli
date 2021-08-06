@@ -16,8 +16,7 @@
 		"build": "yarn run clean && yarn run build:sources",
 		"build:sources": "tsc --project tsconfig.build.json --outDir ./lib/",
 		"test": "tsc --emitDeclarationOnly && jest",
-		"npm:publish": "yarn npm publish --access public --tolerate-republish",
-		"license:check": "licensee --production"
+		"npm:publish": "yarn npm publish --access public --tolerate-republish"
 	},
 	"contributors": [
 		"Jye Cusch <jye.cusch@gmail.com>",
@@ -58,7 +57,6 @@
 		"@types/universal-analytics": "^0.4.4",
 		"@types/uuid": "^8.3.0",
 		"jest": "^26.6.1",
-		"licensee": "^8.2.0",
 		"openapi-types": "^7.2.3",
 		"ts-jest": "^26.4.3",
 		"typescript": "^4.3"

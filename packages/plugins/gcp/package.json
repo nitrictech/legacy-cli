@@ -33,7 +33,6 @@
 		"eslint-config-oclif-typescript": "^0.1",
 		"globby": "^10",
 		"jest": "^26.6.1",
-		"licensee": "^8.2.0",
 		"openapi-types": "^7.2.3",
 		"ts-jest": "^26.4.3",
 		"ts-node": "^8",
@@ -70,7 +69,6 @@
 		"prepack": "rm -rf lib && tsc -p tsconfig.build.json && oclif-dev manifest && oclif-dev readme",
 		"test": "tsc --emitDeclarationOnly && jest --passWithNoTests",
 		"version": "oclif-dev readme && git add README.md",
-		"license:check": "licensee --production",
 		"npm:publish": "yarn npm publish --access public --tolerate-republish"
 	}
 }

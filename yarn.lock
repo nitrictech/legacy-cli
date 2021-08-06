@@ -433,13 +433,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@blueoak/list@npm:^2.0.0":
-  version: 2.0.0
-  resolution: "@blueoak/list@npm:2.0.0"
-  checksum: 7d8fd631c854d491922b6b43c389b19fb498f15be2e62ab9a9e0623e56325b85e7003f85ce336790eb6278569980c86e723c26221d2cabd49e6d4d4579b5954e
-  languageName: node
-  linkType: hard
-
 "@cnakazawa/watch@npm:^1.0.3":
   version: 1.0.4
   resolution: "@cnakazawa/watch@npm:1.0.4"
@@ -728,7 +721,6 @@ __metadata:
     inquirer: ^8.0.0
     jest: ^26.6.1
     json-schema: ^0.3.0
-    licensee: ^8.2.0
     listr2: ^3.6.2
     multimatch: ^5.0.0
     openapi-types: ^7.2.3
@@ -778,7 +770,6 @@ __metadata:
     globby: ^10
     inquirer: ^7.3.3
     jest: ^26.6.1
-    licensee: ^8.2.0
     listr2: ^3.6.2
     multimatch: ^5.0.0
     node-emoji: ^1.10.0
@@ -825,7 +816,6 @@ __metadata:
     globby: ^10
     inquirer: ^7.3.3
     jest: ^26.6.1
-    licensee: ^8.2.0
     listr2: ^3.6.2
     lodash: ^4.17.20
     mime: ^2.5.2
@@ -864,7 +854,6 @@ __metadata:
     globby: ^10
     inquirer: ^8.0.0
     jest: ^26.6.1
-    licensee: ^8.2.0
     listr2: ^3.6.2
     openapi-types: ^7.2.3
     ts-jest: ^26.4.3
@@ -898,7 +887,6 @@ __metadata:
     globby: ^10
     inquirer: ^8.0.0
     jest: ^26.6.1
-    licensee: ^8.2.0
     listr2: ^3.6.2
     ts-jest: ^26.4.3
     ts-node: ^8
@@ -934,7 +922,6 @@ __metadata:
     googleapis: ^61.0.0
     inquirer: ^8.0.0
     jest: ^26.6.1
-    licensee: ^8.2.0
     listr2: ^3.6.2
     mime: ^2.5.2
     openapi-types: ^7.2.3
@@ -2308,13 +2295,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"array-find-index@npm:^1.0.2":
-  version: 1.0.2
-  resolution: "array-find-index@npm:1.0.2"
-  checksum: 5320b3bd4680eadee5191b8d8a4f01788f8761e11ae5d8d8f67e836308760d453c38300cdef41315e8adf24979083f73c353f651f1dc029ab3c712c1ef5ebf17
-  languageName: node
-  linkType: hard
-
 "array-ify@npm:^1.0.0":
   version: 1.0.0
   resolution: "array-ify@npm:1.0.0"
@@ -3630,15 +3610,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"correct-license-metadata@npm:^1.0.1":
-  version: 1.4.0
-  resolution: "correct-license-metadata@npm:1.4.0"
-  dependencies:
-    spdx-expression-validate: ^2.0.0
-  checksum: 00c8875bde07d8390be0e6da91c73815b8a9e49affd51ecf859166c6d70103de48d1c0af1c4a163bc3e531bf0256ee490ddb05510af10111c09a79d42eed4d8f
-  languageName: node
-  linkType: hard
-
 "cosmiconfig@npm:^7.0.0":
   version: 7.0.0
   resolution: "cosmiconfig@npm:7.0.0"
@@ -3999,13 +3970,6 @@ __metadata:
     docker-modem: ^3.0.0
     tar-fs: ~2.0.1
   checksum: 9b87d1efcfec4072ec19295f6737aacfea029d01e2b004c854712d3f1439c107db5db138da623c02e4b322fc8948e4cdb388a306329a8de85e30c5a72686d1c5
-  languageName: node
-  linkType: hard
-
-"docopt@npm:^0.6.2":
-  version: 0.6.2
-  resolution: "docopt@npm:0.6.2"
-  checksum: 956f40c184511e9691deafc5e205d0261f3d90def7f6a0c9caa189020ee968da2c05af4083851f38e7ea6ffbccef2f77d4e3a5ad7a3c9c1a23f85bc3b83368bb
   languageName: node
   linkType: hard
 
@@ -5441,15 +5405,6 @@ __metadata:
   dependencies:
     null-check: ^1.0.0
   checksum: 4baee19389d3dacda35876cfe61c9d5aeba960af2c78535e899444e68feba1003b5e52800bd81a77b9f9b30f012cb516d0fdf9f914cf732dde7deff8e8082cae
-  languageName: node
-  linkType: hard
-
-"fs-access@npm:^2.0.0":
-  version: 2.0.0
-  resolution: "fs-access@npm:2.0.0"
-  dependencies:
-    null-check: ^1.0.0
-  checksum: 7c043058079a8ec9ffda55f2106bbfbacb3f81fd03bd291d9718ebbd5746e59265881c243f184c2c885f5a612dbd5db79e1f9687eda98c7f37677d1829960f63
   languageName: node
   linkType: hard
 
@@ -7554,13 +7509,6 @@ fsevents@^2.1.2:
   languageName: node
   linkType: hard
 
-"json-parse-errback@npm:^2.0.1":
-  version: 2.0.1
-  resolution: "json-parse-errback@npm:2.0.1"
-  checksum: 2157c86bad8d9c37a51d188efc9a102f5139b45ac7b770829aa9f1a629e7866e08cd850b0aea66565a849fbf8bb373eb82c201155673db1cba126e9026c0d922
-  languageName: node
-  linkType: hard
-
 "json-parse-even-better-errors@npm:^2.3.0":
   version: 2.3.1
   resolution: "json-parse-even-better-errors@npm:2.3.1"
@@ -7859,6 +7807,15 @@ fsevents@^2.1.2:
   languageName: node
   linkType: hard
 
+"legally@npm:^3.5.10":
+  version: 3.5.10
+  resolution: "legally@npm:3.5.10"
+  bin:
+    legally: cli.js
+  checksum: 810299c1126db8f822b353482aa2a0a6364c61017557e09f73314cd5391a9f9806fd85bff509b999c79474e85a93f8f89f5491ad112647bc794022c1af718772
+  languageName: node
+  linkType: hard
+
 "leven@npm:^3.1.0":
   version: 3.1.0
   resolution: "leven@npm:3.1.0"
@@ -7895,31 +7852,6 @@ fsevents@^2.1.2:
   bin:
     license-check-and-add: dist/src/cli.js
   checksum: 8929c87f87de7c1dd231fb544a1983645c45bc9a7e5f83718799c45566e823c0c25001378e0875aa2c757b45172a566c9e9547dbb18288f743e136534ed6869e
-  languageName: node
-  linkType: hard
-
-"licensee@npm:^8.2.0":
-  version: 8.2.0
-  resolution: "licensee@npm:8.2.0"
-  dependencies:
-    "@blueoak/list": ^2.0.0
-    correct-license-metadata: ^1.0.1
-    docopt: ^0.6.2
-    fs-access: ^2.0.0
-    has: ^1.0.3
-    json-parse-errback: ^2.0.1
-    npm-license-corrections: ^1.0.0
-    read-package-tree: ^5.3.1
-    run-parallel: ^1.1.9
-    semver: ^6.3.0
-    simple-concat: ^1.0.0
-    spdx-expression-parse: ^3.0.0
-    spdx-expression-validate: ^2.0.0
-    spdx-osi: ^3.0.0
-    spdx-whitelisted: ^1.0.0
-  bin:
-    licensee: licensee
-  checksum: 72cf1e04452551902f54df5df366ba1d8886215c155dd5efe64dc29290262818bba68d520f7330c4cc6dbe17fa9c074dd2bf76f7b766202e6a5954d7e5a62e9d
   languageName: node
   linkType: hard
 
@@ -8760,6 +8692,7 @@ fsevents@^2.1.2:
     globby: ^11.0.1
     husky: ^4.2.5
     jest: 26.6.3
+    legally: ^3.5.10
     license-check-and-add: ^4.0.2
     lint-staged: ^10.1.3
     prettier: ^2.0.4
@@ -8936,13 +8869,6 @@ fsevents@^2.1.2:
   version: 3.0.0
   resolution: "normalize-path@npm:3.0.0"
   checksum: 215a701b471948884193628f3e38910353abf445306b519c42c2a30144b8beb8ca0a684da97bfc2ee11eb168c35c776d484274da4bd8f213d2b22f70579380ee
-  languageName: node
-  linkType: hard
-
-"npm-license-corrections@npm:^1.0.0":
-  version: 1.4.0
-  resolution: "npm-license-corrections@npm:1.4.0"
-  checksum: 19ba1cfd5d68933b878e67b8f101ba3d860fbe27261f9ec28f66a202e7c5060d64aa69487bd4536ad90c7ad310ca874ec181e181632daea196bbe9392635be4b
   languageName: node
   linkType: hard
 
@@ -10696,13 +10622,6 @@ resolve@^2.0.0-next.3:
   languageName: node
   linkType: hard
 
-"simple-concat@npm:^1.0.0":
-  version: 1.0.1
-  resolution: "simple-concat@npm:1.0.1"
-  checksum: 4623960448a49731b5abeedc5430f8158c5caa05f10a685b405b13ed8532c80b5d99e6ef5d53f76a695e66f551cdbcca22c1363ceef8f8b246cda1e21b9ef871
-  languageName: node
-  linkType: hard
-
 "simple-git@npm:^2.31.0, simple-git@npm:^2.37.0":
   version: 2.42.0
   resolution: "simple-git@npm:2.42.0"
@@ -10901,17 +10820,6 @@ resolve@^2.0.0-next.3:
   languageName: node
   linkType: hard
 
-"spdx-compare@npm:^1.0.0":
-  version: 1.0.0
-  resolution: "spdx-compare@npm:1.0.0"
-  dependencies:
-    array-find-index: ^1.0.2
-    spdx-expression-parse: ^3.0.0
-    spdx-ranges: ^2.0.0
-  checksum: f72639fe0d19eee146068fbe30d52f82173ce18e573581b30a43e72863751401e5734cd8ab7e028490ac040752b1ff05b60e84a4ed8b5f2156ed14fea5bc012f
-  languageName: node
-  linkType: hard
-
 "spdx-correct@npm:^3.0.0":
   version: 3.1.1
   resolution: "spdx-correct@npm:3.1.1"
@@ -10939,43 +10847,10 @@ resolve@^2.0.0-next.3:
   languageName: node
   linkType: hard
 
-"spdx-expression-validate@npm:^2.0.0":
-  version: 2.0.0
-  resolution: "spdx-expression-validate@npm:2.0.0"
-  dependencies:
-    spdx-expression-parse: ^3.0.0
-  checksum: 0e5a0bcb65321e60798847090b25df8364323337a9d45841525edb7c3f660c445451869ebeb27e31ffa99868d9f34f2ec270510280a982b880cba9583c9aa229
-  languageName: node
-  linkType: hard
-
 "spdx-license-ids@npm:^3.0.0":
   version: 3.0.9
   resolution: "spdx-license-ids@npm:3.0.9"
   checksum: a4d970d859bc5eeef3a95d7597fa39b36b2c046153d3d2c9876293d84457b0456a56aef7f45e1d3c3129cf7557c35305dffaddbcff630f7df72cb359aed78ce1
-  languageName: node
-  linkType: hard
-
-"spdx-osi@npm:^3.0.0":
-  version: 3.0.0
-  resolution: "spdx-osi@npm:3.0.0"
-  checksum: 3705d842b5106e2d8c33c927b94471455d354556ba35a88b5d2fb739c4627425fdc638265979703fa78d66e1f6bf5e458cc934e59d36085e1eb125a781a10a9f
-  languageName: node
-  linkType: hard
-
-"spdx-ranges@npm:^2.0.0":
-  version: 2.1.1
-  resolution: "spdx-ranges@npm:2.1.1"
-  checksum: da86cbb8a93ed0e929910f1df831d346986dd8c85bd83330b3b36a224ae35057daa8a8026904a46454a77328d0b4a29e73ee699209accd1ccb9b9d7a06f9febe
-  languageName: node
-  linkType: hard
-
-"spdx-whitelisted@npm:^1.0.0":
-  version: 1.0.0
-  resolution: "spdx-whitelisted@npm:1.0.0"
-  dependencies:
-    spdx-compare: ^1.0.0
-    spdx-ranges: ^2.0.0
-  checksum: f9e5c132250cccd33a18f260811e6c1253deabb9804e24c0f93548fc19ab5cb79bf94c4aaacdfce14af3f3d1215b98ebf4e06d20a8e0fb076b1ea7901dbf65d7
   languageName: node
   linkType: hard
 
