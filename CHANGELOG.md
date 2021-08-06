@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.80](https://github.com/nitrictech/cli/compare/v0.0.79...v0.0.80) (2021-08-06)
+
+
+### Features
+
+* add nitric.yaml file validation ([9eaf54d](https://github.com/nitrictech/cli/commit/9eaf54dfce1aa6e00a0917f44b7234b81832d34e))
+
 ### [0.0.79](https://github.com/nitrictech/cli/compare/v0.0.78...v0.0.79) (2021-08-04)
 
 
