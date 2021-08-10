@@ -83,10 +83,10 @@
 				"description": "Commands to make new projects and assets."
 			},
 			"deploy": {
-				"description": "Plugin commands to deploy on supported providers. E.g. `$ nitric plugins:install @nitric/plugin-aws`"
+				"description": "Plugin commands to deploy on supported providers. E.g. `$ nitric deploy:aws`"
 			},
 			"down": {
-				"description": "Plugin commands to tear down deployments on supported providers. E.g. `$ nitric plugins:install @nitric/plugin-aws`"
+				"description": "Plugin commands to tear down deployments on supported providers. E.g. `$ nitric down:aws`"
 			}
 		},
 		"bin": "nitric",
