@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.82](https://github.com/nitrictech/cli/compare/v0.0.81...v0.0.82) (2021-08-11)
+
+
+### Bug Fixes
+
+* modify logging names to be agnostic. ([6789577](https://github.com/nitrictech/cli/commit/67895777ac860042c6bdc8902dab8f2e3fe8824b))
+
 ### [0.0.81](https://github.com/nitrictech/cli/compare/v0.0.80...v0.0.81) (2021-08-10)
 
 
