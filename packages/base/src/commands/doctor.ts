@@ -18,6 +18,7 @@ import cli from 'cli-ux';
 import emoji from 'node-emoji';
 import chalk from 'chalk';
 import stream from 'stream';
+import execa from 'execa';
 import fs from 'fs';
 import { InstallPulumi, InstallDocker, UpdateStoreTask, AddRepositoryTask } from '../tasks';
 import { OFFICIAL_REPOSITORIES } from '../constants';
@@ -81,6 +82,17 @@ export default class Doctor extends BaseCommand {
 			...software,
 			installed: !!which.sync(software.name, { nothrow: true }),
 		}));
+
+		// Removing images from docker
+		const prune = await cli.confirm('\nRemove all previously installed/unused images from docker? [y/n]');
+		if (prune) {
+			try {
+				const output = execa.sync('docker', ['image', 'prune', '-a', '-f']);
+				cli.info('Pruning unused images - \n' + output.stdout + '\n');
+			} catch (e) {
+				cli.info('Unable to prune docker images. Check the Daemon is running.');
+			}
+		}
 
 		// Check for missing store and templates
 		const repos = Repository.fromDefaultDirectory();
