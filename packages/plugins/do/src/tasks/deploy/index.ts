@@ -73,8 +73,8 @@ export class Deploy extends Task<DeployResults> {
 		} = stack.asNitricStack();
 
 		// Use absolute path to log files, so it's easier for users to locate them if printed to the console.
-		const errorFile = path.resolve(await stack.getLoggingFile('error:do'));
-		const logFile = path.resolve(await stack.getLoggingFile('deploy:do'));
+		const errorFile = path.resolve(await stack.getLoggingFile('error-do'));
+		const logFile = path.resolve(await stack.getLoggingFile('deploy-do'));
 
 		try {
 			// Upload the stack

@@ -50,8 +50,8 @@ export class Deploy extends Task<void> {
 		const { buckets, apis = {}, topics = {}, schedules = {}, queues } = stack.asNitricStack();
 
 		// Use absolute path to log files, so it's easier for users to locate them if printed to the console.
-		const errorFile = path.resolve(await stack.getLoggingFile('error:azure'));
-		const logFile = path.resolve(await stack.getLoggingFile('deploy:azure'));
+		const errorFile = path.resolve(await stack.getLoggingFile('error-azure'));
+		const logFile = path.resolve(await stack.getLoggingFile('deploy-azure'));
 
 		try {
 			// Upload the stack
