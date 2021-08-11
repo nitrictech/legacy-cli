@@ -79,8 +79,8 @@ export class Deploy extends Task<DeployResult> {
 		});
 		const authClient = await auth.getClient();
 		// Use absolute path to log files, so it's easier for users to locate them if printed to the console.
-		const logFile = path.resolve(await stack.getLoggingFile('deploy:gcp'));
-		const errorFile = path.resolve(await stack.getLoggingFile('error:gcp'));
+		const logFile = path.resolve(await stack.getLoggingFile('deploy-gcp'));
+		const errorFile = path.resolve(await stack.getLoggingFile('error-gcp'));
 		let result = {} as DeployResult;
 
 		try {

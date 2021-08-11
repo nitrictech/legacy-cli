@@ -101,8 +101,8 @@ export class Deploy extends Task<DeployResult> {
 			entrypoints,
 		} = stack.asNitricStack();
 		// Use absolute path to log files, so it's easier for users to locate them if printed to the console.
-		const logFile = path.resolve(await stack.getLoggingFile('deploy:aws'));
-		const errorFile = path.resolve(await stack.getLoggingFile('error:aws'));
+		const logFile = path.resolve(await stack.getLoggingFile('deploy-aws'));
+		const errorFile = path.resolve(await stack.getLoggingFile('error-aws'));
 		let result = {} as DeployResult;
 
 		this.update('Defining functions');
