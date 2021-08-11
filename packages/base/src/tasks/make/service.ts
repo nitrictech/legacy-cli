@@ -12,8 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Stack, Task, Repository, Template } from '@nitric/cli-common';
+import { Stack, Task, Template } from '@nitric/cli-common';
 import path from 'path';
+import { pullTemplate } from '../../utils';
 
 interface MakeServiceTaskOpts {
 	template: string;
@@ -41,22 +42,6 @@ export class MakeServiceTask extends Task<void> {
 		this.initialService = initialService;
 	}
 
-	private async pullTemplate(stack: Stack): Promise<void> {
-		if (!(await stack.hasTemplate(this.template))) {
-			const repos = Repository.fromDefaultDirectory();
-			const [repoName, templateName] = this.template.split('/');
-			const repo = repos.find((repo) => repo.getName() === repoName);
-
-			if (!repo) {
-				throw new Error(`Repository ${repoName} is not available`);
-			}
-			const template = repo.getTemplate(templateName);
-			this.update(`${this.template} template available locally`);
-
-			await stack.pullTemplate(template);
-		}
-	}
-
 	/**
 	 * Make a new service directory in the project, containing the code scaffold from the chosen template
 	 */
@@ -77,7 +62,7 @@ export class MakeServiceTask extends Task<void> {
 		const nitricFile = this.file;
 		const stack = await Stack.fromFile(nitricFile);
 
-		await this.pullTemplate(stack);
+		await pullTemplate(stack, this.template);
 
 		this.update('Start Make');
 		const nitricProjectDirectory = path.dirname(nitricFile);

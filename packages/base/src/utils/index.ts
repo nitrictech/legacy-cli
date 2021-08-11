@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import fs from 'fs';
-import { LOG_DIR } from '@nitric/cli-common';
+import { LOG_DIR, Stack, Repository } from '@nitric/cli-common';
 import path from 'path';
 
 /**
@@ -31,4 +31,26 @@ export function createNitricLogDir(): void {
  */
 export function functionLogFilePath(name: string): string {
 	return path.join(LOG_DIR, `${name}.txt`);
+}
+
+/**
+ * Pulls a template locally into a project.
+ *
+ * Note: service templates are versioned within project directories to ensure consistent builds.
+ * 	This function pulls the public template from a repository and puts it into the project.
+ */
+export async function pullTemplate(stack: Stack, template: string): Promise<void> {
+	const [repoName, templateName] = template.split('/');
+
+	const alreadyInStack = await stack.hasTemplate(template);
+
+	if (!alreadyInStack) {
+		const repos = Repository.fromDefaultDirectory();
+		const repo = repos.find((repo) => repo.getName() === repoName);
+		if (!repo) {
+			throw new Error(`Repository ${repoName} is not available`);
+		}
+		const template = repo.getTemplate(templateName);
+		await stack.pullTemplate(template);
+	}
 }
