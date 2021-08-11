@@ -499,8 +499,10 @@ export default class Run extends BaseCommand {
 		// Check docker daemon is running
 		try {
 			execa.sync('docker', ['ps']);
-		} catch {
-			throw new Error("Docker daemon not found! Ensure it's running.");
+		} catch (error) {
+			const origErrs: string[] = error.errors && error.errors.length ? error.errors : [error.stack];
+			cli.info("Docker daemon not found! Ensure it's running.");
+			throw new Error(`${origErrs.join('\n')}`);
 		}
 
 		// Generate a random 8 char string, used to avoid name collisions
