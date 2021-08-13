@@ -14,7 +14,7 @@
 
 import 'jest';
 import { mocked } from 'ts-jest/utils';
-import { MIN_PORT, MAX_PORT, getPortRange, getContainerSubscriptions, sortImages } from './run';
+import { MIN_PORT, MAX_PORT, getPortRange, getContainerSubscriptions, sortImages, getPortsToExpose } from './run';
 import * as getPort from 'get-port';
 import { Listr } from 'listr2';
 import { NitricImage, NitricStack } from '@nitric/cli-common';
@@ -31,6 +31,9 @@ jest.mock('cli-ux', () => ({
 		},
 	},
 	table: (): void => {
+		return;
+	},
+	log: (): void => {
 		return;
 	},
 }));
@@ -370,6 +373,65 @@ describe('Given executing nitric run', () => {
 					serviceName: 'same-name',
 				},
 			]);
+		});
+	});
+
+	describe('Given expose flag', () => {
+		test('Invalid ports', () => {
+			expect(() => {
+				getPortsToExpose(['test']);
+			}).toThrow(new Error('Invalid ports: test'));
+
+			expect(() => {
+				getPortsToExpose(['100000/tcp:9229']);
+			}).toThrow(new Error('Invalid port: 100000'));
+		});
+
+		test('Invalid protocol', () => {
+			expect(() => {
+				getPortsToExpose(['9229/tcp:9229/tcc']);
+			}).toThrow(new Error('Invalid ports: 9229/tcp:9229/tcc'));
+		});
+
+		test('Valid ports', () => {
+			expect(getPortsToExpose(['9229:9229'])).toEqual({
+				exposedPorts: {
+					'9229/tcp': {},
+				},
+				portBindings: {
+					'9229/tcp': [
+						{
+							HostPort: '9229/tcp',
+						},
+					],
+				},
+			});
+
+			expect(getPortsToExpose(['9229:9229/tcp'])).toEqual({
+				exposedPorts: {
+					'9229/tcp': {},
+				},
+				portBindings: {
+					'9229/tcp': [
+						{
+							HostPort: '9229/tcp',
+						},
+					],
+				},
+			});
+
+			expect(getPortsToExpose(['9229/udp:9229/udp'])).toEqual({
+				exposedPorts: {
+					'9229/udp': {},
+				},
+				portBindings: {
+					'9229/udp': [
+						{
+							HostPort: '9229/udp',
+						},
+					],
+				},
+			});
 		});
 	});
 });

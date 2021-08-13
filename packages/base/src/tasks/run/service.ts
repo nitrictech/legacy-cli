@@ -21,6 +21,17 @@ import { DOCKER_LABEL_RUN_ID } from '../../constants';
 
 const GATEWAY_PORT = 9001;
 
+export interface PortOptions {
+	portBindings: {
+		[port: string]: {
+			HostPort: string;
+		}[];
+	};
+	exposedPorts: {
+		[port: string]: any;
+	};
+}
+
 /**
  * Options when running local services/functions for development/testing
  */
@@ -31,6 +42,7 @@ export interface RunServiceTaskOptions {
 	network?: Network;
 	volume?: Volume;
 	runId: string;
+	portOptions?: PortOptions | undefined;
 }
 
 /**
@@ -44,8 +56,12 @@ export class RunServiceTask extends Task<Container> {
 	private volume: Volume | undefined;
 	private subscriptions: Record<string, string[]> | undefined;
 	private runId: string;
+	private portOptions: PortOptions | undefined;
 
-	constructor({ image, port, network, subscriptions, volume, runId }: RunServiceTaskOptions, docker?: Docker) {
+	constructor(
+		{ image, port, network, subscriptions, volume, runId, portOptions }: RunServiceTaskOptions,
+		docker?: Docker,
+	) {
 		super(`${image.serviceName} - ${image.id.substring(0, 12)}`);
 		this.image = image;
 		this.port = port;
@@ -54,6 +70,7 @@ export class RunServiceTask extends Task<Container> {
 		this.volume = volume;
 		this.subscriptions = subscriptions;
 		this.runId = runId;
+		this.portOptions = portOptions;
 	}
 
 	async do(): Promise<Container> {
@@ -74,11 +91,14 @@ export class RunServiceTask extends Task<Container> {
 			}
 		}
 
+		const { exposedPorts, portBindings } = this.portOptions || {};
+
 		const dockerOptions = {
 			name: `${this.image.serviceName}-${runId}`,
 			Env: [`LOCAL_SUBSCRIPTIONS=${JSON.stringify(subscriptions)}`],
 			ExposedPorts: {
 				[`${GATEWAY_PORT}/tcp`]: {},
+				...exposedPorts,
 			},
 			Volumes: {},
 			Labels: {
@@ -92,6 +112,7 @@ export class RunServiceTask extends Task<Container> {
 							HostPort: `${this.port}/tcp`,
 						},
 					],
+					...portBindings,
 				},
 			},
 		} as ContainerCreateOptions;

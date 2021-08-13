@@ -21,10 +21,12 @@ import execa from 'execa';
 import Docker, { Container, Network, Volume } from 'dockerode';
 import getPort from 'get-port';
 import readline from 'readline';
+import { flags } from '@oclif/command';
 
 import {
 	CreateNetworkTask,
 	CreateVolumeTask,
+	PortOptions,
 	RunEntrypointTask,
 	RunEntrypointTaskOptions,
 	RunGatewayTask,
@@ -47,6 +49,8 @@ export const MIN_PORT = 49152; // start of ephemeral port range, as defined by I
 
 // Highest available ephemeral port
 export const MAX_PORT = 65535; // end of ephemeral port range, as defined by IANA
+
+const PORT_PROTOCOL_REGEX = /(?<host>[\d/]+\b(tcp|udp|sctp)?\b):(?<container>[\d/]+\b(tcp|udp|sctp)?\b)$/;
 
 /**
  * Creates a list of local container endpoints, which are used by locally running
@@ -294,6 +298,48 @@ export function sortImages(images: NitricImage[]): NitricImage[] {
 }
 
 /**
+ * Takes the expose flags and transforms them into exposed ports and bindings for docker
+ * @param expose
+ * @returns expected objects compatible with dockerode
+ */
+export function getPortsToExpose(expose: string[]): PortOptions {
+	const exposedPorts = {};
+	const portBindings = {};
+
+	for (const ports of expose) {
+		const match = ports.match(PORT_PROTOCOL_REGEX);
+
+		if (!match) {
+			cli.log('Invalid ports:', ports);
+			throw new Error(`Invalid ports: ${ports}`);
+		}
+
+		// handle protocols
+		const { host, container } = match.groups as any;
+		const [hostPort, hostProtocol = 'tcp'] = host.split('/');
+		const [containerPort, containerProtocol = 'tcp'] = container.split('/');
+
+		for (const port of [hostPort, containerPort]) {
+			const portAsNum = parseInt(port);
+
+			if (!Number.isSafeInteger(portAsNum) || portAsNum < 0 || portAsNum > MAX_PORT) {
+				cli.log('Invalid port:', port);
+				throw new Error(`Invalid port: ${port}`);
+			}
+		}
+
+		exposedPorts[`${hostPort}/${hostProtocol}`] = {};
+		portBindings[`${containerPort}/${containerProtocol}`] = [
+			{
+				HostPort: `${hostPort}/${hostProtocol}`,
+			},
+		];
+	}
+
+	return { portBindings, exposedPorts };
+}
+
+/**
  * Nitric CLI run command
  * Extends the build command to run the built docker images locally for testing.
  */
@@ -308,6 +354,10 @@ export default class Run extends BaseCommand {
 	static flags = {
 		...BaseCommand.flags,
 		...Build.flags,
+		expose: flags.string({
+			description: "Expose and publish container's port to host's port, e.g. --expose 8080:80",
+			multiple: true,
+		}),
 	};
 
 	//TODO: Allow for custom docker connection
@@ -325,11 +375,12 @@ export default class Run extends BaseCommand {
 	/**
 	 * Runs a container for each service, api and entrypoint in the Nitric Stack
 	 */
-	runContainers = async (stack: Stack, directory: string, runId: string): Promise<void> => {
+	runContainers = async (stack: Stack, directory: string, runId: string, expose: string[] = []): Promise<void> => {
 		const nitricStack = stack.asNitricStack();
 		const { apis = {}, entrypoints = {} } = nitricStack;
 		const namedApis = Object.keys(apis).map((name) => ({ name, ...apis[name] }));
 		const namedEntrypoints = Object.entries(entrypoints).map(([name, entrypoint]) => ({ name, ...entrypoint }));
+		const portOptions = getPortsToExpose(expose);
 
 		cli.action.stop();
 
@@ -363,6 +414,7 @@ export default class Run extends BaseCommand {
 					runId,
 					port: await getPort({ port: portRange }),
 					subscriptions: getContainerSubscriptions(nitricStack),
+					portOptions,
 				} as RunServiceTaskOptions;
 			}),
 		);
@@ -492,7 +544,7 @@ export default class Run extends BaseCommand {
 	do = async (): Promise<void> => {
 		const { runContainers, cleanup } = this;
 		const { args, flags } = this.parse(Run);
-		const { file = './nitric.yaml' } = flags;
+		const { file = './nitric.yaml', expose } = flags;
 		const { directory = '.' } = args;
 		const stack = await Stack.fromFile(path.join(directory, file));
 
@@ -517,7 +569,7 @@ export default class Run extends BaseCommand {
 
 		// Run the stack
 		try {
-			await runContainers(stack, directory, runId);
+			await runContainers(stack, directory, runId, expose);
 
 			// Wait for Q keypress to stop and quit
 			readline.emitKeypressEvents(process.stdin);
