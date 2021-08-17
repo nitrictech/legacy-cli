@@ -96,7 +96,7 @@ export class Stack<
 		SiteExtensions,
 		EntrypointExtensions
 	>;
-	private comments?: comments;
+	private readonly comments: comments;
 
 	constructor(
 		file: string,
@@ -110,7 +110,7 @@ export class Stack<
 			SiteExtensions,
 			EntrypointExtensions
 		>,
-		comments?: comments,
+		comments: comments = [],
 	) {
 		this.name = descriptor.name;
 		this.descriptor = descriptor;
@@ -230,13 +230,6 @@ export class Stack<
 	}
 
 	/**
-	 * Return comments data for serialized stack file
-	 */
-	getComments(): comments {
-		return this.comments || [];
-	}
-
-	/**
 	 * Make a directory relative to the stack directory and return its path
 	 * @param directory path to be made
 	 * @private
@@ -315,8 +308,7 @@ export class Stack<
 	/**
 	 * Parse a Nitric Stack definition from the given file.
 	 *
-	 * @param file YAML file contents containing the serialized stack definition
-	 * @param parser to parse the serialized file type, defaults to YAML parser.
+	 * @param file path to YAML file containing the serialized stack definition
 	 */
 	static async fromFile(file: string): Promise<Stack> {
 		const { content, filePath } = (await findFileRead(file)) || {};
@@ -341,7 +333,7 @@ export class Stack<
 	 * @param file path to write the YAML file to
 	 */
 	static async writeTo(stack: Stack, file: string): Promise<void> {
-		const doc = insertComments(new YAML.Document(stack.asNitricStack(true)), stack.getComments());
+		const doc = insertComments(new YAML.Document(stack.asNitricStack(true)), stack.comments);
 		const stackString = doc.toString(); //Turn object into yaml
 		return await fs.promises.writeFile(file, stackString);
 	}
