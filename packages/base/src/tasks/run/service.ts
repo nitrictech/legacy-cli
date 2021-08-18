@@ -75,6 +75,7 @@ export class RunServiceTask extends Task<Container> {
 			}
 		}
 
+		// Environment variables
 		let Env = [`LOCAL_SUBSCRIPTIONS=${JSON.stringify(subscriptions)}`];
 
 		// Add profile environment variables if they exist
@@ -82,25 +83,45 @@ export class RunServiceTask extends Task<Container> {
 			Env = [...Env, ...profile?.env];
 		}
 
+		// Ports
+		const ExposedPorts = {
+			[`${GATEWAY_PORT}/tcp`]: {},
+		};
+
+		const PortBindings = {
+			[`${GATEWAY_PORT}/tcp`]: [
+				{
+					HostPort: `${this.port}/tcp`,
+				},
+			],
+		};
+
+		// Add profile exposed / bound ports.
+		if (profile?.ports) {
+			for (const port of profile?.ports) {
+				// Add exported port
+				ExposedPorts[`${port}/tcp`] = {};
+
+				// Bind host port if available (otherwise any available port)
+				PortBindings[`${port}/tcp`] = [
+					{
+						HostPort: `${await getPort({ port: parseInt(port) })}/tcp`,
+					},
+				];
+			}
+		}
+
 		const dockerOptions = {
 			name: `${this.image.serviceName}-${runId}`,
 			Env,
-			ExposedPorts: {
-				[`${GATEWAY_PORT}/tcp`]: {},
-			},
+			ExposedPorts,
 			Volumes: {},
 			Labels: {
 				[DOCKER_LABEL_RUN_ID]: runId,
 			},
 			HostConfig: {
 				NetworkMode: networkName,
-				PortBindings: {
-					[`${GATEWAY_PORT}/tcp`]: [
-						{
-							HostPort: `${this.port}/tcp`,
-						},
-					],
-				},
+				PortBindings,
 			},
 		} as ContainerCreateOptions;
 
