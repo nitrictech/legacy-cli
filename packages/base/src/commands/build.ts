@@ -19,7 +19,7 @@ import { Listr, ListrTask } from 'listr2';
 import path from 'path';
 import execa from 'execa';
 
-export function createBuildTasks(stack: Stack, directory: string, provider = 'local'): Listr {
+export function createBuildTasks(stack: Stack, directory: string, provider = 'local', profileName?: string): Listr {
 	return new Listr(
 		[
 			{
@@ -35,6 +35,7 @@ export function createBuildTasks(stack: Stack, directory: string, provider = 'lo
 										service,
 										baseDir: directory,
 										provider,
+										profileName,
 									}),
 								),
 								options: {

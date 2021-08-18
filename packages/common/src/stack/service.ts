@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { NitricService } from '../types';
+import { NitricService, NitricServiceProfile } from '../types';
 import { Stack } from './stack';
 import path from 'path';
 import { Repository, Template } from '../templates';
@@ -84,6 +84,28 @@ export class Service<ServiceExtensions = Record<string, any>> {
 	getImageTagName(provider?: string): string {
 		const providerString = provider ? `-${provider}` : '';
 		return `${this.stack.getName()}-${this.name}${providerString}`;
+	}
+
+	/**
+	 * Find the profile for a service based on name
+	 * @param s the service to find the template for
+	 * @param name the name of the profile
+	 * @returns
+	 */
+	getProfile(name: string): NitricServiceProfile {
+		const { profiles } = this.descriptor;
+
+		if (!profiles) {
+			throw new Error(`No profiles found for service: ${this.name}`);
+		}
+
+		const profile = profiles[name];
+
+		if (!profile) {
+			throw new Error(`Profile ${name} does not exist for service: ${this.name}`);
+		}
+
+		return profile;
 	}
 
 	/**

@@ -13,7 +13,15 @@
 // limitations under the License.
 
 import tar from 'tar-fs';
-import { dockerodeEvtToString, NitricImage, Task, Service, Stack, Template } from '@nitric/cli-common';
+import {
+	dockerodeEvtToString,
+	NitricImage,
+	Task,
+	Service,
+	Stack,
+	Template,
+	NitricServiceProfile,
+} from '@nitric/cli-common';
 import Docker from 'dockerode';
 import path from 'path';
 import rimraf from 'rimraf';
@@ -24,18 +32,24 @@ interface BuildServiceTaskOptions {
 	baseDir: string;
 	service: Service;
 	provider?: string;
+	profileName?: string;
 }
 
 export class BuildServiceTask extends Task<NitricImage> {
 	private service: Service;
 	private readonly stack: Stack;
 	private readonly provider: string;
+	private readonly profile: NitricServiceProfile | undefined;
 
-	constructor({ service, stack, provider = 'local' }: BuildServiceTaskOptions) {
+	constructor({ service, stack, provider = 'local', profileName }: BuildServiceTaskOptions) {
 		super(`${service.getName()}`);
 		this.service = service;
 		this.stack = stack;
 		this.provider = provider;
+
+		if (profileName) {
+			this.profile = service.getProfile(profileName);
+		}
 	}
 
 	async do(): Promise<NitricImage> {
@@ -93,7 +107,11 @@ export class BuildServiceTask extends Task<NitricImage> {
 			const filteredResults = buildResults.filter((obj) => 'aux' in obj && 'ID' in obj['aux']);
 			if (filteredResults.length > 0) {
 				const imageId = filteredResults[filteredResults.length - 1]['aux'].ID.split(':').pop() as string;
-				return { id: imageId, serviceName: this.service.getName() } as NitricImage;
+				return {
+					id: imageId,
+					serviceName: this.service.getName(),
+					profile: this.profile,
+				} as NitricImage;
 			} else {
 				const {
 					errorDetail: { message },

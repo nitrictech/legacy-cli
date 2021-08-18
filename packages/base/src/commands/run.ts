@@ -21,6 +21,7 @@ import execa from 'execa';
 import Docker, { Container, Network, Volume } from 'dockerode';
 import getPort from 'get-port';
 import readline from 'readline';
+import { flags } from '@oclif/command';
 
 import {
 	CreateNetworkTask,
@@ -308,6 +309,9 @@ export default class Run extends BaseCommand {
 	static flags = {
 		...BaseCommand.flags,
 		...Build.flags,
+		profile: flags.string({
+			description: 'The profile to run, the profile is defined in your stack definition, e.g. --profile dev',
+		}),
 	};
 
 	//TODO: Allow for custom docker connection
@@ -325,7 +329,12 @@ export default class Run extends BaseCommand {
 	/**
 	 * Runs a container for each service, api and entrypoint in the Nitric Stack
 	 */
-	runContainers = async (stack: Stack, directory: string, runId: string): Promise<void> => {
+	runContainers = async (
+		stack: Stack,
+		directory: string,
+		runId: string,
+		profileName: string | undefined,
+	): Promise<void> => {
 		const nitricStack = stack.asNitricStack();
 		const { apis = {}, entrypoints = {} } = nitricStack;
 		const namedApis = Object.keys(apis).map((name) => ({ name, ...apis[name] }));
@@ -334,7 +343,9 @@ export default class Run extends BaseCommand {
 		cli.action.stop();
 
 		// Build the container images for each service in the project stack
-		const builtImages = (await createBuildTasks(stack, directory).run()) as { [key: string]: NitricImage };
+		const builtImages = (await createBuildTasks(stack, directory, undefined, profileName).run()) as {
+			[key: string]: NitricImage;
+		};
 
 		// Filter out undefined and non-image results from build tasks
 		let images = Object.values(builtImages).filter((i) => i && i.serviceName) as NitricImage[];
@@ -492,7 +503,7 @@ export default class Run extends BaseCommand {
 	do = async (): Promise<void> => {
 		const { runContainers, cleanup } = this;
 		const { args, flags } = this.parse(Run);
-		const { file = './nitric.yaml' } = flags;
+		const { file = './nitric.yaml', profile: profileName } = flags;
 		const { directory = '.' } = args;
 		const stack = await Stack.fromFile(path.join(directory, file));
 
@@ -517,7 +528,7 @@ export default class Run extends BaseCommand {
 
 		// Run the stack
 		try {
-			await runContainers(stack, directory, runId);
+			await runContainers(stack, directory, runId, profileName);
 
 			// Wait for Q keypress to stop and quit
 			readline.emitKeypressEvents(process.stdin);

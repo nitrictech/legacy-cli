@@ -16,7 +16,12 @@ export interface NitricServiceTriggers {
 	topics?: string[];
 }
 
-export interface NitricService<Ext extends Record<string, any> = {}> {
+export interface NitricServiceProfile {
+	env?: string[];
+	ports?: string[];
+}
+
+export interface NitricService<Ext extends Record<string, any> = Record<string, unknown>> {
 	path: string;
 	runtime: string;
 	// Scripts that will be executed by the nitric
@@ -40,4 +45,7 @@ export interface NitricService<Ext extends Record<string, any> = {}> {
 	// would use public, but its reserved by typescript
 	external?: boolean;
 	ext?: Ext;
+	profiles?: {
+		[key: string]: NitricServiceProfile;
+	};
 }

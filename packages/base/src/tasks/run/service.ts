@@ -57,7 +57,8 @@ export class RunServiceTask extends Task<Container> {
 	}
 
 	async do(): Promise<Container> {
-		const { network, subscriptions, volume, runId } = this;
+		const { network, subscriptions, volume, runId, image } = this;
+		const { profile } = image;
 
 		if (!this.port) {
 			// Find any open port if none provided.
@@ -74,9 +75,16 @@ export class RunServiceTask extends Task<Container> {
 			}
 		}
 
+		let Env = [`LOCAL_SUBSCRIPTIONS=${JSON.stringify(subscriptions)}`];
+
+		// Add profile environment variables if they exist
+		if (profile?.env) {
+			Env = [...Env, ...profile?.env];
+		}
+
 		const dockerOptions = {
 			name: `${this.image.serviceName}-${runId}`,
-			Env: [`LOCAL_SUBSCRIPTIONS=${JSON.stringify(subscriptions)}`],
+			Env,
 			ExposedPorts: {
 				[`${GATEWAY_PORT}/tcp`]: {},
 			},

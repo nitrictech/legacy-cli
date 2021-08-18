@@ -1571,6 +1571,34 @@ export const STACK_SCHEMA: JSONSchema7 = {
 							minProperties: 1,
 							additionalProperties: false,
 						},
+						profiles: {
+							title: 'service profiles',
+							type: 'object',
+							patternProperties: {
+								[resourceNamePattern]: {
+									title: 'service profile',
+									type: 'object',
+									properties: {
+										env: {
+											type: 'array',
+											items: {
+												type: 'string',
+											},
+										},
+										ports: {
+											type: 'array',
+											items: {
+												type: 'string',
+											},
+										},
+									},
+									minProperties: 1,
+									additionalProperties: false,
+								},
+							},
+							minProperties: 1,
+							additionalProperties: false,
+						},
 					},
 					required: ['path', 'runtime'],
 					additionalProperties: false,
