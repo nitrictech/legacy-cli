@@ -12,29 +12,28 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { NitricImage, Task, Service, Stack } from '@nitric/cli-common';
 import execa from 'execa';
 import { oneLine } from 'common-tags';
+import { Task } from './task';
+import { NitricImage } from '../types';
+import { Service } from '../stack';
 
 interface BuildServiceTaskOptions {
-	stack: Stack;
 	baseDir: string;
 	service: Service;
 	provider?: string;
 }
 
-const PACK_IMAGE = 'buildpacksio/pack:0.20.0';
+const PACK_IMAGE = 'buildpacksio/pack:0.13.1';
 const BUILDER_IMAGE = 'nitrictech/bp-builder-base';
 
 export class BuildServiceTask extends Task<NitricImage> {
 	private service: Service;
-	private readonly stack: Stack;
 	private readonly provider: string;
 
-	constructor({ service, stack, provider = 'local' }: BuildServiceTaskOptions) {
+	constructor({ service, provider = 'local' }: BuildServiceTaskOptions) {
 		super(`${service.getName()}`);
 		this.service = service;
-		this.stack = stack;
 		this.provider = provider;
 	}
 

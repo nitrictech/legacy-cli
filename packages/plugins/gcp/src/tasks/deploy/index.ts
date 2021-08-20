@@ -132,11 +132,11 @@ export class Deploy extends Task<DeployResult> {
 							// Build and push the image
 							const image = new NitricServiceImage(service.getName(), {
 								imageName: pulumi.interpolate`gcr.io/${gcpProject}/${service.getImageTagName()}`,
-								nitricProvider: 'gcp',
 								server: 'https://gcr.io',
 								username: 'oauth2accesstoken',
 								password: imageDeploymentToken!,
 								service,
+								sourceImageName: service.getImageTagName('gcp'),
 							}, defaultResourceOptions);
 							return new NitricServiceCloudRun(service.getName(), {
 								service,

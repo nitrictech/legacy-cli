@@ -12,42 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Task } from './task';
-import { ListrTask } from 'listr2';
-
-interface TaskFactory<T> {
-	name: string;
-	factory: (ctx: any) => Task<T>;
-	skip?: (ctx: any) => boolean;
-}
-
-type TaskOrTaskFactory<T> = Task<T> | TaskFactory<T>;
-
-export function wrapTaskForListr<T>(
-	taskOrTaskFactory: TaskOrTaskFactory<T>,
-	ctxKey?: string,
-	...args: any[]
-): ListrTask<{ [key: string]: T }> {
-	const contextKey = ctxKey || taskOrTaskFactory.name;
-
-	return {
-		title: taskOrTaskFactory.name,
-		// Doesn't matter if we don't have a task factory here
-		// It will come up as undefined otherwise
-		skip: (taskOrTaskFactory as TaskFactory<any>).skip,
-		task: async (ctx, task): Promise<T> => {
-			const t = Object.keys(taskOrTaskFactory).includes('factory')
-				? (taskOrTaskFactory as TaskFactory<T>).factory(ctx)
-				: (taskOrTaskFactory as Task<T>);
-
-			t.on('update', (message) => (task.output = message));
-			const result = await t.run(...args);
-			ctx[contextKey] = result;
-			return result;
-		},
-	};
-}
-
 /**
  * Writes the given nitric stack to a descriptor file
  * @param nitricStack the stack to write out
