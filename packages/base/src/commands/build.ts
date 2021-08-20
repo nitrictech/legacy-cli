@@ -13,51 +13,10 @@
 // limitations under the License.
 
 import { flags } from '@oclif/command';
-import { wrapTaskForListr, Stack, NitricImage, BaseCommand } from '@nitric/cli-common';
-import { BuildServiceTask } from '../tasks';
-import { Listr, ListrTask } from 'listr2';
+import { Stack, NitricImage, BaseCommand, createBuildListrTask } from '@nitric/cli-common';
 import path from 'path';
 import execa from 'execa';
-
-export function createBuildTasks(stack: Stack, directory: string, provider = 'local'): Listr {
-	return new Listr(
-		[
-			{
-				title: 'Building Services',
-				task: (_, task): Listr =>
-					task.newListr(
-						// Create a sub-task to build each service in the project
-						stack.getServices().map(
-							(service): ListrTask => ({
-								...wrapTaskForListr(
-									new BuildServiceTask({
-										stack,
-										service,
-										baseDir: directory,
-										provider,
-									}),
-								),
-								options: {
-									persistentOutput: true,
-								},
-							}),
-						),
-						{
-							concurrent: true,
-							// Don't fail all on a single function failure...
-							exitOnError: true,
-							// Added to allow custom handling of SIGINT for run cmd cleanup.
-							registerSignalListeners: false,
-						},
-					),
-			},
-		],
-		{
-			// Added to allow custom handling of SIGINT for run cmd cleanup.
-			registerSignalListeners: false,
-		},
-	);
-}
+import { Listr } from 'listr2';
 
 /**
  * Nitric CLI build command
@@ -77,7 +36,7 @@ export default class Build extends BaseCommand {
 		provider: flags.enum({
 			char: 'p',
 			description: 'the targeted provider for this build',
-			options: ['local', 'gcp', 'aws'],
+			options: ['dev', 'gcp', 'aws'],
 		}),
 	};
 
@@ -105,7 +64,7 @@ export default class Build extends BaseCommand {
 		}
 
 		try {
-			return await createBuildTasks(stack, directory, provider).run();
+			return await new Listr([createBuildListrTask(stack, provider)]).run();
 		} catch (error) {
 			const origErrs = error.errors && error.errors.length ? error.errors : error;
 			throw new Error(`Something went wrong, see error details.\n ${origErrs}`);
