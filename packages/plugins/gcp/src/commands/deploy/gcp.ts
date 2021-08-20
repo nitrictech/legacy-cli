@@ -14,7 +14,7 @@
 
 import { flags } from '@oclif/command';
 import { Deploy, DeployResult, DEPLOY_TASK_KEY } from '../../tasks/deploy';
-import { BaseCommand, wrapTaskForListr, Stack, constants } from '@nitric/cli-common';
+import { BaseCommand, wrapTaskForListr, Stack, constants, createBuildListrTask } from '@nitric/cli-common';
 import { Listr } from 'listr2';
 import cli from 'cli-ux';
 import path from 'path';
@@ -131,6 +131,7 @@ export default class GcpDeploy extends BaseCommand {
 
 		const results = await new Listr<any>(
 			[
+				createBuildListrTask(stack, 'gcp'),
 				wrapTaskForListr(
 					new Deploy({
 						gcpProject: project,

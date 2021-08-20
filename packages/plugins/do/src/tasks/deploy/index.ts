@@ -138,7 +138,7 @@ export class Deploy extends Task<DeployResults> {
 										password: token,
 										imageName: pulumi.interpolate`registry.digitalocean.com/${registryName}/${service.getName()}`,
 										server: 'registry.digitalocean.com',
-										nitricProvider: 'do',
+										sourceImageName: service.getImageTagName('do'),
 									}),
 								};
 							});

@@ -13,23 +13,28 @@
 // limitations under the License.
 import * as pulumi from '@pulumi/pulumi';
 import * as docker from '@pulumi/docker';
+import fs from 'fs';
 import { Service } from '../stack';
 import path from 'path';
-
-// TODO: Make this common
-type MembraneProviders = 'dev' | 'aws' | 'gcp' | 'azure' | 'do';
+import { TMP_DIR } from '../paths';
 
 interface NitricServiceImageArgs {
 	service: Service;
 	username: pulumi.Input<string>;
 	password: pulumi.Input<string>;
+	// Copy from an existing source image locally
+	sourceImageName: pulumi.Input<string>;
 	imageName: pulumi.Input<string>;
 	server: pulumi.Input<string>;
-	nitricProvider: pulumi.Input<MembraneProviders>;
 }
 
+const DUMMY_DOCKER_FILE = `
+ARG SOURCE_IMAGE
+FROM \${SOURCE_IMAGE}
+`;
+
 /**
- * Image deployment for a Nitric Service
+ * Image deployment for a Nitric Service from a pre-built local image
  */
 export class NitricServiceImage extends pulumi.ComponentResource {
 	/**
@@ -52,19 +57,16 @@ export class NitricServiceImage extends pulumi.ComponentResource {
 	 */
 	public readonly imageDigest: pulumi.Output<string>;
 
-	constructor(name, args: NitricServiceImageArgs, opts?: pulumi.ComponentResourceOptions) {
+	constructor(name: string, args: NitricServiceImageArgs, opts?: pulumi.ComponentResourceOptions) {
 		super('nitric:docker:Image', name, {}, opts);
 
-		const { imageName, username, password, server, service, nitricProvider } = args;
-
+		const { imageName, sourceImageName, username, password, server, service } = args;
 		const defaultResourceOptions: pulumi.ResourceOptions = { parent: this };
-		const templateDir = path.join(
-			service.getStack().getDirectory(),
-			`./.nitric/templates/${service.asNitricService().runtime}/`,
-		);
+		const dummyDockerFilePath = path.join(TMP_DIR, 'dummy.dockerfile');
 
-		//const dockerfile = path.relative(service.getDirectory(), path.join(templateDir, './Dockerfile'));
-		const dockerfile = path.join(templateDir, './Dockerfile');
+		fs.mkdirSync(TMP_DIR, { recursive: true });
+		// write the dummy docker file
+		fs.writeFileSync(dummyDockerFilePath, DUMMY_DOCKER_FILE);
 
 		const image = new docker.Image(
 			`${service.getImageTagName()}-image`,
@@ -74,12 +76,12 @@ export class NitricServiceImage extends pulumi.ComponentResource {
 					// Staging directory
 					context: service.getDirectory(),
 					args: {
-						PROVIDER: nitricProvider,
+						SOURCE_IMAGE: sourceImageName,
 					},
 					env: {
 						DOCKER_BUILDKIT: '1',
 					},
-					dockerfile,
+					dockerfile: dummyDockerFilePath,
 				},
 				registry: {
 					server,

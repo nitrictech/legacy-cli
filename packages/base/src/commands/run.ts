@@ -13,8 +13,15 @@
 // limitations under the License.
 
 import cli from 'cli-ux';
-import Build, { createBuildTasks } from './build';
-import { BaseCommand, Stack, wrapTaskForListr, NitricImage, NitricStack } from '@nitric/cli-common';
+import Build from './build';
+import {
+	BaseCommand,
+	Stack,
+	wrapTaskForListr,
+	NitricImage,
+	NitricStack,
+	createBuildListrTask,
+} from '@nitric/cli-common';
 import { Listr, ListrTask, ListrContext, ListrRenderer } from 'listr2';
 import path from 'path';
 import execa from 'execa';
@@ -334,7 +341,7 @@ export default class Run extends BaseCommand {
 		cli.action.stop();
 
 		// Build the container images for each service in the project stack
-		const builtImages = (await createBuildTasks(stack, directory).run()) as { [key: string]: NitricImage };
+		const builtImages = (await new Listr([createBuildListrTask(stack)]).run()) as { [key: string]: NitricImage };
 
 		// Filter out undefined and non-image results from build tasks
 		let images = Object.values(builtImages).filter((i) => i && i.serviceName) as NitricImage[];

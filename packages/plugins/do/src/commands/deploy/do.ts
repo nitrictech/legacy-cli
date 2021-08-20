@@ -14,7 +14,7 @@
 
 import { flags } from '@oclif/command';
 import { Deploy, DEPLOY_TASK_KEY, DeployResults } from '../../tasks/deploy';
-import { BaseCommand, wrapTaskForListr, Stack, block, constants } from '@nitric/cli-common';
+import { BaseCommand, wrapTaskForListr, Stack, block, constants, createBuildListrTask } from '@nitric/cli-common';
 import { Listr } from 'listr2';
 import path from 'path';
 import inquirer from 'inquirer';
@@ -85,7 +85,10 @@ export default class DoDeploy extends BaseCommand {
 
 		try {
 			const results = await new Listr(
-				[wrapTaskForListr(new Deploy({ stack, registryName: containerRegistry, region, token }))],
+				[
+					createBuildListrTask(stack, 'aws'),
+					wrapTaskForListr(new Deploy({ stack, registryName: containerRegistry, region, token })),
+				],
 				constants.DEFAULT_LISTR_OPTIONS,
 			).run();
 
