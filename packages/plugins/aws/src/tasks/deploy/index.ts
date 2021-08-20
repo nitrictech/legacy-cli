@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Task, Stack, mapObject, NitricServiceImage, NitricImage } from '@nitric/cli-common';
+import { Task, Stack, mapObject, NitricServiceImage } from '@nitric/cli-common';
 import * as pulumi from '@pulumi/pulumi';
 
 import { LocalWorkspace } from '@pulumi/pulumi/automation';
