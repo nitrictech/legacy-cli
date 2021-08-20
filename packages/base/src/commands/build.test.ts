@@ -14,13 +14,11 @@
 
 import 'jest';
 // import * as clicommon from '@nitric/cli-common';
-// import { BuildFunctionTask } from '../tasks/build';
 // import Build from './build';
 // import Listr from 'listr';
 // import { mocked } from 'ts-jest/utils';
 
 jest.mock('@nitric/cli-common');
-jest.mock('../tasks/build');
 jest.mock('listr2');
 
 describe('Given executing nitric build', () => {

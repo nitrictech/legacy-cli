@@ -332,7 +332,7 @@ export default class Run extends BaseCommand {
 	/**
 	 * Runs a container for each service, api and entrypoint in the Nitric Stack
 	 */
-	runContainers = async (stack: Stack, directory: string, runId: string): Promise<void> => {
+	runContainers = async (stack: Stack, runId: string): Promise<void> => {
 		const nitricStack = stack.asNitricStack();
 		const { apis = {}, entrypoints = {} } = nitricStack;
 		const namedApis = Object.keys(apis).map((name) => ({ name, ...apis[name] }));
@@ -524,7 +524,7 @@ export default class Run extends BaseCommand {
 
 		// Run the stack
 		try {
-			await runContainers(stack, directory, runId);
+			await runContainers(stack, runId);
 
 			// Wait for Q keypress to stop and quit
 			readline.emitKeypressEvents(process.stdin);
