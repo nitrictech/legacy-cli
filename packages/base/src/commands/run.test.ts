@@ -36,7 +36,6 @@ jest.mock('cli-ux', () => ({
 }));
 jest.mock('listr2');
 jest.mock('../tasks/run');
-jest.mock('../tasks/build');
 
 // We want to ensure tests fail if these constant values are unintentionally changed
 describe('Given MIN_PORT is constant', () => {
