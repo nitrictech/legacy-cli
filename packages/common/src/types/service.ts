@@ -16,9 +16,14 @@ export interface NitricServiceTriggers {
 	topics?: string[];
 }
 
-export interface NitricService<Ext extends Record<string, any> = {}> {
+export interface NitricService<Ext extends Record<string, any> = never> {
+	// A stack relative context for the directory that will
+	// be included in the build
+	context?: string;
+	// The path location of the service
+	// relative to context
 	path: string;
-	runtime: string;
+	// runtime: string;
 	// Scripts that will be executed by the nitric
 	// build process before begining the docker build
 	buildScripts?: string[];

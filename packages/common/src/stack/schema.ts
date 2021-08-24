@@ -1551,12 +1551,7 @@ export const STACK_SCHEMA: JSONSchema7 = {
 					type: 'object',
 					properties: {
 						path: { type: 'string' },
-						runtime: {
-							title: 'service runtime',
-							description: 'The template/runtime the service is based on',
-							type: 'string',
-							pattern: serviceRuntimeTemplatePattern,
-						},
+						context: { type: 'string' },
 						triggers: {
 							title: 'service triggers',
 							type: 'object',
@@ -1572,7 +1567,7 @@ export const STACK_SCHEMA: JSONSchema7 = {
 							additionalProperties: false,
 						},
 					},
-					required: ['path', 'runtime'],
+					required: ['path'],
 					additionalProperties: false,
 				},
 			},
