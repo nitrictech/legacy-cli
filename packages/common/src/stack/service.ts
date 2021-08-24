@@ -15,8 +15,9 @@
 import { NitricService } from '../types';
 import { Stack } from './stack';
 import path from 'path';
-import { Repository, Template } from '../templates';
+import dotenv from 'dotenv';
 import fs from 'fs';
+import Handlebars from 'handlebars';
 
 type omitMethods = 'getService' | 'getServices';
 
@@ -58,16 +59,62 @@ export class Service<ServiceExtensions = Record<string, any>> {
 	}
 
 	/**
+	 * Get the build context of the service
+	 * @returns
+	 */
+	getContext(): string {
+		const origCtx = this.descriptor.context || this.descriptor.path;
+		const ctxPath = path.join(this.stack.getDirectory(), origCtx);
+
+		if (!fs.existsSync(ctxPath)) {
+			throw new Error(
+				`function context '${this.descriptor.path}' for function '${this.name}' not found. Directory may have been renamed or removed, check 'path' configuration for this function in the config file.`,
+			);
+		}
+
+		return ctxPath;
+	}
+
+	/**
+	 * Returns defined path relative to context
+	 * @returns
+	 */
+	getContextRelativeDirectory(): string {
+		return this.descriptor.context ? this.descriptor.path : '.';
+	}
+
+	/**
 	 * Return the directory that contains this service's source
 	 */
 	getDirectory(): string {
-		const funcPath = path.join(this.stack.getDirectory(), this.descriptor.path);
+		const funcPath = path.join(this.getContext(), this.getContextRelativeDirectory());
+
 		if (!fs.existsSync(funcPath)) {
 			throw new Error(
 				`function directory '${this.descriptor.path}' for function '${this.name}' not found. Directory may have been renamed or removed, check 'path' configuration for this function in the config file.`,
 			);
 		}
 		return funcPath;
+	}
+
+	/**
+	 * Get the pack env config for a given function
+	 * @returns
+	 */
+	getPackEnv(): dotenv.DotenvParseOutput {
+		const packrcFile = path.join(this.getDirectory(), '.packrc');
+		if (fs.existsSync(packrcFile)) {
+			const packContents = fs.readFileSync(packrcFile).toString();
+			const template = Handlebars.compile(packContents);
+
+			const parsedRc = template({
+				PATH: this.getContextRelativeDirectory(),
+			});
+
+			return dotenv.parse(parsedRc);
+		}
+		// return empty env variables
+		return {};
 	}
 
 	/**
@@ -84,25 +131,5 @@ export class Service<ServiceExtensions = Record<string, any>> {
 	getImageTagName(provider?: string): string {
 		const providerString = provider ? `-${provider}` : '';
 		return `${this.stack.getName()}-${this.name}${providerString}`;
-	}
-
-	/**
-	 * Find the template for a function from a given set of repositories
-	 * @param s the service to find the template for
-	 * @param repos the repositories to search in for the template
-	 */
-	static async findTemplateForService(s: Service, repos: Repository[]): Promise<Template> {
-		const [repoName, tmplName] = s.descriptor.runtime.split('/');
-
-		const repo = repos.find((r) => r.getName() === repoName);
-		if (!repo) {
-			throw new Error(`Repository ${repoName} could not be found`);
-		}
-
-		if (!repo.hasTemplate(tmplName)) {
-			throw new Error(`Repository ${repoName} does not contain template ${tmplName}`);
-		}
-
-		return repo.getTemplate(tmplName);
 	}
 }

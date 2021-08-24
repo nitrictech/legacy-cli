@@ -84,7 +84,6 @@ export class MakeServiceTask extends Task<void> {
 
 		stack.addService(this.serviceName, {
 			path: path.relative(nitricProjectDirectory, this.dir),
-			runtime: this.template,
 		});
 
 		this.update('Scaffolding template code');
