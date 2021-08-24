@@ -69,7 +69,6 @@ describe('validateSchema', () => {
 				services: {
 					theservice: {
 						path: 'thepath',
-						runtime: 'function/validruntime',
 					},
 				},
 			};
@@ -87,7 +86,6 @@ describe('validateSchema', () => {
 				services: {
 					theservice: {
 						path: 'thepath',
-						runtime: 'function/validruntime',
 						triggers: {
 							topictypo: [
 								// misspelled trigger property
@@ -113,7 +111,6 @@ describe('validateSchema', () => {
 				services: {
 					'a-service': {
 						path: 'thepath',
-						runtime: 'function/validruntime',
 						extra: {},
 					},
 				},
@@ -134,7 +131,6 @@ describe('validateSchema', () => {
 				services: {
 					theservice: {
 						path: 'thepath',
-						runtime: 'function/validruntime',
 						triggers: {
 							topics: [
 								// misspelled trigger property
@@ -174,7 +170,6 @@ describe('validateSchema', () => {
 					services: {
 						theservice: {
 							path: 'thepath',
-							runtime: 'function/validruntime',
 							triggers: {
 								/* at least one property should be present here. */
 							},
@@ -197,7 +192,6 @@ describe('validateSchema', () => {
 					services: {
 						theservice: {
 							path: 'thepath',
-							runtime: 'function/validruntime',
 							triggers: {
 								topics: ['a-valid-topic'],
 							},

@@ -139,14 +139,12 @@ describe('Given getContainerSubscriptions', () => {
 				services: {
 					'function-one': {
 						path: './function-one',
-						runtime: 'official/nextjs',
 						triggers: {
 							topics: ['topic-one'],
 						},
 					},
 					'function-two': {
 						path: './function-one',
-						runtime: 'official/nextjs',
 						triggers: {
 							topics: ['topic-two'],
 						},
@@ -279,11 +277,9 @@ describe('Given executing nitric run', () => {
 			name: 'test-stack',
 			services: {
 				'dummy-func1': {
-					runtime: 'custom',
 					path: 'dummy-func1',
 				},
 				'dummy-func2': {
-					runtime: 'custom',
 					path: 'dummy-func2',
 				},
 			},

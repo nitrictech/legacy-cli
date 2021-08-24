@@ -48,9 +48,12 @@ export class BuildServiceTask extends Task<NitricImage> {
 				docker run
 					--privileged=true
 					-v /var/run/docker.sock:/var/run/docker.sock
-					-v ${this.service.getDirectory()}:/workspace -w /workspace
+					-v ${this.service.getContext()}:/workspace -w /workspace
 					${PACK_IMAGE} build ${imageId} 
 					--builder ${BUILDER_IMAGE}
+					${Object.entries(this.service.getPackEnv())
+						.map(([k, v]) => `--env ${k}=${v}`)
+						.join(' ')}
 					--env BP_MEMBRANE_PROVIDER=${this.provider}
 					--default-process membrane
 			`);
