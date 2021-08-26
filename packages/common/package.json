@@ -44,7 +44,7 @@
 		"tslib": "^1",
 		"universal-analytics": "^0.4.23",
 		"uuid": "^8.3.2",
-		"yaml": "^1.10.0"
+		"yaml": "^2.0.0-7"
 	},
 	"files": [
 		"/lib"

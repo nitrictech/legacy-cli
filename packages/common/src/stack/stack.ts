@@ -25,6 +25,52 @@ import { validateStack } from './schema';
 
 const NITRIC_DIRECTORY = '.nitric';
 
+type comment = { before: string; inline: string };
+type comments = { path: string[]; comment: comment }[];
+
+const extractComments = (node, path: string[] = []): comments => {
+	const comment = { before: node.commentBefore, inline: node.comment } as comment;
+	const comments: comments = !!comment.before || !!comment.inline ? [{ path, comment }] : [];
+
+	if (YAML.isDocument(node)) {
+		return extractComments(node.contents, [...path, 'contents']);
+	}
+	if (YAML.isScalar(node)) {
+		return comments;
+	}
+	if (YAML.isCollection(node)) {
+		return node.items
+			.map((ele, ix) => extractComments(ele, [...path, 'items', ix]))
+			.reduce((acc, cur) => [...acc, ...cur], comments);
+	}
+	if (YAML.isPair(node)) {
+		return [
+			...comments,
+			...extractComments(node.key, [...path, 'key']),
+			...extractComments(node.value, [...path, 'value']),
+		];
+	}
+	// unknown type, return it's comments, but stop the recursion here.
+	return comments;
+};
+
+const insertComments = (node, comments: comments): YAML.Document => {
+	comments.forEach(({ comment, path }) => {
+		let pathPointer = node as any;
+		for (let i = 0; i < path.length; i++) {
+			if (pathPointer[path[i]]) {
+				pathPointer = pathPointer[path[i]];
+			} else {
+				console.log(path.join('.'), ' not found, skipping reapplication of comments');
+				break;
+			}
+		}
+		pathPointer.commentBefore = comment.before;
+		pathPointer.comment = comment.inline;
+	});
+	return node;
+};
+
 /**
  * Represents a Nitric Project Stack, including resources and their configuration
  */
@@ -50,6 +96,7 @@ export class Stack<
 		SiteExtensions,
 		EntrypointExtensions
 	>;
+	private readonly comments: comments;
 
 	constructor(
 		file: string,
@@ -63,10 +110,12 @@ export class Stack<
 			SiteExtensions,
 			EntrypointExtensions
 		>,
+		comments: comments = [],
 	) {
 		this.name = descriptor.name;
 		this.descriptor = descriptor;
 		this.file = file;
+		this.comments = comments;
 	}
 
 	/**
@@ -259,35 +308,33 @@ export class Stack<
 	/**
 	 * Parse a Nitric Stack definition from the given file.
 	 *
-	 * @param file containing the serialized stack definition
-	 * @param parser to parse the serialized file type, defaults to YAML parser.
+	 * @param file path to YAML file containing the serialized stack definition
 	 */
-	static async fromFile(file: string, parser: (content: string) => NitricStack = YAML.parse): Promise<Stack> {
+	static async fromFile(file: string): Promise<Stack> {
 		const { content, filePath } = (await findFileRead(file)) || {};
 
 		if (!content) {
 			throw new Error(`Nitric Stack file not found. Add ${file} to your project or home directory.`);
 		}
 
-		const stack = parser(content);
+		const doc = YAML.parseDocument(content);
+		const stack = doc.toJS();
 		// validate the stack against the schema and throw in case of errors.
 		validateStack(stack);
 
-		return new Stack(filePath || file, stack);
+		const comments = extractComments(doc);
+
+		return new Stack(filePath || file, stack, comments);
 	}
 
 	/**
-	 * Write a stack to a given file
+	 * Write a stack to a given YAML file
 	 * @param stack to write
-	 * @param file to write to
-	 * @param stringify function to use to convert the stack to a string. Defaults to YAML.stringify.
+	 * @param file path to write the YAML file to
 	 */
-	static async writeTo(
-		stack: Stack,
-		file: string,
-		stringify: (obj: NitricStack) => string = YAML.stringify,
-	): Promise<void> {
-		const stackString = stringify(stack.asNitricStack(true)); //Turn object into yaml
+	static async writeTo(stack: Stack, file: string): Promise<void> {
+		const doc = insertComments(new YAML.Document(stack.asNitricStack(true)), stack.comments);
+		const stackString = doc.toString(); //Turn object into yaml
 		return await fs.promises.writeFile(file, stackString);
 	}
 
