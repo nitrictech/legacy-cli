@@ -500,7 +500,9 @@ export default class Run extends BaseCommand {
 		try {
 			execa.sync('docker', ['ps']);
 		} catch {
-			throw new Error("Docker daemon not found! Ensure it's running.");
+			throw new Error(
+				"Docker daemon was not found!\nTry using 'Nitric doctor' to confirm it is correctly installed, and check that the service is running.",
+			);
 		}
 
 		// Generate a random 8 char string, used to avoid name collisions
