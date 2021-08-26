@@ -16,11 +16,13 @@ import { google } from 'googleapis';
 import { Task, Stack, mapObject, NitricServiceImage } from '@nitric/cli-common';
 import { LocalWorkspace } from '@pulumi/pulumi/automation';
 import * as pulumi from '@pulumi/pulumi';
+import * as gcp from "@pulumi/gcp";
 
 import {
 	NitricApiGcpApiGateway,
 	NitricBucketCloudStorage,
 	NitricEntrypointGoogleCloudLB,
+	NitricGcpProject,
 	NitricScheduleCloudScheduler,
 	NitricServiceCloudRun,
 	NitricSiteCloudStorage,
@@ -95,15 +97,36 @@ export class Deploy extends Task<DeployResult> {
 
 					// Now we can start deploying with Pulumi
 					try {
+
+						// Get the current google cloud project
+						const project = await gcp.organizations.getProject({});
+
+						// Setup project and permissions for nitric
+						const nitricProject = new NitricGcpProject('project', {
+							project,
+						});
+
+						const defaultResourceOptions = {
+							dependsOn: nitricProject,
+						};
+
 						// deploy the buckets
-						mapObject(buckets).map((bucket) => new NitricBucketCloudStorage(bucket.name, { bucket }));
+						mapObject(buckets).map((bucket) => 
+							new NitricBucketCloudStorage(bucket.name, { bucket }, defaultResourceOptions)
+						);
 
 						// deploy the topics
-						const deployedTopics = mapObject(topics).map((topic) => new NitricTopicPubsub(topic.name, { topic }));
+						const deployedTopics = mapObject(topics).map((topic) => 
+							new NitricTopicPubsub(topic.name, { topic }, defaultResourceOptions)
+						);
+						
+						// deploy the sites
+						const deployedSites = stack.getSites().map((site) => 
+							new NitricSiteCloudStorage(site.getName(), { site }, defaultResourceOptions)
+						);
+
 						// deploy the services
 						const { token: imageDeploymentToken } = await authClient.getAccessToken();
-
-						const deployedSites = stack.getSites().map((site) => new NitricSiteCloudStorage(site.getName(), { site }));
 
 						const deployedServices = stack.getServices().map((service) => {
 							// Build and push the image
@@ -114,24 +137,28 @@ export class Deploy extends Task<DeployResult> {
 								username: 'oauth2accesstoken',
 								password: imageDeploymentToken!,
 								service,
-							});
+							}, defaultResourceOptions);
 							return new NitricServiceCloudRun(service.getName(), {
 								service,
 								topics: deployedTopics,
 								image,
 								location: region,
-							});
+							}, defaultResourceOptions);
 						});
 
 						// deploy the schedules
 						mapObject(schedules).map(
-							(s) => new NitricScheduleCloudScheduler(s.name, { schedule: s, topics: deployedTopics }),
+							(s) => new NitricScheduleCloudScheduler(
+								s.name, { schedule: s, topics: deployedTopics }, defaultResourceOptions
+							),
 						);
 						// deploy apis
 						const deployedApis = await Promise.all(
 							mapObject(apis).map(async ({ name, ...spec }) => {
 								const convertedSpec = await NitricApiGcpApiGateway.convertNitricAPIv2(spec);
-								return new NitricApiGcpApiGateway(name, { api: convertedSpec, services: deployedServices });
+								return new NitricApiGcpApiGateway(
+									name, { api: convertedSpec, services: deployedServices }, defaultResourceOptions
+								);
 							}),
 						);
 
@@ -143,7 +170,7 @@ export class Deploy extends Task<DeployResult> {
 									apis: deployedApis,
 									sites: deployedSites,
 									stackName: stack.getName(),
-								});
+								}, defaultResourceOptions);
 
 								return {
 									entrypoint: pulumi.output(name),

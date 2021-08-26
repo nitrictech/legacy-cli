@@ -82,6 +82,13 @@ export class NitricServiceCloudRun extends pulumi.ComponentResource {
 				accountId: `${name}-subacct`.substring(0, 30),
 			});
 
+			// Apply permissions for the above account to the newly deployed cloud run service
+			new gcp.cloudrun.IamMember(`${service.getName()}-subrole`, {
+				member: pulumi.interpolate`serviceAccount:${invokerAccount.email}`,
+				role: 'roles/run.invoker',
+				service: this.cloudrun.name,
+			});
+
 			triggers.topics.forEach((sub) => {
 				const topic = topics.find((t) => t.name === sub);
 				if (topic) {
