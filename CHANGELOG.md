@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.83](https://github.com/nitrictech/cli/compare/v0.0.82...v0.0.83) (2021-08-26)
+
+
+### Bug Fixes
+
+* preserve stack file comments ([cbefc2d](https://github.com/nitrictech/cli/commit/cbefc2d8559537ecb7962938ba5cab933fa3e8cd))
+* print the friendly error message to user ([18a4bb7](https://github.com/nitrictech/cli/commit/18a4bb79d2d43fa74a0a0d62db99842643460362))
+
 ### [0.0.82](https://github.com/nitrictech/cli/compare/v0.0.81...v0.0.82) (2021-08-11)
 
 
