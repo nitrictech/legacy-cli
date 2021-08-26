@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.84](https://github.com/nitrictech/cli/compare/v0.0.82...v0.0.84) (2021-08-26)
+
+
+### Features
+
+* **plugins/gcp:** Add initial service enablement to gcp deployments. ([6bfeaf4](https://github.com/nitrictech/cli/commit/6bfeaf4090e1bb7d682eb0a505f4a2227dc37cec))
+* **plugins/gcp:** Add new component resources for configuring project permissions. ([fa244a9](https://github.com/nitrictech/cli/commit/fa244a96dc579541eb63a68e8ea99b546df82959))
+
+
+### Bug Fixes
+
+* **plugins/gcp:** Add authentication config for APIs to invoke services. ([a85f53f](https://github.com/nitrictech/cli/commit/a85f53f2a77d4f13c80214a7a3d1c67771275e30))
+* **plugins/gcp:** Add missing permission for pubsub push subscriptions. ([aa56042](https://github.com/nitrictech/cli/commit/aa56042cc238dc97e46ddda220887de1b20c8ff0))
+* preserve stack file comments ([cbefc2d](https://github.com/nitrictech/cli/commit/cbefc2d8559537ecb7962938ba5cab933fa3e8cd))
+* print the friendly error message to user ([18a4bb7](https://github.com/nitrictech/cli/commit/18a4bb79d2d43fa74a0a0d62db99842643460362))
+
 ### [0.0.83](https://github.com/nitrictech/cli/compare/v0.0.82...v0.0.83) (2021-08-26)
 
 
