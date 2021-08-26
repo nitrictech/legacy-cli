@@ -183,7 +183,8 @@ export class Deploy extends Task<void> {
 								const image = new NitricServiceImage(`${s.getName()}-image`, {
 									service: s,
 									imageName: pulumi.interpolate`${registry.loginServer}/${s.getImageTagName('azure')}`,
-									sourceImageName: s.getImageTagName('azure'),
+									// sourceImageName: s.getImageTagName('azure'),
+									nitricProvider: 'azure',
 									username: adminUsername,
 									password: adminPassword,
 									server: registry.loginServer,
