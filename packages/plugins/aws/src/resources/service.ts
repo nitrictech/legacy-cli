@@ -105,6 +105,41 @@ export class NitricServiceAWSLambda extends pulumi.ComponentResource {
 		);
 
 		new aws.iam.RolePolicy(
+			`${service.getName()}SecretsAccess`,
+			{
+				role: lambdaRole.id,
+				policy: JSON.stringify({
+					Version: '2012-10-17',
+					Statement: [
+						{
+							Effect: 'Allow',
+							Action: [
+								'secretsmanager:DescribeSecret',
+								'secretsmanager:PutSecretValue',
+								'secretsmanager:CreateSecret',
+								'secretsmanager:DeleteSecret',
+								'secretsmanager:CancelRotateSecret',
+								'secretsmanager:ListSecretVersionIds',
+								'secretsmanager:UpdateSecret',
+								'secretsmanager:GetRandomPassword',
+								'secretsmanager:GetResourcePolicy',
+								'secretsmanager:GetSecretValue',
+								'secretsmanager:StopReplicationToReplica',
+								'secretsmanager:ReplicateSecretToRegions',
+								'secretsmanager:RestoreSecret',
+								'secretsmanager:RotateSecret',
+								'secretsmanager:UpdateSecretVersionStage',
+								'secretsmanager:RemoveRegionsFromReplication',
+							],
+							Resource: '*',
+						},
+					],
+				}),
+			},
+			defaultResourceOptions,
+		);
+
+		new aws.iam.RolePolicy(
 			`${service.getName()}DynamoDBAccess`,
 			{
 				role: lambdaRole.id,
