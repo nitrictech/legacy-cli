@@ -14,12 +14,13 @@
 
 import { Stack, Task, mapObject } from '@nitric/cli-common';
 import { LocalWorkspace } from '@pulumi/pulumi/automation';
-import { resources, storage, web, containerregistry } from '@pulumi/azure-native';
+import { resources, storage, web, containerregistry, documentdb } from '@pulumi/azure-native';
 import { createBucket } from './bucket';
 import { createTopic } from './topic';
 import { createFunctionAsApp } from './function';
 import { createQueue } from './queue';
 import { createAPI } from './api';
+import { createMongoDatabase } from './database';
 import * as pulumi from '@pulumi/pulumi';
 import fs from 'fs';
 import path from 'path';
@@ -132,6 +133,35 @@ export class Deploy extends Task<void> {
 							pulumi.log.warn('Schedules are not currently supported for Azure deployments');
 							// schedules.map(s => createSchedule(resourceGroup, s))
 						}
+
+						// Create Database account
+						const dbAccount = new documentdb.DatabaseAccount(`${stack.getName()}-db-account`, {
+							resourceGroupName: resourceGroup.name,
+							// 24 character limit
+							accountName: `${stack.getName().replace(/-/g, '')}`,
+							kind: 'MongoDB',
+							apiProperties: {
+								serverVersion: '4.0',
+							},
+							location: resourceGroup.location,
+							databaseAccountOfferType: 'Standard',
+							locations: [
+								// what should we make these? TODO
+								{
+									failoverPriority: 0,
+									isZoneRedundant: false,
+									locationName: 'southcentralus',
+								},
+								{
+									failoverPriority: 1,
+									isZoneRedundant: false,
+									locationName: 'eastus',
+								},
+							],
+						});
+
+						// Create Cosmos DB API for MongoDB
+						createMongoDatabase(resourceGroup, dbAccount, stack.getName());
 
 						mapObject(apis).map((a) => createAPI(resourceGroup, orgName, adminEmail, a, DeployedServices));
 					} catch (e) {
