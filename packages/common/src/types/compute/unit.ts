@@ -12,37 +12,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export interface NitricFunctionTriggers {
-	topics?: string[];
-}
+import { NitricComputeUnitTriggers } from './triggers';
 
-export interface NitricFunction<Ext extends Record<string, any> = never> {
+export interface NitricComputeUnit<Ext extends Record<string, any> = never> {
 	// A stack relative context for the directory that will
 	// be included in the build
 	context?: string;
-	// The path location of the func
-	// relative to context
-	path: string;
-	// runtime: string;
-	// Scripts that will be executed by the nitric
-	// build process before beginning the docker build
-	buildScripts?: string[];
-	// files to exclude from final build
-	// can be globs
-	excludes?: string[];
-	// Allow the user to specify a custom unique tag for the function
-	tag?: string;
-	// subs?: NitricSubscription[];
-	triggers?: NitricFunctionTriggers;
+	// Triggers used to invoke this compute unit, e.g. Topic Subscriptions
+	triggers?: NitricComputeUnitTriggers;
 	// The minimum number of instances to keep alive
 	minScale?: number;
 	// The maximum number of instances to scale to
 	maxScale?: number;
-	// The most requests a single function instance should handle
-	maxRequests?: number;
-	// Simple configuration to determine if the function should be directly
-	// invokable without authentication
-	// would use public, but its reserved by typescript
-	external?: boolean;
+	// Allow the user to specify a custom unique tag for the function
+	tag?: string;
+	// Custom extensions
 	ext?: Ext;
 }

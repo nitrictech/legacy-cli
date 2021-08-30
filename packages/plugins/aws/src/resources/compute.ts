@@ -13,14 +13,14 @@
 // limitations under the License.
 import * as pulumi from '@pulumi/pulumi';
 import * as aws from '@pulumi/aws';
-import { Container, NitricContainerImage } from '@nitric/cli-common';
+import { StackFunction, StackContainer, NitricContainerImage } from '@nitric/cli-common';
 import { NitricSnsTopic } from './topic';
 
-interface NitricContainerAwsLambdaArgs {
+interface NitricComputeAwsLambdaArgs {
 	/**
-	 * Nitric Container
+	 * Nitric Function or Custom Container
 	 */
-	container: Container;
+	source: StackFunction | StackContainer;
 
 	/**
 	 * A deployed Nitric Image
@@ -46,23 +46,22 @@ interface NitricContainerAwsLambdaArgs {
 }
 
 /**
- * AWS Lambda implementation of a custom container in a Nitric project
+ * AWS Lambda implementation of a custom source in a Nitric project
  */
-export class NitricContainerAWSLambda extends pulumi.ComponentResource {
+export class NitricComputeAWSLambda extends pulumi.ComponentResource {
 	public readonly name: string;
 	public readonly lambda: aws.lambda.Function;
 
-	constructor(name, args: NitricContainerAwsLambdaArgs, opts?: pulumi.ComponentResourceOptions) {
+	constructor(name, args: NitricComputeAwsLambdaArgs, opts?: pulumi.ComponentResourceOptions) {
 		super('nitric:func:AWSLambda', name, {}, opts);
 
-		const { container, image, topics, timeout = 15, memory = 128 } = args;
+		const { source, image, topics, timeout = 15, memory = 128 } = args;
 		const defaultResourceOptions: pulumi.ResourceOptions = { parent: this };
-		const descriptor = container.asNitricContainer();
 
-		this.name = container.getName();
+		this.name = source.getName();
 
 		const lambdaRole = new aws.iam.Role(
-			`${container.getName()}LambdaRole`,
+			`${source.getName()}LambdaRole`,
 			{
 				assumeRolePolicy: aws.iam.assumeRolePolicyForPrincipal(aws.iam.Principals.LambdaPrincipal),
 			},
@@ -70,7 +69,7 @@ export class NitricContainerAWSLambda extends pulumi.ComponentResource {
 		);
 
 		new aws.iam.RolePolicyAttachment(
-			`${container.getName()}LambdaBasicExecution`,
+			`${source.getName()}LambdaBasicExecution`,
 			{
 				policyArn: aws.iam.ManagedPolicies.AWSLambdaBasicExecutionRole,
 				role: lambdaRole.id,
@@ -80,7 +79,7 @@ export class NitricContainerAWSLambda extends pulumi.ComponentResource {
 
 		// TODO: Lock this SNS topics for which this function has pub definitions
 		new aws.iam.RolePolicy(
-			`${container.getName()}SNSAccess`,
+			`${source.getName()}SNSAccess`,
 			{
 				role: lambdaRole.id,
 				policy: JSON.stringify({
@@ -106,7 +105,7 @@ export class NitricContainerAWSLambda extends pulumi.ComponentResource {
 		);
 
 		new aws.iam.RolePolicy(
-			`${container.getName()}DynamoDBAccess`,
+			`${source.getName()}DynamoDBAccess`,
 			{
 				role: lambdaRole.id,
 				policy: JSON.stringify({
@@ -138,7 +137,7 @@ export class NitricContainerAWSLambda extends pulumi.ComponentResource {
 		);
 
 		new aws.iam.RolePolicy(
-			`${container.getName()}S3Access`,
+			`${source.getName()}S3Access`,
 			{
 				role: lambdaRole.id,
 				policy: JSON.stringify({
@@ -157,7 +156,7 @@ export class NitricContainerAWSLambda extends pulumi.ComponentResource {
 		);
 
 		this.lambda = new aws.lambda.Function(
-			container.getName(),
+			source.getName(),
 			{
 				imageUri: image.imageUri,
 				memorySize: memory,
@@ -168,7 +167,7 @@ export class NitricContainerAWSLambda extends pulumi.ComponentResource {
 			defaultResourceOptions,
 		);
 
-		const { triggers = {} } = descriptor;
+		const { triggers = {} } = source.getDescriptor();
 
 		(triggers.topics || []).forEach((triggerTopic) => {
 			const topic = topics.find((t) => t.name === triggerTopic);
@@ -176,7 +175,7 @@ export class NitricContainerAWSLambda extends pulumi.ComponentResource {
 			// Only apply if the topic exists
 			if (topic) {
 				new aws.lambda.Permission(
-					`${container.getName()}${triggerTopic}Permission`,
+					`${source.getName()}${triggerTopic}Permission`,
 					{
 						sourceArn: topic.sns.arn,
 						function: this.lambda,
@@ -187,7 +186,7 @@ export class NitricContainerAWSLambda extends pulumi.ComponentResource {
 				);
 
 				new aws.sns.TopicSubscription(
-					`${container.getName()}${triggerTopic}Subscription`,
+					`${source.getName()}${triggerTopic}Subscription`,
 					{
 						endpoint: this.lambda.arn,
 						protocol: 'lambda',

@@ -14,14 +14,11 @@
 import * as pulumi from '@pulumi/pulumi';
 import { NamedObject, NitricEntrypoint } from '@nitric/cli-common';
 import { resources } from '@pulumi/azure-native';
-import { NitricFunctionAzureAppService } from './function';
-import { NitricContainerAzureAppService } from './container';
-import { NitricAzureStorageSite } from './site';
-import { NitricApiAzureApiManagement } from './api';
+import { NitricComputeAzureAppService, NitricAzureStorageSite, NitricApiAzureApiManagement } from '.';
 
 interface NitricAzureStorageBucketArgs {
 	entrypoint: NamedObject<NitricEntrypoint>;
-	services: (NitricFunctionAzureAppService | NitricContainerAzureAppService)[];
+	services: NitricComputeAzureAppService[];
 	sites: NitricAzureStorageSite[];
 	apis: NitricApiAzureApiManagement[];
 	resourceGroup: resources.ResourceGroup;

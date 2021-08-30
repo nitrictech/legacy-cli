@@ -20,8 +20,7 @@ import { NitricSchedule } from './schedule';
 import { NitricAPI } from './api';
 import { NitricStaticSite } from './static-site';
 import { NitricEntrypoint } from './entrypoints';
-import { NitricFunction } from './func';
-import { NitricContainer } from './container';
+import { NitricFunction, NitricContainer } from './compute';
 
 /**
  * A Nitric application stack descriptor

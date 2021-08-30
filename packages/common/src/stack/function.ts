@@ -24,7 +24,7 @@ type omitMethods = 'getService' | 'getServices';
 /**
  * Represents a Nitric Function
  */
-export class Func<FuncExtensions = Record<string, any>> {
+export class StackFunction<FuncExtensions = Record<string, any>> {
 	// Back reference to the parent stack
 	// emit getFunction here to prevent recursion
 	private stack: Omit<Stack, omitMethods>;
@@ -47,7 +47,7 @@ export class Func<FuncExtensions = Record<string, any>> {
 	/**
 	 * Returns the descriptor for this function
 	 */
-	asNitricFunction(): NitricFunction<FuncExtensions> {
+	getDescriptor(): NitricFunction<FuncExtensions> {
 		return this.descriptor;
 	}
 
@@ -118,14 +118,14 @@ export class Func<FuncExtensions = Record<string, any>> {
 	}
 
 	/**
-	 * Get the directory used to stage a container image build of this function
+	 * Get the directory used to stage a source image build of this function
 	 */
 	getStagingDirectory(): string {
 		return path.join(this.stack.getStagingDirectory(), this.name);
 	}
 
 	/**
-	 * Return the default image tag for a container image built from this function
+	 * Return the default image tag for a source image built from this function
 	 * @param provider the provider name (e.g. aws), used to uniquely identify builds for specific providers
 	 */
 	getImageTagName(provider?: string): string {

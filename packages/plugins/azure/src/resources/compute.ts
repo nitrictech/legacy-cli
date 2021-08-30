@@ -13,10 +13,10 @@
 // limitations under the License.
 import * as pulumi from '@pulumi/pulumi';
 import { resources, web, containerregistry, eventgrid } from '@pulumi/azure-native';
-import { Container, NitricContainerImage } from '@nitric/cli-common';
+import { NitricContainerImage, NitricFunctionImage, StackFunction, StackContainer } from '@nitric/cli-common';
 import { NitricEventgridTopic } from './topic';
 
-interface NitricContainerAzureAppServiceArgs {
+interface NitricComputeAzureAppServiceArgs {
 	/**
 	 * Azure resource group to deploy func to
 	 */
@@ -28,9 +28,9 @@ interface NitricContainerAzureAppServiceArgs {
 	plan: web.AppServicePlan;
 
 	/**
-	 * Nitric Project Custom Container
+	 * Nitric Function or Custom Container
 	 */
-	container: Container;
+	source: StackFunction | StackContainer;
 
 	/**
 	 * Registry the image is deployed to
@@ -40,7 +40,7 @@ interface NitricContainerAzureAppServiceArgs {
 	/**
 	 * A deployed Nitric Image
 	 */
-	image: NitricContainerImage;
+	image: NitricContainerImage | NitricFunctionImage;
 
 	/**
 	 * Deployed Nitric Service Topics
@@ -49,20 +49,20 @@ interface NitricContainerAzureAppServiceArgs {
 }
 
 /**
- * Azure App Service implementation of a Nitric Custom Container
+ * Azure App Service implementation of a Nitric Function or Custom Container
  */
-export class NitricContainerAzureAppService extends pulumi.ComponentResource {
+export class NitricComputeAzureAppService extends pulumi.ComponentResource {
 	public readonly name: string;
 	public readonly webapp: web.WebApp;
 
-	constructor(name: string, args: NitricContainerAzureAppServiceArgs, opts?: pulumi.ComponentResourceOptions) {
+	constructor(name: string, args: NitricComputeAzureAppServiceArgs, opts?: pulumi.ComponentResourceOptions) {
 		super('nitric:func:AppService', name, {}, opts);
 		const defaultResourceOptions: pulumi.ResourceOptions = { parent: this };
-		const { container, resourceGroup, plan, registry, image, topics } = args;
+		const { source, resourceGroup, plan, registry, image, topics } = args;
 
 		this.name = name;
 
-		const nitricContainer = container.asNitricContainer();
+		const nitricContainer = source.getDescriptor();
 
 		const credentials = pulumi.all([resourceGroup.name, registry.name]).apply(([resourceGroupName, registryName]) =>
 			containerregistry.listRegistryCredentials({
@@ -80,10 +80,10 @@ export class NitricContainerAzureAppService extends pulumi.ComponentResource {
 		// Azure that utilizes that contract.
 		// return new appservice.FunctionApp()
 		this.webapp = new web.WebApp(
-			container.getName(),
+			source.getName(),
 			{
 				serverFarmId: plan.id,
-				name: `${container.getStack().getName()}-${container.getName()}`,
+				name: `${source.getStack().getName()}-${source.getName()}`,
 				resourceGroupName: resourceGroup.name,
 				siteConfig: {
 					appSettings: [
@@ -122,9 +122,9 @@ export class NitricContainerAzureAppService extends pulumi.ComponentResource {
 
 			if (topic) {
 				new eventgrid.EventSubscription(
-					`${container.getName()}-${topic.name}-subscription`,
+					`${source.getName()}-${topic.name}-subscription`,
 					{
-						eventSubscriptionName: `${container.getName()}-${topic.name}-subscription`,
+						eventSubscriptionName: `${source.getName()}-${topic.name}-subscription`,
 						scope: topic.eventgrid.id,
 						destination: {
 							endpointType: 'WebHook',

@@ -19,8 +19,7 @@ import * as pulumi from '@pulumi/pulumi';
 import fs from 'fs';
 import path from 'path';
 import {
-	NitricContainerAzureAppService,
-	NitricFunctionAzureAppService,
+	NitricComputeAzureAppService,
 	NitricEventgridTopic,
 	NitricAzureStorageBucket,
 	NitricStorageQueue,
@@ -134,7 +133,7 @@ export class Deploy extends Task<void> {
 						);
 
 						// DEPLOY SERVICES
-						let deployedAzureApps: NitricFunctionAzureAppService[] = [];
+						let deployedAzureApps: NitricComputeAzureAppService[] = [];
 						if (stack.getFunctions().length > 0) {
 							// deploy a registry for deploying this stacks containers
 							// TODO: We will want to prefer a pre-existing registry, supplied by the user
@@ -192,8 +191,8 @@ export class Deploy extends Task<void> {
 									});
 
 									// Create a new Nitric azure app func instance
-									return new NitricFunctionAzureAppService(func.getName(), {
-										func,
+									return new NitricComputeAzureAppService(func.getName(), {
+										source: func,
 										resourceGroup,
 										plan,
 										registry,
@@ -213,8 +212,8 @@ export class Deploy extends Task<void> {
 									});
 
 									// Create a new Nitric azure app func instance
-									return new NitricContainerAzureAppService(container.getName(), {
-										container,
+									return new NitricComputeAzureAppService(container.getName(), {
+										source: container,
 										resourceGroup,
 										plan,
 										registry,

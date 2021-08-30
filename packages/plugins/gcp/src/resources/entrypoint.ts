@@ -17,15 +17,14 @@ import * as gcp from '@pulumi/gcp';
 import * as tls from '@pulumi/tls';
 import { NitricSiteCloudStorage } from './site';
 import { NitricApiGcpApiGateway } from './api';
-import { NitricContainerCloudRun } from './container';
-import { NitricFunctionCloudRun } from './function';
+import { NitricComputeCloudRun } from './compute';
 
 interface NitricEntrypointGoogleCloudLBArgs {
 	stackName: string;
 	entrypoint: NitricEntrypoint;
 	sites: NitricSiteCloudStorage[];
 	apis: NitricApiGcpApiGateway[];
-	services: (NitricFunctionCloudRun | NitricContainerCloudRun)[];
+	services: NitricComputeCloudRun[];
 }
 
 /**

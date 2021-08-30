@@ -12,8 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './func';
-export * from './container';
+export * from './compute';
 export * from './image';
 export * from './stack';
 export * from './bucket';

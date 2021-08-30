@@ -18,10 +18,8 @@ import fs from 'fs';
 import YAML from 'yaml';
 import { Template } from '../templates';
 import { STAGING_DIR } from '../paths';
-import { Site } from './site';
 import { findFileRead } from '../utils';
-import { Func } from './func';
-import { Container } from './container';
+import { StackSite, StackFunction, StackContainer } from '.';
 import { validateStack } from './schema';
 
 const NITRIC_DIRECTORY = '.nitric';
@@ -148,7 +146,7 @@ export class Stack<
 	 * Return a function from the stack by name
 	 * @param name of the function
 	 */
-	getFunction(name: string): Func {
+	getFunction(name: string): StackFunction {
 		const { descriptor } = this;
 		const { functions = {} } = descriptor;
 
@@ -156,23 +154,23 @@ export class Stack<
 			throw new Error(`Stack ${this.name}, does not contain service ${name}`);
 		}
 
-		return new Func(this, name, functions[name]);
+		return new StackFunction(this, name, functions[name]);
 	}
 
 	/**
 	 * Return all functions in the stack
 	 */
-	getFunctions(): Func[] {
+	getFunctions(): StackFunction[] {
 		const { descriptor } = this;
 		const { functions = {} } = descriptor;
 
-		return Object.keys(functions).map((funcName) => new Func(this, funcName, functions[funcName]));
+		return Object.keys(functions).map((funcName) => new StackFunction(this, funcName, functions[funcName]));
 	}
 
 	/**
-	 * Add a container to the stack
-	 * @param name of the new container, which much not already be present in the stack's functions or containers
-	 * @param container the container descriptor to add
+	 * Add a source to the stack
+	 * @param name of the new source, which much not already be present in the stack's functions or containers
+	 * @param container the source descriptor to add
 	 */
 	addContainer(name: string, container: NitricContainer<ContainerExtensions>): Stack {
 		const { descriptor } = this;
@@ -194,10 +192,10 @@ export class Stack<
 	}
 
 	/**
-	 * Return a container from the stack by name
-	 * @param name of the container
+	 * Return a source from the stack by name
+	 * @param name of the source
 	 */
-	getContainer(name: string): Container {
+	getContainer(name: string): StackContainer {
 		const { descriptor } = this;
 		const { containers = {} } = descriptor;
 
@@ -205,29 +203,29 @@ export class Stack<
 			throw new Error(`Stack ${this.name}, does not contain container ${name}`);
 		}
 
-		return new Container(this, name, containers[name]);
+		return new StackContainer(this, name, containers[name]);
 	}
 
 	/**
 	 * Return all containers in the stack
 	 */
-	getContainers(): Container[] {
+	getContainers(): StackContainer[] {
 		const { descriptor } = this;
 		const { containers = {} } = descriptor;
 
 		return Object.keys(containers).map(
-			(containerName) => new Container(this, containerName, containers[containerName]),
+			(containerName) => new StackContainer(this, containerName, containers[containerName]),
 		);
 	}
 
 	/**
 	 * Return all sites (static sites) in the stack
 	 */
-	getSites(): Site[] {
+	getSites(): StackSite[] {
 		const { descriptor } = this;
 		const { sites = {} } = descriptor;
 
-		return Object.keys(sites).map((siteName) => new Site(this, siteName, sites[siteName]));
+		return Object.keys(sites).map((siteName) => new StackSite(this, siteName, sites[siteName]));
 	}
 
 	/**

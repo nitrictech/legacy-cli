@@ -56,7 +56,7 @@ export const MIN_PORT = 49152; // start of ephemeral port range, as defined by I
 export const MAX_PORT = 65535; // end of ephemeral port range, as defined by IANA
 
 /**
- * Creates a list of local container endpoints, which are used by locally running
+ * Creates a list of local source endpoints, which are used by locally running
  * containers to push messages directly to their subscribers.
  *
  * Used to simulate pub/sub connections for local testing only.
@@ -74,7 +74,7 @@ export function getContainerSubscriptions({
 
 	// Find and return the subscribed functions and containers for each topic
 	return namedTopics.reduce((subs, topic) => {
-		// Retrieve the URLs for each function and container, for direct http based topic pubs
+		// Retrieve the URLs for each function and source, for direct http based topic pubs
 		const functionSubs = namedFunctions
 			.filter(({ triggers }) => {
 				return triggers && (triggers.topics || []).filter((name) => name === topic.name).length > 0;
@@ -200,7 +200,7 @@ export function createGatewayContainerRunTasks(
 }
 
 /**
- * Listrception: Creates container sub-tasks for the 'Running Containers' listr task (see createContainerTasks)
+ * Listrception: Creates source sub-tasks for the 'Running Containers' listr task (see createContainerTasks)
  * which will be run in parallel
  */
 export function createContainerRunTasks(containers: RunContainerTaskOptions[], docker: Docker): (ctx, task) => Listr {
@@ -281,7 +281,7 @@ export function createRunTasks(
 }
 
 /**
- * Sorts images by the name of the function/container they contain.
+ * Sorts images by the name of the function/source they contain.
  * NOTE: Returns a new sorted array
  */
 export function sortImages(images: ContainerImage[]): ContainerImage[] {
@@ -329,7 +329,7 @@ export default class Run extends BaseCommand {
 	};
 
 	/**
-	 * Runs a container for each container, function, api and entrypoint in the Nitric Stack
+	 * Runs a source for each source, function, api and entrypoint in the Nitric Stack
 	 */
 	runContainers = async (stack: Stack, runId: string): Promise<void> => {
 		const nitricStack = stack.asNitricStack();
@@ -339,7 +339,7 @@ export default class Run extends BaseCommand {
 
 		cli.action.stop();
 
-		// Build the container images for each function in the project stack
+		// Build the source images for each function in the project stack
 		const builtImages = (await new Listr([createBuildListrTask(stack)]).run()) as { [key: string]: ContainerImage };
 
 		// Filter out undefined and non-image results from build tasks

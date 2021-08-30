@@ -22,7 +22,7 @@ jest.mock('fs');
 jest.mock('dockerode');
 jest.mock('../../utils');
 
-describe('Given a Nitric function is being run locally as a container', () => {
+describe('Given a Nitric function is being run locally as a source', () => {
 	afterEach(() => {
 		jest.resetAllMocks();
 	});
@@ -39,7 +39,7 @@ describe('Given a Nitric function is being run locally as a container', () => {
 		} as any;
 	};
 
-	test('A container image should be created', async () => {
+	test('A source image should be created', async () => {
 		expect.assertions(1);
 		const runContainerTask = new RunContainerTask({
 			image: {
@@ -86,7 +86,7 @@ describe('Given a Nitric function is being run locally as a container', () => {
 		});
 	});
 
-	describe('When the container finishes running', () => {
+	describe('When the source finishes running', () => {
 		let logSpy;
 		beforeAll(() => {
 			console.log = jest.fn();

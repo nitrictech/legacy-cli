@@ -11,14 +11,14 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-import { crawlDirectorySync, Site } from '@nitric/cli-common';
+import { crawlDirectorySync, StackSite } from '@nitric/cli-common';
 import * as pulumi from '@pulumi/pulumi';
 import * as gcp from '@pulumi/gcp';
 import path from 'path';
 import * as mime from 'mime';
 
 interface NitricSiteCloudStorageArgs {
-	site: Site;
+	site: StackSite;
 }
 
 /**
@@ -35,7 +35,7 @@ export class NitricSiteCloudStorage extends pulumi.ComponentResource {
 
 		this.name = site.getName();
 
-		Site.buildSync(site);
+		StackSite.buildSync(site);
 
 		// Deploy the func
 		this.storage = new gcp.storage.Bucket(

@@ -12,22 +12,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export interface NitricContainerTriggers {
-	topics?: string[];
-}
+import { NitricComputeUnit } from '.';
 
-export interface NitricContainer<Ext extends Record<string, any> = never> {
-	// A stack relative context for the directory that will
-	// be included in the build
-	context: string;
-	// The path to the Dockerfile to use to build this container
+export interface NitricFunction<Ext> extends NitricComputeUnit<Ext> {
+	// The path location of the func
 	// relative to context
-	dockerfile: string;
-	triggers?: NitricContainerTriggers;
-	// The minimum number of instances to keep alive
-	minScale?: number;
-	// The maximum number of instances to scale to
-	maxScale?: number;
-	// Custom extensions
-	ext?: Ext;
+	path: string;
+	// Scripts that will be executed by the nitric
+	// build process before beginning the docker build
+	buildScripts?: string[];
+	// files to exclude from final build
+	// can be globs
+	excludes?: string[];
+	// The most requests a single function instance should handle
+	maxRequests?: number;
+	// Simple configuration to determine if the function should be directly
+	// invokable without authentication
+	// would use public, but its reserved by typescript
+	external?: boolean;
 }

@@ -12,9 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { NitricFunction } from '@nitric/cli-common';
-import * as digitalocean from '@pulumi/digitalocean';
+import { NitricComputeUnit } from '.';
 
-export interface DeployedFunction extends NitricFunction {
-	app: digitalocean.App;
+export interface NitricContainer<Ext> extends NitricComputeUnit<Ext> {
+	// The path to the Dockerfile to use to build this source
+	// relative to context
+	dockerfile: string;
 }

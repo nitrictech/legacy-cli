@@ -16,11 +16,11 @@ import execa from 'execa';
 import { oneLine } from 'common-tags';
 import { Task } from './task';
 import { ContainerImage } from '../types';
-import { Func } from '../stack';
+import { StackFunction } from '../stack';
 
 interface BuildFunctionTaskOptions {
 	baseDir: string;
-	func: Func;
+	func: StackFunction;
 	provider?: string;
 }
 
@@ -28,7 +28,7 @@ const PACK_IMAGE = 'buildpacksio/pack:0.13.1';
 const BUILDER_IMAGE = 'nitrictech/bp-builder-base';
 
 export class BuildFunctionTask extends Task<ContainerImage> {
-	private service: Func;
+	private service: StackFunction;
 	private readonly provider: string;
 
 	constructor({ func, provider = 'local' }: BuildFunctionTaskOptions) {

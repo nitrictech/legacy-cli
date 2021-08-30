@@ -13,12 +13,12 @@
 // limitations under the License.
 import * as pulumi from '@pulumi/pulumi';
 import * as docker from '@pulumi/docker';
-import { Container } from '../stack';
+import { StackContainer } from '../stack';
 import path from 'path';
 import { MembraneProviders } from '../types';
 
 interface NitricContainerImageArgs {
-	container: Container;
+	container: StackContainer;
 	username: pulumi.Input<string>;
 	password: pulumi.Input<string>;
 	imageName: pulumi.Input<string>;
@@ -27,7 +27,7 @@ interface NitricContainerImageArgs {
 }
 
 /**
- * Image deployment for a custom container in a Nitric project
+ * Image deployment for a custom source in a Nitric project
  */
 export class NitricContainerImage extends pulumi.ComponentResource {
 	/**

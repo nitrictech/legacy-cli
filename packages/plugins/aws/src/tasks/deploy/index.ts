@@ -27,8 +27,7 @@ import {
 	NitricEntrypointCloudFront,
 	NitricBucketS3,
 	NitricCollectionDynamo,
-	NitricFunctionAWSLambda,
-	NitricContainerAWSLambda,
+	NitricComputeAWSLambda,
 } from '../../resources';
 
 /**
@@ -166,41 +165,44 @@ export class Deploy extends Task<DeployResult> {
 								// create a new repository for each func...
 								const repository = new ecr.Repository(func.getImageTagName());
 
-								const image = new NitricFunctionImage(func.getName(), {
-									func,
-									server: authToken.proxyEndpoint,
-									username: authToken.userName,
-									password: authToken.password,
-									imageName: repository.repositoryUrl,
-									sourceImageName: func.getImageTagName('aws'),
-								});
-
-								return new NitricFunctionAWSLambda(func.getName(), {
-									func,
-									topics: deployedTopics,
-									image: image,
-								});
+								return {
+									name: func.getName(),
+									image: new NitricFunctionImage(func.getName(), {
+										func,
+										server: authToken.proxyEndpoint,
+										username: authToken.userName,
+										password: authToken.password,
+										imageName: repository.repositoryUrl,
+										sourceImageName: func.getImageTagName('aws'),
+									}),
+									source: func,
+								};
 							}),
 							...stack.getContainers().map((container) => {
 								// create a new repository for each func...
 								const repository = new ecr.Repository(container.getImageTagName());
 
-								const image = new NitricContainerImage(container.getName(), {
-									container,
-									server: authToken.proxyEndpoint,
-									username: authToken.userName,
-									password: authToken.password,
-									imageName: repository.repositoryUrl,
-									nitricProvider: 'aws',
-								});
-
-								return new NitricContainerAWSLambda(container.getName(), {
-									container,
-									topics: deployedTopics,
-									image: image,
-								});
+								return {
+									name: container.getName(),
+									image: new NitricContainerImage(container.getName(), {
+										container,
+										server: authToken.proxyEndpoint,
+										username: authToken.userName,
+										password: authToken.password,
+										imageName: repository.repositoryUrl,
+										nitricProvider: 'aws',
+									}),
+									source: container,
+								};
 							}),
-						];
+						].map(
+							({ name, source, image }) =>
+								new NitricComputeAWSLambda(name, {
+									source,
+									topics: deployedTopics,
+									image,
+								}),
+						);
 						// Deploy Nitric APIs
 						const deployedApis = mapObject(apis).map(
 							(api) =>
