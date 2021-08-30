@@ -36,7 +36,7 @@ export interface RunGatewayTaskOptions {
 }
 
 /**
- * Create a temporary staging directory for API Gateway container builds
+ * Create a temporary staging directory for API Gateway source builds
  */
 export function createAPIStagingDirectory(): string {
 	if (!fs.existsSync(`${STAGING_API_DIR}`)) {
@@ -47,7 +47,7 @@ export function createAPIStagingDirectory(): string {
 }
 
 /**
- * Create a temporary staging directory for a specific API Gateway container build
+ * Create a temporary staging directory for a specific API Gateway source build
  */
 export function createAPIDirectory(apiName: string): string {
 	const stagingDir = createAPIStagingDirectory();
@@ -95,7 +95,7 @@ export class RunGatewayTask extends Task<Container> {
 			}
 		}
 
-		// Download the base API Gateway container image
+		// Download the base API Gateway source image
 		// note: needed because docker.createContainer doesn't appear to automatically retrieve the base image.
 		await streamToPromise(await this.docker.pull(NITRIC_BASE_API_GATEWAY_IMAGE));
 
@@ -140,7 +140,7 @@ export class RunGatewayTask extends Task<Container> {
 		// use tarfs to create a buffer to pipe to put archive...
 		const packStream = tar.pack(dirName);
 
-		// Write the open api file to this api gateway container
+		// Write the open api file to this api gateway source
 		await container.putArchive(packStream, {
 			path: '/',
 		});

@@ -22,7 +22,7 @@ type omitMethods = 'getService' | 'getServices';
 /**
  * Represents a Nitric Container
  */
-export class Container<ContainerExtensions = Record<string, any>> {
+export class StackContainer<ContainerExtensions = Record<string, any>> {
 	// Back reference to the parent stack
 	// emit getContainer here to prevent recursion
 	private stack: Omit<Stack, omitMethods>;
@@ -43,26 +43,26 @@ export class Container<ContainerExtensions = Record<string, any>> {
 	}
 
 	/**
-	 * Returns the descriptor for this container
+	 * Returns the descriptor for this source
 	 */
-	asNitricContainer(): NitricContainer<ContainerExtensions> {
+	getDescriptor(): NitricContainer<ContainerExtensions> {
 		return this.descriptor;
 	}
 
 	/**
-	 * Return the container name
+	 * Return the source name
 	 */
 	getName(): string {
 		return this.name;
 	}
 
 	/**
-	 * Get the build context of the container
+	 * Get the build context of the source
 	 * @returns
 	 */
 	getContext(): string {
 		const origCtx = this.descriptor.context;
-		const ctxPath = path.join(this.stack.getDirectory(), origCtx);
+		const ctxPath = origCtx ? path.join(this.stack.getDirectory(), origCtx) : this.stack.getDirectory();
 
 		if (!fs.existsSync(ctxPath)) {
 			throw new Error(
@@ -74,7 +74,7 @@ export class Container<ContainerExtensions = Record<string, any>> {
 	}
 
 	/**
-	 * Get the path to Dockerfile used to build this container.
+	 * Get the path to Dockerfile used to build this source.
 	 *
 	 * The returned path is relative and below the context directory.
 	 * @returns
@@ -93,7 +93,7 @@ export class Container<ContainerExtensions = Record<string, any>> {
 	}
 
 	/**
-	 * Return the default image tag for a container image built from this container definition
+	 * Return the default image tag for a source image built from this source definition
 	 * @param provider the provider name (e.g. aws), used to uniquely identify builds for specific providers
 	 */
 	getImageTagName(provider?: string): string {

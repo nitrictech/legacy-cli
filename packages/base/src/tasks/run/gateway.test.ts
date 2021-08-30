@@ -71,7 +71,7 @@ describe('GatewayRunTask', () => {
 			}).do();
 		});
 
-		it('should pull the dev-api-gateway container', () => {
+		it('should pull the dev-api-gateway source', () => {
 			expect(pullSpy).toBeCalledTimes(1);
 			expect(pullSpy).toBeCalledWith('nitricimages/dev-api-gateway');
 		});
@@ -80,15 +80,15 @@ describe('GatewayRunTask', () => {
 			expect(getPort).toHaveBeenCalled();
 		});
 
-		it('should create a single docker container', () => {
+		it('should create a single docker source', () => {
 			expect(createContainerSpy).toHaveBeenCalledTimes(1);
 		});
 
-		it('should start the created container', () => {
+		it('should start the created source', () => {
 			expect(container.start).toHaveBeenCalled();
 		});
 
-		it('should upload the api to the created container', () => {
+		it('should upload the api to the created source', () => {
 			expect(container.putArchive).toHaveBeenCalled();
 		});
 

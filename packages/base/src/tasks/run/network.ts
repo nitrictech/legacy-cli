@@ -16,7 +16,7 @@ import { Task } from '@nitric/cli-common';
 import Docker, { Network } from 'dockerode';
 
 /**
- * Local development/testing container network options
+ * Local development/testing source network options
  */
 export interface CreateNetworkTaskOptions {
 	name: string;

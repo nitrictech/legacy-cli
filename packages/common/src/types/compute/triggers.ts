@@ -12,9 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { NitricContainer } from '@nitric/cli-common';
-import * as digitalocean from '@pulumi/digitalocean';
-
-export interface DeployedContainer extends NitricContainer {
-	app: digitalocean.App;
+export interface NitricComputeUnitTriggers {
+	topics?: string[];
 }

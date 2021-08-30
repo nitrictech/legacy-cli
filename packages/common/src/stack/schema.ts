@@ -1577,7 +1577,7 @@ export const STACK_SCHEMA: JSONSchema7 = {
 			patternProperties: {
 				[resourceNamePattern]: {
 					title: 'container',
-					description: 'A OCI container',
+					description: 'A OCI source',
 					type: 'object',
 					properties: {
 						dockerfile: { type: 'string' },

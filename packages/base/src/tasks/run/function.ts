@@ -153,7 +153,7 @@ export class RunContainerTask extends Task<Container> {
 		);
 
 		return await new Promise((res, rej) => {
-			// Only wait 2 seconds for the container.
+			// Only wait 2 seconds for the source.
 			const rejectTimeout = setTimeout(() => {
 				rej(new Error(`Container for image ${this.image.id} not started after 2 seconds.`));
 			}, 2000);

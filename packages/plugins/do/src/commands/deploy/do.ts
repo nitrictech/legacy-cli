@@ -29,7 +29,7 @@ export default class DoDeploy extends BaseCommand {
 		...BaseCommand.flags,
 		containerRegistry: flags.string({
 			char: 'c',
-			description: 'Digital Ocean Container Registry to deploy lambdas to',
+			description: 'Digital Ocean Container Registry to deploy containers to',
 		}),
 		region: flags.enum({
 			char: 'r',

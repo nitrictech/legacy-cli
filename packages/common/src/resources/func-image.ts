@@ -11,15 +11,16 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
 import * as pulumi from '@pulumi/pulumi';
 import * as docker from '@pulumi/docker';
 import fs from 'fs';
-import { Func } from '../stack';
+import { StackFunction } from '../stack';
 import path from 'path';
 import { TMP_DIR } from '../paths';
 
 interface NitricFunctionImageArgs {
-	func: Func;
+	func: StackFunction;
 	username: pulumi.Input<string>;
 	password: pulumi.Input<string>;
 	// Copy from an existing source image locally

@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { NamedObject, NitricEntrypoint, Site, Stack, Task } from '@nitric/cli-common';
+import { NamedObject, NitricEntrypoint, StackSite, Stack, Task } from '@nitric/cli-common';
 import Docker, { Container, ContainerCreateOptions, Network, NetworkInspectInfo } from 'dockerode';
 import tar from 'tar-fs';
 import fs from 'fs';
@@ -209,7 +209,7 @@ export class RunEntrypointTask extends Task<Container> {
 				},
 			},
 		} as ContainerCreateOptions;
-		// Create the nginx container first
+		// Create the nginx source first
 		const container = await docker.createContainer(dockerOptions);
 
 		// Get the nginx configuration from our nitric entrypoints
@@ -227,17 +227,17 @@ export class RunEntrypointTask extends Task<Container> {
 
 		// write the nginx configuration to the default nginx directory
 		await container.putArchive(packStream, {
-			// Copy nginx.conf to our nginx container
+			// Copy nginx.conf to our nginx source
 			path: '/etc/nginx/',
 		});
 
-		// Start the entrypoint container
+		// Start the entrypoint source
 		await container.start();
 
-		// Copy sites onto the frontend container
+		// Copy sites onto the frontend source
 		await Promise.all(
 			stack.getSites().map(async (s) => {
-				await Site.build(s);
+				await StackSite.build(s);
 				const siteTar = tar.pack(s.getAssetPath());
 
 				const exec = await container.exec({

@@ -18,14 +18,14 @@ import { Stack } from '../stack';
 import { BuildFunctionTask } from './build-function';
 import { BuildContainerTask } from './build-container';
 
-// Utility function to create a list of build function/container tasks from
+// Utility function to create a list of build function/source tasks from
 // a given nitric stack
 export function createBuildTasks(
 	stack: Stack,
 	directory: string,
 	provider = 'dev',
 ): (BuildFunctionTask | BuildContainerTask)[] {
-	// Create function container images using Buildpacks
+	// Create function source images using Buildpacks
 	const funcTasks = stack.getFunctions().map(
 		(func): BuildFunctionTask =>
 			new BuildFunctionTask({
@@ -35,7 +35,7 @@ export function createBuildTasks(
 			}),
 	);
 
-	// Create container images using Docker
+	// Create source images using Docker
 	const containerTasks = stack.getContainers().map(
 		(container): BuildContainerTask =>
 			new BuildContainerTask({

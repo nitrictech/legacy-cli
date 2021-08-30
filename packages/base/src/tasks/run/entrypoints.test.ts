@@ -13,7 +13,7 @@
 // limitations under the License.
 
 //import jest from "jest";
-import { Stack, Site, NitricEntrypoint } from '@nitric/cli-common';
+import { Stack, StackSite, NitricEntrypoint } from '@nitric/cli-common';
 import * as EPS from './entrypoints';
 import fs from 'fs';
 import Docker from 'dockerode';
@@ -195,7 +195,7 @@ describe('RunEntrypointsTask', () => {
 			}),
 		);
 		writeFileSpy = jest.spyOn(fs.promises, 'writeFile').mockImplementation(() => Promise.resolve());
-		siteBuildMock = jest.spyOn(Site, 'build').mockImplementation(ASYNC_NO_OP);
+		siteBuildMock = jest.spyOn(StackSite, 'build').mockImplementation(ASYNC_NO_OP);
 		tarPackMock = jest.spyOn(tar, 'pack').mockReturnValue((Readable as any).from(['test']));
 		createContainerMock = jest.spyOn(Docker.prototype, 'createContainer').mockReturnValue(
 			Promise.resolve({
@@ -256,7 +256,7 @@ describe('RunEntrypointsTask', () => {
 			).do();
 		});
 
-		it('should create a new nginx docker container', () => {
+		it('should create a new nginx docker source', () => {
 			expect(createContainerMock).toBeCalledTimes(1);
 			expect(createContainerMock).toBeCalledWith(
 				expect.objectContaining({
@@ -275,12 +275,12 @@ describe('RunEntrypointsTask', () => {
 			);
 		});
 
-		it('should push the nginx config to the new container', () => {
+		it('should push the nginx config to the new source', () => {
 			expect(putArchiveMock).toBeCalled();
 			expect(putArchiveMock).nthCalledWith(1, expect.anything(), expect.objectContaining({ path: '/etc/nginx/' }));
 		});
 
-		it('should start the nginx container', () => {
+		it('should start the nginx source', () => {
 			expect(containerStartMock).toBeCalledTimes(1);
 		});
 
@@ -293,7 +293,7 @@ describe('RunEntrypointsTask', () => {
 			expect(tarPackMock).nthCalledWith(2, 'test');
 		});
 
-		it('should push the sites to the nginx container', () => {
+		it('should push the sites to the nginx source', () => {
 			expect(putArchiveMock).nthCalledWith(2, expect.anything(), expect.objectContaining({ path: '/www/test' }));
 		});
 	});

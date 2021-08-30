@@ -20,7 +20,7 @@ import path from 'path';
 /**
  * A Nitric Static Site
  */
-export class Site<SiteExtensions = Record<string, any>> {
+export class StackSite<SiteExtensions = Record<string, any>> {
 	private name: string;
 	private stack: Stack;
 	private descriptor: NitricStaticSite<SiteExtensions>;
@@ -67,7 +67,7 @@ export class Site<SiteExtensions = Record<string, any>> {
 	 * Build a static site by executing its build scripts
 	 * @param site the site to build
 	 */
-	static async build(site: Site): Promise<void> {
+	static async build(site: StackSite): Promise<void> {
 		if (site.descriptor.buildScripts) {
 			const workingDir = site.getPath();
 
@@ -77,7 +77,7 @@ export class Site<SiteExtensions = Record<string, any>> {
 		}
 	}
 
-	static buildSync(site: Site): void {
+	static buildSync(site: StackSite): void {
 		if (site.descriptor.buildScripts) {
 			const workingDir = site.getPath();
 
