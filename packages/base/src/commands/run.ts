@@ -18,7 +18,7 @@ import {
 	BaseCommand,
 	Stack,
 	wrapTaskForListr,
-	NitricImage,
+	ContainerImage,
 	NitricStack,
 	createBuildListrTask,
 } from '@nitric/cli-common';
@@ -36,8 +36,8 @@ import {
 	RunEntrypointTaskOptions,
 	RunGatewayTask,
 	RunGatewayTaskOptions,
-	RunServiceTask,
-	RunServiceTaskOptions,
+	RunContainerTask,
+	RunContainerTaskOptions,
 } from '../tasks';
 import { TaskWrapper } from 'listr2/dist/lib/task-wrapper';
 import crypto from 'crypto';
@@ -65,20 +65,31 @@ export const MAX_PORT = 65535; // end of ephemeral port range, as defined by IAN
  */
 export function getContainerSubscriptions({
 	topics = {},
-	services = {},
+	functions = {},
+	containers = {},
 }: NitricStack): Record<string, string[]> | undefined {
 	const namedTopics = Object.keys(topics).map((name) => ({ name, ...topics[name] }));
-	const namedServices = Object.keys(services).map((name) => ({ name, ...services[name] }));
+	const namedFunctions = Object.keys(functions).map((name) => ({ name, ...functions[name] }));
+	const namedContainers = Object.keys(containers).map((name) => ({ name, ...containers[name] }));
 
-	// Find and return the subscribed services for each topic
+	// Find and return the subscribed functions and containers for each topic
 	return namedTopics.reduce((subs, topic) => {
+		// Retrieve the URLs for each function and container, for direct http based topic pubs
+		const functionSubs = namedFunctions
+			.filter(({ triggers }) => {
+				return triggers && (triggers.topics || []).filter((name) => name === topic.name).length > 0;
+			})
+			.map((func) => `http://${func.name}:9001`);
+
+		const containerSubs = namedContainers
+			.filter(({ triggers }) => {
+				return triggers && (triggers.topics || []).filter((name) => name === topic.name).length > 0;
+			})
+			.map((container) => `http://${container.name}:9001`);
+
 		return {
 			...subs,
-			[topic.name]: namedServices
-				.filter(({ triggers }) => {
-					return triggers && (triggers.topics || []).filter((name) => name === topic.name).length > 0;
-				})
-				.map((service) => `http://${service.name}:9001`),
+			[topic.name]: [...functionSubs, ...containerSubs],
 		};
 	}, {} as Record<string, string[]>);
 }
@@ -97,23 +108,23 @@ export function getPortRange(minPort: number = MIN_PORT, maxPort: number = MAX_P
 }
 
 /**
- * Returns an array of Listr wrapped RunServiceTasks
- * @param services to run
- * @param docker handle to use when running the services
- * @param network docker network to use with the service containers
- * @param volume docker volume to mount in the service containers
+ * Returns an array of Listr wrapped RunFunctionTasks
+ * @param functions to run
+ * @param docker handle to use when running the functions
+ * @param network docker network to use with the function containers
+ * @param volume docker volume to mount in the function containers
  */
-export function createServiceTasks(
-	services: RunServiceTaskOptions[],
+export function createContainerTasks(
+	functions: RunContainerTaskOptions[],
 	docker: Docker,
 	network: Docker.Network,
 	volume: Docker.Volume,
 ): Array<ListrTask> {
-	return services.map((service) =>
+	return functions.map((func) =>
 		wrapTaskForListr(
-			new RunServiceTask(
+			new RunContainerTask(
 				{
-					...service,
+					...func,
 					network: network,
 					volume: volume,
 				},
@@ -189,15 +200,12 @@ export function createGatewayContainerRunTasks(
 }
 
 /**
- * Listrception: Creates service sub-tasks for the 'Running Services' listr task (see createServiceTasks)
+ * Listrception: Creates container sub-tasks for the 'Running Containers' listr task (see createContainerTasks)
  * which will be run in parallel
  */
-export function createServiceContainerRunTasks(
-	functions: RunServiceTaskOptions[],
-	docker: Docker,
-): (ctx, task) => Listr {
+export function createContainerRunTasks(containers: RunContainerTaskOptions[], docker: Docker): (ctx, task) => Listr {
 	return (ctx, task: TaskWrapper<unknown, typeof ListrRenderer>): Listr => {
-		return task.newListr(createServiceTasks(functions, docker, ctx.network, ctx.volume), {
+		return task.newListr(createContainerTasks(containers, docker, ctx.network, ctx.volume), {
 			concurrent: true,
 			// Don't fail all on a single function failure...
 			exitOnError: false,
@@ -228,21 +236,12 @@ export function createEntrypointContainerRunTasks(
  */
 export function createRunTasks(
 	stack: Stack,
-	functions: RunServiceTaskOptions[],
+	containers: RunContainerTaskOptions[],
 	apis: RunGatewayTaskOptions[],
 	entrypoints: RunEntrypointTaskOptions[],
 	docker: Docker,
 	runId: string,
 ): Listr {
-	// const entrypointsTask = entrypoints
-	// 	? [
-	// 			wrapTaskForListr({
-	// 				name: 'Starting Entrypoints Proxy',
-	// 				factory: (ctx) => new RunEntrypointsTask({ stack, docker, network: ctx.network, port: entrypointPort }),
-	// 			}),
-	// 	  ]
-	// 	: [];
-
 	return new Listr<ListrCtx>(
 		[
 			// Create ephemeral docker network for this run
@@ -255,12 +254,12 @@ export function createRunTasks(
 				}),
 				'volume',
 			),
-			// Run the service containers, attached to the network and volume
+			// Run the functions & containers, attached to the network and volume
 			{
-				title: 'Running Services',
-				task: createServiceContainerRunTasks(functions, docker),
+				title: 'Running Functions & Containers',
+				task: createContainerRunTasks(containers, docker),
 			},
-			// Start the APIs, to route requests to the services
+			// Start the APIs, to route requests to the containers
 			{
 				title: 'Starting API Gateways',
 				task: createGatewayContainerRunTasks(stack.getName(), apis, docker),
@@ -282,12 +281,12 @@ export function createRunTasks(
 }
 
 /**
- * Sorts images by the name of the service they contain.
+ * Sorts images by the name of the function/container they contain.
  * NOTE: Returns a new sorted array
  */
-export function sortImages(images: NitricImage[]): NitricImage[] {
+export function sortImages(images: ContainerImage[]): ContainerImage[] {
 	const imagesCopy = [...images];
-	imagesCopy.sort(({ serviceName: nameA }, { serviceName: nameB }) => {
+	imagesCopy.sort(({ name: nameA }, { name: nameB }) => {
 		if (nameA < nameB) {
 			return -1;
 		}
@@ -330,7 +329,7 @@ export default class Run extends BaseCommand {
 	};
 
 	/**
-	 * Runs a container for each service, api and entrypoint in the Nitric Stack
+	 * Runs a container for each container, function, api and entrypoint in the Nitric Stack
 	 */
 	runContainers = async (stack: Stack, runId: string): Promise<void> => {
 		const nitricStack = stack.asNitricStack();
@@ -340,11 +339,11 @@ export default class Run extends BaseCommand {
 
 		cli.action.stop();
 
-		// Build the container images for each service in the project stack
-		const builtImages = (await new Listr([createBuildListrTask(stack)]).run()) as { [key: string]: NitricImage };
+		// Build the container images for each function in the project stack
+		const builtImages = (await new Listr([createBuildListrTask(stack)]).run()) as { [key: string]: ContainerImage };
 
 		// Filter out undefined and non-image results from build tasks
-		let images = Object.values(builtImages).filter((i) => i && i.serviceName) as NitricImage[];
+		let images = Object.values(builtImages).filter((i) => i && i.name) as ContainerImage[];
 
 		// Generate a range of ports to try to assign to containers
 		const portRange = getPortRange();
@@ -363,14 +362,14 @@ export default class Run extends BaseCommand {
 			}),
 		);
 
-		const runServicesTaskOptions = await Promise.all(
+		const runContainersTaskOptions = await Promise.all(
 			images.map(async (image) => {
 				return {
 					image,
 					runId,
 					port: await getPort({ port: portRange }),
 					subscriptions: getContainerSubscriptions(nitricStack),
-				} as RunServiceTaskOptions;
+				} as RunContainerTaskOptions;
 			}),
 		);
 
@@ -385,10 +384,10 @@ export default class Run extends BaseCommand {
 			}),
 		);
 
-		// Capture the results of running tasks to setup docker network, volume and service containers
+		// Capture the results of running tasks to setup docker network, volume, functions and containers
 		const runTaskResults = await createRunTasks(
 			stack,
-			runServicesTaskOptions,
+			runContainersTaskOptions,
 			runGatewayOptions,
 			runEntrypointOptions,
 			this.docker,
@@ -406,10 +405,10 @@ export default class Run extends BaseCommand {
 		this.network = newNetwork;
 		this.runningContainers = results;
 
-		// Present a list of service and api containers and their ports on the cli
-		cli.table(runServicesTaskOptions, {
-			service: {
-				get: (row): string => row.image && row.image.serviceName,
+		// Present a list of containers (inc. functions and APIs) and their ports on the cli
+		cli.table(runContainersTaskOptions, {
+			function: {
+				get: (row): string => row.image && row.image.name,
 			},
 			port: {},
 		});

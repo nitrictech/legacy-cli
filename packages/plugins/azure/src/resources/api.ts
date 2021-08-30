@@ -15,14 +15,15 @@ import * as pulumi from '@pulumi/pulumi';
 import { NamedObject, NitricAPI, NitricAPITarget } from '@nitric/cli-common';
 import { resources, apimanagement } from '@pulumi/azure-native';
 import { OpenAPIV3 } from 'openapi-types';
-import { NitricServiceAzureAppService } from './service';
+import { NitricFunctionAzureAppService } from './function';
+import { NitricContainerAzureAppService } from './container';
 
 interface NitricApiAzureApiManagementArgs {
 	resourceGroup: resources.ResourceGroup;
 	orgName: string;
 	adminEmail: string;
 	api: NamedObject<NitricAPI>;
-	services: NitricServiceAzureAppService[];
+	services: (NitricFunctionAzureAppService | NitricContainerAzureAppService)[];
 }
 
 type method = 'get' | 'post' | 'put' | 'update' | 'delete' | 'patch';

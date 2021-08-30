@@ -15,6 +15,7 @@ export * from './api';
 export * from './bucket';
 export * from './entrypoint';
 export * from './schedule';
-export * from './service';
+export * from './function';
+export * from './container';
 export * from './site';
 export * from './topic';

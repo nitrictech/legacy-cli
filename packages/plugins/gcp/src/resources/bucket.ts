@@ -30,7 +30,7 @@ export class NitricBucketCloudStorage extends pulumi.ComponentResource {
 		const { bucket } = args;
 		const defaultResourceOptions: pulumi.ResourceOptions = { parent: this };
 
-		// Deploy the service
+		// Deploy the func
 		this.storage = new gcp.storage.Bucket(
 			bucket.name,
 			{

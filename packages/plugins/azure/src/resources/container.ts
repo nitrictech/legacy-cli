@@ -13,24 +13,24 @@
 // limitations under the License.
 import * as pulumi from '@pulumi/pulumi';
 import { resources, web, containerregistry, eventgrid } from '@pulumi/azure-native';
-import { Service, NitricServiceImage } from '@nitric/cli-common';
+import { Container, NitricContainerImage } from '@nitric/cli-common';
 import { NitricEventgridTopic } from './topic';
 
-interface NitricServiceAzureAppServiceArgs {
+interface NitricContainerAzureAppServiceArgs {
 	/**
-	 * Azure resource group to deploy service to
+	 * Azure resource group to deploy func to
 	 */
 	resourceGroup: resources.ResourceGroup;
 
 	/**
-	 * App Service plan to deploy this service to
+	 * App Service plan to deploy this func to
 	 */
 	plan: web.AppServicePlan;
 
 	/**
-	 * Nitric Service
+	 * Nitric Project Custom Container
 	 */
-	service: Service;
+	container: Container;
 
 	/**
 	 * Registry the image is deployed to
@@ -40,7 +40,7 @@ interface NitricServiceAzureAppServiceArgs {
 	/**
 	 * A deployed Nitric Image
 	 */
-	image: NitricServiceImage;
+	image: NitricContainerImage;
 
 	/**
 	 * Deployed Nitric Service Topics
@@ -49,20 +49,20 @@ interface NitricServiceAzureAppServiceArgs {
 }
 
 /**
- * AWS Lambda implementation of a nitric service
+ * Azure App Service implementation of a Nitric Custom Container
  */
-export class NitricServiceAzureAppService extends pulumi.ComponentResource {
+export class NitricContainerAzureAppService extends pulumi.ComponentResource {
 	public readonly name: string;
 	public readonly webapp: web.WebApp;
 
-	constructor(name: string, args: NitricServiceAzureAppServiceArgs, opts?: pulumi.ComponentResourceOptions) {
-		super('nitric:service:AppService', name, {}, opts);
+	constructor(name: string, args: NitricContainerAzureAppServiceArgs, opts?: pulumi.ComponentResourceOptions) {
+		super('nitric:func:AppService', name, {}, opts);
 		const defaultResourceOptions: pulumi.ResourceOptions = { parent: this };
-		const { service, resourceGroup, plan, registry, image, topics } = args;
+		const { container, resourceGroup, plan, registry, image, topics } = args;
 
 		this.name = name;
 
-		const nitricService = service.asNitricService();
+		const nitricContainer = container.asNitricContainer();
 
 		const credentials = pulumi.all([resourceGroup.name, registry.name]).apply(([resourceGroupName, registryName]) =>
 			containerregistry.listRegistryCredentials({
@@ -73,17 +73,17 @@ export class NitricServiceAzureAppService extends pulumi.ComponentResource {
 		const adminUsername = credentials.apply((credentials) => credentials.username!);
 		const adminPassword = credentials.apply((credentials) => credentials.passwords![0].value!);
 
-		// TODO: We will write a seperate function app gateway much like we did for
+		// TODO: We will write a separate function app gateway much like we did for
 		// AWS Lambda, it appears that RPC is used between the function host and workers
 		// https://github.com/Azure/azure-functions-language-worker-protobuf
 		// So hopefully this should be as simple as including a gateway plugin for
 		// Azure that utilizes that contract.
 		// return new appservice.FunctionApp()
 		this.webapp = new web.WebApp(
-			service.getName(),
+			container.getName(),
 			{
 				serverFarmId: plan.id,
-				name: `${service.getStack().getName()}-${service.getName()}`,
+				name: `${container.getStack().getName()}-${container.getName()}`,
 				resourceGroupName: resourceGroup.name,
 				siteConfig: {
 					appSettings: [
@@ -114,7 +114,7 @@ export class NitricServiceAzureAppService extends pulumi.ComponentResource {
 			},
 			defaultResourceOptions,
 		);
-		const { triggers = {} } = nitricService;
+		const { triggers = {} } = nitricContainer;
 
 		// Deploy an evengrid webhook subscription
 		(triggers.topics || []).forEach((s) => {
@@ -122,9 +122,9 @@ export class NitricServiceAzureAppService extends pulumi.ComponentResource {
 
 			if (topic) {
 				new eventgrid.EventSubscription(
-					`${service.getName()}-${topic.name}-subscription`,
+					`${container.getName()}-${topic.name}-subscription`,
 					{
-						eventSubscriptionName: `${service.getName()}-${topic.name}-subscription`,
+						eventSubscriptionName: `${container.getName()}-${topic.name}-subscription`,
 						scope: topic.eventgrid.id,
 						destination: {
 							endpointType: 'WebHook',

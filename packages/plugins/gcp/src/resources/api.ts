@@ -15,13 +15,14 @@ import { NitricAPI, NitricAPITarget } from '@nitric/cli-common';
 import * as pulumi from '@pulumi/pulumi';
 import { OpenAPIV2 } from 'openapi-types';
 import * as gcp from '@pulumi/gcp';
-import { NitricServiceCloudRun } from './service';
+import { NitricFunctionCloudRun } from './function';
+import { NitricContainerCloudRun } from './container';
 import Converter from 'api-spec-converter';
 
 interface NitricApiGcpApiGatewayArgs {
 	// Preconvert the API spec
 	api: OpenAPIV2.Document<NitricAPITarget>;
-	services: NitricServiceCloudRun[];
+	services: (NitricContainerCloudRun | NitricFunctionCloudRun)[];
 }
 
 type method = 'get' | 'post' | 'put' | 'patch' | 'delete';
@@ -112,7 +113,7 @@ export class NitricApiGcpApiGateway extends pulumi.ComponentResource {
 			defaultResourceOptions,
 		);
 
-		// Now we need to create the document provided and interpolate the deployed service targets
+		// Now we need to create the document provided and interpolate the deployed func targets
 		// i.e. their Urls...
 		// Deploy the config
 		const deployedConfig = new gcp.apigateway.ApiConfig(

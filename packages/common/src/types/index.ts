@@ -12,10 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './service';
+export * from './func';
+export * from './container';
 export * from './image';
 export * from './stack';
 export * from './bucket';
+export * from './named-object';
 export * from './collection';
 export * from './topic';
 export * from './queue';
@@ -23,4 +25,4 @@ export * from './schedule';
 export * from './api';
 export * from './static-site';
 export * from './entrypoints';
-export * from './named-object';
+export * from './providers';

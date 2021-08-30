@@ -15,29 +15,29 @@
 import execa from 'execa';
 import { oneLine } from 'common-tags';
 import { Task } from './task';
-import { NitricImage } from '../types';
-import { Service } from '../stack';
+import { ContainerImage } from '../types';
+import { Func } from '../stack';
 
-interface BuildServiceTaskOptions {
+interface BuildFunctionTaskOptions {
 	baseDir: string;
-	service: Service;
+	func: Func;
 	provider?: string;
 }
 
 const PACK_IMAGE = 'buildpacksio/pack:0.13.1';
 const BUILDER_IMAGE = 'nitrictech/bp-builder-base';
 
-export class BuildServiceTask extends Task<NitricImage> {
-	private service: Service;
+export class BuildFunctionTask extends Task<ContainerImage> {
+	private service: Func;
 	private readonly provider: string;
 
-	constructor({ service, provider = 'local' }: BuildServiceTaskOptions) {
-		super(`${service.getName()}`);
-		this.service = service;
+	constructor({ func, provider = 'local' }: BuildFunctionTaskOptions) {
+		super(`${func.getName()}`);
+		this.service = func;
 		this.provider = provider;
 	}
 
-	async do(): Promise<NitricImage> {
+	async do(): Promise<ContainerImage> {
 		const imageId = this.service.getImageTagName(this.provider);
 
 		// Run docker
@@ -55,6 +55,7 @@ export class BuildServiceTask extends Task<NitricImage> {
 						.map(([k, v]) => `--env ${k}=${v}`)
 						.join(' ')}
 					--env BP_MEMBRANE_PROVIDER=${this.provider}
+					--pull-policy if-not-present
 					--default-process membrane
 			`);
 
@@ -71,7 +72,7 @@ export class BuildServiceTask extends Task<NitricImage> {
 
 		return {
 			id: imageId,
-			serviceName: this.service.getName(),
+			name: this.service.getName(),
 		};
 	}
 }

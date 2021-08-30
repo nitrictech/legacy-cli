@@ -11,39 +11,39 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-import { NitricServiceImage, Service } from '@nitric/cli-common';
+import { NitricContainerImage, Container } from '@nitric/cli-common';
 import * as pulumi from '@pulumi/pulumi';
 import * as gcp from '@pulumi/gcp';
 import { NitricTopicPubsub } from './topic';
 
-interface NitricServiceCloudRunArgs {
-	service: Service;
-	image: NitricServiceImage;
+interface NitricContainerCloudRunArgs {
+	container: Container;
+	image: NitricContainerImage;
 	location: string;
 	topics: NitricTopicPubsub[];
 }
 
 /**
- * Nitric Service deployed to Google Cloud Run
+ * Nitric Custom Container deployed to Google Cloud Run
  */
-export class NitricServiceCloudRun extends pulumi.ComponentResource {
+export class NitricContainerCloudRun extends pulumi.ComponentResource {
 	public readonly name: string;
 	public readonly cloudrun: gcp.cloudrun.Service;
 	public readonly url: pulumi.Output<string>;
 
-	constructor(name: string, args: NitricServiceCloudRunArgs, opts?: pulumi.ComponentResourceOptions) {
-		super('nitric:service:CloudRun', name, {}, opts);
-		const { service, image, location, topics } = args;
-		const serviceDescriptor = service.asNitricService();
+	constructor(name: string, args: NitricContainerCloudRunArgs, opts?: pulumi.ComponentResourceOptions) {
+		super('nitric:func:CloudRun', name, {}, opts);
+		const { container, image, location, topics } = args;
+		const containerDescriptor = container.asNitricContainer();
 		const defaultResourceOptions: pulumi.ResourceOptions = { parent: this };
 
-		const { minScale = 0, maxScale = 10, triggers = {} } = serviceDescriptor;
+		const { minScale = 0, maxScale = 10, triggers = {} } = containerDescriptor;
 
-		this.name = service.getName();
+		this.name = container.getName();
 
-		// Deploy the service
+		// Deploy the func
 		this.cloudrun = new gcp.cloudrun.Service(
-			service.getName(),
+			container.getName(),
 			{
 				location,
 				template: {
@@ -74,10 +74,10 @@ export class NitricServiceCloudRun extends pulumi.ComponentResource {
 
 		// wire up its subscriptions
 		if (triggers.topics && triggers.topics.length > 0) {
-			// Create an account for invoking this service via subscriptions
+			// Create an account for invoking this func via subscriptions
 			// TODO: Do we want to make this one account for subscription in future
 			// TODO: We will likely configure this via eventarc in the future
-			const invokerAccount = new gcp.serviceaccount.Account(`${service.getName()}-subacct`, {
+			const invokerAccount = new gcp.serviceaccount.Account(`${container.getName()}-subacct`, {
 				// accountId accepts a max of 30 chars, limit our generated name to this length
 				accountId: `${name}-subacct`.substring(0, 30),
 			});
@@ -102,7 +102,7 @@ export class NitricServiceCloudRun extends pulumi.ComponentResource {
 								oidcToken: {
 									serviceAccountEmail: invokerAccount.email,
 								},
-								// Assume the 0th status contains the URL of the service
+								// Assume the 0th status contains the URL of the func
 								pushEndpoint: this.url,
 							},
 						},

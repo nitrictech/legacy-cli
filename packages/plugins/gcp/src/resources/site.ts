@@ -37,7 +37,7 @@ export class NitricSiteCloudStorage extends pulumi.ComponentResource {
 
 		Site.buildSync(site);
 
-		// Deploy the service
+		// Deploy the func
 		this.storage = new gcp.storage.Bucket(
 			site.getName(),
 			{

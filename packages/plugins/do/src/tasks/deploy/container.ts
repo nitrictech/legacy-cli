@@ -12,9 +12,31 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { NitricFunction } from '@nitric/cli-common';
+import { NitricContainerImage, NitricEntrypoint } from '@nitric/cli-common';
 import * as digitalocean from '@pulumi/digitalocean';
 
-export interface DeployedFunction extends NitricFunction {
-	app: digitalocean.App;
+interface CreateContainerResult {
+	spec: digitalocean.types.input.AppSpecService;
+}
+
+export function createContainerServiceSpec(
+	name: string,
+	image: NitricContainerImage,
+	entrypoint: NitricEntrypoint,
+): CreateContainerResult {
+	return {
+		spec: {
+			name: name,
+			httpPort: 9001,
+			image: {
+				registryType: 'DOCR',
+				// TODO: Apply docker deployed repository here...
+				repository: image.name,
+				tag: image.imageDigest,
+			},
+			routes: Object.entries(entrypoint.paths)
+				.filter(([, opts]) => opts.target === name)
+				.map(([path]) => ({ path })),
+		},
+	};
 }

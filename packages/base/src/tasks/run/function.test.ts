@@ -14,7 +14,7 @@
 
 import 'jest';
 import { mocked } from 'ts-jest/utils';
-import { RunServiceTask, Cleanup } from '.';
+import { RunContainerTask, Cleanup } from '.';
 import Docker, { Network } from 'dockerode';
 
 jest.mock('get-port');
@@ -41,10 +41,10 @@ describe('Given a Nitric function is being run locally as a container', () => {
 
 	test('A container image should be created', async () => {
 		expect.assertions(1);
-		const runFunctionTask = new RunServiceTask({
+		const runContainerTask = new RunContainerTask({
 			image: {
 				id: 'test-id',
-				serviceName: 'test-function',
+				name: 'test-function',
 			},
 			runId: 'test-run',
 			// port: 3000, network: '', subscriptions: '', volume: '',
@@ -54,16 +54,16 @@ describe('Given a Nitric function is being run locally as a container', () => {
 		const mockRun = mocked(mockInstance.run, true);
 		mockRun.mockImplementation(mockRunImpl);
 
-		await runFunctionTask.do();
+		await runContainerTask.do();
 		expect(mockRun).toBeCalled();
 	});
 
 	describe('When docker run takes too long to respond', () => {
 		test('The task promise should reject with details', () => {
-			const runFunctionTask = new RunServiceTask({
+			const runContainerTask = new RunContainerTask({
 				image: {
 					id: 'test-id',
-					serviceName: 'test-function',
+					name: 'test-function',
 				},
 				runId: 'test-run',
 				// port: 3000, network: '', subscriptions: '', volume: '',
@@ -80,7 +80,7 @@ describe('Given a Nitric function is being run locally as a container', () => {
 				} as any;
 			});
 
-			return expect(runFunctionTask.do()).rejects.toEqual(
+			return expect(runContainerTask.do()).rejects.toEqual(
 				new Error(`Container for image test-id not started after 2 seconds.`),
 			);
 		});
@@ -96,33 +96,33 @@ describe('Given a Nitric function is being run locally as a container', () => {
 		const runConfig = {
 			image: {
 				id: 'test-id',
-				serviceName: 'test-function',
+				name: 'test-function',
 			},
 			runId: 'test-run',
 		};
 
 		test('The status code should be logged', async () => {
 			expect.assertions(1);
-			const runFunctionTask = new RunServiceTask(runConfig);
+			const runContainerTask = new RunContainerTask(runConfig);
 
 			const mockInstance = mocked(Docker, true).mock.instances[0];
 			const mockRun = mocked(mockInstance.run, true);
 			mockRun.mockImplementation(mockRunImpl);
 
-			await runFunctionTask.do();
+			await runContainerTask.do();
 			runCallback(null, { StatusCode: 'dummy status' }, null);
 			expect(logSpy).toBeCalledWith('test-function - test-id exited with status code: dummy status');
 		});
 
 		test('An error should be logged if it occurs', async () => {
 			expect.assertions(1);
-			const runFunctionTask = new RunServiceTask(runConfig);
+			const runContainerTask = new RunContainerTask(runConfig);
 
 			const mockInstance = mocked(Docker, true).mock.instances[0];
 			const mockRun = mocked(mockInstance.run, true);
 			mockRun.mockImplementation(mockRunImpl);
 
-			await runFunctionTask.do();
+			await runContainerTask.do();
 			runCallback('dummy error', null, null);
 			expect(logSpy).toBeCalledWith('dummy error');
 		});
@@ -131,10 +131,10 @@ describe('Given a Nitric function is being run locally as a container', () => {
 	describe('When a custom docker network is set', () => {
 		test('The network config should be passed to Docker', async () => {
 			expect.assertions(1);
-			const runFunctionTask = new RunServiceTask({
+			const runContainerTask = new RunContainerTask({
 				image: {
 					id: 'test-id',
-					serviceName: 'test-function',
+					name: 'test-function',
 				},
 				network: {
 					inspect: async () => {
@@ -150,7 +150,7 @@ describe('Given a Nitric function is being run locally as a container', () => {
 			const mockRun = mocked(mockInstance.run, true);
 			mockRun.mockImplementation(mockRunImpl);
 
-			await runFunctionTask.do();
+			await runContainerTask.do();
 			expect(mockRun).toBeCalledWith(
 				expect.anything(),
 				expect.anything(),
@@ -173,10 +173,10 @@ describe('Given a Nitric function is being run locally as a container', () => {
 
 			test('A warning should be logged', async () => {
 				expect.assertions(1);
-				const runFunctionTask = new RunServiceTask({
+				const runContainerTask = new RunContainerTask({
 					image: {
 						id: 'test-id',
-						serviceName: 'test-function',
+						name: 'test-function',
 					},
 					// port: 3000,
 					network: new Network(null, 'dummy-network'),
@@ -189,16 +189,16 @@ describe('Given a Nitric function is being run locally as a container', () => {
 				const mockRun = mocked(mockInstance.run, true);
 				mockRun.mockImplementation(mockRunImpl);
 
-				await runFunctionTask.do();
+				await runContainerTask.do();
 				expect(warnSpy).toBeCalledWith('Failed to set custom docker network, defaulting to bridge network');
 			});
 
 			test('The bridge network should be used instead', async () => {
 				expect.assertions(1);
-				const runFunctionTask = new RunServiceTask({
+				const runContainerTask = new RunContainerTask({
 					image: {
 						id: 'test-id',
-						serviceName: 'test-function',
+						name: 'test-function',
 					},
 					// port: 3000,
 					network: new Network(null, 'dummy-network'),
@@ -211,7 +211,7 @@ describe('Given a Nitric function is being run locally as a container', () => {
 				const mockRun = mocked(mockInstance.run, true);
 				mockRun.mockImplementation(mockRunImpl);
 
-				await runFunctionTask.do();
+				await runContainerTask.do();
 				expect(mockRun).toBeCalledWith(
 					expect.anything(),
 					expect.anything(),
@@ -230,10 +230,10 @@ describe('Given a Nitric function is being run locally as a container', () => {
 	describe('When a docker volume is provided', () => {
 		test('The volume config should be passed to Docker', async () => {
 			expect.assertions(1);
-			const runFunctionTask = new RunServiceTask({
+			const runContainerTask = new RunContainerTask({
 				image: {
 					id: 'test-id',
-					serviceName: 'test-function',
+					name: 'test-function',
 				},
 				// port: 3000, subscriptions: '', volume: '',
 				volume: {
@@ -246,7 +246,7 @@ describe('Given a Nitric function is being run locally as a container', () => {
 			const mockRun = mocked(mockInstance.run, true);
 			mockRun.mockImplementation(mockRunImpl);
 
-			await runFunctionTask.do();
+			await runContainerTask.do();
 			expect(mockRun).toBeCalledWith(
 				expect.anything(),
 				expect.anything(),

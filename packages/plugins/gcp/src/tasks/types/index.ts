@@ -17,5 +17,4 @@ export * from './bucket';
 export * from './schedule';
 export * from './site';
 export * from './schedule';
-export * from './service';
 export * from './topic';
