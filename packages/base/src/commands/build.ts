@@ -13,14 +13,14 @@
 // limitations under the License.
 
 import { flags } from '@oclif/command';
-import { Stack, NitricImage, BaseCommand, createBuildListrTask } from '@nitric/cli-common';
+import { Stack, ContainerImage, BaseCommand, createBuildListrTask } from '@nitric/cli-common';
 import path from 'path';
 import execa from 'execa';
 import { Listr } from 'listr2';
 
 /**
  * Nitric CLI build command
- * Will use docker to build application services as docker images
+ * Will use docker to build application functions as docker images
  * ready to be executed on a CaaS
  */
 export default class Build extends BaseCommand {
@@ -48,7 +48,7 @@ export default class Build extends BaseCommand {
 		},
 	];
 
-	async do(): Promise<{ [key: string]: NitricImage }> {
+	async do(): Promise<{ [key: string]: ContainerImage }> {
 		const { args, flags } = this.parse(Build);
 		const { directory = '.' } = args;
 		const { file = './nitric.yaml', provider = 'local' } = flags;

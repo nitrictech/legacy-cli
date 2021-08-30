@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Task, NitricImage } from '@nitric/cli-common';
+import { ContainerImage, Task } from '@nitric/cli-common';
 import getPort from 'get-port';
-import Docker, { Container, Network, NetworkInspectInfo, ContainerCreateOptions, Volume } from 'dockerode';
+import Docker, { Container, ContainerCreateOptions, Network, NetworkInspectInfo, Volume } from 'dockerode';
 import { createNitricLogDir, functionLogFilePath } from '../../utils';
 import fs from 'fs';
 import { DOCKER_LABEL_RUN_ID } from '../../constants';
@@ -22,10 +22,10 @@ import { DOCKER_LABEL_RUN_ID } from '../../constants';
 const GATEWAY_PORT = 9001;
 
 /**
- * Options when running local services/functions for development/testing
+ * Options when running local functions/containers for development/testing
  */
-export interface RunServiceTaskOptions {
-	image: NitricImage;
+export interface RunContainerTaskOptions {
+	image: ContainerImage;
 	port?: number | undefined;
 	subscriptions?: Record<string, string[]>;
 	network?: Network;
@@ -34,10 +34,10 @@ export interface RunServiceTaskOptions {
 }
 
 /**
- * Run a Service (e.g. Function/Container) locally for development or testing
+ * Run a Nitric Function or Container locally for development or testing
  */
-export class RunServiceTask extends Task<Container> {
-	private image: NitricImage;
+export class RunContainerTask extends Task<Container> {
+	private image: ContainerImage;
 	private port: number | undefined;
 	private docker: Docker;
 	private network: Network | undefined;
@@ -45,8 +45,8 @@ export class RunServiceTask extends Task<Container> {
 	private subscriptions: Record<string, string[]> | undefined;
 	private runId: string;
 
-	constructor({ image, port, network, subscriptions, volume, runId }: RunServiceTaskOptions, docker?: Docker) {
-		super(`${image.serviceName} - ${image.id.substring(0, 12)}`);
+	constructor({ image, port, network, subscriptions, volume, runId }: RunContainerTaskOptions, docker?: Docker) {
+		super(`${image.name} - ${image.id.substring(0, 12)}`);
 		this.image = image;
 		this.port = port;
 		this.docker = docker || new Docker();
@@ -64,7 +64,7 @@ export class RunServiceTask extends Task<Container> {
 			this.port = await getPort();
 		}
 
-		// If available, use the custom network for this service
+		// If available, use the custom network for this func
 		let networkName = 'bridge';
 		if (network) {
 			try {
@@ -75,7 +75,7 @@ export class RunServiceTask extends Task<Container> {
 		}
 
 		const dockerOptions = {
-			name: `${this.image.serviceName}-${runId}`,
+			name: `${this.image.name}-${runId}`,
 			Env: [`LOCAL_SUBSCRIPTIONS=${JSON.stringify(subscriptions)}`],
 			ExposedPorts: {
 				[`${GATEWAY_PORT}/tcp`]: {},
@@ -101,7 +101,7 @@ export class RunServiceTask extends Task<Container> {
 			dockerOptions['NetworkingConfig'] = {
 				EndpointsConfig: {
 					[networkName]: {
-						Aliases: [this.image.serviceName],
+						Aliases: [this.image.name],
 					},
 				},
 			};
@@ -152,7 +152,7 @@ export class RunServiceTask extends Task<Container> {
 			},
 		);
 
-		const container: Container = await new Promise((res, rej) => {
+		return await new Promise((res, rej) => {
 			// Only wait 2 seconds for the container.
 			const rejectTimeout = setTimeout(() => {
 				rej(new Error(`Container for image ${this.image.id} not started after 2 seconds.`));
@@ -164,8 +164,6 @@ export class RunServiceTask extends Task<Container> {
 				res(container);
 			});
 		});
-
-		return container;
 	}
 }
 

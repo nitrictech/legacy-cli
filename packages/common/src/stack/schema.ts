@@ -17,17 +17,13 @@ import ajv, { DefinedError } from 'ajv';
 import { NitricStack } from '../types';
 
 /**
- * Pattern for stack resources names, e.g. service names, topic names, buckets, etc.
+ * Pattern for stack resources names, e.g. func names, topic names, buckets, etc.
  */
 export const resourceNamePattern = /^\w+([.\\-]\w+)*$/.toString().slice(1, -1);
 /**
  * CRON expression string pattern
  */
 export const cronExpressionPattern = /^.*$/.toString().slice(1, -1);
-/**
- * Pattern for matching valid service runtime names, e.g. function/nodets12
- */
-export const serviceRuntimeTemplatePattern = /^[^/]+\/[^/]+$/.toString().slice(1, -1);
 
 /**
  * OpenAPI 3.0 Schema, with Nitric extensions added, such as x-nitric-target
@@ -839,7 +835,7 @@ const OPENAPI_3_SCHEMA: JSONSchema7 = {
 						},
 						type: {
 							type: 'string',
-							enum: ['service'],
+							enum: ['function', 'container'],
 						},
 					},
 					required: ['name', 'type'],
@@ -1541,19 +1537,19 @@ export const STACK_SCHEMA: JSONSchema7 = {
 			type: 'string',
 			pattern: resourceNamePattern,
 		},
-		services: {
-			title: 'services',
+		functions: {
+			title: 'functions',
 			type: 'object',
 			patternProperties: {
 				[resourceNamePattern]: {
-					title: 'service',
-					description: 'A nitric compute service, such as a serverless function',
+					title: 'function',
+					description: 'A nitric compute func, such as a serverless function',
 					type: 'object',
 					properties: {
 						path: { type: 'string' },
 						context: { type: 'string' },
 						triggers: {
-							title: 'service triggers',
+							title: 'func triggers',
 							type: 'object',
 							properties: {
 								topics: {
@@ -1574,6 +1570,40 @@ export const STACK_SCHEMA: JSONSchema7 = {
 			minProperties: 1,
 			additionalProperties: false,
 		},
+		containers: {
+			title: 'containers',
+			description: 'custom project containers to build with docker',
+			type: 'object',
+			patternProperties: {
+				[resourceNamePattern]: {
+					title: 'container',
+					description: 'A OCI container',
+					type: 'object',
+					properties: {
+						dockerfile: { type: 'string' },
+						context: { type: 'string' },
+						triggers: {
+							title: 'func triggers',
+							type: 'object',
+							properties: {
+								topics: {
+									type: 'array',
+									items: {
+										type: 'string',
+									},
+								},
+							},
+							minProperties: 1,
+							additionalProperties: false,
+						},
+					},
+					required: ['dockerfile', 'context'],
+					additionalProperties: false,
+				},
+			},
+			minProperties: 1,
+			additionalProperties: false,
+		},
 		collections: {
 			title: 'collections',
 			description: 'document collections',
@@ -1581,7 +1611,7 @@ export const STACK_SCHEMA: JSONSchema7 = {
 			patternProperties: {
 				[resourceNamePattern]: {
 					title: 'document collection',
-					description: 'A document service collection',
+					description: 'A document func collection',
 					type: 'object',
 					properties: {
 						/* currently no properties provided for collections */
@@ -1761,7 +1791,7 @@ export const STACK_SCHEMA: JSONSchema7 = {
 										type: {
 											description: 'The resource type of the target',
 											type: 'string',
-											enum: ['site', 'api', 'service'],
+											enum: ['site', 'api', 'function', 'container'],
 										},
 									},
 									required: ['target', 'type'],
@@ -1809,9 +1839,17 @@ const stackSchemaErrorToDetails = (error: DefinedError): string => {
 	switch (error.keyword) {
 		case 'additionalProperties':
 			if (
-				['apis', 'collections', 'topics', 'queues', 'buckets', 'schedules', 'services', 'entrypoints'].indexOf(
-					location.trim(),
-				) !== -1
+				[
+					'apis',
+					'collections',
+					'topics',
+					'queues',
+					'buckets',
+					'schedules',
+					'functions',
+					'containers',
+					'entrypoints',
+				].indexOf(location.trim()) !== -1
 			) {
 				return `Invalid ${location.slice(0, -1)} name "${
 					error.params.additionalProperty
@@ -1885,15 +1923,29 @@ export const validateStack = (potentialStack: any): void => {
 	// Validate logical errors (e.g. pointing to names that don't exist, even if they're valid).
 	const logicErrors: string[] = [];
 
-	// Validate Service Configurations
-	if (potentialStack.services) {
+	// Validate Func Configurations
+	if (potentialStack.functions) {
 		// Validate topic triggers
-		Object.entries(potentialStack.services).forEach(([serviceName, service]: [string, any]) => {
-			if (service.triggers && service.triggers.topics) {
-				service.triggers.topics.forEach((triggerTopic) => {
+		Object.entries(potentialStack.functions).forEach(([funcName, func]: [string, any]) => {
+			if (func.triggers && func.triggers.topics) {
+				func.triggers.topics.forEach((triggerTopic) => {
+					if (!(potentialStack.topics && potentialStack.topics[triggerTopic])) {
+						logicErrors.push(`Invalid topic trigger for functions.${funcName}, topic "${triggerTopic}" doesn't exist`);
+					}
+				});
+			}
+		});
+	}
+
+	// Validate Container Configurations
+	if (potentialStack.containers) {
+		// Validate topic triggers
+		Object.entries(potentialStack.containers).forEach(([containerName, container]: [string, any]) => {
+			if (container.triggers && container.triggers.topics) {
+				container.triggers.topics.forEach((triggerTopic) => {
 					if (!(potentialStack.topics && potentialStack.topics[triggerTopic])) {
 						logicErrors.push(
-							`Invalid topic trigger for services.${serviceName}, topic "${triggerTopic}" doesn't exist`,
+							`Invalid topic trigger for containers.${containerName}, topic "${triggerTopic}" doesn't exist`,
 						);
 					}
 				});

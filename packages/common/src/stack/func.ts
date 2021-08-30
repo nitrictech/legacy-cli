@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { NitricService } from '../types';
+import { NitricFunction } from '../types';
 import { Stack } from './stack';
 import path from 'path';
 import dotenv from 'dotenv';
@@ -22,16 +22,16 @@ import Handlebars from 'handlebars';
 type omitMethods = 'getService' | 'getServices';
 
 /**
- * Represents a Nitric Service (Function/Container/etc.)
+ * Represents a Nitric Function
  */
-export class Service<ServiceExtensions = Record<string, any>> {
+export class Func<FuncExtensions = Record<string, any>> {
 	// Back reference to the parent stack
 	// emit getFunction here to prevent recursion
 	private stack: Omit<Stack, omitMethods>;
 	private name: string;
-	private descriptor: NitricService<ServiceExtensions>;
+	private descriptor: NitricFunction<FuncExtensions>;
 
-	constructor(stack: Stack, name: string, descriptor: NitricService<ServiceExtensions>) {
+	constructor(stack: Stack, name: string, descriptor: NitricFunction<FuncExtensions>) {
 		this.stack = stack;
 		this.name = name;
 		this.descriptor = descriptor;
@@ -45,21 +45,21 @@ export class Service<ServiceExtensions = Record<string, any>> {
 	}
 
 	/**
-	 * Returns the descriptor for this service
+	 * Returns the descriptor for this function
 	 */
-	asNitricService(): NitricService<ServiceExtensions> {
+	asNitricFunction(): NitricFunction<FuncExtensions> {
 		return this.descriptor;
 	}
 
 	/**
-	 * Return the service name
+	 * Return the function name
 	 */
 	getName(): string {
 		return this.name;
 	}
 
 	/**
-	 * Get the build context of the service
+	 * Get the build context of the function
 	 * @returns
 	 */
 	getContext(): string {
@@ -68,7 +68,7 @@ export class Service<ServiceExtensions = Record<string, any>> {
 
 		if (!fs.existsSync(ctxPath)) {
 			throw new Error(
-				`function context '${this.descriptor.path}' for function '${this.name}' not found. Directory may have been renamed or removed, check 'path' configuration for this function in the config file.`,
+				`function context '${origCtx}' for function '${this.name}' not found. Directory may have been renamed or removed, check 'context' and 'path' configuration for this function in the config file.`,
 			);
 		}
 
@@ -84,7 +84,7 @@ export class Service<ServiceExtensions = Record<string, any>> {
 	}
 
 	/**
-	 * Return the directory that contains this service's source
+	 * Return the directory that contains this function's source
 	 */
 	getDirectory(): string {
 		const funcPath = path.join(this.getContext(), this.getContextRelativeDirectory());
@@ -118,14 +118,14 @@ export class Service<ServiceExtensions = Record<string, any>> {
 	}
 
 	/**
-	 * Get the directory used to stage a container image build of this service
+	 * Get the directory used to stage a container image build of this function
 	 */
 	getStagingDirectory(): string {
 		return path.join(this.stack.getStagingDirectory(), this.name);
 	}
 
 	/**
-	 * Return the default image tag for a container image built from this service
+	 * Return the default image tag for a container image built from this function
 	 * @param provider the provider name (e.g. aws), used to uniquely identify builds for specific providers
 	 */
 	getImageTagName(provider?: string): string {

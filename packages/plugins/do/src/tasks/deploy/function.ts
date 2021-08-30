@@ -12,16 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { NitricEntrypoint, NitricServiceImage } from '@nitric/cli-common';
+import { NitricEntrypoint, NitricFunctionImage } from '@nitric/cli-common';
 import * as digitalocean from '@pulumi/digitalocean';
 
 interface CreateFunctionResult {
 	spec: digitalocean.types.input.AppSpecService;
 }
 
-export function createServiceSpec(
+export function createFunctionServiceSpec(
 	name: string,
-	image: NitricServiceImage,
+	image: NitricFunctionImage,
 	entrypoint: NitricEntrypoint,
 ): CreateFunctionResult {
 	return {

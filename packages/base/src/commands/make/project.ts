@@ -14,10 +14,9 @@
 
 import { flags } from '@oclif/command';
 import { wrapTaskForListr, Repository, BaseCommand } from '@nitric/cli-common';
-import { MakeProjectTask, MakeServiceTask, AddRepositoryTask, UpdateStoreTask } from '../../tasks';
+import { MakeProjectTask, AddRepositoryTask, UpdateStoreTask } from '../../tasks';
 import { Listr, ListrTask } from 'listr2';
 import cli from 'cli-ux';
-import inquirer from 'inquirer';
 import { OFFICIAL_REPOSITORIES } from '../../constants';
 
 const projectNameRegex = /^[a-z]+(-[a-z]+)*$/g;
@@ -47,7 +46,7 @@ export default class Project extends BaseCommand {
 		const { args, flags } = this.parse(Project);
 		const { name } = args;
 		const { force } = flags;
-		let commands: ListrTask[] = [];
+		const commands: ListrTask[] = [];
 
 		if (!name.match(projectNameRegex)) {
 			throw new Error(`project name must be lowercase letters and dashes only. e.g. example-project-name`);
@@ -75,41 +74,6 @@ export default class Project extends BaseCommand {
 
 			// Refresh templates
 			repos = Repository.fromDefaultDirectory();
-		}
-
-		const templates = Repository.availableTemplates(repos);
-
-		const { example }: { example: string } = await inquirer.prompt([
-			{
-				name: 'example',
-				message: 'Include an example service?',
-				type: 'list',
-				choices: [...templates, 'none'],
-			},
-		]);
-
-		if (example !== 'none') {
-			const { serviceName } = await inquirer.prompt([
-				{
-					name: 'serviceName',
-					message: 'Name for the example service?',
-					type: 'input',
-					default: 'example',
-				},
-			]);
-
-			// Create an example service to go along with the project
-			commands = [
-				wrapTaskForListr(
-					new MakeServiceTask({
-						template: example,
-						dir: `./${name}/${serviceName}/`,
-						file: `./${name}/nitric.yaml`,
-						name: serviceName,
-						initialService: true, // required for creation of initial service path
-					}),
-				),
-			];
 		}
 
 		await new Listr([wrapTaskForListr(new MakeProjectTask(name, force)), ...commands]).run();

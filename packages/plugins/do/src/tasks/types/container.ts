@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { NitricService, NamedObject } from '@nitric/cli-common';
-import { cloudrun } from '@pulumi/gcp';
+import { NitricContainer } from '@nitric/cli-common';
+import * as digitalocean from '@pulumi/digitalocean';
 
-export interface DeployedService extends NamedObject<NitricService> {
-	cloudRun: cloudrun.Service;
+export interface DeployedContainer extends NitricContainer {
+	app: digitalocean.App;
 }

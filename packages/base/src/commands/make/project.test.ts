@@ -59,7 +59,7 @@ it.skip('placeholder', () => {
 // 				expect(inquirer.prompt).toBeCalled();
 // 				expect(inquirer.prompt).toBeCalledWith([
 // 					{
-// 						name: 'functionName',
+// 						name: 'name',
 // 						message: 'Name for the example function?',
 // 						type: 'input',
 // 					},
