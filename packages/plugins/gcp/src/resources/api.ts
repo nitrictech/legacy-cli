@@ -15,13 +15,14 @@ import { NitricAPI, NitricAPITarget } from '@nitric/cli-common';
 import * as pulumi from '@pulumi/pulumi';
 import { OpenAPIV2 } from 'openapi-types';
 import * as gcp from '@pulumi/gcp';
-import { NitricServiceCloudRun } from './service';
+import { NitricFunctionCloudRun } from './function';
+import { NitricContainerCloudRun } from './container';
 import Converter from 'api-spec-converter';
 
 interface NitricApiGcpApiGatewayArgs {
 	// Preconvert the API spec
 	api: OpenAPIV2.Document<NitricAPITarget>;
-	services: NitricServiceCloudRun[];
+	services: (NitricContainerCloudRun | NitricFunctionCloudRun)[];
 }
 
 type method = 'get' | 'post' | 'put' | 'patch' | 'delete';

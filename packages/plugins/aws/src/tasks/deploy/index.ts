@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Task, Stack, mapObject, NitricServiceImage } from '@nitric/cli-common';
+import { Task, Stack, mapObject, NitricFunctionImage, NitricContainerImage } from '@nitric/cli-common';
 import * as pulumi from '@pulumi/pulumi';
 
 import { LocalWorkspace } from '@pulumi/pulumi/automation';
@@ -23,11 +23,12 @@ import {
 	NitricSnsTopic,
 	NitricScheduleEventBridge,
 	NitricSiteS3,
-	NitricServiceAWSLambda,
 	NitricApiAwsApiGateway,
 	NitricEntrypointCloudFront,
 	NitricBucketS3,
 	NitricCollectionDynamo,
+	NitricFunctionAWSLambda,
+	NitricContainerAWSLambda,
 } from '../../resources';
 
 /**
@@ -159,32 +160,53 @@ export class Deploy extends Task<DeployResult> {
 									indexDocument: 'index.html',
 								}),
 						);
-						// Deploy Nitric Services
-						const deployedServices = stack.getServices().map((s) => {
-							// create a new repository for each service...
-							const repository = new ecr.Repository(s.getImageTagName());
+						// Deploy Nitric Functions and Containers
+						const deployedLambdas = [
+							...stack.getFunctions().map((func) => {
+								// create a new repository for each func...
+								const repository = new ecr.Repository(func.getImageTagName());
 
-							const image = new NitricServiceImage(s.getName(), {
-								service: s,
-								server: authToken.proxyEndpoint,
-								username: authToken.userName,
-								password: authToken.password,
-								imageName: repository.repositoryUrl,
-								sourceImageName: s.getImageTagName('aws'),
-							});
+								const image = new NitricFunctionImage(func.getName(), {
+									func,
+									server: authToken.proxyEndpoint,
+									username: authToken.userName,
+									password: authToken.password,
+									imageName: repository.repositoryUrl,
+									sourceImageName: func.getImageTagName('aws'),
+								});
 
-							return new NitricServiceAWSLambda(s.getName(), {
-								service: s,
-								topics: deployedTopics,
-								image: image,
-							});
-						});
+								return new NitricFunctionAWSLambda(func.getName(), {
+									func,
+									topics: deployedTopics,
+									image: image,
+								});
+							}),
+							...stack.getContainers().map((container) => {
+								// create a new repository for each func...
+								const repository = new ecr.Repository(container.getImageTagName());
+
+								const image = new NitricContainerImage(container.getName(), {
+									container,
+									server: authToken.proxyEndpoint,
+									username: authToken.userName,
+									password: authToken.password,
+									imageName: repository.repositoryUrl,
+									nitricProvider: 'aws',
+								});
+
+								return new NitricContainerAWSLambda(container.getName(), {
+									container,
+									topics: deployedTopics,
+									image: image,
+								});
+							}),
+						];
 						// Deploy Nitric APIs
 						const deployedApis = mapObject(apis).map(
 							(api) =>
 								new NitricApiAwsApiGateway(api.name, {
 									api,
-									services: deployedServices,
+									lambdas: deployedLambdas,
 								}),
 						);
 						// Deploy Nitric Entrypoints
@@ -193,27 +215,11 @@ export class Deploy extends Task<DeployResult> {
 								return new NitricEntrypointCloudFront(name, {
 									stackName: stack.getName(),
 									entrypoint: entrypoint,
-									services: deployedServices,
+									lambdas: deployedLambdas,
 									apis: deployedApis,
 									sites: deployedSites,
 								});
 							});
-
-							//result.dnsConfigs = eps.reduce((acc, e) => {
-							//	return {
-							//		...acc,
-							//		...e.validationOptions?.apply(vo => vo.reduce((a, o) => {
-							//			return {
-							//				...a,
-							//				[o.domainName]: {
-							//					create: o.resourceRecordName,
-							//					target: o.resourceRecordValue,
-							//					type: o.resourceRecordType,
-							//				},
-							//			};
-							//		}, {} as any))
-							//	};
-							//}, {} as any);
 
 							result.entrypoints = eps.map((ep) => {
 								return ep.cloudfront.domainName.apply((domainName) => ({

@@ -20,13 +20,15 @@ import { NitricSchedule } from './schedule';
 import { NitricAPI } from './api';
 import { NitricStaticSite } from './static-site';
 import { NitricEntrypoint } from './entrypoints';
-import { NitricService } from './service';
+import { NitricFunction } from './func';
+import { NitricContainer } from './container';
 
 /**
  * A Nitric application stack descriptor
  */
 export interface NitricStack<
-	ServiceExtensions = Record<string, any>,
+	FunctionExtensions = Record<string, any>,
+	ContainerExtensions = Record<string, any>,
 	BucketExtensions = Record<string, any>,
 	CollectionExtensions = Record<string, any>,
 	TopicExtensions = Record<string, any>,
@@ -39,8 +41,12 @@ export interface NitricStack<
 	// Name of the Nitric Stack
 	name: string;
 	// Functions that will be deployed
-	services?: {
-		[name: string]: NitricService<ServiceExtensions>;
+	functions?: {
+		[name: string]: NitricFunction<FunctionExtensions>;
+	};
+	// Containers that will be deployed
+	containers?: {
+		[name: string]: NitricContainer<ContainerExtensions>;
 	};
 	// Buckets that will be deployed
 	buckets?: {

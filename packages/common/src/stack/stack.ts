@@ -13,14 +13,15 @@
 // limitations under the License.
 
 import path from 'path';
-import { NitricService, NitricStack } from '../types';
+import { NitricFunction, NitricContainer, NitricStack } from '../types';
 import fs from 'fs';
 import YAML from 'yaml';
 import { Template } from '../templates';
 import { STAGING_DIR } from '../paths';
 import { Site } from './site';
 import { findFileRead } from '../utils';
-import { Service } from './service';
+import { Func } from './func';
+import { Container } from './container';
 import { validateStack } from './schema';
 
 const NITRIC_DIRECTORY = '.nitric';
@@ -75,7 +76,8 @@ const insertComments = (node, comments: comments): YAML.Document => {
  * Represents a Nitric Project Stack, including resources and their configuration
  */
 export class Stack<
-	ServiceExtensions = Record<string, any>,
+	FunctionExtensions = Record<string, any>,
+	ContainerExtensions = Record<string, any>,
 	BucketExtensions = Record<string, any>,
 	TopicExtensions = Record<string, any>,
 	QueueExtensions = Record<string, any>,
@@ -87,7 +89,8 @@ export class Stack<
 	private file: string;
 	private name: string;
 	private descriptor: NitricStack<
-		ServiceExtensions,
+		FunctionExtensions,
+		ContainerExtensions,
 		BucketExtensions,
 		TopicExtensions,
 		QueueExtensions,
@@ -101,7 +104,8 @@ export class Stack<
 	constructor(
 		file: string,
 		descriptor: NitricStack<
-			ServiceExtensions,
+			FunctionExtensions,
+			ContainerExtensions,
 			BucketExtensions,
 			TopicExtensions,
 			QueueExtensions,
@@ -133,7 +137,8 @@ export class Stack<
 	asNitricStack(
 		noUndefined = false,
 	): NitricStack<
-		ServiceExtensions,
+		FunctionExtensions,
+		ContainerExtensions,
 		BucketExtensions,
 		TopicExtensions,
 		QueueExtensions,
@@ -145,7 +150,8 @@ export class Stack<
 		return Object.keys(this.descriptor)
 			.filter((k) => this.descriptor[k] != undefined || !noUndefined)
 			.reduce((acc, k) => ({ ...acc, [k]: this.descriptor[k] }), {}) as NitricStack<
-			ServiceExtensions,
+			FunctionExtensions,
+			ContainerExtensions,
 			BucketExtensions,
 			TopicExtensions,
 			QueueExtensions,
@@ -164,23 +170,23 @@ export class Stack<
 	}
 
 	/**
-	 * Add a service to the stack
-	 * @param name of the new service, which much not already be present in the stack
-	 * @param svc the service descriptor to add
+	 * Add a function to the stack
+	 * @param name of the new function, which much not already be present in the stack's functions or containers
+	 * @param func the function descriptor to add
 	 */
-	addService(name: string, svc: NitricService<ServiceExtensions>): Stack {
+	addFunction(name: string, func: NitricFunction<FunctionExtensions>): Stack {
 		const { descriptor } = this;
-		const { services = {} } = this.descriptor;
+		const { functions = {}, containers = {} } = this.descriptor;
 
-		if (services[name]) {
-			throw new Error(`Service ${name} already defined in ${this.file}`);
+		if (functions[name] || containers[name]) {
+			throw new Error(`Function ${name} already defined in ${this.file}`);
 		}
 
 		this.descriptor = {
 			...descriptor,
-			services: {
-				...services,
-				[name]: svc,
+			functions: {
+				...functions,
+				[name]: func,
 			},
 		};
 
@@ -188,28 +194,79 @@ export class Stack<
 	}
 
 	/**
-	 * Return a service from the stack by name
-	 * @param name of the service
+	 * Return a function from the stack by name
+	 * @param name of the function
 	 */
-	getService(name: string): Service {
+	getFunction(name: string): Func {
 		const { descriptor } = this;
-		const { services = {} } = descriptor;
+		const { functions = {} } = descriptor;
 
-		if (!services[name]) {
+		if (!functions[name]) {
 			throw new Error(`Stack ${this.name}, does not contain service ${name}`);
 		}
 
-		return new Service(this, name, services[name]);
+		return new Func(this, name, functions[name]);
 	}
 
 	/**
-	 * Return all services in the stack
+	 * Return all functions in the stack
 	 */
-	getServices(): Service[] {
+	getFunctions(): Func[] {
 		const { descriptor } = this;
-		const { services = {} } = descriptor;
+		const { functions = {} } = descriptor;
 
-		return Object.keys(services).map((svcName) => new Service(this, svcName, services[svcName]));
+		return Object.keys(functions).map((funcName) => new Func(this, funcName, functions[funcName]));
+	}
+
+	/**
+	 * Add a container to the stack
+	 * @param name of the new container, which much not already be present in the stack's functions or containers
+	 * @param container the container descriptor to add
+	 */
+	addContainer(name: string, container: NitricContainer<ContainerExtensions>): Stack {
+		const { descriptor } = this;
+		const { containers = {}, functions = {} } = this.descriptor;
+
+		if (containers[name] || functions[name]) {
+			throw new Error(`Container ${name} already defined in ${this.file}`);
+		}
+
+		this.descriptor = {
+			...descriptor,
+			containers: {
+				...containers,
+				[name]: container,
+			},
+		};
+
+		return this;
+	}
+
+	/**
+	 * Return a container from the stack by name
+	 * @param name of the container
+	 */
+	getContainer(name: string): Container {
+		const { descriptor } = this;
+		const { containers = {} } = descriptor;
+
+		if (!containers[name]) {
+			throw new Error(`Stack ${this.name}, does not contain container ${name}`);
+		}
+
+		return new Container(this, name, containers[name]);
+	}
+
+	/**
+	 * Return all containers in the stack
+	 */
+	getContainers(): Container[] {
+		const { descriptor } = this;
+		const { containers = {} } = descriptor;
+
+		return Object.keys(containers).map(
+			(containerName) => new Container(this, containerName, containers[containerName]),
+		);
 	}
 
 	/**

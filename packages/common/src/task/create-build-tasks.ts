@@ -15,19 +15,37 @@
 import { Listr, ListrTask } from 'listr2';
 import { wrapTaskForListr } from './wrap-task';
 import { Stack } from '../stack';
-import { BuildServiceTask } from './build-service';
+import { BuildFunctionTask } from './build-function';
+import { BuildContainerTask } from './build-container';
 
-// Utility function to create a list of build service tasks from
+// Utility function to create a list of build function/container tasks from
 // a given nitric stack
-export function createBuildTasks(stack: Stack, directory: string, provider = 'dev'): BuildServiceTask[] {
-	return stack.getServices().map(
-		(service): BuildServiceTask =>
-			new BuildServiceTask({
-				service,
+export function createBuildTasks(
+	stack: Stack,
+	directory: string,
+	provider = 'dev',
+): (BuildFunctionTask | BuildContainerTask)[] {
+	// Create function container images using Buildpacks
+	const funcTasks = stack.getFunctions().map(
+		(func): BuildFunctionTask =>
+			new BuildFunctionTask({
+				func,
 				baseDir: directory,
 				provider,
 			}),
 	);
+
+	// Create container images using Docker
+	const containerTasks = stack.getContainers().map(
+		(container): BuildContainerTask =>
+			new BuildContainerTask({
+				container,
+				baseDir: directory,
+				provider,
+			}),
+	);
+
+	return [...funcTasks, ...containerTasks];
 }
 
 export function createBuildListrTask(stack: Stack, provider = 'dev'): ListrTask<any> {
@@ -35,7 +53,7 @@ export function createBuildListrTask(stack: Stack, provider = 'dev'): ListrTask<
 		title: 'Building Services',
 		task: (_, task): Listr =>
 			task.newListr(
-				// Create a sub-task to build each service in the project
+				// Create a sub-task to build each func in the project
 				createBuildTasks(stack, stack.getDirectory(), provider).map((t) => wrapTaskForListr(t)),
 				{
 					concurrent: true,

@@ -13,3 +13,4 @@
 // limitations under the License.
 
 export * from './function';
+export * from './container';

@@ -12,20 +12,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export interface NitricServiceTriggers {
+export interface NitricFunctionTriggers {
 	topics?: string[];
 }
 
-export interface NitricService<Ext extends Record<string, any> = never> {
+export interface NitricFunction<Ext extends Record<string, any> = never> {
 	// A stack relative context for the directory that will
 	// be included in the build
 	context?: string;
-	// The path location of the service
+	// The path location of the func
 	// relative to context
 	path: string;
 	// runtime: string;
 	// Scripts that will be executed by the nitric
-	// build process before begining the docker build
+	// build process before beginning the docker build
 	buildScripts?: string[];
 	// files to exclude from final build
 	// can be globs
@@ -33,10 +33,10 @@ export interface NitricService<Ext extends Record<string, any> = never> {
 	// Allow the user to specify a custom unique tag for the function
 	tag?: string;
 	// subs?: NitricSubscription[];
-	triggers?: NitricServiceTriggers;
+	triggers?: NitricFunctionTriggers;
 	// The minimum number of instances to keep alive
 	minScale?: number;
-	// The maximum nunber of instances to scale to
+	// The maximum number of instances to scale to
 	maxScale?: number;
 	// The most requests a single function instance should handle
 	maxRequests?: number;

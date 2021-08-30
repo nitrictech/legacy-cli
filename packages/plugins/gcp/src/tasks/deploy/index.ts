@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import { google } from 'googleapis';
-import { Task, Stack, mapObject, NitricServiceImage } from '@nitric/cli-common';
+import { Task, Stack, mapObject, NitricFunctionImage, NitricContainerImage } from '@nitric/cli-common';
 import { LocalWorkspace } from '@pulumi/pulumi/automation';
 import * as pulumi from '@pulumi/pulumi';
 import * as gcp from "@pulumi/gcp";
@@ -24,7 +24,6 @@ import {
 	NitricEntrypointGoogleCloudLB,
 	NitricGcpProject,
 	NitricScheduleCloudScheduler,
-	NitricServiceCloudRun,
 	NitricSiteCloudStorage,
 	NitricTopicPubsub,
 } from '../../resources';
@@ -32,6 +31,7 @@ import {
 import fs from 'fs';
 import path from 'path';
 import { Output } from '@pulumi/pulumi';
+import { NitricFunctionCloudRun, NitricContainerCloudRun } from '../../resources';
 
 export interface ProgramResult {
 	entrypoints?: {
@@ -128,23 +128,44 @@ export class Deploy extends Task<DeployResult> {
 						// deploy the services
 						const { token: imageDeploymentToken } = await authClient.getAccessToken();
 
-						const deployedServices = stack.getServices().map((service) => {
-							// Build and push the image
-							const image = new NitricServiceImage(service.getName(), {
-								imageName: pulumi.interpolate`gcr.io/${gcpProject}/${service.getImageTagName()}`,
-								server: 'https://gcr.io',
-								username: 'oauth2accesstoken',
-								password: imageDeploymentToken!,
-								service,
-								sourceImageName: service.getImageTagName('gcp'),
-							}, defaultResourceOptions);
-							return new NitricServiceCloudRun(service.getName(), {
-								service,
-								topics: deployedTopics,
-								image,
-								location: region,
-							}, defaultResourceOptions);
-						});
+						const deployedSites = stack.getSites().map((site) => new NitricSiteCloudStorage(site.getName(), { site }));
+
+						const deployedCloudRunServices = [
+							...stack.getFunctions().map((func) => {
+								// Build and push the image
+								const image = new NitricFunctionImage(func.getName(), {
+									func,
+									imageName: pulumi.interpolate`gcr.io/${gcpProject}/${func.getImageTagName()}`,
+									server: 'https://gcr.io',
+									username: 'oauth2accesstoken',
+									password: imageDeploymentToken!,
+									sourceImageName: func.getImageTagName('gcp'),
+								});
+								return new NitricFunctionCloudRun(func.getName(), {
+									func,
+									topics: deployedTopics,
+									image,
+									location: region,
+								});
+							}),
+							...stack.getContainers().map((container) => {
+								// Build and push the image
+								const image = new NitricContainerImage(container.getName(), {
+									container,
+									nitricProvider: 'gcp',
+									imageName: pulumi.interpolate`gcr.io/${gcpProject}/${container.getImageTagName()}`,
+									server: 'https://gcr.io',
+									username: 'oauth2accesstoken',
+									password: imageDeploymentToken!,
+								});
+								return new NitricContainerCloudRun(container.getName(), {
+									container,
+									topics: deployedTopics,
+									image,
+									location: region,
+								});
+							}),
+						];
 
 						// deploy the schedules
 						mapObject(schedules).map(
@@ -166,7 +187,7 @@ export class Deploy extends Task<DeployResult> {
 							deploymentResult.entrypoints = Object.entries(entrypoints).map(([name, entrypoint]) => {
 								const deployedEntrypoint = new NitricEntrypointGoogleCloudLB(stack.getName(), {
 									entrypoint,
-									services: deployedServices,
+									services: deployedCloudRunServices,
 									apis: deployedApis,
 									sites: deployedSites,
 									stackName: stack.getName(),

@@ -12,12 +12,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './bucket';
-export * from './topic';
-export * from './queue';
-export * from './function';
-export * from './container';
-export * from './collection';
-export * from './site';
-export * from './api';
-export * from './entrypoint';
+export interface NitricContainerTriggers {
+	topics?: string[];
+}
+
+export interface NitricContainer<Ext extends Record<string, any> = never> {
+	// A stack relative context for the directory that will
+	// be included in the build
+	context: string;
+	// The path to the Dockerfile to use to build this container
+	// relative to context
+	dockerfile: string;
+	triggers?: NitricContainerTriggers;
+	// The minimum number of instances to keep alive
+	minScale?: number;
+	// The maximum number of instances to scale to
+	maxScale?: number;
+	// Custom extensions
+	ext?: Ext;
+}

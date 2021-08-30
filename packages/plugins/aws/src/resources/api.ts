@@ -16,7 +16,8 @@ import * as aws from '@pulumi/aws';
 import { OpenAPIV3 } from 'openapi-types';
 import { uniq } from 'lodash';
 import { NamedObject, NitricAPI } from '@nitric/cli-common';
-import { NitricServiceAWSLambda } from './service';
+import { NitricFunctionAWSLambda } from './function';
+import { NitricContainerAWSLambda } from './container';
 
 type method = 'get' | 'post' | 'put' | 'patch' | 'delete';
 const METHOD_KEYS: method[] = ['get', 'post', 'put', 'patch', 'delete'];
@@ -28,7 +29,7 @@ type AwsApiGatewayHttpMethods = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
 // https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-swagger-extensions-integration.html
 interface AwsExtentions {
 	'x-amazon-apigateway-integration': {
-		uri: string | object;
+		uri: string | Record<string, unknown>;
 		responses?: any;
 		passthroughBehaviour?: string;
 		httpMethod: AwsApiGatewayHttpMethods;
@@ -40,8 +41,8 @@ interface AwsExtentions {
 
 interface NitricApiAwsApiGatewayArgs {
 	api: NamedObject<NitricAPI>;
-	// TODO: Create more abstract service type here...
-	services: NitricServiceAWSLambda[];
+	// TODO: Create more abstract func type here...
+	lambdas: (NitricFunctionAWSLambda | NitricContainerAWSLambda)[];
 }
 
 /**
@@ -62,7 +63,7 @@ export class NitricApiAwsApiGateway extends pulumi.ComponentResource {
 		super('nitric:api:AwsApiGateway', name, {}, opts);
 
 		const defaultResourceOptions: pulumi.ResourceOptions = { parent: this };
-		const { api, services } = args;
+		const { api, lambdas } = args;
 		const { name: nitricName, ...rest } = api;
 
 		this.name = name;
@@ -84,7 +85,7 @@ export class NitricApiAwsApiGateway extends pulumi.ComponentResource {
 		);
 
 		const transformedDoc = pulumi
-			.all(services.map((s) => s.lambda.invokeArn.apply((arn) => `${s.name}||${arn}`)))
+			.all(lambdas.map((s) => s.lambda.invokeArn.apply((arn) => `${s.name}||${arn}`)))
 			.apply((nameArnPairs) => {
 				const transformedApi = {
 					...rest,
@@ -158,7 +159,7 @@ export class NitricApiAwsApiGateway extends pulumi.ComponentResource {
 		);
 
 		// Generate lambda permissions enabling the API Gateway to invoke the functions it targets
-		services
+		lambdas
 			.filter((f) => targetNames.includes(f.name))
 			.forEach((f) => {
 				new aws.lambda.Permission(

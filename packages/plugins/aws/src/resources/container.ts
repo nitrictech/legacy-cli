@@ -13,19 +13,19 @@
 // limitations under the License.
 import * as pulumi from '@pulumi/pulumi';
 import * as aws from '@pulumi/aws';
-import { Service, NitricServiceImage } from '@nitric/cli-common';
+import { Container, NitricContainerImage } from '@nitric/cli-common';
 import { NitricSnsTopic } from './topic';
 
-interface NitricServiceAwsLambdaArgs {
+interface NitricContainerAwsLambdaArgs {
 	/**
-	 * Nitric Service
+	 * Nitric Container
 	 */
-	service: Service;
+	container: Container;
 
 	/**
 	 * A deployed Nitric Image
 	 */
-	image: NitricServiceImage;
+	image: NitricContainerImage;
 
 	/**
 	 * Deployed Nitric Service Topics
@@ -39,30 +39,30 @@ interface NitricServiceAwsLambdaArgs {
 	memory?: pulumi.Input<number>;
 
 	/**
-	 * The timeout for the service in seconds
+	 * The timeout for the func in seconds
 	 * defaults to 15
 	 */
 	timeout?: pulumi.Input<number>;
 }
 
 /**
- * AWS Lambda implementation of a nitric service
+ * AWS Lambda implementation of a custom container in a Nitric project
  */
-export class NitricServiceAWSLambda extends pulumi.ComponentResource {
+export class NitricContainerAWSLambda extends pulumi.ComponentResource {
 	public readonly name: string;
 	public readonly lambda: aws.lambda.Function;
 
-	constructor(name, args: NitricServiceAwsLambdaArgs, opts?: pulumi.ComponentResourceOptions) {
-		super('nitric:service:AWSLambda', name, {}, opts);
+	constructor(name, args: NitricContainerAwsLambdaArgs, opts?: pulumi.ComponentResourceOptions) {
+		super('nitric:func:AWSLambda', name, {}, opts);
 
-		const { service, image, topics, timeout = 15, memory = 128 } = args;
+		const { container, image, topics, timeout = 15, memory = 128 } = args;
 		const defaultResourceOptions: pulumi.ResourceOptions = { parent: this };
-		const descriptor = service.asNitricService();
+		const descriptor = container.asNitricContainer();
 
-		this.name = service.getName();
+		this.name = container.getName();
 
 		const lambdaRole = new aws.iam.Role(
-			`${service.getName()}LambdaRole`,
+			`${container.getName()}LambdaRole`,
 			{
 				assumeRolePolicy: aws.iam.assumeRolePolicyForPrincipal(aws.iam.Principals.LambdaPrincipal),
 			},
@@ -70,7 +70,7 @@ export class NitricServiceAWSLambda extends pulumi.ComponentResource {
 		);
 
 		new aws.iam.RolePolicyAttachment(
-			`${service.getName()}LambdaBasicExecution`,
+			`${container.getName()}LambdaBasicExecution`,
 			{
 				policyArn: aws.iam.ManagedPolicies.AWSLambdaBasicExecutionRole,
 				role: lambdaRole.id,
@@ -80,7 +80,7 @@ export class NitricServiceAWSLambda extends pulumi.ComponentResource {
 
 		// TODO: Lock this SNS topics for which this function has pub definitions
 		new aws.iam.RolePolicy(
-			`${service.getName()}SNSAccess`,
+			`${container.getName()}SNSAccess`,
 			{
 				role: lambdaRole.id,
 				policy: JSON.stringify({
@@ -96,6 +96,7 @@ export class NitricServiceAWSLambda extends pulumi.ComponentResource {
 								'sns:ListTopics',
 								'sns:Unsubscribe',
 							],
+							// FIXME: Limit to known resources
 							Resource: '*',
 						},
 					],
@@ -105,42 +106,7 @@ export class NitricServiceAWSLambda extends pulumi.ComponentResource {
 		);
 
 		new aws.iam.RolePolicy(
-			`${service.getName()}SecretsAccess`,
-			{
-				role: lambdaRole.id,
-				policy: JSON.stringify({
-					Version: '2012-10-17',
-					Statement: [
-						{
-							Effect: 'Allow',
-							Action: [
-								'secretsmanager:DescribeSecret',
-								'secretsmanager:PutSecretValue',
-								'secretsmanager:CreateSecret',
-								'secretsmanager:DeleteSecret',
-								'secretsmanager:CancelRotateSecret',
-								'secretsmanager:ListSecretVersionIds',
-								'secretsmanager:UpdateSecret',
-								'secretsmanager:GetRandomPassword',
-								'secretsmanager:GetResourcePolicy',
-								'secretsmanager:GetSecretValue',
-								'secretsmanager:StopReplicationToReplica',
-								'secretsmanager:ReplicateSecretToRegions',
-								'secretsmanager:RestoreSecret',
-								'secretsmanager:RotateSecret',
-								'secretsmanager:UpdateSecretVersionStage',
-								'secretsmanager:RemoveRegionsFromReplication',
-							],
-							Resource: '*',
-						},
-					],
-				}),
-			},
-			defaultResourceOptions,
-		);
-
-		new aws.iam.RolePolicy(
-			`${service.getName()}DynamoDBAccess`,
+			`${container.getName()}DynamoDBAccess`,
 			{
 				role: lambdaRole.id,
 				policy: JSON.stringify({
@@ -162,6 +128,7 @@ export class NitricServiceAWSLambda extends pulumi.ComponentResource {
 								'dynamodb:UpdateTable',
 								'dynamodb:ListTables',
 							],
+							// FIXME: Limit to known resources
 							Resource: '*',
 						},
 					],
@@ -171,7 +138,7 @@ export class NitricServiceAWSLambda extends pulumi.ComponentResource {
 		);
 
 		new aws.iam.RolePolicy(
-			`${service.getName()}S3Access`,
+			`${container.getName()}S3Access`,
 			{
 				role: lambdaRole.id,
 				policy: JSON.stringify({
@@ -190,9 +157,9 @@ export class NitricServiceAWSLambda extends pulumi.ComponentResource {
 		);
 
 		this.lambda = new aws.lambda.Function(
-			service.getName(),
+			container.getName(),
 			{
-				imageUri: image.imageUri, // generateEcrRepositoryUri(account, region, stackName, func) + ':latest',
+				imageUri: image.imageUri,
 				memorySize: memory,
 				timeout,
 				packageType: 'Image',
@@ -209,7 +176,7 @@ export class NitricServiceAWSLambda extends pulumi.ComponentResource {
 			// Only apply if the topic exists
 			if (topic) {
 				new aws.lambda.Permission(
-					`${service.getName()}${triggerTopic}Permission`,
+					`${container.getName()}${triggerTopic}Permission`,
 					{
 						sourceArn: topic.sns.arn,
 						function: this.lambda,
@@ -220,7 +187,7 @@ export class NitricServiceAWSLambda extends pulumi.ComponentResource {
 				);
 
 				new aws.sns.TopicSubscription(
-					`${service.getName()}${triggerTopic}Subscription`,
+					`${container.getName()}${triggerTopic}Subscription`,
 					{
 						endpoint: this.lambda.arn,
 						protocol: 'lambda',

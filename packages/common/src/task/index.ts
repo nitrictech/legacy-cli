@@ -13,6 +13,7 @@
 // limitations under the License.
 
 export * from './task';
-export * from './build-service';
+export * from './build-function';
+export * from './build-container';
 export * from './create-build-tasks';
 export * from './wrap-task';

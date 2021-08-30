@@ -13,30 +13,23 @@
 // limitations under the License.
 import * as pulumi from '@pulumi/pulumi';
 import * as docker from '@pulumi/docker';
-import fs from 'fs';
-import { Service } from '../stack';
+import { Container } from '../stack';
 import path from 'path';
-import { TMP_DIR } from '../paths';
+import { MembraneProviders } from '../types';
 
-interface NitricServiceImageArgs {
-	service: Service;
+interface NitricContainerImageArgs {
+	container: Container;
 	username: pulumi.Input<string>;
 	password: pulumi.Input<string>;
-	// Copy from an existing source image locally
-	sourceImageName: pulumi.Input<string>;
 	imageName: pulumi.Input<string>;
 	server: pulumi.Input<string>;
+	nitricProvider: pulumi.Input<MembraneProviders>;
 }
 
-const DUMMY_DOCKER_FILE = `
-ARG SOURCE_IMAGE
-FROM \${SOURCE_IMAGE}
-`;
-
 /**
- * Image deployment for a Nitric Service from a pre-built local image
+ * Image deployment for a custom container in a Nitric project
  */
-export class NitricServiceImage extends pulumi.ComponentResource {
+export class NitricContainerImage extends pulumi.ComponentResource {
 	/**
 	 * Just the image name
 	 */
@@ -57,31 +50,32 @@ export class NitricServiceImage extends pulumi.ComponentResource {
 	 */
 	public readonly imageDigest: pulumi.Output<string>;
 
-	constructor(name: string, args: NitricServiceImageArgs, opts?: pulumi.ComponentResourceOptions) {
+	constructor(name, args: NitricContainerImageArgs, opts?: pulumi.ComponentResourceOptions) {
 		super('nitric:docker:Image', name, {}, opts);
 
-		const { imageName, sourceImageName, username, password, server, service } = args;
-		const defaultResourceOptions: pulumi.ResourceOptions = { parent: this };
-		const dummyDockerFilePath = path.join(TMP_DIR, 'dummy.dockerfile');
+		const { imageName, username, password, server, container, nitricProvider } = args;
 
-		fs.mkdirSync(TMP_DIR, { recursive: true });
-		// write the dummy docker file
-		fs.writeFileSync(dummyDockerFilePath, DUMMY_DOCKER_FILE);
+		const defaultResourceOptions: pulumi.ResourceOptions = { parent: this };
+
+		const context = container.getContext();
+		const dockerfile = path.join(context, container.getDockerfile());
 
 		const image = new docker.Image(
-			`${service.getImageTagName()}-image`,
+			`${container.getImageTagName()}-image`,
 			{
 				imageName,
 				build: {
 					// Staging directory
-					context: service.getDirectory(),
+					context,
 					args: {
-						SOURCE_IMAGE: sourceImageName,
+						// TODO: consider a more collision safe name, e.g. NITRIC_PROVIDER_ID
+						// Provider may not be used by all custom containers, given regardless
+						PROVIDER: nitricProvider,
 					},
 					env: {
 						DOCKER_BUILDKIT: '1',
 					},
-					dockerfile: dummyDockerFilePath,
+					dockerfile,
 				},
 				registry: {
 					server,

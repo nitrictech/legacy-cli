@@ -12,14 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Stack, Task, mapObject, NitricServiceImage } from '@nitric/cli-common';
+import { Stack, Task, mapObject, NitricFunctionImage, NitricContainerImage } from '@nitric/cli-common';
 import { LocalWorkspace } from '@pulumi/pulumi/automation';
 import { resources, storage, web, containerregistry } from '@pulumi/azure-native';
 import * as pulumi from '@pulumi/pulumi';
 import fs from 'fs';
 import path from 'path';
 import {
-	NitricServiceAzureAppService,
+	NitricContainerAzureAppService,
+	NitricFunctionAzureAppService,
 	NitricEventgridTopic,
 	NitricAzureStorageBucket,
 	NitricStorageQueue,
@@ -133,8 +134,8 @@ export class Deploy extends Task<void> {
 						);
 
 						// DEPLOY SERVICES
-						let deployedServices: NitricServiceAzureAppService[] = [];
-						if (stack.getServices().length > 0) {
+						let deployedAzureApps: NitricFunctionAzureAppService[] = [];
+						if (stack.getFunctions().length > 0) {
 							// deploy a registry for deploying this stacks containers
 							// TODO: We will want to prefer a pre-existing registry, supplied by the user
 							const registry = new containerregistry.Registry(`${stack.getName()}-registry`, {
@@ -147,7 +148,7 @@ export class Deploy extends Task<void> {
 								},
 							});
 
-							// Deploy create an app service plan for this stack
+							// Deploy create an app func plan for this stack
 							const plan = new web.AppServicePlan(`${stack.getName()}Plan`, {
 								name: `${stack.getName()}Plan`,
 								location: resourceGroup.location,
@@ -178,27 +179,50 @@ export class Deploy extends Task<void> {
 							const adminUsername = credentials.apply((credentials) => credentials.username!);
 							const adminPassword = credentials.apply((credentials) => credentials.passwords![0].value!);
 
-							deployedServices = stack.getServices().map((s) => {
-								// Deploy the services image
-								const image = new NitricServiceImage(`${s.getName()}-image`, {
-									service: s,
-									imageName: pulumi.interpolate`${registry.loginServer}/${s.getImageTagName('azure')}`,
-									sourceImageName: s.getImageTagName('azure'),
-									username: adminUsername,
-									password: adminPassword,
-									server: registry.loginServer,
-								});
+							deployedAzureApps = [
+								...stack.getFunctions().map((func) => {
+									// Deploy the lambdas image
+									const image = new NitricFunctionImage(`${func.getName()}-image`, {
+										func,
+										imageName: pulumi.interpolate`${registry.loginServer}/${func.getImageTagName('azure')}`,
+										sourceImageName: func.getImageTagName('azure'),
+										username: adminUsername,
+										password: adminPassword,
+										server: registry.loginServer,
+									});
 
-								// Create a new Nitric azure app service instance
-								return new NitricServiceAzureAppService(s.getName(), {
-									resourceGroup,
-									plan,
-									registry,
-									service: s,
-									topics: deployedTopics,
-									image,
-								});
-							});
+									// Create a new Nitric azure app func instance
+									return new NitricFunctionAzureAppService(func.getName(), {
+										func,
+										resourceGroup,
+										plan,
+										registry,
+										topics: deployedTopics,
+										image,
+									});
+								}),
+								...stack.getContainers().map((container) => {
+									// Deploy the lambdas image
+									const image = new NitricContainerImage(`${container.getName()}-image`, {
+										container,
+										imageName: pulumi.interpolate`${registry.loginServer}/${container.getImageTagName('azure')}`,
+										nitricProvider: 'azure',
+										username: adminUsername,
+										password: adminPassword,
+										server: registry.loginServer,
+									});
+
+									// Create a new Nitric azure app func instance
+									return new NitricContainerAzureAppService(container.getName(), {
+										container,
+										resourceGroup,
+										plan,
+										registry,
+										topics: deployedTopics,
+										image,
+									});
+								}),
+							];
 						}
 
 						// TODO: Add schedule support
@@ -216,7 +240,7 @@ export class Deploy extends Task<void> {
 									orgName,
 									adminEmail,
 									api: a,
-									services: deployedServices,
+									services: deployedAzureApps,
 								}),
 						);
 
@@ -227,7 +251,7 @@ export class Deploy extends Task<void> {
 								new NitricEntrypointAzureFrontDoor(e.name, {
 									resourceGroup,
 									entrypoint: e,
-									services: deployedServices,
+									services: deployedAzureApps,
 									sites: deployedSites,
 									apis: deployedApis,
 								}),
