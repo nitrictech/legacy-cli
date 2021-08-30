@@ -13,12 +13,12 @@
 // limitations under the License.
 import * as pulumi from '@pulumi/pulumi';
 import * as aws from '@pulumi/aws';
-import { crawlDirectorySync, Site } from '@nitric/cli-common';
+import { crawlDirectorySync, StackSite } from '@nitric/cli-common';
 import path from 'path';
 import mime from 'mime';
 
 interface NitricSiteS3Args {
-	site: Site;
+	site: StackSite;
 	indexDocument: string;
 	acl: 'public-read' | 'private';
 }
@@ -43,7 +43,7 @@ export class NitricSiteS3 extends pulumi.ComponentResource {
 		const { site, indexDocument, acl } = args;
 
 		// Build the site before proceeding
-		Site.buildSync(site);
+		StackSite.buildSync(site);
 
 		this.name = site.getName();
 

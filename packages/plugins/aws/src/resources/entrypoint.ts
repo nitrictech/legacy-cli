@@ -16,15 +16,14 @@ import * as aws from '@pulumi/aws';
 import { NitricEntrypoint } from '@nitric/cli-common';
 import { NitricSiteS3 } from './site';
 import { NitricApiAwsApiGateway } from './api';
-import { NitricFunctionAWSLambda } from './function';
-import { NitricContainerAWSLambda } from './container';
+import { NitricComputeAWSLambda } from './compute';
 
 interface NitricEntrypointCloudfrontArgs {
 	stackName: string;
 	entrypoint: NitricEntrypoint;
 	sites: NitricSiteS3[];
 	apis: NitricApiAwsApiGateway[];
-	lambdas: (NitricFunctionAWSLambda | NitricContainerAWSLambda)[];
+	lambdas: NitricComputeAWSLambda[];
 }
 
 /**

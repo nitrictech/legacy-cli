@@ -16,10 +16,9 @@ import { Task, Stack, mapObject, NitricFunctionImage, NitricContainerImage } fro
 import * as pulumi from '@pulumi/pulumi';
 import { LocalWorkspace } from '@pulumi/pulumi/automation';
 import * as digitalocean from '@pulumi/digitalocean';
-import { createFunctionServiceSpec } from './function';
+import { createComputeServiceSpec } from './compute';
 import fs from 'fs';
 import path from 'path';
-import { createContainerServiceSpec } from './container';
 
 const REGISTRY_LIMITS: Record<string, number> = {
 	starter: 1,
@@ -31,7 +30,7 @@ interface DeployOptions {
 	stack: Stack;
 	region: string;
 	// Currently each digital ocean account
-	// may only have one docker container registry
+	// may only have one docker source registry
 	registryName: string;
 	token: string;
 }
@@ -131,32 +130,31 @@ export class Deploy extends Task<DeployResults> {
 								);
 							}
 
+							const standardImageArgs = (name: string): any => ({
+								username: token,
+								password: token,
+								imageName: pulumi.interpolate`registry.digitalocean.com/${registryName}/${name}`,
+								server: 'registry.digitalocean.com',
+							});
+
 							const deployedImages = [
 								...funcs.map((func) => {
 									return {
 										name: func.getName(),
-										type: 'function',
 										image: new NitricFunctionImage(func.getName(), {
 											func,
-											username: token,
-											password: token,
-											imageName: pulumi.interpolate`registry.digitalocean.com/${registryName}/${func.getName()}`,
-											server: 'registry.digitalocean.com',
 											sourceImageName: func.getImageTagName('do'),
+											...standardImageArgs(func.getName()),
 										}),
 									};
 								}),
 								...containers.map((container) => {
 									return {
 										name: container.getName(),
-										type: 'container',
 										image: new NitricContainerImage(container.getName(), {
 											container,
 											nitricProvider: 'do',
-											username: token,
-											password: token,
-											imageName: pulumi.interpolate`registry.digitalocean.com/${registryName}/${container.getName()}`,
-											server: 'registry.digitalocean.com',
+											...standardImageArgs(container.getName()),
 										}),
 									};
 								}),
@@ -197,11 +195,7 @@ export class Deploy extends Task<DeployResults> {
 									.filter(({ name }) => {
 										return servicePaths.find(({ target }) => target == name) != undefined;
 									})
-									.map(({ name, image, type }) => {
-										return type === 'function'
-											? createFunctionServiceSpec(name, image, entrypoint)
-											: createContainerServiceSpec(name, image, entrypoint);
-									});
+									.map(({ name, image }) => createComputeServiceSpec(name, image, entrypoint));
 
 								const app = new digitalocean.App(stack.getName(), {
 									spec: {

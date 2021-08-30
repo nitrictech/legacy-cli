@@ -12,16 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { NitricContainer } from '@nitric/cli-common';
-import { web } from '@pulumi/azure-native';
-import { Image } from '@pulumi/docker';
-
-export interface DeployedContainerImage extends NitricContainer {
-	name: string;
-	image: Image;
-}
-
-export interface DeployedContainer extends NitricContainer {
-	name: string;
-	appService: web.WebApp;
-}
+export * from './triggers';
+export * from './unit';
+export * from './function';
+export * from './container';

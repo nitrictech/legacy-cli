@@ -13,11 +13,11 @@
 // limitations under the License.
 import * as pulumi from '@pulumi/pulumi';
 import path from 'path';
-import { crawlDirectorySync, Site } from '@nitric/cli-common';
+import { crawlDirectorySync, StackSite } from '@nitric/cli-common';
 import { resources, storage } from '@pulumi/azure-native';
 
 interface NitricAzureStorageBucketArgs {
-	site: Site;
+	site: StackSite;
 	storageAcct: storage.StorageAccount;
 	resourceGroup: resources.ResourceGroup;
 }

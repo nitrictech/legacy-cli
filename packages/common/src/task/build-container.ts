@@ -12,11 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// import execa from 'execa';
-// import { oneLine } from 'common-tags';
 import { Task } from './task';
 import { ContainerImage } from '../types';
-import { Container } from '../stack';
+import { StackContainer } from '../stack';
 import { dockerodeEvtToString } from '../index';
 // import rimraf from 'rimraf';
 
@@ -25,12 +23,12 @@ import Docker from 'dockerode';
 
 interface BuildContainerTaskOptions {
 	baseDir: string;
-	container: Container;
+	container: StackContainer;
 	provider?: string;
 }
 
 export class BuildContainerTask extends Task<ContainerImage> {
-	private container: Container;
+	private container: StackContainer;
 	// private readonly stack: Stack;
 	private readonly provider: string;
 

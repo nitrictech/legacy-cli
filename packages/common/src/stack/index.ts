@@ -13,6 +13,6 @@
 // limitations under the License.
 
 export * from './stack';
-export * from './func';
+export * from './function';
 export * from './container';
 export * from './site';

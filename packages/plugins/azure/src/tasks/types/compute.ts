@@ -12,16 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { NitricFunction } from '@nitric/cli-common';
+import { NitricComputeUnit } from '@nitric/cli-common';
 import { web } from '@pulumi/azure-native';
 import { Image } from '@pulumi/docker';
 
-export interface DeployedFunctionImage extends NitricFunction {
+export interface DeployedComputeImage extends NitricComputeUnit {
 	name: string;
 	image: Image;
 }
 
-export interface DeployedFunction extends NitricFunction {
+export interface DeployedComputeUnit extends NitricComputeUnit {
 	name: string;
 	appService: web.WebApp;
 }

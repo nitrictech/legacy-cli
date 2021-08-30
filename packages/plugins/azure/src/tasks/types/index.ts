@@ -13,5 +13,4 @@
 // limitations under the License.
 
 export * from './topic';
-export * from './function';
-export * from './container';
+export * from './compute';

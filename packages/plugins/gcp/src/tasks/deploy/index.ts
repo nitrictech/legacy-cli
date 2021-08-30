@@ -31,7 +31,7 @@ import {
 import fs from 'fs';
 import path from 'path';
 import { Output } from '@pulumi/pulumi';
-import { NitricFunctionCloudRun, NitricContainerCloudRun } from '../../resources';
+import { NitricComputeCloudRun } from '../../resources';
 
 export interface ProgramResult {
 	entrypoints?: {
@@ -141,8 +141,8 @@ export class Deploy extends Task<DeployResult> {
 									password: imageDeploymentToken!,
 									sourceImageName: func.getImageTagName('gcp'),
 								});
-								return new NitricFunctionCloudRun(func.getName(), {
-									func,
+								return new NitricComputeCloudRun(func.getName(), {
+									source: func,
 									topics: deployedTopics,
 									image,
 									location: region,
@@ -158,8 +158,8 @@ export class Deploy extends Task<DeployResult> {
 									username: 'oauth2accesstoken',
 									password: imageDeploymentToken!,
 								});
-								return new NitricContainerCloudRun(container.getName(), {
-									container,
+								return new NitricComputeCloudRun(container.getName(), {
+									source: container,
 									topics: deployedTopics,
 									image,
 									location: region,

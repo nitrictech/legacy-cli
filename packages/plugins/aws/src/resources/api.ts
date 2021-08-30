@@ -16,8 +16,7 @@ import * as aws from '@pulumi/aws';
 import { OpenAPIV3 } from 'openapi-types';
 import { uniq } from 'lodash';
 import { NamedObject, NitricAPI } from '@nitric/cli-common';
-import { NitricFunctionAWSLambda } from './function';
-import { NitricContainerAWSLambda } from './container';
+import { NitricComputeAWSLambda } from './compute';
 
 type method = 'get' | 'post' | 'put' | 'patch' | 'delete';
 const METHOD_KEYS: method[] = ['get', 'post', 'put', 'patch', 'delete'];
@@ -42,7 +41,7 @@ interface AwsExtentions {
 interface NitricApiAwsApiGatewayArgs {
 	api: NamedObject<NitricAPI>;
 	// TODO: Create more abstract func type here...
-	lambdas: (NitricFunctionAWSLambda | NitricContainerAWSLambda)[];
+	lambdas: NitricComputeAWSLambda[];
 }
 
 /**
