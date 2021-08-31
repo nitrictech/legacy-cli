@@ -55,6 +55,7 @@ export class BuildFunctionTask extends Task<ContainerImage> {
 						.map(([k, v]) => `--env ${k}=${v}`)
 						.join(' ')}
 					--env BP_MEMBRANE_PROVIDER=${this.provider}
+					--env BP_NITRIC_SERVICE_HANDLER=${this.service.getContextRelativeDirectory()}
 					--pull-policy if-not-present
 					--default-process membrane
 			`);

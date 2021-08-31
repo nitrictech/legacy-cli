@@ -34,7 +34,7 @@ export const cronExpressionPattern = /^.*$/.toString().slice(1, -1);
  */
 const OPENAPI_3_SCHEMA: JSONSchema7 = {
 	$id: 'https://spec.openapis.org/oas/3.0/schema/2019-04-02',
-	$schema: 'http://json-schema.org/draft-04/schema#',
+	//$schema: 'http://json-schema.org/draft-04/schema#',
 	description: 'Validation schema for OpenAPI Specification 3.0.X.',
 	type: 'object',
 	required: ['openapi', 'info', 'paths'],
@@ -1550,7 +1550,7 @@ export const STACK_SCHEMA: JSONSchema7 = {
 					description: 'A nitric compute func, such as a serverless function',
 					type: 'object',
 					properties: {
-						path: { type: 'string' },
+						handler: { type: 'string' },
 						context: { type: 'string' },
 						triggers: {
 							title: 'func triggers',
@@ -1567,7 +1567,7 @@ export const STACK_SCHEMA: JSONSchema7 = {
 							additionalProperties: false,
 						},
 					},
-					required: ['path'],
+					required: ['handler', 'context'],
 					additionalProperties: false,
 				},
 			},

@@ -349,7 +349,7 @@ export class Stack<
 
 		const stack = parser(content);
 		// validate the stack against the schema and throw in case of errors.
-		validateStack(stack, filePath || file);
+		validateStack(stack, path.dirname(filePath || file));
 
 		return new Stack(filePath || file, stack);
 	}
