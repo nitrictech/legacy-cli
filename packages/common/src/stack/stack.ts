@@ -21,6 +21,7 @@ import { STAGING_DIR } from '../paths';
 import { findFileRead } from '../utils';
 import { StackSite, StackFunction, StackContainer } from '.';
 import { validateStack } from './schema';
+import { StackAPI } from './api';
 
 const NITRIC_DIRECTORY = '.nitric';
 
@@ -80,7 +81,6 @@ export class Stack<
 	TopicExtensions = Record<string, any>,
 	QueueExtensions = Record<string, any>,
 	ScheduleExtensions = Record<string, any>,
-	ApiExtensions = Record<string, any>,
 	SiteExtensions = Record<string, any>,
 	EntrypointExtensions = Record<string, any>,
 > {
@@ -93,7 +93,6 @@ export class Stack<
 		TopicExtensions,
 		QueueExtensions,
 		ScheduleExtensions,
-		ApiExtensions,
 		SiteExtensions,
 		EntrypointExtensions
 	>;
@@ -108,7 +107,6 @@ export class Stack<
 			TopicExtensions,
 			QueueExtensions,
 			ScheduleExtensions,
-			ApiExtensions,
 			SiteExtensions,
 			EntrypointExtensions
 		>,
@@ -141,7 +139,6 @@ export class Stack<
 		TopicExtensions,
 		QueueExtensions,
 		ScheduleExtensions,
-		ApiExtensions,
 		SiteExtensions,
 		EntrypointExtensions
 	> {
@@ -154,7 +151,6 @@ export class Stack<
 			TopicExtensions,
 			QueueExtensions,
 			ScheduleExtensions,
-			ApiExtensions,
 			SiteExtensions,
 			EntrypointExtensions
 		>;
@@ -214,6 +210,33 @@ export class Stack<
 		const { functions = {} } = descriptor;
 
 		return Object.keys(functions).map((funcName) => new StackFunction(this, funcName, functions[funcName]));
+	}
+
+	/**
+	 * Return a single API from the stack
+	 * @param name - The name of the API to return
+	 * @returns
+	 */
+	getApi(name: string): StackAPI {
+		const { descriptor } = this;
+		const { apis = {} } = descriptor;
+
+		if (!apis[name]) {
+			throw new Error(`Stack ${this.name}, does not contain service ${name}`);
+		}
+
+		return new StackAPI(this, name, apis[name]);
+	}
+
+	/**
+	 * Return all APIs in the stack
+	 * @returns
+	 */
+	getApis(): StackAPI[] {
+		const { descriptor } = this;
+		const { apis = {} } = descriptor;
+
+		return Object.keys(apis).map((apiKey) => new StackAPI(this, apiKey, apis[apiKey]));
 	}
 
 	/**
@@ -375,7 +398,7 @@ export class Stack<
 		const doc = YAML.parseDocument(content);
 		const stack = doc.toJS();
 		// validate the stack against the schema and throw in case of errors.
-		validateStack(stack);
+		validateStack(stack, filePath || file);
 
 		const comments = extractComments(doc);
 

@@ -15,9 +15,9 @@
 import { NitricComputeUnit } from '.';
 
 export interface NitricFunction<Ext> extends NitricComputeUnit<Ext> {
-	// The path location of the func
+	// The location of the function handler
 	// relative to context
-	path: string;
+	handler: string;
 	// Scripts that will be executed by the nitric
 	// build process before beginning the docker build
 	buildScripts?: string[];
