@@ -17,7 +17,6 @@ import { NitricCollection } from './collection';
 import { NitricTopic } from './topic';
 import { NitricQueue } from './queue';
 import { NitricSchedule } from './schedule';
-import { NitricAPI } from './api';
 import { NitricStaticSite } from './static-site';
 import { NitricEntrypoint } from './entrypoints';
 import { NitricFunction, NitricContainer } from './compute';
@@ -33,7 +32,6 @@ export interface NitricStack<
 	TopicExtensions = Record<string, any>,
 	QueueExtensions = Record<string, any>,
 	ScheduleExtensions = Record<string, any>,
-	ApiExtensions = Record<string, any>,
 	SiteExtensions = Record<string, any>,
 	EntrypointExtensions = Record<string, any>,
 > {
@@ -69,7 +67,7 @@ export interface NitricStack<
 	};
 	// APIs to be deployed
 	apis?: {
-		[name: string]: NitricAPI<ApiExtensions>;
+		[name: string]: string;
 	};
 	// Static sites to be deployed
 	sites?: {

@@ -15,6 +15,7 @@
 import { JSONSchema7 } from 'json-schema';
 import ajv, { DefinedError } from 'ajv';
 import { NitricStack } from '../types';
+import fs from 'fs';
 
 /**
  * Pattern for stack resources names, e.g. func names, topic names, buckets, etc.
@@ -1759,7 +1760,9 @@ export const STACK_SCHEMA: JSONSchema7 = {
 		apis: {
 			type: 'object',
 			patternProperties: {
-				[resourceNamePattern]: OPENAPI_3_SCHEMA,
+				[resourceNamePattern]: {
+					type: 'string',
+				},
 			},
 			minProperties: 1,
 			additionalProperties: false,
@@ -1901,7 +1904,7 @@ const stackError = (errors: string[] | string): Error => {
  * Returns void if validation is successful, otherwise throws an exception containing validation error details.
  * @param potentialStack the stack to validate.
  */
-export const validateStack = (potentialStack: any): void => {
+export const validateStack = (potentialStack: any, filePath: string): void => {
 	// Validate Schema Errors
 	const schemaValidator = new ajv({
 		// schemaId: "auto",
@@ -1918,18 +1921,18 @@ export const validateStack = (potentialStack: any): void => {
 		throw stackError(errors);
 	}
 
-	potentialStack = potentialStack as unknown as NitricStack;
+	const pStack: NitricStack = potentialStack as unknown as NitricStack;
 
 	// Validate logical errors (e.g. pointing to names that don't exist, even if they're valid).
 	const logicErrors: string[] = [];
 
 	// Validate Func Configurations
-	if (potentialStack.functions) {
+	if (pStack.functions) {
 		// Validate topic triggers
-		Object.entries(potentialStack.functions).forEach(([funcName, func]: [string, any]) => {
+		Object.entries(pStack.functions).forEach(([funcName, func]: [string, any]) => {
 			if (func.triggers && func.triggers.topics) {
 				func.triggers.topics.forEach((triggerTopic) => {
-					if (!(potentialStack.topics && potentialStack.topics[triggerTopic])) {
+					if (!(pStack.topics && pStack.topics[triggerTopic])) {
 						logicErrors.push(`Invalid topic trigger for functions.${funcName}, topic "${triggerTopic}" doesn't exist`);
 					}
 				});
@@ -1938,12 +1941,12 @@ export const validateStack = (potentialStack: any): void => {
 	}
 
 	// Validate Container Configurations
-	if (potentialStack.containers) {
+	if (pStack.containers) {
 		// Validate topic triggers
-		Object.entries(potentialStack.containers).forEach(([containerName, container]: [string, any]) => {
+		Object.entries(pStack.containers).forEach(([containerName, container]: [string, any]) => {
 			if (container.triggers && container.triggers.topics) {
 				container.triggers.topics.forEach((triggerTopic) => {
-					if (!(potentialStack.topics && potentialStack.topics[triggerTopic])) {
+					if (!(pStack.topics && pStack.topics[triggerTopic])) {
 						logicErrors.push(
 							`Invalid topic trigger for containers.${containerName}, topic "${triggerTopic}" doesn't exist`,
 						);
@@ -1954,10 +1957,10 @@ export const validateStack = (potentialStack: any): void => {
 	}
 
 	// Validate Entrypoint Configurations
-	if (potentialStack.entrypoints) {
-		Object.entries(potentialStack.entrypoints).forEach(([entrypointName, entrypoint]: [string, any]) => {
+	if (pStack.entrypoints) {
+		Object.entries(pStack.entrypoints).forEach(([entrypointName, entrypoint]: [string, any]) => {
 			Object.entries(entrypoint.paths).forEach(([pathName, path]: [string, any]) => {
-				if (!(potentialStack[`${path.type}s`] && potentialStack[`${path.type}s`][path.target])) {
+				if (!(pStack[`${path.type}s`] && pStack[`${path.type}s`][path.target])) {
 					logicErrors.push(
 						`Invalid target for entrypoints.${entrypointName}.${pathName}, target ${path.type} "${path.target}" doesn't exist`,
 					);
@@ -1967,10 +1970,10 @@ export const validateStack = (potentialStack: any): void => {
 	}
 
 	// Validate Schedule Configurations
-	if (potentialStack.schedules) {
-		Object.entries(potentialStack.schedules).forEach(([scheduleName, schedule]: [string, any]) => {
+	if (pStack.schedules) {
+		Object.entries(pStack.schedules).forEach(([scheduleName, schedule]: [string, any]) => {
 			const target = schedule.target;
-			if (!(potentialStack[`${target.type}s`] && potentialStack[`${target.type}s`][target.name])) {
+			if (!(pStack[`${target.type}s`] && pStack[`${target.type}s`][target.name])) {
 				logicErrors.push(
 					`Invalid target for schedules.${scheduleName}, target ${target.type} "${target.name}" doesn't exist`,
 				);
@@ -1979,8 +1982,11 @@ export const validateStack = (potentialStack: any): void => {
 	}
 
 	// Validate API Gateway Configurations
-	if (potentialStack.apis) {
-		Object.entries(potentialStack.apis).forEach(([apiName, api]: [string, any]) => {
+	if (pStack.apis) {
+		Object.entries(pStack.apis).forEach(([apiName, api]: [string, string]) => {
+			// see if the file exists...
+			fs.existsSync();
+
 			Object.entries(api.paths).forEach(([pathName, path]: [string, any]) => {
 				Object.entries(path).forEach(([opName, op]: [string, any]) => {
 					if (!/^(get|put|post|delete|options|head|patch|trace)$/.test(opName)) {
