@@ -333,8 +333,7 @@ export default class Run extends BaseCommand {
 	 */
 	runContainers = async (stack: Stack, runId: string): Promise<void> => {
 		const nitricStack = stack.asNitricStack();
-		const { apis = {}, entrypoints = {} } = nitricStack;
-		const namedApis = Object.keys(apis).map((name) => ({ name, ...apis[name] }));
+		const { entrypoints = {} } = nitricStack;
 		const namedEntrypoints = Object.entries(entrypoints).map(([name, entrypoint]) => ({ name, ...entrypoint }));
 
 		cli.action.stop();
@@ -352,7 +351,7 @@ export default class Run extends BaseCommand {
 		images = sortImages(images);
 
 		const runGatewayOptions = await Promise.all(
-			namedApis.map(async (api) => {
+			stack.getApis().map(async (api) => {
 				return {
 					stackName: nitricStack.name,
 					runId,
