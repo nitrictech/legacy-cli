@@ -398,7 +398,7 @@ export class Stack<
 		const doc = YAML.parseDocument(content);
 		const stack = doc.toJS();
 		// validate the stack against the schema and throw in case of errors.
-		validateStack(stack, filePath || file);
+		validateStack(stack, path.dirname(filePath || file));
 
 		const comments = extractComments(doc);
 
