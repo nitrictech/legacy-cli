@@ -63,7 +63,7 @@ export class StackFunction<FuncExtensions = Record<string, any>> {
 	 * @returns
 	 */
 	getContext(): string {
-		const origCtx = this.descriptor.context || this.descriptor.path;
+		const origCtx = this.descriptor.context || this.descriptor.handler;
 		const ctxPath = path.join(this.stack.getDirectory(), origCtx);
 
 		if (!fs.existsSync(ctxPath)) {
@@ -80,7 +80,7 @@ export class StackFunction<FuncExtensions = Record<string, any>> {
 	 * @returns
 	 */
 	getContextRelativeDirectory(): string {
-		return this.descriptor.context ? this.descriptor.path : '.';
+		return this.descriptor.context ? this.descriptor.handler : '.';
 	}
 
 	/**
@@ -91,7 +91,7 @@ export class StackFunction<FuncExtensions = Record<string, any>> {
 
 		if (!fs.existsSync(funcPath)) {
 			throw new Error(
-				`function directory '${this.descriptor.path}' for function '${this.name}' not found. Directory may have been renamed or removed, check 'path' configuration for this function in the config file.`,
+				`function directory '${this.descriptor.handler}' for function '${this.name}' not found. Directory may have been renamed or removed, check 'path' configuration for this function in the config file.`,
 			);
 		}
 		return funcPath;

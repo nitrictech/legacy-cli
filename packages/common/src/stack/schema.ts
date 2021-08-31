@@ -18,7 +18,7 @@ import { NitricStack } from '../types';
 import fs from 'fs';
 import path from 'path';
 import YAML from 'yaml';
-import { StackAPI, StackAPIDocument } from './api';
+import { StackAPIDocument } from './api';
 
 /**
  * Pattern for stack resources names, e.g. func names, topic names, buckets, etc.
@@ -1996,6 +1996,13 @@ export const validateStack = (potentialStack: any, filePath: string): void => {
 				// Load and validate the files contents
 				const contents = fs.readFileSync(file);
 				const api = YAML.parse(contents.toString()) as StackAPIDocument;
+
+				const validate = schemaValidator.compile(OPENAPI_3_SCHEMA);
+
+				if (!validate(api)) {
+					logicErrors.push(`${apiName} at ${api} is not a valid Open API 3.0 document`);
+				}
+
 				Object.entries(api.paths).forEach(([pathName, path]: [string, any]) => {
 					Object.entries(path).forEach(([opName, op]: [string, any]) => {
 						if (!/^(get|put|post|delete|options|head|patch|trace)$/.test(opName)) {
