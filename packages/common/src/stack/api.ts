@@ -46,12 +46,15 @@ export class StackAPI {
 		this.descriptor = descriptor;
 	}
 
+	public get path(): string {
+		return path.join(this.stack.getDirectory(), this.descriptor);
+	}
+
 	public get document(): StackAPIDocument {
 		if (!this._document) {
-			const file = path.join(this.stack.getDirectory(), this.descriptor);
 			// Read the api file and cache it locally
 			// parse the file contents
-			this._document = YAML.parse(fs.readFileSync(file).toString()) as StackAPIDocument;
+			this._document = YAML.parse(fs.readFileSync(this.path).toString()) as StackAPIDocument;
 		}
 
 		return this._document;
