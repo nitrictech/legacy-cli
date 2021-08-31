@@ -16,6 +16,9 @@ import { JSONSchema7 } from 'json-schema';
 import ajv, { DefinedError } from 'ajv';
 import { NitricStack } from '../types';
 import fs from 'fs';
+import path from 'path';
+import YAML from 'yaml';
+import { StackAPI, StackAPIDocument } from './api';
 
 /**
  * Pattern for stack resources names, e.g. func names, topic names, buckets, etc.
@@ -1985,22 +1988,29 @@ export const validateStack = (potentialStack: any, filePath: string): void => {
 	if (pStack.apis) {
 		Object.entries(pStack.apis).forEach(([apiName, api]: [string, string]) => {
 			// see if the file exists...
-			fs.existsSync();
+			const file = path.join(filePath, api);
 
-			Object.entries(api.paths).forEach(([pathName, path]: [string, any]) => {
-				Object.entries(path).forEach(([opName, op]: [string, any]) => {
-					if (!/^(get|put|post|delete|options|head|patch|trace)$/.test(opName)) {
-						// skip properties that aren't http operations.
-						return;
-					}
-					const target = op['x-nitric-target'];
-					if (!(potentialStack[`${target.type}s`] && potentialStack[`${target.type}s`][target.name])) {
-						logicErrors.push(
-							`Invalid target for apis.${apiName}.${pathName}.${opName}, target ${target.type} "${target.name}" doesn't exist`,
-						);
-					}
+			if (!fs.existsSync(file)) {
+				logicErrors.push(`API file ${api} does not exist relative to ${filePath}`);
+			} else {
+				// Load and validate the files contents
+				const contents = fs.readFileSync(file);
+				const api = YAML.parse(contents.toString()) as StackAPIDocument;
+				Object.entries(api.paths).forEach(([pathName, path]: [string, any]) => {
+					Object.entries(path).forEach(([opName, op]: [string, any]) => {
+						if (!/^(get|put|post|delete|options|head|patch|trace)$/.test(opName)) {
+							// skip properties that aren't http operations.
+							return;
+						}
+						const target = op['x-nitric-target'];
+						if (!(potentialStack[`${target.type}s`] && potentialStack[`${target.type}s`][target.name])) {
+							logicErrors.push(
+								`Invalid target for apis.${apiName}.${pathName}.${opName}, target ${target.type} "${target.name}" doesn't exist`,
+							);
+						}
+					});
 				});
-			});
+			}
 		});
 	}
 
