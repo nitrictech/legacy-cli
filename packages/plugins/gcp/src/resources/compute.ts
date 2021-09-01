@@ -84,7 +84,7 @@ export class NitricComputeCloudRun extends pulumi.ComponentResource {
 			});
 
 			// Apply permissions for the above account to the newly deployed cloud run service
-			new gcp.cloudrun.IamMember(`${service.getName()}-subrole`, {
+			new gcp.cloudrun.IamMember(`${source.getName()}-subrole`, {
 				member: pulumi.interpolate`serviceAccount:${invokerAccount.email}`,
 				role: 'roles/run.invoker',
 				service: this.cloudrun.name,
