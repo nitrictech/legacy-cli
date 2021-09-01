@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import { google } from 'googleapis';
-import { Task, Stack, mapObject, NitricFunctionImage, NitricContainerImage } from '@nitric/cli-common';
+import { Task, Stack, mapObject, NitricContainerImage } from '@nitric/cli-common';
 import { LocalWorkspace } from '@pulumi/pulumi/automation';
 import * as pulumi from '@pulumi/pulumi';
 
@@ -73,7 +73,7 @@ export class Deploy extends Task<DeployResult> {
 
 	async do(): Promise<DeployResult> {
 		const { stack, gcpProject, region } = this;
-		const { buckets = {}, apis = {}, topics = {}, schedules = {}, entrypoints } = stack.asNitricStack();
+		const { buckets = {}, topics = {}, schedules = {}, entrypoints } = stack.asNitricStack();
 		const auth = new google.auth.GoogleAuth({
 			scopes: ['https://www.googleapis.com/auth/cloud-platform'],
 		});
@@ -108,8 +108,8 @@ export class Deploy extends Task<DeployResult> {
 						const deployedCloudRunServices = [
 							...stack.getFunctions().map((func) => {
 								// Build and push the image
-								const image = new NitricFunctionImage(func.getName(), {
-									func,
+								const image = new NitricContainerImage(func.getName(), {
+									unit: func,
 									imageName: pulumi.interpolate`gcr.io/${gcpProject}/${func.getImageTagName()}`,
 									server: 'https://gcr.io',
 									username: 'oauth2accesstoken',
@@ -126,8 +126,8 @@ export class Deploy extends Task<DeployResult> {
 							...stack.getContainers().map((container) => {
 								// Build and push the image
 								const image = new NitricContainerImage(container.getName(), {
-									container,
-									nitricProvider: 'gcp',
+									unit: container,
+									sourceImageName: container.getImageTagName('gcp'),
 									imageName: pulumi.interpolate`gcr.io/${gcpProject}/${container.getImageTagName()}`,
 									server: 'https://gcr.io',
 									username: 'oauth2accesstoken',
@@ -148,9 +148,10 @@ export class Deploy extends Task<DeployResult> {
 						);
 						// deploy apis
 						const deployedApis = await Promise.all(
-							mapObject(apis).map(async ({ name, ...spec }) => {
-								const convertedSpec = await NitricApiGcpApiGateway.convertNitricAPIv2(spec);
-								return new NitricApiGcpApiGateway(name, { api: convertedSpec, services: deployedCloudRunServices });
+							stack.getApis().map(async (api) => {
+								const document = api.document;
+								const convertedSpec = await NitricApiGcpApiGateway.convertNitricAPIv2(document);
+								return new NitricApiGcpApiGateway(api.name, { api: convertedSpec, services: deployedCloudRunServices });
 							}),
 						);
 

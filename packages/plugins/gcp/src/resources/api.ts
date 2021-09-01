@@ -11,7 +11,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-import { NitricAPI, NitricAPITarget } from '@nitric/cli-common';
+import { NitricAPITarget, StackAPIDocument } from '@nitric/cli-common';
 import * as pulumi from '@pulumi/pulumi';
 import { OpenAPIV2 } from 'openapi-types';
 import * as gcp from '@pulumi/gcp';
@@ -158,7 +158,7 @@ export class NitricApiGcpApiGateway extends pulumi.ComponentResource {
 	 * Converts a NitricAPI which confroms to OpenAPI v3 spec
 	 * to openAPI v2
 	 */
-	static async convertNitricAPIv2(api: NitricAPI): Promise<OpenAPIV2.Document<NitricAPITarget>> {
+	static async convertNitricAPIv2(api: StackAPIDocument): Promise<OpenAPIV2.Document<NitricAPITarget>> {
 		// Convert to swagger, OpenAPI 3 spec isn't supported by GCP API Gateway currently.
 		const { spec: translatedApi }: { spec: OpenAPIV2.Document<NitricAPITarget> } = await Converter.convert({
 			from: 'openapi_3',

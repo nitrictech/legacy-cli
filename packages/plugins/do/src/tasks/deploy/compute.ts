@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { NitricContainerImage, NitricEntrypoint, NitricFunctionImage } from '@nitric/cli-common';
+import { NitricContainerImage, NitricEntrypoint } from '@nitric/cli-common';
 import * as digitalocean from '@pulumi/digitalocean';
 
 interface CreateComputeResult {
@@ -21,7 +21,7 @@ interface CreateComputeResult {
 
 export function createComputeServiceSpec(
 	name: string,
-	image: NitricFunctionImage | NitricContainerImage,
+	image: NitricContainerImage,
 	entrypoint: NitricEntrypoint,
 ): CreateComputeResult {
 	return {

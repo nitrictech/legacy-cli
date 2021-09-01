@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 import * as pulumi from '@pulumi/pulumi';
-import { NamedObject, NitricAPI, NitricAPITarget } from '@nitric/cli-common';
+import { NitricAPITarget, StackAPI } from '@nitric/cli-common';
 import { resources, apimanagement } from '@pulumi/azure-native';
 import { OpenAPIV3 } from 'openapi-types';
 import { NitricComputeAzureAppService } from '.';
@@ -21,7 +21,7 @@ interface NitricApiAzureApiManagementArgs {
 	resourceGroup: resources.ResourceGroup;
 	orgName: string;
 	adminEmail: string;
-	api: NamedObject<NitricAPI>;
+	api: StackAPI;
 	services: NitricComputeAzureAppService[];
 }
 
@@ -62,7 +62,7 @@ export class NitricApiAzureApiManagement extends pulumi.ComponentResource {
 			defaultResourceOptions,
 		);
 
-		const { name: _, ...openapi } = api;
+		const openapi = api.document;
 
 		this.api = new apimanagement.Api(
 			`${name}-api`,
@@ -80,8 +80,8 @@ export class NitricApiAzureApiManagement extends pulumi.ComponentResource {
 			defaultResourceOptions,
 		);
 
-		Object.keys(api.paths).forEach((p) => {
-			const path = api.paths[p]!;
+		Object.keys(openapi.paths).forEach((p) => {
+			const path = openapi.paths[p]!;
 
 			Object.keys(path)
 				.filter((k) => METHODS.includes(k as method))

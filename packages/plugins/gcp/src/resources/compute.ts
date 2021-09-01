@@ -12,14 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { NitricContainerImage, NitricFunctionImage, StackContainer, StackFunction } from '@nitric/cli-common';
+import { NitricContainerImage, StackContainer, StackFunction } from '@nitric/cli-common';
 import * as pulumi from '@pulumi/pulumi';
 import * as gcp from '@pulumi/gcp';
 import { NitricTopicPubsub } from './topic';
 
 interface NitricComputeCloudRunArgs {
 	source: StackContainer | StackFunction;
-	image: NitricContainerImage | NitricFunctionImage;
+	image: NitricContainerImage;
 	location: string;
 	topics: NitricTopicPubsub[];
 }
