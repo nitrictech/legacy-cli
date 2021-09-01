@@ -23,7 +23,7 @@ const belowMinimumResourceTest = (resource: string): void => {
 
 		describe('When calling validateStack', () => {
 			it('Should fail with below minimum error', () => {
-				expect(() => validateStack(belowMin)).toThrow(`${resource} below minimum of 1`);
+				expect(() => validateStack(belowMin, '.')).toThrow(`${resource} below minimum of 1`);
 			});
 		});
 	});
@@ -41,7 +41,7 @@ const invalidResourceNameTest = (resource: string): void => {
 		describe('When calling validateStack', () => {
 			it('Should fail with invalid name error', () => {
 				// Invalid collection name "invalid-name!!"
-				expect(() => validateStack(belowMin)).toThrow(`Invalid ${resource.slice(0, -1)} name "invalid-name!!"`);
+				expect(() => validateStack(belowMin, '.')).toThrow(`Invalid ${resource.slice(0, -1)} name "invalid-name!!"`);
 			});
 		});
 	});
@@ -68,14 +68,14 @@ describe('validateSchema', () => {
 				...validNameStack,
 				functions: {
 					thefunction: {
-						path: 'thepath',
+						handler: 'thepath',
 					},
 				},
 			};
 
 			describe('When calling validateStack', () => {
 				it('Should succeed', () => {
-					expect(() => validateStack(validWithFunction)).not.toThrow();
+					expect(() => validateStack(validWithFunction, '.')).not.toThrow();
 				});
 			});
 		});
@@ -85,7 +85,7 @@ describe('validateSchema', () => {
 				...validNameStack,
 				functions: {
 					thefunction: {
-						path: 'thepath',
+						handler: 'thepath',
 						triggers: {
 							topictypo: [
 								// misspelled trigger property
@@ -98,7 +98,7 @@ describe('validateSchema', () => {
 
 			describe('When calling validateStack', () => {
 				it('Should fail with invalid property error', () => {
-					expect(() => validateStack(stackWithFunctionWithInvalidTrigger)).toThrow(
+					expect(() => validateStack(stackWithFunctionWithInvalidTrigger, '.')).toThrow(
 						'Unexpected property "topictypo" in functions.thefunction.triggers',
 					);
 				});
@@ -110,7 +110,7 @@ describe('validateSchema', () => {
 				...validNameStack,
 				functions: {
 					'a-function': {
-						path: 'thepath',
+						handler: 'thepath',
 						extra: {},
 					},
 				},
@@ -118,7 +118,9 @@ describe('validateSchema', () => {
 
 			describe('When calling validateStack', () => {
 				it('Should fail with unexpected property error', () => {
-					expect(() => validateStack(invalidWithExtraProps)).toThrow('Unexpected property "extra" in functions.a-func');
+					expect(() => validateStack(invalidWithExtraProps, '.')).toThrow(
+						'Unexpected property "extra" in functions.a-func',
+					);
 				});
 			});
 		});
@@ -128,7 +130,7 @@ describe('validateSchema', () => {
 				...validNameStack,
 				functions: {
 					thefunction: {
-						path: 'thepath',
+						handler: 'thepath',
 						triggers: {
 							topics: [
 								// misspelled trigger property
@@ -141,7 +143,7 @@ describe('validateSchema', () => {
 
 			describe('When calling validateStack', () => {
 				it('Should fail topic not exist error', () => {
-					expect(() => validateStack(stackWithFunctionWithInvalidTrigger)).toThrow(
+					expect(() => validateStack(stackWithFunctionWithInvalidTrigger, '.')).toThrow(
 						'Invalid topic trigger for functions.thefunction, topic "not-exist-topic" doesn\'t exist',
 					);
 				});
@@ -158,7 +160,7 @@ describe('validateSchema', () => {
 
 			describe('When calling validateStack', () => {
 				it('Should succeed', () => {
-					expect(() => validateStack(validWithTopic)).not.toThrow();
+					expect(() => validateStack(validWithTopic, '.')).not.toThrow();
 				});
 			});
 
@@ -167,7 +169,7 @@ describe('validateSchema', () => {
 					...validWithTopic,
 					functions: {
 						thefunction: {
-							path: 'thepath',
+							handler: 'thepath',
 							triggers: {
 								/* at least one property should be present here. */
 							},
@@ -177,7 +179,7 @@ describe('validateSchema', () => {
 
 				describe('When calling validateStack', () => {
 					it('Should fail with below min error', () => {
-						expect(() => validateStack(stackWithFunctionWithEmptyTriggers)).toThrow(
+						expect(() => validateStack(stackWithFunctionWithEmptyTriggers, '.')).toThrow(
 							'functions.thefunction.triggers below minimum of 1',
 						);
 					});
@@ -189,7 +191,7 @@ describe('validateSchema', () => {
 					...validWithTopic,
 					functions: {
 						thefunction: {
-							path: 'thepath',
+							handler: 'thepath',
 							triggers: {
 								topics: ['a-valid-topic'],
 							},
@@ -199,7 +201,7 @@ describe('validateSchema', () => {
 
 				describe('When calling validateStack', () => {
 					it('Should succeed', () => {
-						expect(() => validateStack(stackWithFunctionWithTopicTrigger)).not.toThrow();
+						expect(() => validateStack(stackWithFunctionWithTopicTrigger, '.')).not.toThrow();
 					});
 				});
 			});
@@ -217,7 +219,7 @@ describe('validateSchema', () => {
 
 			describe('When calling validateStack', () => {
 				it('Should fail with unexpected property error', () => {
-					expect(() => validateStack(invalidWithTopicWithExtraProps)).toThrow(
+					expect(() => validateStack(invalidWithTopicWithExtraProps, '.')).toThrow(
 						'Unexpected property "extra" in topics.a-topic',
 					);
 				});
@@ -236,7 +238,7 @@ describe('validateSchema', () => {
 
 			describe('When calling validateStack', () => {
 				it('Should fail with unexpected property error', () => {
-					expect(() => validateStack(invalidWithBucketWithExtraProps)).toThrow(
+					expect(() => validateStack(invalidWithBucketWithExtraProps, '.')).toThrow(
 						'Unexpected property "extra" in buckets.a-bucket',
 					);
 				});
@@ -255,7 +257,7 @@ describe('validateSchema', () => {
 
 			describe('When calling validateStack', () => {
 				it('Should fail with unexpected property error', () => {
-					expect(() => validateStack(invalidWithExtraProps)).toThrow(
+					expect(() => validateStack(invalidWithExtraProps, '.')).toThrow(
 						'Unexpected property "extra" in collections.a-collection',
 					);
 				});
@@ -274,7 +276,9 @@ describe('validateSchema', () => {
 
 			describe('When calling validateStack', () => {
 				it('Should fail with unexpected property error', () => {
-					expect(() => validateStack(invalidWithExtraProps)).toThrow('Unexpected property "extra" in queues.a-queue');
+					expect(() => validateStack(invalidWithExtraProps, '.')).toThrow(
+						'Unexpected property "extra" in queues.a-queue',
+					);
 				});
 			});
 		});
@@ -297,7 +301,9 @@ describe('validateSchema', () => {
 
 			describe('When calling validateStack', () => {
 				it('Should fail with unexpected property error', () => {
-					expect(() => validateStack(invalidWithExtraProps)).toThrow('Unexpected property "extra" in entrypoints.main');
+					expect(() => validateStack(invalidWithExtraProps, '.')).toThrow(
+						'Unexpected property "extra" in entrypoints.main',
+					);
 				});
 			});
 		});
@@ -327,19 +333,19 @@ describe('validateSchema', () => {
 
 			describe('When calling validateStack', () => {
 				it('Should fail with site not found', () => {
-					expect(() => validateStack(invalidEntrypointTargets)).toThrow(
+					expect(() => validateStack(invalidEntrypointTargets, '.')).toThrow(
 						'Invalid target for entrypoints.main./, target site "invalid-site" doesn\'t exist',
 					);
 				});
 
 				it('Should fail with api not found', () => {
-					expect(() => validateStack(invalidEntrypointTargets)).toThrow(
+					expect(() => validateStack(invalidEntrypointTargets, '.')).toThrow(
 						'Invalid target for entrypoints.main./api, target api "invalid-api" doesn\'t exist',
 					);
 				});
 
 				it('Should fail with func not found', () => {
-					expect(() => validateStack(invalidEntrypointTargets)).toThrow(
+					expect(() => validateStack(invalidEntrypointTargets, '.')).toThrow(
 						'Invalid target for entrypoints.main./function, target function "invalid-func" doesn\'t exist',
 					);
 				});
@@ -367,7 +373,7 @@ describe('validateSchema', () => {
 
 			describe('When calling validateStack', () => {
 				it('Should fail with site not found', () => {
-					expect(() => validateStack(invalidScheduleTarget)).toThrow(
+					expect(() => validateStack(invalidScheduleTarget, '.')).toThrow(
 						'Invalid target for schedules.nightly, target topic "invalid-topic" doesn\'t exist',
 					);
 				});
@@ -382,7 +388,7 @@ describe('validateSchema', () => {
 
 			describe('When calling validateStack', () => {
 				it('Should fail with unexpected property error', () => {
-					expect(() => validateStack(invalidResourceStack)).toThrow('Unexpected property "invalidResource"');
+					expect(() => validateStack(invalidResourceStack, '.')).toThrow('Unexpected property "invalidResource"');
 				});
 			});
 		});
@@ -395,7 +401,7 @@ describe('validateSchema', () => {
 
 		describe('When calling validateStack', () => {
 			it('Should fail with invalid value error', () => {
-				expect(() => validateStack(validNameStack)).toThrow('name contains an invalid value');
+				expect(() => validateStack(validNameStack, '.')).toThrow('name contains an invalid value');
 			});
 		});
 	});

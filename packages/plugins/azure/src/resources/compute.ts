@@ -13,7 +13,7 @@
 // limitations under the License.
 import * as pulumi from '@pulumi/pulumi';
 import { resources, web, containerregistry, eventgrid } from '@pulumi/azure-native';
-import { NitricContainerImage, NitricFunctionImage, StackFunction, StackContainer } from '@nitric/cli-common';
+import { NitricContainerImage, StackFunction, StackContainer } from '@nitric/cli-common';
 import { NitricEventgridTopic } from './topic';
 
 interface NitricComputeAzureAppServiceArgs {
@@ -40,7 +40,7 @@ interface NitricComputeAzureAppServiceArgs {
 	/**
 	 * A deployed Nitric Image
 	 */
-	image: NitricContainerImage | NitricFunctionImage;
+	image: NitricContainerImage;
 
 	/**
 	 * Deployed Nitric Service Topics

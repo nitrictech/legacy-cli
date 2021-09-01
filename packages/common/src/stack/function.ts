@@ -63,12 +63,12 @@ export class StackFunction<FuncExtensions = Record<string, any>> {
 	 * @returns
 	 */
 	getContext(): string {
-		const origCtx = this.descriptor.context || this.descriptor.handler;
+		const origCtx = this.descriptor.context || '.';
 		const ctxPath = path.join(this.stack.getDirectory(), origCtx);
 
 		if (!fs.existsSync(ctxPath)) {
 			throw new Error(
-				`function context '${origCtx}' for function '${this.name}' not found. Directory may have been renamed or removed, check 'context' and 'path' configuration for this function in the config file.`,
+				`function context '${origCtx}' for function '${this.name}' not found. Directory may have been renamed or removed, check 'context' and 'handler' configuration for this function in the config file.`,
 			);
 		}
 
@@ -80,7 +80,7 @@ export class StackFunction<FuncExtensions = Record<string, any>> {
 	 * @returns
 	 */
 	getContextRelativeDirectory(): string {
-		return this.descriptor.context ? this.descriptor.handler : '.';
+		return this.descriptor.handler;
 	}
 
 	/**

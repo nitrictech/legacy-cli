@@ -63,7 +63,7 @@ export function createNginxConfig(entrypoint: NamedObject<NitricEntrypoint>, sta
 
 	const sites = paths.filter((e) => e.type === 'site');
 	const apis = paths.filter((e) => e.type === 'api');
-	const services = paths.filter((e) => e.type === 'service');
+	const services = paths.filter((e) => ['function', 'container'].includes(e.type));
 
 	return `
 	events {}

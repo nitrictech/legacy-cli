@@ -15,7 +15,7 @@ import * as pulumi from '@pulumi/pulumi';
 import * as aws from '@pulumi/aws';
 import { OpenAPIV3 } from 'openapi-types';
 import { uniq } from 'lodash';
-import { NamedObject, NitricAPI } from '@nitric/cli-common';
+import { StackAPI } from '@nitric/cli-common';
 import { NitricComputeAWSLambda } from './compute';
 
 type method = 'get' | 'post' | 'put' | 'patch' | 'delete';
@@ -39,7 +39,7 @@ interface AwsExtentions {
 }
 
 interface NitricApiAwsApiGatewayArgs {
-	api: NamedObject<NitricAPI>;
+	api: StackAPI;
 	// TODO: Create more abstract func type here...
 	lambdas: NitricComputeAWSLambda[];
 }
@@ -67,9 +67,11 @@ export class NitricApiAwsApiGateway extends pulumi.ComponentResource {
 
 		this.name = name;
 
+		const openapi = api.document;
+
 		const targetNames = uniq(
-			Object.keys(api.paths).reduce((acc, p) => {
-				const path = api.paths[p]!;
+			Object.keys(openapi.paths).reduce((acc, p) => {
+				const path = openapi.paths[p]!;
 
 				return [
 					...acc,
@@ -88,8 +90,8 @@ export class NitricApiAwsApiGateway extends pulumi.ComponentResource {
 			.apply((nameArnPairs) => {
 				const transformedApi = {
 					...rest,
-					paths: Object.keys(api.paths).reduce((acc, pathKey) => {
-						const path = api.paths[pathKey]!;
+					paths: Object.keys(openapi.paths).reduce((acc, pathKey) => {
+						const path = openapi.paths[pathKey]!;
 						const newMethods = Object.keys(path)
 							.filter((k) => METHOD_KEYS.includes(k as method))
 							.reduce((acc, method) => {

@@ -16,7 +16,7 @@ import 'jest';
 import { RunGatewayTask } from '.';
 import Docker, { Container } from 'dockerode';
 import getPort from 'get-port';
-import { NamedObject, NitricAPI } from '@nitric/cli-common';
+import { StackAPI } from '@nitric/cli-common/lib/stack/api';
 import _ from 'stream-to-promise';
 
 jest.mock('get-port');
@@ -30,19 +30,18 @@ jest.mock('stream-to-promise', () => ({
 	},
 }));
 
+jest.mock('@nitric/cli-common/lib/stack/api');
+
 afterAll(() => {
 	jest.restoreAllMocks();
 });
 
-const MOCK_API: NamedObject<NitricAPI> = {
-	name: 'test',
-	openapi: '3.0.0',
-	info: {
-		title: 'test',
-		version: '1',
-	},
-	paths: {},
-};
+const MOCK_API = new StackAPI(null as any, 'api', 'api.yaml');
+Object.defineProperty(MOCK_API, 'document', {
+	get: jest.fn(() => ({
+		openapi: '3.0.0',
+	})),
+});
 
 describe('GatewayRunTask', () => {
 	let createContainerSpy: jest.SpyInstance;
