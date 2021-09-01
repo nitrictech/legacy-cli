@@ -89,11 +89,6 @@ export class StackFunction<FuncExtensions = Record<string, any>> {
 	getDirectory(): string {
 		const funcPath = path.join(this.getContext(), this.getContextRelativeDirectory());
 
-		if (!fs.existsSync(funcPath)) {
-			throw new Error(
-				`function directory '${this.descriptor.handler}' for function '${this.name}' not found. Directory may have been renamed or removed, check 'path' configuration for this function in the config file.`,
-			);
-		}
 		return funcPath;
 	}
 
