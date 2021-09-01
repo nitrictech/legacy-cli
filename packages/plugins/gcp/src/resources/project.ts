@@ -25,23 +25,23 @@ interface NitricGcpProjectArgs {
 // with the default set of services used by the GCP provider
 const ENABLE_SERVICE_APIS = [
 	// Enable IAM
-	"iam.googleapis.com",
+	'iam.googleapis.com',
 	// Enable cloud run
-	"run.googleapis.com",
+	'run.googleapis.com',
 	// Enable pubsub
-	"pubsub.googleapis.com",
+	'pubsub.googleapis.com',
 	// Enable cloud scheduler
-	"cloudscheduler.googleapis.com",
+	'cloudscheduler.googleapis.com',
 	// Enable cloud scheduler
-	"storage.googleapis.com",
+	'storage.googleapis.com',
 	// Enable Compute API (Networking/Load Balancing)
-	"compute.googleapis.com",
+	'compute.googleapis.com',
 	// Enable Container Registry API
-	"containerregistry.googleapis.com",
+	'containerregistry.googleapis.com',
 	// Enable firestore API
-	"firestore.googleapis.com",
+	'firestore.googleapis.com',
 	// Enable ApiGateway API
-	"apigateway.googleapis.com"
+	'apigateway.googleapis.com',
 ];
 
 /**
@@ -52,35 +52,40 @@ export class NitricGcpProject extends pulumi.ComponentResource {
 
 	constructor(name: string, args: NitricGcpProjectArgs, opts?: pulumi.ComponentResourceOptions) {
 		super('nitric:project:GcpProject', name, {}, opts);
-		const { 
-			project,
-			disableDependentServices = true, 
-			disableOnDestroy = false 
-		} = args;
+		const { project, disableDependentServices = true, disableOnDestroy = false } = args;
 
 		const defaultResourceOptions: pulumi.ResourceOptions = { parent: this };
 
 		// Create the services
-		this.services = ENABLE_SERVICE_APIS.map(api => 
-			new gcp.projects.Service(`${api}-enabled`, {
-				project: project.id,
-				service: api,
-				disableOnDestroy,
-				disableDependentServices,
-			}, defaultResourceOptions)
+		this.services = ENABLE_SERVICE_APIS.map(
+			(api) =>
+				new gcp.projects.Service(
+					`${api}-enabled`,
+					{
+						project: project.id,
+						service: api,
+						disableOnDestroy,
+						disableDependentServices,
+					},
+					defaultResourceOptions,
+				),
 		);
 
 		// Add ServiceAccount Token Creator Role to the default pubsub gservice account
 		// services-{projectNumber}@gcp-sa-pubsub.iam.gserviceaccount.com
-		new gcp.projects.IAMMember(`pubsub-token-creator`, {
-			role: 'roles/iam.serviceAccountTokenCreator',
-			member: pulumi.interpolate`serviceAccount:services-${project.number}@gcp-sa-pubsub.iam.gserviceaccount.com`,
-			project: project.id
-		}, {
-			...defaultResourceOptions,
-			// Only create this once the google managed service account is available
-			dependsOn: this.services,
-		});
+		new gcp.projects.IAMMember(
+			`pubsub-token-creator`,
+			{
+				role: 'roles/iam.serviceAccountTokenCreator',
+				member: pulumi.interpolate`serviceAccount:services-${project.number}@gcp-sa-pubsub.iam.gserviceaccount.com`,
+				project: project.id,
+			},
+			{
+				...defaultResourceOptions,
+				// Only create this once the google managed service account is available
+				dependsOn: this.services,
+			},
+		);
 
 		this.registerOutputs({
 			services: this.services,

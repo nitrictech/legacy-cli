@@ -68,7 +68,7 @@ export class NitricApiGcpApiGateway extends pulumi.ComponentResource {
 				}, svcs);
 
 			return svcs;
-		}, [] as NitricServiceCloudRun[]);
+		}, [] as NitricComputeCloudRun[]);
 
 		// Replace Nitric API Extensions with google api gateway extensions
 		const spec = pulumi.all(services.map((s) => s.url.apply((url) => `${s.name}||${url}`))).apply((nameUrlPairs) => {
@@ -140,16 +140,20 @@ export class NitricApiGcpApiGateway extends pulumi.ComponentResource {
 				// as hard constraint in GCP
 				accountId: `${name}-acct`.substr(0, 30),
 			},
-			defaultResourceOptions
+			defaultResourceOptions,
 		);
 
 		// Bind that IAM account as a member of all available service targets
-		targetServices.map(svc => {
-			new gcp.cloudrun.IamMember(`${name}-acct-binding`, {
-				service: svc.cloudrun.name,
-				member: pulumi.interpolate`serviceAccount:${apiInvoker.email}`,
-				role: 'roles/run.invoker'
-			}, defaultResourceOptions);
+		targetServices.map((svc) => {
+			new gcp.cloudrun.IamMember(
+				`${name}-acct-binding`,
+				{
+					service: svc.cloudrun.name,
+					member: pulumi.interpolate`serviceAccount:${apiInvoker.email}`,
+					role: 'roles/run.invoker',
+				},
+				defaultResourceOptions,
+			);
 		});
 
 		// Now we need to create the document provided and interpolate the deployed service targets
