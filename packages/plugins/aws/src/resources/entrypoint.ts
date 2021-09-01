@@ -90,7 +90,8 @@ export class NitricEntrypointCloudFront extends pulumi.ComponentResource {
 						},
 					};
 				}
-				case 'service': {
+				case 'container':
+				case 'function': {
 					const deployedService = lambdas.find((s) => s.name === target);
 
 					if (!deployedService) {

@@ -1567,7 +1567,7 @@ export const STACK_SCHEMA: JSONSchema7 = {
 							additionalProperties: false,
 						},
 					},
-					required: ['handler', 'context'],
+					required: ['handler'],
 					additionalProperties: false,
 				},
 			},

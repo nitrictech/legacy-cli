@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Task, Stack, mapObject, NitricFunctionImage, NitricContainerImage } from '@nitric/cli-common';
+import { Task, Stack, mapObject, NitricContainerImage } from '@nitric/cli-common';
 import * as pulumi from '@pulumi/pulumi';
 
 import { LocalWorkspace } from '@pulumi/pulumi/automation';
@@ -92,14 +92,7 @@ export class Deploy extends Task<DeployResult> {
 
 	async do(): Promise<DeployResult> {
 		const { stack, region } = this;
-		const {
-			topics = {},
-			buckets = {},
-			collections = {},
-			schedules = {},
-			apis = {},
-			entrypoints,
-		} = stack.asNitricStack();
+		const { topics = {}, buckets = {}, collections = {}, schedules = {}, entrypoints } = stack.asNitricStack();
 		// Use absolute path to log files, so it's easier for users to locate them if printed to the console.
 		const logFile = path.resolve(await stack.getLoggingFile('deploy-aws'));
 		const errorFile = path.resolve(await stack.getLoggingFile('error-aws'));
@@ -167,8 +160,8 @@ export class Deploy extends Task<DeployResult> {
 
 								return {
 									name: func.getName(),
-									image: new NitricFunctionImage(func.getName(), {
-										func,
+									image: new NitricContainerImage(func.getName(), {
+										unit: func,
 										server: authToken.proxyEndpoint,
 										username: authToken.userName,
 										password: authToken.password,
@@ -185,12 +178,12 @@ export class Deploy extends Task<DeployResult> {
 								return {
 									name: container.getName(),
 									image: new NitricContainerImage(container.getName(), {
-										container,
+										unit: container,
 										server: authToken.proxyEndpoint,
 										username: authToken.userName,
 										password: authToken.password,
 										imageName: repository.repositoryUrl,
-										nitricProvider: 'aws',
+										sourceImageName: container.getImageTagName('aws'),
 									}),
 									source: container,
 								};
@@ -204,7 +197,7 @@ export class Deploy extends Task<DeployResult> {
 								}),
 						);
 						// Deploy Nitric APIs
-						const deployedApis = mapObject(apis).map(
+						const deployedApis = stack.getApis().map(
 							(api) =>
 								new NitricApiAwsApiGateway(api.name, {
 									api,

@@ -117,7 +117,8 @@ export class NitricEntrypointGoogleCloudLB extends pulumi.ComponentResource {
 						backend,
 					};
 				}
-				case 'service': {
+				case 'container':
+				case 'function': {
 					const deployedFunction = services.find((s) => s.name === entrypointPath.target);
 
 					if (!deployedFunction) {

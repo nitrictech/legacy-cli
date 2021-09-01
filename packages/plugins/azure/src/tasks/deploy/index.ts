@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Stack, Task, mapObject, NitricFunctionImage, NitricContainerImage } from '@nitric/cli-common';
+import { Stack, Task, mapObject, NitricContainerImage } from '@nitric/cli-common';
 import { LocalWorkspace } from '@pulumi/pulumi/automation';
 import { resources, storage, web, containerregistry } from '@pulumi/azure-native';
 import * as pulumi from '@pulumi/pulumi';
@@ -51,14 +51,7 @@ export class Deploy extends Task<void> {
 
 	async do(): Promise<void> {
 		const { stack, orgName, adminEmail, region } = this;
-		const {
-			buckets = {},
-			apis = {},
-			topics = {},
-			schedules = {},
-			queues = {},
-			entrypoints = {},
-		} = stack.asNitricStack();
+		const { buckets = {}, topics = {}, schedules = {}, queues = {}, entrypoints = {} } = stack.asNitricStack();
 
 		// Use absolute path to log files, so it's easier for users to locate them if printed to the console.
 		const errorFile = path.resolve(await stack.getLoggingFile('error-azure'));
@@ -181,8 +174,8 @@ export class Deploy extends Task<void> {
 							deployedAzureApps = [
 								...stack.getFunctions().map((func) => {
 									// Deploy the lambdas image
-									const image = new NitricFunctionImage(`${func.getName()}-image`, {
-										func,
+									const image = new NitricContainerImage(`${func.getName()}-image`, {
+										unit: func,
 										imageName: pulumi.interpolate`${registry.loginServer}/${func.getImageTagName('azure')}`,
 										sourceImageName: func.getImageTagName('azure'),
 										username: adminUsername,
@@ -203,9 +196,9 @@ export class Deploy extends Task<void> {
 								...stack.getContainers().map((container) => {
 									// Deploy the lambdas image
 									const image = new NitricContainerImage(`${container.getName()}-image`, {
-										container,
+										unit: container,
 										imageName: pulumi.interpolate`${registry.loginServer}/${container.getImageTagName('azure')}`,
-										nitricProvider: 'azure',
+										sourceImageName: container.getImageTagName('azure'),
 										username: adminUsername,
 										password: adminPassword,
 										server: registry.loginServer,
@@ -232,7 +225,7 @@ export class Deploy extends Task<void> {
 							// schedules.map(s => createSchedule(resourceGroup, s))
 						}
 
-						const deployedApis = mapObject(apis).map(
+						const deployedApis = stack.getApis().map(
 							(a) =>
 								new NitricApiAzureApiManagement(a.name, {
 									resourceGroup,

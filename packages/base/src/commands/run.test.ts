@@ -138,13 +138,13 @@ describe('Given getContainerSubscriptions', () => {
 				...topicStack,
 				functions: {
 					'function-one': {
-						path: './function-one',
+						handler: './function-one',
 						triggers: {
 							topics: ['topic-one'],
 						},
 					},
 					'function-two': {
-						path: './function-one',
+						handler: './function-one',
 						triggers: {
 							topics: ['topic-two'],
 						},
@@ -277,10 +277,10 @@ describe('Given executing nitric run', () => {
 			name: 'test-stack',
 			functions: {
 				'dummy-func1': {
-					path: 'dummy-func1',
+					handler: 'dummy-func1',
 				},
 				'dummy-func2': {
-					path: 'dummy-func2',
+					handler: 'dummy-func2',
 				},
 			},
 		};

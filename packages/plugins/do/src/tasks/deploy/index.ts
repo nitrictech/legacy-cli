@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Task, Stack, mapObject, NitricFunctionImage, NitricContainerImage } from '@nitric/cli-common';
+import { Task, Stack, mapObject, NitricContainerImage } from '@nitric/cli-common';
 import * as pulumi from '@pulumi/pulumi';
 import { LocalWorkspace } from '@pulumi/pulumi/automation';
 import * as digitalocean from '@pulumi/digitalocean';
@@ -141,8 +141,8 @@ export class Deploy extends Task<DeployResults> {
 								...funcs.map((func) => {
 									return {
 										name: func.getName(),
-										image: new NitricFunctionImage(func.getName(), {
-											func,
+										image: new NitricContainerImage(func.getName(), {
+											unit: func,
 											sourceImageName: func.getImageTagName('do'),
 											...standardImageArgs(func.getName()),
 										}),
@@ -152,8 +152,8 @@ export class Deploy extends Task<DeployResults> {
 									return {
 										name: container.getName(),
 										image: new NitricContainerImage(container.getName(), {
-											container,
-											nitricProvider: 'do',
+											unit: container,
+											sourceImageName: container.getImageTagName('do'),
 											...standardImageArgs(container.getName()),
 										}),
 									};
@@ -179,8 +179,8 @@ export class Deploy extends Task<DeployResults> {
 									throw new Error(`Entrypoint [${name}] must contain a default path /`);
 								}
 
-								const servicePaths = normalizedPaths.filter(({ type }) => type === 'service');
-								const otherPaths = normalizedPaths.filter(({ type }) => type !== 'service');
+								const servicePaths = normalizedPaths.filter(({ type }) => ['function', 'service'].includes(type));
+								const otherPaths = normalizedPaths.filter(({ type }) => !['function', 'service'].includes(type));
 
 								if (otherPaths.length > 0) {
 									pulumi.log.warn(

@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { NitricAPI, NamedObject, Task, StackAPI, STAGING_API_DIR } from '@nitric/cli-common';
+import { Task, StackAPI, STAGING_API_DIR } from '@nitric/cli-common';
 import Docker, { Container, ContainerCreateOptions, Network, NetworkInspectInfo } from 'dockerode';
 import fs from 'fs';
 import getPort from 'get-port';
