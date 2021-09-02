@@ -12,10 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Repository, Task, Template } from '@nitric/cli-common';
+import { Repository, Stack, Task, Template } from '@nitric/cli-common';
 import fs from 'fs';
 import YAML from 'yaml';
 import path from 'path';
+import cli from 'cli-ux';
 
 const SAFE_NAME_PATTERN = /^(?!-)([a-zA-Z0-9-](?!-($|-)))*$/;
 
@@ -74,6 +75,16 @@ export class MakeStackTask extends Task<void> {
 
 			const template = repo.getTemplate(this.template.name);
 			await Template.copyTo(template, stackPath);
+
+			// Update stack name
+			try {
+				const stackFilePath = path.join(stackPath, './nitric.yaml');
+				const stack = await Stack.fromFile(stackFilePath);
+				stack.setName(stackName);
+				await Stack.writeTo(stack, stackFilePath);
+			} catch (nameUpdateError) {
+				cli.log(`stack created but failed to update stack name in nitric.yaml. Details: ${nameUpdateError.error}`);
+			}
 		} else {
 			// If no template is wanted, just create an empty stack file ready for manual editing
 			fs.writeFileSync(

@@ -84,7 +84,6 @@ export class Stack<
 	EntrypointExtensions = Record<string, any>,
 > {
 	private file: string;
-	private name: string;
 	private descriptor: NitricStack<
 		FunctionExtensions,
 		ContainerExtensions,
@@ -111,7 +110,6 @@ export class Stack<
 		>,
 		comments: comments = [],
 	) {
-		this.name = descriptor.name;
 		this.descriptor = descriptor;
 		this.file = file;
 		this.comments = comments;
@@ -121,7 +119,14 @@ export class Stack<
 	 * Return the stack name
 	 */
 	getName(): string {
-		return this.name;
+		return this.descriptor.name;
+	}
+
+	/**
+	 * Update the stack name
+	 */
+	setName(name: string): void {
+		this.descriptor.name = name;
 	}
 
 	/**
@@ -195,7 +200,7 @@ export class Stack<
 		const { functions = {} } = descriptor;
 
 		if (!functions[name]) {
-			throw new Error(`Stack ${this.name}, does not contain service ${name}`);
+			throw new Error(`Stack ${this.getName()}, does not contain service ${name}`);
 		}
 
 		return new StackFunction(this, name, functions[name]);
@@ -221,7 +226,7 @@ export class Stack<
 		const { apis = {} } = descriptor;
 
 		if (!apis[name]) {
-			throw new Error(`Stack ${this.name}, does not contain service ${name}`);
+			throw new Error(`Stack ${this.getName()}, does not contain service ${name}`);
 		}
 
 		return new StackAPI(this, name, apis[name]);
@@ -271,7 +276,7 @@ export class Stack<
 		const { containers = {} } = descriptor;
 
 		if (!containers[name]) {
-			throw new Error(`Stack ${this.name}, does not contain container ${name}`);
+			throw new Error(`Stack ${this.getName()}, does not contain container ${name}`);
 		}
 
 		return new StackContainer(this, name, containers[name]);
@@ -303,7 +308,7 @@ export class Stack<
 	 * Get the directory used to perform build operations for this stack and its resources
 	 */
 	getStagingDirectory(): string {
-		return path.join(STAGING_DIR, this.name);
+		return path.join(STAGING_DIR, this.getName());
 	}
 
 	/**
