@@ -16,7 +16,6 @@ import path from 'path';
 import { NitricFunction, NitricContainer, NitricStack } from '../types';
 import fs from 'fs';
 import YAML from 'yaml';
-import { Template } from '../templates';
 import { STAGING_DIR } from '../paths';
 import { findFileRead } from '../utils';
 import { StackSite, StackFunction, StackContainer } from '.';
@@ -322,11 +321,6 @@ export class Stack<
 		return dir;
 	}
 
-	async hasTemplate(templateName: string): Promise<boolean> {
-		const templateDir = await this.getTemplatesDirectory();
-		return fs.existsSync(path.join(templateDir, templateName));
-	}
-
 	/**
 	 * Create the nitric directory if it doesn't exist and return its path
 	 */
@@ -339,35 +333,6 @@ export class Stack<
 	 */
 	async makeLoggingDirectory(): Promise<string> {
 		return await this.makeRelativeDirectory(`./${NITRIC_DIRECTORY}/logs/`);
-	}
-
-	async makeTemplatesDirectory(): Promise<string> {
-		return await this.makeRelativeDirectory(`./${NITRIC_DIRECTORY}/templates/`);
-	}
-
-	async getTemplatesDirectory(): Promise<string> {
-		return await this.makeTemplatesDirectory();
-	}
-
-	/**
-	 * Pulls a template for local versioning as part of this stack
-	 * @param template
-	 */
-	async pullTemplate(template: Template): Promise<void> {
-		const templateDir = await this.getTemplatesDirectory();
-		const templatePath = path.join(templateDir, template.getFullName());
-		await Template.copyTo(template, templatePath);
-	}
-
-	async getTemplate(templateName: string): Promise<Template> {
-		const hasTemplate = await this.hasTemplate(templateName);
-		if (hasTemplate) {
-			const [repoName, tName] = templateName.split('/');
-			const templatesDir = await this.getTemplatesDirectory();
-			return new Template(repoName, tName, 'any', path.join(templatesDir, templateName));
-		} else {
-			throw new Error(`Stack does not have template: ${templateName}`);
-		}
 	}
 
 	/**
