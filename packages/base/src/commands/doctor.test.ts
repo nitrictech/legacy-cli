@@ -17,13 +17,13 @@ import Doctor from './doctor';
 import which from 'which';
 import fs from 'fs';
 import cli from 'cli-ux';
-import { Repository, Preferences } from '@nitric/cli-common';
+import { Preferences } from '@nitric/cli-common';
 import { InstallPulumi, InstallDocker } from '../tasks/doctor';
-import { UpdateStoreTask } from '../tasks/store/update';
-import { AddRepositoryTask } from '../tasks/repository/add';
 
 beforeAll(() => {
+	// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 	Preferences.requiresInit = () => false;
+	// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 	Preferences.fromDefault = async () =>
 		new Preferences({
 			analyticsEnabled: false,
@@ -41,8 +41,6 @@ describe('Doctor Command:', () => {
 		jest.mock('inquirer');
 		jest.mock('@nitric/cli-common');
 		jest.mock('../tasks/doctor');
-		jest.mock('../tasks/store/update');
-		jest.mock('../tasks/repository/add');
 
 		tableSpy = jest.spyOn(cli, 'table').mockReturnValue();
 		infoSpy = jest.spyOn(cli, 'info').mockReturnValue();
@@ -55,21 +53,15 @@ describe('Doctor Command:', () => {
 	describe('Given all required software is already installed', () => {
 		// Setup the mocks
 		let whichSpy: jest.SpyInstance;
-		let fsSpy: jest.SpyInstance;
-		let repoSpy: jest.SpyInstance;
 
 		beforeAll(() => {
 			whichSpy = jest.spyOn(which, 'sync').mockReturnValue(true); // Installed.
-			fsSpy = jest.spyOn(fs, 'existsSync').mockReturnValue(true);
-			repoSpy = jest.spyOn(Repository, 'fromDefaultDirectory').mockReturnValue([new Repository('test', 'test', [])]);
 		});
 
 		afterAll(() => {
 			whichSpy.mockReset();
-			fsSpy.mockReset();
 			tableSpy.mockReset();
 			infoSpy.mockReset();
-			repoSpy.mockReset();
 		});
 
 		describe('When calling `nitric doctor`', () => {
@@ -80,14 +72,6 @@ describe('Doctor Command:', () => {
 
 			it('Should check the software is installed', () => {
 				expect(whichSpy).toBeCalledTimes(2); // Pulumi, Docker
-			});
-
-			it('Should check the store is installed', () => {
-				expect(fsSpy).toBeCalledTimes(1);
-			});
-
-			it('Should check the repo is installed', () => {
-				expect(repoSpy).toBeCalled();
 			});
 
 			it('Should list the software', () => {
@@ -105,19 +89,16 @@ describe('Doctor Command:', () => {
 		let whichSpy: jest.SpyInstance;
 		let fsSpy: jest.SpyInstance;
 		let confirmSpy: jest.SpyInstance;
-		let repoSpy: jest.SpyInstance;
 
 		beforeAll(() => {
 			whichSpy = jest.spyOn(which, 'sync').mockReturnValue(false); // Not installed.
 			fsSpy = jest.spyOn(fs, 'existsSync').mockReturnValue(false);
-			repoSpy = jest.spyOn(Repository, 'fromDefaultDirectory').mockReturnValue([]);
 			confirmSpy = jest.spyOn(cli, 'confirm');
 		});
 
 		afterAll(() => {
 			whichSpy.mockReset();
 			fsSpy.mockReset();
-			repoSpy.mockReset();
 			tableSpy.mockReset();
 			infoSpy.mockReset();
 			confirmSpy.mockReset();
@@ -127,16 +108,12 @@ describe('Doctor Command:', () => {
 			describe('When the user wants to install the software', () => {
 				let installPulumiSpy: jest.SpyInstance;
 				let installDockerSpy: jest.SpyInstance;
-				let addRepoSpy: jest.SpyInstance;
-				let updateStoreSpy: jest.SpyInstance;
 
 				// Run the command
 				beforeAll(async () => {
 					confirmSpy.mockResolvedValue(true); // Yes, install it
 					installPulumiSpy = jest.spyOn(InstallPulumi.prototype, 'run').mockResolvedValue();
 					installDockerSpy = jest.spyOn(InstallDocker.prototype, 'run').mockResolvedValue();
-					addRepoSpy = jest.spyOn(AddRepositoryTask.prototype, 'run').mockResolvedValue();
-					updateStoreSpy = jest.spyOn(UpdateStoreTask.prototype, 'run').mockResolvedValue();
 
 					await new Doctor([], null as any).run();
 				});
@@ -149,8 +126,6 @@ describe('Doctor Command:', () => {
 
 					installPulumiSpy.mockRestore();
 					installDockerSpy.mockRestore();
-					addRepoSpy.mockRestore();
-					updateStoreSpy.mockRestore();
 				});
 
 				it('Should check the software is installed', () => {
@@ -162,13 +137,9 @@ describe('Doctor Command:', () => {
 				});
 
 				it('Should ask to install the software', () => {
-					expect(confirmSpy).toBeCalledTimes(2);
+					expect(confirmSpy).toBeCalledTimes(1);
 
 					expect(confirmSpy).toHaveBeenNthCalledWith(1, expect.stringContaining('install missing software?'));
-					expect(confirmSpy).toHaveBeenNthCalledWith(
-						2,
-						expect.stringContaining('Install the official template repositories?'),
-					);
 				});
 			});
 

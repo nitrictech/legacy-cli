@@ -20,7 +20,7 @@ export const NITRIC_HOME = process.env.NITRIC_HOME || path.join(USER_HOME, '.nit
 export const TMP_DIR = path.join(NITRIC_HOME, 'tmp');
 export const STAGING_DIR = path.join(NITRIC_HOME, 'staging');
 export const STAGING_API_DIR = path.join(STAGING_DIR, 'apis');
-export const TEMPLATE_DIR = path.join(NITRIC_HOME, 'templates');
+export const TEMPLATE_DIR = path.join(NITRIC_HOME, 'stack-templates');
 export const LOG_DIR = path.join(NITRIC_HOME, 'logs');
 export const PREFERENCES_FILE = path.join(NITRIC_HOME, 'preferences.yaml');
 

@@ -12,15 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { BaseCommand, Task, Repository, NITRIC_REPOSITORIES_FILE, block } from '@nitric/cli-common';
+import { BaseCommand, Task, block } from '@nitric/cli-common';
 import which from 'which';
 import cli from 'cli-ux';
 import emoji from 'node-emoji';
 import chalk from 'chalk';
 import stream from 'stream';
-import fs from 'fs';
-import { InstallPulumi, InstallDocker, UpdateStoreTask, AddRepositoryTask } from '../tasks';
-import { OFFICIAL_REPOSITORIES } from '../constants';
+import { InstallPulumi, InstallDocker } from '../tasks';
 
 interface Software {
 	name: string;
@@ -82,30 +80,15 @@ export default class Doctor extends BaseCommand {
 			installed: !!which.sync(software.name, { nothrow: true }),
 		}));
 
-		// Check for missing store and templates
-		const repos = Repository.fromDefaultDirectory();
-		const storeExists = fs.existsSync(NITRIC_REPOSITORIES_FILE);
-		const missingTemplates = !repos.length || !storeExists;
-
 		// Display doctor results
-		cli.table(
-			[
-				...statuses,
-				{
-					name: 'setup a nitric repository',
-					installed: !missingTemplates,
-					icon: ':rocket:',
-				},
-			],
-			{
-				'Doctor summary:': {
-					get: ({ name, icon, installed }): string =>
-						installed
-							? chalk.greenBright(emoji.emojify(`${icon} ${name}`))
-							: chalk.redBright(emoji.emojify(`${icon} ${name}`)),
-				},
+		cli.table(statuses, {
+			'Doctor summary:': {
+				get: ({ name, icon, installed }): string =>
+					installed
+						? chalk.greenBright(emoji.emojify(`${icon} ${name}`))
+						: chalk.redBright(emoji.emojify(`${icon} ${name}`)),
 			},
-		);
+		});
 
 		const missingSoftware = statuses.filter(({ installed }) => !installed);
 
@@ -128,23 +111,6 @@ export default class Doctor extends BaseCommand {
 
 				exit = true;
 				cli.log();
-			}
-		}
-
-		if (missingTemplates) {
-			const autoFixRepos = await cli.confirm('Install the official template repositories? [y/n]');
-
-			if (autoFixRepos) {
-				await new UpdateStoreTask().run();
-				await Promise.all(OFFICIAL_REPOSITORIES.map((repo) => new AddRepositoryTask({ alias: repo }).run()));
-			} else {
-				cli.info(
-					block`At least one template repository is required, make a new project or run ${chalk.cyan(
-						'nitric templates:repos:add',
-					)} to install.`,
-				);
-
-				exit = true;
 			}
 		}
 

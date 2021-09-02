@@ -18,17 +18,18 @@ import fs from 'fs';
 import path from 'path';
 import YAML from 'yaml';
 import rimraf from 'rimraf';
-import { gitP } from 'simple-git';
+import simpleGit, { CheckRepoActions, SimpleGit } from 'simple-git';
 import which from 'which';
+
+// TODO: make this configurable or extensible.
+const STACK_TEMPLATE_REPO_URI = 'https://github.com/nitrictech/stack-templates';
 
 /**
  * Represents a template description inside a repository file
  */
 interface TemplateDescriptor {
 	name: string;
-	lang: string;
 	path: string;
-	codeDir?: string;
 }
 
 /**
@@ -66,9 +67,7 @@ export class Repository {
 	 * Get all available templates in this repository
 	 */
 	getTemplates(): Template[] {
-		return this.templateDescriptors.map(
-			(td) => new Template(this.name, td.name, td.lang, path.join(this.path, td.path)),
-		);
+		return this.templateDescriptors.map((td) => new Template(this.name, td.name, path.join(this.path, td.path)));
 	}
 
 	/**
@@ -96,7 +95,7 @@ export class Repository {
 			throw new Error(`Template ${templateName} does not exist in repository ${this.name}`);
 		}
 
-		return new Template(this.name, descriptor.name, descriptor.lang, path.join(this.path, descriptor.path));
+		return new Template(this.name, descriptor.name, path.join(this.path, descriptor.path));
 	}
 
 	/**
@@ -154,7 +153,7 @@ export class Repository {
 	 * @param name to give the repository locally
 	 * @param url containing the repository git repository
 	 */
-	static async checkout(name: string, url: string): Promise<Repository> {
+	static async refreshCache(name: string, url: string): Promise<Repository> {
 		const repositoryPath = path.join(TEMPLATE_DIR, `./${name}`);
 
 		// Do a fresh checkout every time
@@ -171,14 +170,29 @@ export class Repository {
 		}
 
 		try {
-			const git = gitP(repositoryPath);
-			await git.clone(url, '.', {
-				'--depth': 1,
-			});
+			// TODO: consider using HTTP instead of Git to reduce the CLI's dependency on external programs.
+			const git: SimpleGit = simpleGit(repositoryPath);
+			// Check whether the repo exists, then pull to get the latest or clone to create fresh
+			if (await git.checkIsRepo(CheckRepoActions.BARE)) {
+				await git.pull({
+					'--depth': 1,
+				});
+			} else {
+				await git.clone(url, '.', {
+					'--depth': 1,
+				});
+			}
 		} catch (error) {
-			throw new Error(`Failed to add repository ${url}.\nDetails: ${error}`);
+			throw new Error(`Failed to download template repository ${url}.\nDetails: ${error}`);
 		}
 
 		return Repository.fromFile(path.join(repositoryPath, './repository.yaml'));
+	}
+
+	/**
+	 * Create or updates the locally installed cache of the Official Nitric Stack Repository
+	 */
+	static async installOrUpdateOfficialRepository(): Promise<Repository> {
+		return Repository.refreshCache('official', STACK_TEMPLATE_REPO_URI);
 	}
 }

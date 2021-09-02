@@ -94,12 +94,15 @@ export abstract class BaseCommand extends Command {
 			return await this.do();
 		} catch (e) {
 			cmd.error(e, true);
-			const stack = await Stack.fromDirectory('.');
-			const file = await stack.getLoggingFile(`error-${this.ctor.name}`);
-			fs.appendFileSync(file, e.stack);
-
-			console.log('An unexpected error has occured: ' + e.message);
-			throw new Error(`See ${file} for details`); // re-throw so users get error feedback and can report issues.
+			try {
+				const stack = await Stack.fromDirectory('.');
+				const file = await stack.getLoggingFile(`error-${this.ctor.name}`);
+				fs.appendFileSync(file, e.stack);
+				console.log('An unexpected error has occurred: ' + e.message);
+				throw new Error(`See ${file} for details`); // re-throw so users get error feedback and can report issues.
+			} catch (writeError) {
+				throw e;
+			}
 		} finally {
 			await cmd.stop();
 		}
