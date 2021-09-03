@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ContainerImage, Task } from '@nitric/cli-common';
+import { ContainerImage, Stack, Task } from '@nitric/cli-common';
 import getPort from 'get-port';
 import Docker, { Container, ContainerCreateOptions, Network, NetworkInspectInfo } from 'dockerode';
 import { createNitricLogDir, functionLogFilePath } from '../../utils';
@@ -23,7 +23,7 @@ import path from 'path';
 
 const GATEWAY_PORT = 9001;
 
-const NITRIC_RUN_DIR = path.join(process.cwd(), './.nitric/run');
+const NITRIC_RUN_DIR = './.nitric/run';
 // NOTE: octal notation is important here!!!
 const NITRIC_RUN_PERM = 0o777;
 
@@ -31,6 +31,7 @@ const NITRIC_RUN_PERM = 0o777;
  * Options when running local functions/containers for development/testing
  */
 export interface RunContainerTaskOptions {
+	stack: Stack;
 	image: ContainerImage;
 	port?: number | undefined;
 	subscriptions?: Record<string, string[]>;
@@ -42,6 +43,7 @@ export interface RunContainerTaskOptions {
  * Run a Nitric Function or Container locally for development or testing
  */
 export class RunContainerTask extends Task<Container> {
+	private stack: Stack;
 	private image: ContainerImage;
 	private port: number | undefined;
 	private docker: Docker;
@@ -49,8 +51,9 @@ export class RunContainerTask extends Task<Container> {
 	private subscriptions: Record<string, string[]> | undefined;
 	private runId: string;
 
-	constructor({ image, port, network, subscriptions, runId }: RunContainerTaskOptions, docker?: Docker) {
+	constructor({ stack, image, port, network, subscriptions, runId }: RunContainerTaskOptions, docker?: Docker) {
 		super(`${image.name} - ${image.id.substring(0, 12)}`);
+		this.stack = stack;
 		this.image = image;
 		this.port = port;
 		this.docker = docker || new Docker();
@@ -110,10 +113,9 @@ export class RunContainerTask extends Task<Container> {
 			};
 		}
 
-		const nitricRunDir = path.join(NITRIC_RUN_DIR);
+		const nitricRunDir = path.join(this.stack.getDirectory(), NITRIC_RUN_DIR);
 
 		fs.mkdirSync(nitricRunDir, { recursive: true });
-
 		fs.chmodSync(nitricRunDir, NITRIC_RUN_PERM);
 
 		// Add storage volume, if configured

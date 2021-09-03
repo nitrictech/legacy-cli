@@ -112,6 +112,7 @@ export function getPortRange(minPort: number = MIN_PORT, maxPort: number = MAX_P
  * @param network docker network to use with the function containers
  */
 export function createContainerTasks(
+	stack: Stack,
 	functions: RunContainerTaskOptions[],
 	docker: Docker,
 	network: Docker.Network,
@@ -121,6 +122,7 @@ export function createContainerTasks(
 			new RunContainerTask(
 				{
 					...func,
+					stack,
 					network: network,
 				},
 				docker,
@@ -198,9 +200,13 @@ export function createGatewayContainerRunTasks(
  * Listrception: Creates source sub-tasks for the 'Running Containers' listr task (see createContainerTasks)
  * which will be run in parallel
  */
-export function createContainerRunTasks(containers: RunContainerTaskOptions[], docker: Docker): (ctx, task) => Listr {
+export function createContainerRunTasks(
+	stack: Stack,
+	containers: RunContainerTaskOptions[],
+	docker: Docker,
+): (ctx, task) => Listr {
 	return (ctx, task: TaskWrapper<unknown, typeof ListrRenderer>): Listr => {
-		return task.newListr(createContainerTasks(containers, docker, ctx.network), {
+		return task.newListr(createContainerTasks(stack, containers, docker, ctx.network), {
 			concurrent: true,
 			// Don't fail all on a single function failure...
 			exitOnError: false,
@@ -244,7 +250,7 @@ export function createRunTasks(
 			// Run the functions & containers, attached to the network
 			{
 				title: 'Running Functions & Containers',
-				task: createContainerRunTasks(containers, docker),
+				task: createContainerRunTasks(stack, containers, docker),
 			},
 			// Start the APIs, to route requests to the containers
 			{
