@@ -25,13 +25,12 @@ import {
 import { Listr, ListrTask, ListrContext, ListrRenderer } from 'listr2';
 import path from 'path';
 import execa from 'execa';
-import Docker, { Container, Network, Volume } from 'dockerode';
+import Docker, { Container, Network } from 'dockerode';
 import getPort from 'get-port';
 import readline from 'readline';
 
 import {
 	CreateNetworkTask,
-	CreateVolumeTask,
 	RunEntrypointTask,
 	RunEntrypointTaskOptions,
 	RunGatewayTask,
@@ -44,7 +43,6 @@ import crypto from 'crypto';
 
 interface KnownListrCtx {
 	network: Network;
-	volume: Volume;
 }
 
 type ListrCtx = { [key: string]: any } & KnownListrCtx & ListrContext;
@@ -112,13 +110,11 @@ export function getPortRange(minPort: number = MIN_PORT, maxPort: number = MAX_P
  * @param functions to run
  * @param docker handle to use when running the functions
  * @param network docker network to use with the function containers
- * @param volume docker volume to mount in the function containers
  */
 export function createContainerTasks(
 	functions: RunContainerTaskOptions[],
 	docker: Docker,
 	network: Docker.Network,
-	volume: Docker.Volume,
 ): Array<ListrTask> {
 	return functions.map((func) =>
 		wrapTaskForListr(
@@ -126,7 +122,6 @@ export function createContainerTasks(
 				{
 					...func,
 					network: network,
-					volume: volume,
 				},
 				docker,
 			),
@@ -205,7 +200,7 @@ export function createGatewayContainerRunTasks(
  */
 export function createContainerRunTasks(containers: RunContainerTaskOptions[], docker: Docker): (ctx, task) => Listr {
 	return (ctx, task: TaskWrapper<unknown, typeof ListrRenderer>): Listr => {
-		return task.newListr(createContainerTasks(containers, docker, ctx.network, ctx.volume), {
+		return task.newListr(createContainerTasks(containers, docker, ctx.network), {
 			concurrent: true,
 			// Don't fail all on a single function failure...
 			exitOnError: false,
@@ -246,15 +241,7 @@ export function createRunTasks(
 		[
 			// Create ephemeral docker network for this run
 			wrapTaskForListr(new CreateNetworkTask({ name: `${stack.getName()}-net-${runId}`, docker }), 'network'),
-			// Create ephemeral docker volume for this run
-			wrapTaskForListr(
-				new CreateVolumeTask({
-					volumeName: `${stack.getName()}-vol-${runId}`,
-					dockerClient: docker,
-				}),
-				'volume',
-			),
-			// Run the functions & containers, attached to the network and volume
+			// Run the functions & containers, attached to the network
 			{
 				title: 'Running Functions & Containers',
 				task: createContainerRunTasks(containers, docker),
@@ -304,7 +291,6 @@ export function sortImages(images: ContainerImage[]): ContainerImage[] {
  * Extends the build command to run the built docker images locally for testing.
  */
 export default class Run extends BaseCommand {
-	private volume: Volume | undefined = undefined;
 	private network: Network | undefined = undefined;
 
 	static description = 'builds and runs a project locally for testing';
@@ -383,7 +369,7 @@ export default class Run extends BaseCommand {
 			}),
 		);
 
-		// Capture the results of running tasks to setup docker network, volume, functions and containers
+		// Capture the results of running tasks to setup docker network, functions and containers
 		const runTaskResults = await createRunTasks(
 			stack,
 			runContainersTaskOptions,
@@ -394,13 +380,8 @@ export default class Run extends BaseCommand {
 		).run();
 
 		// Capture created docker resources for cleanup on run termination (see cleanup())
-		const {
-			network: newNetwork,
-			volume: newVolume,
-			...results
-		}: { [key: string]: Container } & { network: Network; volume: Volume } = runTaskResults;
+		const { network: newNetwork, ...results }: { [key: string]: Container } & { network: Network } = runTaskResults;
 
-		this.volume = newVolume;
 		this.network = newNetwork;
 		this.runningContainers = results;
 
@@ -439,7 +420,7 @@ export default class Run extends BaseCommand {
 	 * Cleanup created docker assets for this instance of Run
 	 */
 	cleanup = async (): Promise<void> => {
-		const { network, volume, runningContainers: runResults } = this;
+		const { network, runningContainers: runResults } = this;
 
 		try {
 			if (runResults) {
@@ -476,14 +457,6 @@ export default class Run extends BaseCommand {
 				}
 			}
 
-			// Remove the docker volume if one was created
-			if (volume) {
-				try {
-					await volume.remove();
-				} catch (error) {
-					cli.log('Volume remove error:', error);
-				}
-			}
 			cli.action.stop();
 		} catch (error) {
 			cli.error('Unexpected error:', error);

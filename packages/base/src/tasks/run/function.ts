@@ -63,7 +63,7 @@ export class RunContainerTask extends Task<Container> {
 	}
 
 	async do(): Promise<Container> {
-		const { network, subscriptions, volume, runId } = this;
+		const { network, subscriptions, runId } = this;
 
 		if (!this.port) {
 			// Find any open port if none provided.
@@ -121,21 +121,19 @@ export class RunContainerTask extends Task<Container> {
 
 		// Add storage volume, if configured
 		const MOUNT_POINT = NITRIC_DEV_VOLUME;
-		if (volume) {
-			dockerOptions['Volumes'] = {
-				[MOUNT_POINT]: {},
-			};
-			dockerOptions['HostConfig'] = {
-				...(dockerOptions['HostConfig'] || {}),
-				Mounts: [
-					{
-						Target: MOUNT_POINT,
-						Source: nitricRunDir, // volume.name,
-						Type: 'bind',
-					},
-				],
-			};
-		}
+		dockerOptions['Volumes'] = {
+			[MOUNT_POINT]: {},
+		};
+		dockerOptions['HostConfig'] = {
+			...(dockerOptions['HostConfig'] || {}),
+			Mounts: [
+				{
+					Target: MOUNT_POINT,
+					Source: nitricRunDir, // volume.name,
+					Type: 'bind',
+				},
+			],
+		};
 
 		const imageRunLogFile = functionLogFilePath(this.name);
 
