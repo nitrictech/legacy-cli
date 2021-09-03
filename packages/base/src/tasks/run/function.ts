@@ -19,8 +19,13 @@ import { createNitricLogDir, functionLogFilePath } from '../../utils';
 import fs from 'fs';
 import { DOCKER_LABEL_RUN_ID } from '../../constants';
 import { NITRIC_DEV_VOLUME } from './constants';
+import path from 'path';
 
 const GATEWAY_PORT = 9001;
+
+const NITRIC_RUN_DIR = path.join(process.cwd(), './.nitric/run');
+// NOTE: octal notation is important here!!!
+const NITRIC_RUN_PERM = 0o777;
 
 /**
  * Options when running local functions/containers for development/testing
@@ -108,6 +113,12 @@ export class RunContainerTask extends Task<Container> {
 			};
 		}
 
+		const nitricRunDir = path.join(NITRIC_RUN_DIR);
+
+		fs.mkdirSync(nitricRunDir, { recursive: true });
+
+		fs.chmodSync(nitricRunDir, NITRIC_RUN_PERM);
+
 		// Add storage volume, if configured
 		const MOUNT_POINT = NITRIC_DEV_VOLUME;
 		if (volume) {
@@ -119,8 +130,8 @@ export class RunContainerTask extends Task<Container> {
 				Mounts: [
 					{
 						Target: MOUNT_POINT,
-						Source: volume.name,
-						Type: 'volume',
+						Source: nitricRunDir, // volume.name,
+						Type: 'bind',
 					},
 				],
 			};
