@@ -2,6 +2,8 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.85](https://github.com/nitrictech/cli/compare/v0.0.84...v0.0.85) (2021-09-03)
+
 ### [0.0.84](https://github.com/nitrictech/cli/compare/v0.0.82...v0.0.84) (2021-08-26)
 
 
