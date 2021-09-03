@@ -236,9 +236,6 @@ describe('Given a Nitric function is being run locally as a source', () => {
 					name: 'test-function',
 				},
 				// port: 3000, subscriptions: '', volume: '',
-				volume: {
-					name: 'dummy-volume',
-				} as any,
 				runId: 'test-run',
 			});
 
@@ -259,8 +256,8 @@ describe('Given a Nitric function is being run locally as a source', () => {
 						Mounts: [
 							{
 								Target: '/nitric/',
-								Source: 'dummy-volume',
-								Type: 'volume',
+								Source: expect.stringContaining('.nitric/run'),
+								Type: 'bind',
 							},
 						],
 					}),

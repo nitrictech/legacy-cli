@@ -14,7 +14,7 @@
 
 import { ContainerImage, Task } from '@nitric/cli-common';
 import getPort from 'get-port';
-import Docker, { Container, ContainerCreateOptions, Network, NetworkInspectInfo, Volume } from 'dockerode';
+import Docker, { Container, ContainerCreateOptions, Network, NetworkInspectInfo } from 'dockerode';
 import { createNitricLogDir, functionLogFilePath } from '../../utils';
 import fs from 'fs';
 import { DOCKER_LABEL_RUN_ID } from '../../constants';
@@ -35,7 +35,6 @@ export interface RunContainerTaskOptions {
 	port?: number | undefined;
 	subscriptions?: Record<string, string[]>;
 	network?: Network;
-	volume?: Volume;
 	runId: string;
 }
 
@@ -47,17 +46,15 @@ export class RunContainerTask extends Task<Container> {
 	private port: number | undefined;
 	private docker: Docker;
 	private network: Network | undefined;
-	private volume: Volume | undefined;
 	private subscriptions: Record<string, string[]> | undefined;
 	private runId: string;
 
-	constructor({ image, port, network, subscriptions, volume, runId }: RunContainerTaskOptions, docker?: Docker) {
+	constructor({ image, port, network, subscriptions, runId }: RunContainerTaskOptions, docker?: Docker) {
 		super(`${image.name} - ${image.id.substring(0, 12)}`);
 		this.image = image;
 		this.port = port;
 		this.docker = docker || new Docker();
 		this.network = network;
-		this.volume = volume;
 		this.subscriptions = subscriptions;
 		this.runId = runId;
 	}
