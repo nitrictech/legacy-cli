@@ -46,6 +46,7 @@ export class BuildFunctionTask extends Task<ContainerImage> {
 		try {
 			const packProcess = execa.command(oneLine`
 				docker run
+					--rm
 					--privileged=true
 					-v /var/run/docker.sock:/var/run/docker.sock
 					-v ${this.service.getContext()}:/workspace -w /workspace
