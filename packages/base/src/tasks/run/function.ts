@@ -18,6 +18,7 @@ import Docker, { Container, ContainerCreateOptions, Network, NetworkInspectInfo,
 import { createNitricLogDir, functionLogFilePath } from '../../utils';
 import fs from 'fs';
 import { DOCKER_LABEL_RUN_ID } from '../../constants';
+import { NITRIC_DEV_VOLUME } from './constants';
 
 const GATEWAY_PORT = 9001;
 
@@ -76,7 +77,7 @@ export class RunContainerTask extends Task<Container> {
 
 		const dockerOptions = {
 			name: `${this.image.name}-${runId}`,
-			Env: [`LOCAL_SUBSCRIPTIONS=${JSON.stringify(subscriptions)}`],
+			Env: [`LOCAL_SUBSCRIPTIONS=${JSON.stringify(subscriptions)}`, `NITRIC_DEV_VOLUME=${NITRIC_DEV_VOLUME}`],
 			ExposedPorts: {
 				[`${GATEWAY_PORT}/tcp`]: {},
 			},
@@ -108,7 +109,7 @@ export class RunContainerTask extends Task<Container> {
 		}
 
 		// Add storage volume, if configured
-		const MOUNT_POINT = '/nitric/';
+		const MOUNT_POINT = NITRIC_DEV_VOLUME;
 		if (volume) {
 			dockerOptions['Volumes'] = {
 				[MOUNT_POINT]: {},
