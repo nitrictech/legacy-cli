@@ -24,6 +24,10 @@ const BaseFlags = {
 		char: 'f',
 		default: 'nitric.yaml',
 	}),
+	destroy: flags.boolean({
+		char: 'd',
+		description: 'destroy documents, buckets and secrets when stack is torn down',
+	}),
 };
 
 /**
@@ -78,7 +82,7 @@ export default class DownCmd extends BaseCommand {
 			promptFlags = await inquirer.prompt(prompts);
 		}
 
-		const { file } = { ...flags, ...promptFlags };
+		const { file = 'nitric.yaml', destroy = false } = { ...flags, ...promptFlags };
 		const stackDefinitionPath = path.join(dir, file);
 		const stack: NitricStack = await (await Stack.fromFile(stackDefinitionPath)).asNitricStack();
 
@@ -86,7 +90,8 @@ export default class DownCmd extends BaseCommand {
 			[
 				wrapTaskForListr(
 					new Down({
-						stackName: stack.name,
+						stack: stack,
+						destroy,
 					}),
 				),
 			],
