@@ -16,14 +16,14 @@ import * as aws from '@pulumi/aws';
 import { NitricEntrypoint } from '@nitric/cli-common';
 import { NitricSiteS3 } from './site';
 import { NitricApiAwsApiGateway } from './api';
-import { NitricServiceAWSLambda } from './service';
+import { NitricComputeAWSLambda } from './compute';
 
 interface NitricEntrypointCloudfrontArgs {
 	stackName: string;
 	entrypoint: NitricEntrypoint;
 	sites: NitricSiteS3[];
 	apis: NitricApiAwsApiGateway[];
-	services: NitricServiceAWSLambda[];
+	lambdas: NitricComputeAWSLambda[];
 }
 
 /**
@@ -42,7 +42,7 @@ export class NitricEntrypointCloudFront extends pulumi.ComponentResource {
 		super('nitric:entrypoints:CloudFront', name, {}, opts);
 
 		const defaultResourceOptions: pulumi.ResourceOptions = { parent: this };
-		const { entrypoint, stackName, sites, apis, services } = args;
+		const { entrypoint, stackName, sites, apis, lambdas } = args;
 		const oai = new aws.cloudfront.OriginAccessIdentity(`${stackName}OAI`, {}, defaultResourceOptions);
 
 		this.name = name;
@@ -90,8 +90,9 @@ export class NitricEntrypointCloudFront extends pulumi.ComponentResource {
 						},
 					};
 				}
-				case 'service': {
-					const deployedService = services.find((s) => s.name === target);
+				case 'container':
+				case 'function': {
+					const deployedService = lambdas.find((s) => s.name === target);
 
 					if (!deployedService) {
 						throw new Error(`Target Function ${name} configured in entrypoints but does not exist`);

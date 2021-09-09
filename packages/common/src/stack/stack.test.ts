@@ -34,19 +34,17 @@ describe('Preserve Comments', () => {
 		jest.restoreAllMocks();
 	});
 
-	describe('Given a YAML stack file with comments', async () => {
+	describe('Given a YAML stack file with comments', () => {
 		let readSpy: jest.SpyInstance;
 		const fileWithComments = `# This is an example stack with comments
 name: example-stack
-services:
+functions:
   # service comment
   customer-create:
     # map prop comment
-    path: customer-create # inline prop comment
-    runtime: function/nodets12
+    handler: customer-create # inline prop comment
   customer-log:
-    path: customer-log
-    runtime: function/nodets12
+    handler: customer-log
     triggers:
       topics:
         # list comment

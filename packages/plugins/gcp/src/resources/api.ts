@@ -11,17 +11,17 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-import { NitricAPI, NitricAPITarget } from '@nitric/cli-common';
+import { NitricAPITarget, StackAPIDocument } from '@nitric/cli-common';
 import * as pulumi from '@pulumi/pulumi';
 import { OpenAPIV2 } from 'openapi-types';
 import * as gcp from '@pulumi/gcp';
-import { NitricServiceCloudRun } from './service';
+import { NitricComputeCloudRun } from './compute';
 import Converter from 'api-spec-converter';
 
 interface NitricApiGcpApiGatewayArgs {
 	// Preconvert the API spec
 	api: OpenAPIV2.Document<NitricAPITarget>;
-	services: NitricServiceCloudRun[];
+	services: NitricComputeCloudRun[];
 }
 
 type method = 'get' | 'post' | 'put' | 'patch' | 'delete';
@@ -68,7 +68,7 @@ export class NitricApiGcpApiGateway extends pulumi.ComponentResource {
 				}, svcs);
 
 			return svcs;
-		}, [] as NitricServiceCloudRun[]);
+		}, [] as NitricComputeCloudRun[]);
 
 		// Replace Nitric API Extensions with google api gateway extensions
 		const spec = pulumi.all(services.map((s) => s.url.apply((url) => `${s.name}||${url}`))).apply((nameUrlPairs) => {
@@ -140,16 +140,20 @@ export class NitricApiGcpApiGateway extends pulumi.ComponentResource {
 				// as hard constraint in GCP
 				accountId: `${name}-acct`.substr(0, 30),
 			},
-			defaultResourceOptions
+			defaultResourceOptions,
 		);
 
 		// Bind that IAM account as a member of all available service targets
-		targetServices.map(svc => {
-			new gcp.cloudrun.IamMember(`${name}-acct-binding`, {
-				service: svc.cloudrun.name,
-				member: pulumi.interpolate`serviceAccount:${apiInvoker.email}`,
-				role: 'roles/run.invoker'
-			}, defaultResourceOptions);
+		targetServices.map((svc) => {
+			new gcp.cloudrun.IamMember(
+				`${name}-acct-binding`,
+				{
+					service: svc.cloudrun.name,
+					member: pulumi.interpolate`serviceAccount:${apiInvoker.email}`,
+					role: 'roles/run.invoker',
+				},
+				defaultResourceOptions,
+			);
 		});
 
 		// Now we need to create the document provided and interpolate the deployed service targets
@@ -204,7 +208,7 @@ export class NitricApiGcpApiGateway extends pulumi.ComponentResource {
 	 * Converts a NitricAPI which confroms to OpenAPI v3 spec
 	 * to openAPI v2
 	 */
-	static async convertNitricAPIv2(api: NitricAPI): Promise<OpenAPIV2.Document<NitricAPITarget>> {
+	static async convertNitricAPIv2(api: StackAPIDocument): Promise<OpenAPIV2.Document<NitricAPITarget>> {
 		// Convert to swagger, OpenAPI 3 spec isn't supported by GCP API Gateway currently.
 		const { spec: translatedApi }: { spec: OpenAPIV2.Document<NitricAPITarget> } = await Converter.convert({
 			from: 'openapi_3',

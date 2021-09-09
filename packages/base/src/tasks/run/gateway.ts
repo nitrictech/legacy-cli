@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { NitricAPI, NamedObject, Task, STAGING_API_DIR } from '@nitric/cli-common';
+import { Task, StackAPI, STAGING_API_DIR } from '@nitric/cli-common';
 import Docker, { Container, ContainerCreateOptions, Network, NetworkInspectInfo } from 'dockerode';
 import fs from 'fs';
 import getPort from 'get-port';
@@ -28,7 +28,7 @@ const NITRIC_BASE_API_GATEWAY_IMAGE = 'nitricimages/dev-api-gateway';
  */
 export interface RunGatewayTaskOptions {
 	stackName: string;
-	api: NitricAPI & { name: string };
+	api: StackAPI;
 	port?: number;
 	docker: Docker;
 	network?: Network;
@@ -36,7 +36,7 @@ export interface RunGatewayTaskOptions {
 }
 
 /**
- * Create a temporary staging directory for API Gateway container builds
+ * Create a temporary staging directory for API Gateway source builds
  */
 export function createAPIStagingDirectory(): string {
 	if (!fs.existsSync(`${STAGING_API_DIR}`)) {
@@ -47,7 +47,7 @@ export function createAPIStagingDirectory(): string {
 }
 
 /**
- * Create a temporary staging directory for a specific API Gateway container build
+ * Create a temporary staging directory for a specific API Gateway source build
  */
 export function createAPIDirectory(apiName: string): string {
 	const stagingDir = createAPIStagingDirectory();
@@ -63,7 +63,7 @@ export function createAPIDirectory(apiName: string): string {
  */
 export class RunGatewayTask extends Task<Container> {
 	private stackName: string;
-	private api: NamedObject<NitricAPI>;
+	private api: StackAPI;
 	private port?: number;
 	private network?: Network;
 	private docker: Docker;
@@ -95,7 +95,7 @@ export class RunGatewayTask extends Task<Container> {
 			}
 		}
 
-		// Download the base API Gateway container image
+		// Download the base API Gateway source image
 		// note: needed because docker.createContainer doesn't appear to automatically retrieve the base image.
 		await streamToPromise(await this.docker.pull(NITRIC_BASE_API_GATEWAY_IMAGE));
 
@@ -131,16 +131,15 @@ export class RunGatewayTask extends Task<Container> {
 		} as ContainerCreateOptions;
 		const container = await this.docker.createContainer(dockerOptions);
 
-		const { name, ...spec } = api;
-
 		// Create staging dir for the build and add the api spec to be loaded by the gateway server
-		const dirName = createAPIDirectory(name);
-		fs.writeFileSync(`${dirName}/openapi.json`, JSON.stringify(spec));
+		const dirName = createAPIDirectory(api.name);
+		const document = api.document;
+		fs.writeFileSync(`${dirName}/openapi.json`, JSON.stringify(document));
 
 		// use tarfs to create a buffer to pipe to put archive...
 		const packStream = tar.pack(dirName);
 
-		// Write the open api file to this api gateway container
+		// Write the open api file to this api gateway source
 		await container.putArchive(packStream, {
 			path: '/',
 		});

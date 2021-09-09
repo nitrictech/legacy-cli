@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Task, Stack, mapObject, NitricServiceImage } from '@nitric/cli-common';
+import { Task, Stack, mapObject, NitricContainerImage } from '@nitric/cli-common';
 import * as pulumi from '@pulumi/pulumi';
 
 import { LocalWorkspace } from '@pulumi/pulumi/automation';
@@ -23,11 +23,11 @@ import {
 	NitricSnsTopic,
 	NitricScheduleEventBridge,
 	NitricSiteS3,
-	NitricServiceAWSLambda,
 	NitricApiAwsApiGateway,
 	NitricEntrypointCloudFront,
 	NitricBucketS3,
 	NitricCollectionDynamo,
+	NitricComputeAWSLambda,
 } from '../../resources';
 
 /**
@@ -92,14 +92,7 @@ export class Deploy extends Task<DeployResult> {
 
 	async do(): Promise<DeployResult> {
 		const { stack, region } = this;
-		const {
-			topics = {},
-			buckets = {},
-			collections = {},
-			schedules = {},
-			apis = {},
-			entrypoints,
-		} = stack.asNitricStack();
+		const { topics = {}, buckets = {}, collections = {}, schedules = {}, entrypoints } = stack.asNitricStack();
 		// Use absolute path to log files, so it's easier for users to locate them if printed to the console.
 		const logFile = path.resolve(await stack.getLoggingFile('deploy-aws'));
 		const errorFile = path.resolve(await stack.getLoggingFile('error-aws'));
@@ -159,32 +152,56 @@ export class Deploy extends Task<DeployResult> {
 									indexDocument: 'index.html',
 								}),
 						);
-						// Deploy Nitric Services
-						const deployedServices = stack.getServices().map((s) => {
-							// create a new repository for each service...
-							const repository = new ecr.Repository(s.getImageTagName());
+						// Deploy Nitric Functions and Containers
+						const deployedLambdas = [
+							...stack.getFunctions().map((func) => {
+								// create a new repository for each func...
+								const repository = new ecr.Repository(func.getImageTagName());
 
-							const image = new NitricServiceImage(s.getName(), {
-								service: s,
-								server: authToken.proxyEndpoint,
-								username: authToken.userName,
-								password: authToken.password,
-								imageName: repository.repositoryUrl,
-								nitricProvider: 'aws',
-							});
+								return {
+									name: func.getName(),
+									image: new NitricContainerImage(func.getName(), {
+										unit: func,
+										server: authToken.proxyEndpoint,
+										username: authToken.userName,
+										password: authToken.password,
+										imageName: repository.repositoryUrl,
+										sourceImageName: func.getImageTagName('aws'),
+									}),
+									source: func,
+								};
+							}),
+							...stack.getContainers().map((container) => {
+								// create a new repository for each func...
+								const repository = new ecr.Repository(container.getImageTagName());
 
-							return new NitricServiceAWSLambda(s.getName(), {
-								service: s,
-								topics: deployedTopics,
-								image: image,
-							});
-						});
+								return {
+									name: container.getName(),
+									image: new NitricContainerImage(container.getName(), {
+										unit: container,
+										server: authToken.proxyEndpoint,
+										username: authToken.userName,
+										password: authToken.password,
+										imageName: repository.repositoryUrl,
+										sourceImageName: container.getImageTagName('aws'),
+									}),
+									source: container,
+								};
+							}),
+						].map(
+							({ name, source, image }) =>
+								new NitricComputeAWSLambda(name, {
+									source,
+									topics: deployedTopics,
+									image,
+								}),
+						);
 						// Deploy Nitric APIs
-						const deployedApis = mapObject(apis).map(
+						const deployedApis = stack.getApis().map(
 							(api) =>
 								new NitricApiAwsApiGateway(api.name, {
 									api,
-									services: deployedServices,
+									lambdas: deployedLambdas,
 								}),
 						);
 						// Deploy Nitric Entrypoints
@@ -193,27 +210,11 @@ export class Deploy extends Task<DeployResult> {
 								return new NitricEntrypointCloudFront(name, {
 									stackName: stack.getName(),
 									entrypoint: entrypoint,
-									services: deployedServices,
+									lambdas: deployedLambdas,
 									apis: deployedApis,
 									sites: deployedSites,
 								});
 							});
-
-							//result.dnsConfigs = eps.reduce((acc, e) => {
-							//	return {
-							//		...acc,
-							//		...e.validationOptions?.apply(vo => vo.reduce((a, o) => {
-							//			return {
-							//				...a,
-							//				[o.domainName]: {
-							//					create: o.resourceRecordName,
-							//					target: o.resourceRecordValue,
-							//					type: o.resourceRecordType,
-							//				},
-							//			};
-							//		}, {} as any))
-							//	};
-							//}, {} as any);
 
 							result.entrypoints = eps.map((ep) => {
 								return ep.cloudfront.domainName.apply((domainName) => ({

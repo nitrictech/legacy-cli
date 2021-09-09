@@ -26,8 +26,8 @@ export function createNitricLogDir(): void {
 }
 
 /**
- * Provides a path that can be used for the logfile for a specific service/function
- * @param name of the service/function. This must be unique to ensure no collision with file paths.
+ * Provides a path that can be used for the logfile for a specific func/function
+ * @param name of the func/function. This must be unique to ensure no collision with file paths.
  */
 export function functionLogFilePath(name: string): string {
 	return path.join(LOG_DIR, `${name}.txt`);

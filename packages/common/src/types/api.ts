@@ -12,17 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { OpenAPIV3 } from 'openapi-types';
-
-// Inject referencable NitricStack metadata into the OpenAPI typing
-// This will extend at the point of an operations object...
-// Using this we can find the appropriate backend reference
-// in each of the cloud plugins during deployment
-export interface NitricAPITarget {
-	'x-nitric-target': {
-		name: string;
-		type: 'function';
-	};
-}
-
-export type NitricAPI<Ext extends Record<string, any> = {}> = { ext?: Ext } & OpenAPIV3.Document<NitricAPITarget>;
+// The nitric API is only a simple string type
+// This just represents a path to a file relative to the nitric stack
+export type NitricAPI = string;

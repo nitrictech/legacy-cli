@@ -33,7 +33,7 @@ export class NitricTopicPubsub extends pulumi.ComponentResource {
 
 		this.name = topic.name;
 
-		// Deploy the service
+		// Deploy the func
 		this.pubsub = new gcp.pubsub.Topic(
 			topic.name,
 			{

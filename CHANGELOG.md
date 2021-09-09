@@ -30,147 +30,127 @@ All notable changes to this project will be documented in this file. See [standa
 
 ### [0.0.82](https://github.com/nitrictech/cli/compare/v0.0.81...v0.0.82) (2021-08-11)
 
-
 ### Bug Fixes
 
-* modify logging names to be agnostic. ([6789577](https://github.com/nitrictech/cli/commit/67895777ac860042c6bdc8902dab8f2e3fe8824b))
+- modify logging names to be agnostic. ([6789577](https://github.com/nitrictech/cli/commit/67895777ac860042c6bdc8902dab8f2e3fe8824b))
 
 ### [0.0.81](https://github.com/nitrictech/cli/compare/v0.0.80...v0.0.81) (2021-08-10)
 
-
 ### Bug Fixes
 
-* correct example references ([9012be9](https://github.com/nitrictech/cli/commit/9012be9ddc0cc7075deb0a88d30ac95b081c1be7))
+- correct example references ([9012be9](https://github.com/nitrictech/cli/commit/9012be9ddc0cc7075deb0a88d30ac95b081c1be7))
 
 ### [0.0.80](https://github.com/nitrictech/cli/compare/v0.0.79...v0.0.80) (2021-08-06)
 
-
 ### Features
 
-* add nitric.yaml file validation ([9eaf54d](https://github.com/nitrictech/cli/commit/9eaf54dfce1aa6e00a0917f44b7234b81832d34e))
+- add nitric.yaml file validation ([9eaf54d](https://github.com/nitrictech/cli/commit/9eaf54dfce1aa6e00a0917f44b7234b81832d34e))
 
 ### [0.0.79](https://github.com/nitrictech/cli/compare/v0.0.78...v0.0.79) (2021-08-04)
 
-
 ### Features
 
-* support collection deployment in AWS ([c5b39d7](https://github.com/nitrictech/cli/commit/c5b39d7edc77f7ae3f0a83790ad8787c5d993e50))
+- support collection deployment in AWS ([c5b39d7](https://github.com/nitrictech/cli/commit/c5b39d7edc77f7ae3f0a83790ad8787c5d993e50))
 
 ### [0.0.78](https://github.com/nitrictech/cli/compare/v0.0.77...v0.0.78) (2021-08-04)
 
-
 ### Bug Fixes
 
-* Ensure resource names are unique. ([0f9637b](https://github.com/nitrictech/cli/commit/0f9637b2c3906d89fbf385620cc5ed9f728f29f7))
+- Ensure resource names are unique. ([0f9637b](https://github.com/nitrictech/cli/commit/0f9637b2c3906d89fbf385620cc5ed9f728f29f7))
 
 ### [0.0.77](https://github.com/nitrictech/cli/compare/v0.0.76...v0.0.77) (2021-08-03)
 
-
 ### Bug Fixes
 
-* **cli-common:** Fix template runtime extraction exclusion path. ([c4d0acd](https://github.com/nitrictech/cli/commit/c4d0acd8d74f9987a959f7742428bfb149c649d6))
+- **cli-common:** Fix template runtime extraction exclusion path. ([c4d0acd](https://github.com/nitrictech/cli/commit/c4d0acd8d74f9987a959f7742428bfb149c649d6))
 
 ### [0.0.76](https://github.com/nitrictech/cli/compare/v0.0.75...v0.0.76) (2021-08-03)
 
-
 ### Bug Fixes
 
-* **GCP:** preserve paths from API gateway to services ([c3259f8](https://github.com/nitrictech/cli/commit/c3259f8d10ac528f5415405158f4e0f635faaac0))
+- **GCP:** preserve paths from API gateway to services ([c3259f8](https://github.com/nitrictech/cli/commit/c3259f8d10ac528f5415405158f4e0f635faaac0))
 
 ### [0.0.75](https://github.com/nitrictech/cli/compare/v0.0.74...v0.0.75) (2021-07-29)
 
-
 ### Bug Fixes
 
-* ensure make:service creates service in correct directory relative to config ([7cb585a](https://github.com/nitrictech/cli/commit/7cb585a8ac8f6af3da9f5c8c0dabc8b6f6fc7807))
+- ensure make:service creates service in correct directory relative to config ([7cb585a](https://github.com/nitrictech/cli/commit/7cb585a8ac8f6af3da9f5c8c0dabc8b6f6fc7807))
 
 ### [0.0.74](https://github.com/nitrictech/cli/compare/v0.0.73...v0.0.74) (2021-07-26)
 
-
 ### Bug Fixes
 
-* **plugins/do:** Fix stack names for digital ocean plugins. ([3ceeb1e](https://github.com/nitrictech/cli/commit/3ceeb1e6ff30a52fd451f32369c8afe1b2b03588))
+- **plugins/do:** Fix stack names for digital ocean plugins. ([3ceeb1e](https://github.com/nitrictech/cli/commit/3ceeb1e6ff30a52fd451f32369c8afe1b2b03588))
 
 ### [0.0.73](https://github.com/nitrictech/cli/compare/v0.0.72...v0.0.73) (2021-07-01)
 
-
 ### Bug Fixes
 
-* add execStream wrapper function to fix windows site run issue ([844b41d](https://github.com/nitrictech/cli/commit/844b41d60a257f4a6a60a30115ecd90ffb376277))
-* use path.join for staging directory ([0b0ad95](https://github.com/nitrictech/cli/commit/0b0ad9503e754761166389d96fb5d2b35086805e))
+- add execStream wrapper function to fix windows site run issue ([844b41d](https://github.com/nitrictech/cli/commit/844b41d60a257f4a6a60a30115ecd90ffb376277))
+- use path.join for staging directory ([0b0ad95](https://github.com/nitrictech/cli/commit/0b0ad9503e754761166389d96fb5d2b35086805e))
 
 ### [0.0.72](https://github.com/nitrictech/cli/compare/v0.0.71...v0.0.72) (2021-06-30)
 
-
 ### Bug Fixes
 
-* use node readline instead of keypress and fix windows exit issues ([16ff5e2](https://github.com/nitrictech/cli/commit/16ff5e2aaa6df39c552914dae5132e85b3a00712))
+- use node readline instead of keypress and fix windows exit issues ([16ff5e2](https://github.com/nitrictech/cli/commit/16ff5e2aaa6df39c552914dae5132e85b3a00712))
 
 ### [0.0.71](https://github.com/nitrictech/cli/compare/v0.0.70...v0.0.71) (2021-06-28)
 
-
 ### Bug Fixes
 
-* **plugins/aws:** Add missing s3 permission. ([f02d812](https://github.com/nitrictech/cli/commit/f02d812fb6e3b2617516ff539ef6034314419284))
+- **plugins/aws:** Add missing s3 permission. ([f02d812](https://github.com/nitrictech/cli/commit/f02d812fb6e3b2617516ff539ef6034314419284))
 
 ### [0.0.70](https://github.com/nitrictech/cli/compare/v0.0.69...v0.0.70) (2021-06-27)
 
-
 ### Bug Fixes
 
-* **plugins/aws:** Add s3 permissions to nitric services ([4e0f1ec](https://github.com/nitrictech/cli/commit/4e0f1ec9ac277240f4c4a9ddcdd412dad6371df6))
+- **plugins/aws:** Add s3 permissions to nitric services ([4e0f1ec](https://github.com/nitrictech/cli/commit/4e0f1ec9ac277240f4c4a9ddcdd412dad6371df6))
 
 ### [0.0.69](https://github.com/nitrictech/cli/compare/v0.0.68...v0.0.69) (2021-06-24)
 
-
 ### Bug Fixes
 
-* Disable bytecode generation. ([9a5fe91](https://github.com/nitrictech/cli/commit/9a5fe912ba37e81067586781604e927341ec354f))
-* Include @oclif/plugin-plugins. ([208516d](https://github.com/nitrictech/cli/commit/208516d4a33c9ecb8a2a238a30a44cee83b2b114))
+- Disable bytecode generation. ([9a5fe91](https://github.com/nitrictech/cli/commit/9a5fe912ba37e81067586781604e927341ec354f))
+- Include @oclif/plugin-plugins. ([208516d](https://github.com/nitrictech/cli/commit/208516d4a33c9ecb8a2a238a30a44cee83b2b114))
 
 ### [0.0.68](https://github.com/nitrictech/cli/compare/v0.0.67...v0.0.68) (2021-06-23)
 
-
 ### Bug Fixes
 
-* Fix issue where errors weren't converted to strings before logging ([5aedf27](https://github.com/nitrictech/cli/commit/5aedf2735e468b2617430ecb3b43459cf2c09da0))
+- Fix issue where errors weren't converted to strings before logging ([5aedf27](https://github.com/nitrictech/cli/commit/5aedf2735e468b2617430ecb3b43459cf2c09da0))
 
 ### [0.0.67](https://github.com/nitrictech/cli/compare/v0.0.66...v0.0.67) (2021-06-23)
 
-
 ### Bug Fixes
 
-* Handle promise rejections from pulumi tasks. ([c15696b](https://github.com/nitrictech/cli/commit/c15696b8dabe46785ab50f6be6de0c2d8b685d48))
+- Handle promise rejections from pulumi tasks. ([c15696b](https://github.com/nitrictech/cli/commit/c15696b8dabe46785ab50f6be6de0c2d8b685d48))
 
 ### [0.0.66](https://github.com/nitrictech/cli/compare/v0.0.65...v0.0.66) (2021-06-23)
 
-
 ### Bug Fixes
 
-* **run:** Fix failure to cleanup running docker resources ([95b36f8](https://github.com/nitrictech/cli/commit/95b36f8c011f2fb0c7e9f56cf4e592973efd5b1e))
-* **run:** improve docker error status code logging ([8008567](https://github.com/nitrictech/cli/commit/80085673b0f7fb3be9dc47d84ca3429c1608d4ae))
+- **run:** Fix failure to cleanup running docker resources ([95b36f8](https://github.com/nitrictech/cli/commit/95b36f8c011f2fb0c7e9f56cf4e592973efd5b1e))
+- **run:** improve docker error status code logging ([8008567](https://github.com/nitrictech/cli/commit/80085673b0f7fb3be9dc47d84ca3429c1608d4ae))
 
 ### [0.0.65](https://github.com/nitrictech/cli/compare/v0.0.64...v0.0.65) (2021-06-21)
 
-
 ### Bug Fixes
 
-* don't collapse errors on run ([3401796](https://github.com/nitrictech/cli/commit/34017968961db704e8730333982cddd0d919827c))
-* runIds for gateways and api names ([259af75](https://github.com/nitrictech/cli/commit/259af75dbeeb1b2201ce56c8e1813342375ca068))
+- don't collapse errors on run ([3401796](https://github.com/nitrictech/cli/commit/34017968961db704e8730333982cddd0d919827c))
+- runIds for gateways and api names ([259af75](https://github.com/nitrictech/cli/commit/259af75dbeeb1b2201ce56c8e1813342375ca068))
 
 ### [0.0.64](https://github.com/nitrictech/cli/compare/v0.0.63...v0.0.64) (2021-06-20)
 
-
 ### Features
 
-* add unique run id to local run resources ([cc553f9](https://github.com/nitrictech/cli/commit/cc553f9d07eb99afad59aa8fab7c718fd29e0d65))
+- add unique run id to local run resources ([cc553f9](https://github.com/nitrictech/cli/commit/cc553f9d07eb99afad59aa8fab7c718fd29e0d65))
 
 ### [0.0.63](https://github.com/nitrictech/cli/compare/v0.0.62...v0.0.63) (2021-06-15)
 
-
 ### Bug Fixes
 
-* add exiting please wait message ([30a5c0d](https://github.com/nitrictech/cli/commit/30a5c0dafb1e5b752f414c010915725e682bb95b))
+- add exiting please wait message ([30a5c0d](https://github.com/nitrictech/cli/commit/30a5c0dafb1e5b752f414c010915725e682bb95b))
 
 ### [0.0.62](https://github.com/nitrictech/cli/compare/v0.0.61...v0.0.62) (2021-06-11)
 
@@ -182,114 +162,102 @@ All notable changes to this project will be documented in this file. See [standa
 
 ### [0.0.58](https://github.com/nitrictech/cli/compare/v0.0.57...v0.0.58) (2021-06-10)
 
-
 ### Bug Fixes
 
-* check that docker daemon is running for run and build commands ([4413c06](https://github.com/nitrictech/cli/commit/4413c060a3c844e1d3229420e7e7cf04d244532a))
+- check that docker daemon is running for run and build commands ([4413c06](https://github.com/nitrictech/cli/commit/4413c060a3c844e1d3229420e7e7cf04d244532a))
 
 ### [0.0.57](https://github.com/nitrictech/cli/compare/v0.0.56...v0.0.57) (2021-06-10)
 
 ### [0.0.56](https://github.com/nitrictech/cli/compare/v0.0.55...v0.0.56) (2021-06-10)
 
-
 ### Bug Fixes
 
-* check for git when installing template store ([f40610f](https://github.com/nitrictech/cli/commit/f40610f19b28d18f53ef7e4edab2cd659201a0a2))
-* use correct slashes for windows powershell pulumi install ([ed30e33](https://github.com/nitrictech/cli/commit/ed30e338c37bcb1d5a8f53711c6b8ea2a571b4c6))
+- check for git when installing template store ([f40610f](https://github.com/nitrictech/cli/commit/f40610f19b28d18f53ef7e4edab2cd659201a0a2))
+- use correct slashes for windows powershell pulumi install ([ed30e33](https://github.com/nitrictech/cli/commit/ed30e338c37bcb1d5a8f53711c6b8ea2a571b4c6))
 
 ### [0.0.55](https://github.com/nitrictech/cli/compare/v0.0.54...v0.0.55) (2021-06-10)
 
-
 ### Bug Fixes
 
-* improve error handling when Git is missing ([75502d9](https://github.com/nitrictech/cli/commit/75502d90ae258c0602843ce1c714e1c36a557bb0))
-* remove literal path separator from repo file path ([fe77865](https://github.com/nitrictech/cli/commit/fe77865f7a255ddde1fecb854e6ccb393aca928b))
+- improve error handling when Git is missing ([75502d9](https://github.com/nitrictech/cli/commit/75502d90ae258c0602843ce1c714e1c36a557bb0))
+- remove literal path separator from repo file path ([fe77865](https://github.com/nitrictech/cli/commit/fe77865f7a255ddde1fecb854e6ccb393aca928b))
 
 ### [0.0.54](https://github.com/nitrictech/cli/compare/v0.0.53...v0.0.54) (2021-06-10)
 
-
 ### Bug Fixes
 
-* add repo name to add repo task output ([7c76e2e](https://github.com/nitrictech/cli/commit/7c76e2e3856823c478b107fbd7369630f749792d))
-* **make:project:** install the correct repos when they're missing ([7582808](https://github.com/nitrictech/cli/commit/75828088b0fd9008a70fb97ba768780bdac7f6a8))
+- add repo name to add repo task output ([7c76e2e](https://github.com/nitrictech/cli/commit/7c76e2e3856823c478b107fbd7369630f749792d))
+- **make:project:** install the correct repos when they're missing ([7582808](https://github.com/nitrictech/cli/commit/75828088b0fd9008a70fb97ba768780bdac7f6a8))
 
 ### [0.0.53](https://github.com/nitrictech/cli/compare/v0.0.52...v0.0.53) (2021-06-09)
 
-
 ### Bug Fixes
 
-* Scope stack deployments with stackname & provider. ([0889758](https://github.com/nitrictech/cli/commit/08897580607d1eb6cb9c2155396a934a40be145d))
+- Scope stack deployments with stackname & provider. ([0889758](https://github.com/nitrictech/cli/commit/08897580607d1eb6cb9c2155396a934a40be145d))
 
 ### [0.0.52](https://github.com/nitrictech/cli/compare/v0.0.51...v0.0.52) (2021-06-08)
 
-
 ### Features
 
-* Enable buildkit. ([a5b6e40](https://github.com/nitrictech/cli/commit/a5b6e40a56725272de3c8d9b009aadd96736fc6a))
-* **common:** Add imageDigest as output for NitricServiceImage. ([7173e51](https://github.com/nitrictech/cli/commit/7173e519ff8b524e0d122e8a824c71f3dfe4067c))
-* **plugin-do:** Add image digest as tag for service spec. ([55e6fad](https://github.com/nitrictech/cli/commit/55e6fade229939d247fc873fcbd0c2c2ac2ed9af))
+- Enable buildkit. ([a5b6e40](https://github.com/nitrictech/cli/commit/a5b6e40a56725272de3c8d9b009aadd96736fc6a))
+- **common:** Add imageDigest as output for NitricServiceImage. ([7173e51](https://github.com/nitrictech/cli/commit/7173e519ff8b524e0d122e8a824c71f3dfe4067c))
+- **plugin-do:** Add image digest as tag for service spec. ([55e6fad](https://github.com/nitrictech/cli/commit/55e6fade229939d247fc873fcbd0c2c2ac2ed9af))
 
 ### [0.0.51](https://github.com/nitrictech/cli/compare/v0.0.50...v0.0.51) (2021-06-08)
 
-
 ### Bug Fixes
 
-* **common:** Remove superfluous makeDirectory in stack.pullTemplate ([80e8ab1](https://github.com/nitrictech/cli/commit/80e8ab16aa5871772c57228da8a3f1e24046311d))
+- **common:** Remove superfluous makeDirectory in stack.pullTemplate ([80e8ab1](https://github.com/nitrictech/cli/commit/80e8ab16aa5871772c57228da8a3f1e24046311d))
 
 ### [0.0.50](https://github.com/nitrictech/cli/compare/v0.0.49...v0.0.50) (2021-06-07)
 
-
 ### Features
 
-* Add certificate creation and validation for custom domains. ([c501dbe](https://github.com/nitrictech/cli/commit/c501dbe38be45dce5476841a0a4690dd74f1bc12))
-* add custom domains support for DO entrypoints ([fde501c](https://github.com/nitrictech/cli/commit/fde501cca7edbb42e930db59812ecf7ea17f16dd))
-* Add extensions for all stack items. ([87e4995](https://github.com/nitrictech/cli/commit/87e4995c295777758e5119e591dafd12f0f84fbb))
-* Add generic extensions to resources classes. ([8950c13](https://github.com/nitrictech/cli/commit/8950c1376501f833cd98cbc34ef959fa0b86aebb))
-* Add output results and cleanup to digital ocean deploy. ([bc7c123](https://github.com/nitrictech/cli/commit/bc7c123443014086c6d10b8e0e8024a0bcc4a54f))
-* Add outputs and instructions for AWS dns configurations. ([e881ef2](https://github.com/nitrictech/cli/commit/e881ef2a947183caec2969de651b50f4d3a4b5d4))
-* Make domains and paths extensible. ([65538c0](https://github.com/nitrictech/cli/commit/65538c02e0f7595b7e35089ab42ebe41cfc2dc9b))
-* support multiple entrypoints for local run ([00ca5e4](https://github.com/nitrictech/cli/commit/00ca5e45bda76e616713a21a6338c5929575f3b4))
-* support multiple entrypoints in gcp ([e0d5a9f](https://github.com/nitrictech/cli/commit/e0d5a9fbcb1873d6001f0d20f27ab0dbb51475cf))
-* Update AWS and GCP entrypoint outputs. ([b976ab2](https://github.com/nitrictech/cli/commit/b976ab24b8d19f221b9eff8b9ec49cc1f6ff187a))
-* Update aws entrypoints definitions. ([1169c9c](https://github.com/nitrictech/cli/commit/1169c9c95a145becbfc54056d28e309bd8627a0c))
-* Update types to simplify domains. ([e57e4ae](https://github.com/nitrictech/cli/commit/e57e4aeee1378603657c98db9817c4579be79077))
-
+- Add certificate creation and validation for custom domains. ([c501dbe](https://github.com/nitrictech/cli/commit/c501dbe38be45dce5476841a0a4690dd74f1bc12))
+- add custom domains support for DO entrypoints ([fde501c](https://github.com/nitrictech/cli/commit/fde501cca7edbb42e930db59812ecf7ea17f16dd))
+- Add extensions for all stack items. ([87e4995](https://github.com/nitrictech/cli/commit/87e4995c295777758e5119e591dafd12f0f84fbb))
+- Add generic extensions to resources classes. ([8950c13](https://github.com/nitrictech/cli/commit/8950c1376501f833cd98cbc34ef959fa0b86aebb))
+- Add output results and cleanup to digital ocean deploy. ([bc7c123](https://github.com/nitrictech/cli/commit/bc7c123443014086c6d10b8e0e8024a0bcc4a54f))
+- Add outputs and instructions for AWS dns configurations. ([e881ef2](https://github.com/nitrictech/cli/commit/e881ef2a947183caec2969de651b50f4d3a4b5d4))
+- Make domains and paths extensible. ([65538c0](https://github.com/nitrictech/cli/commit/65538c02e0f7595b7e35089ab42ebe41cfc2dc9b))
+- support multiple entrypoints for local run ([00ca5e4](https://github.com/nitrictech/cli/commit/00ca5e45bda76e616713a21a6338c5929575f3b4))
+- support multiple entrypoints in gcp ([e0d5a9f](https://github.com/nitrictech/cli/commit/e0d5a9fbcb1873d6001f0d20f27ab0dbb51475cf))
+- Update AWS and GCP entrypoint outputs. ([b976ab2](https://github.com/nitrictech/cli/commit/b976ab24b8d19f221b9eff8b9ec49cc1f6ff187a))
+- Update aws entrypoints definitions. ([1169c9c](https://github.com/nitrictech/cli/commit/1169c9c95a145becbfc54056d28e309bd8627a0c))
+- Update types to simplify domains. ([e57e4ae](https://github.com/nitrictech/cli/commit/e57e4aeee1378603657c98db9817c4579be79077))
 
 ### Bug Fixes
 
-* add mistakenly removed imports ([ae6a3f8](https://github.com/nitrictech/cli/commit/ae6a3f8b25952105ac31bdcbcf515ba086526bec))
-* **gcp:** Fix incorrect backend name. ([ab5ebe3](https://github.com/nitrictech/cli/commit/ab5ebe30e7febb08186c8e7f1d7d494721a55317))
-* **gcp:** fix incorrect resource names. ([92999da](https://github.com/nitrictech/cli/commit/92999da09b8d44ce1d2bda82f8bfef74d9df9cb9))
-* **gcp:** Fix non-default entrypoint normalization. ([b31594e](https://github.com/nitrictech/cli/commit/b31594eab8ddb1659c10dcf56fbdb2576ec4aa77))
-* **gcp:** fix target filtering. ([e73bb50](https://github.com/nitrictech/cli/commit/e73bb50031abcceea90cf4f275fc993cba973dd0))
-* **gcp:** Fix type error. ([64efe3e](https://github.com/nitrictech/cli/commit/64efe3eb5fcc380498a70d3cf79dc4d715dee21c))
-* add entrypoint suffix to do app name ([b4a1fc7](https://github.com/nitrictech/cli/commit/b4a1fc72be26b3409ce2bb5956ac4b3e000a33f8))
-* Await the deployment. ([291bb47](https://github.com/nitrictech/cli/commit/291bb47eff0753c04d401c0eb2b479f07a1fc7f6))
-* AWS cloudfront deploys to use pre-provisioned certificates. ([e6ab460](https://github.com/nitrictech/cli/commit/e6ab460d38634b6235fbb85a71095714d66c24eb))
-* don't use BuildKit for image builds ([f7a4c23](https://github.com/nitrictech/cli/commit/f7a4c2379df6084d8eb0e3d4cf48f99e579957f5))
+- add mistakenly removed imports ([ae6a3f8](https://github.com/nitrictech/cli/commit/ae6a3f8b25952105ac31bdcbcf515ba086526bec))
+- **gcp:** Fix incorrect backend name. ([ab5ebe3](https://github.com/nitrictech/cli/commit/ab5ebe30e7febb08186c8e7f1d7d494721a55317))
+- **gcp:** fix incorrect resource names. ([92999da](https://github.com/nitrictech/cli/commit/92999da09b8d44ce1d2bda82f8bfef74d9df9cb9))
+- **gcp:** Fix non-default entrypoint normalization. ([b31594e](https://github.com/nitrictech/cli/commit/b31594eab8ddb1659c10dcf56fbdb2576ec4aa77))
+- **gcp:** fix target filtering. ([e73bb50](https://github.com/nitrictech/cli/commit/e73bb50031abcceea90cf4f275fc993cba973dd0))
+- **gcp:** Fix type error. ([64efe3e](https://github.com/nitrictech/cli/commit/64efe3eb5fcc380498a70d3cf79dc4d715dee21c))
+- add entrypoint suffix to do app name ([b4a1fc7](https://github.com/nitrictech/cli/commit/b4a1fc72be26b3409ce2bb5956ac4b3e000a33f8))
+- Await the deployment. ([291bb47](https://github.com/nitrictech/cli/commit/291bb47eff0753c04d401c0eb2b479f07a1fc7f6))
+- AWS cloudfront deploys to use pre-provisioned certificates. ([e6ab460](https://github.com/nitrictech/cli/commit/e6ab460d38634b6235fbb85a71095714d66c24eb))
+- don't use BuildKit for image builds ([f7a4c23](https://github.com/nitrictech/cli/commit/f7a4c2379df6084d8eb0e3d4cf48f99e579957f5))
 
 ### [0.0.49](https://github.com/nitrictech/cli/compare/v0.0.48...v0.0.49) (2021-06-06)
 
-
 ### Features
 
-* Remove references to stage stack task. ([8ba641c](https://github.com/nitrictech/cli/commit/8ba641c66b130333bde19f4b7c42170c70abde85))
-* Stage runtime as workaround for lack of external dockerfile support for dockerode. ([1c63ea7](https://github.com/nitrictech/cli/commit/1c63ea740e6d821c741ba7168ab6d83242d8cff6))
-* WIP templates pulling into nitric project stacks. ([26f0c20](https://github.com/nitrictech/cli/commit/26f0c2033563baf3a3d3e222831a7ac58950d5a9))
-
+- Remove references to stage stack task. ([8ba641c](https://github.com/nitrictech/cli/commit/8ba641c66b130333bde19f4b7c42170c70abde85))
+- Stage runtime as workaround for lack of external dockerfile support for dockerode. ([1c63ea7](https://github.com/nitrictech/cli/commit/1c63ea740e6d821c741ba7168ab6d83242d8cff6))
+- WIP templates pulling into nitric project stacks. ([26f0c20](https://github.com/nitrictech/cli/commit/26f0c2033563baf3a3d3e222831a7ac58950d5a9))
 
 ### Bug Fixes
 
-* Add ignore for dockerode build. ([4ec2fc3](https://github.com/nitrictech/cli/commit/4ec2fc3622f6eb636211ce88d9b8f6e48a84af10))
+- Add ignore for dockerode build. ([4ec2fc3](https://github.com/nitrictech/cli/commit/4ec2fc3622f6eb636211ce88d9b8f6e48a84af10))
 
 ### [0.0.48](https://github.com/nitrictech/cli/compare/v0.0.47...v0.0.48) (2021-06-03)
 
 ### [0.0.47](https://github.com/nitrictech/cli/compare/v0.0.46...v0.0.47) (2021-06-02)
 
-
 ### Bug Fixes
 
-* Remove autopull of official nitric template repository. ([96faf3f](https://github.com/nitrictech/cli/commit/96faf3f09958a020f14aa911217f6d500d416c7d))
+- Remove autopull of official nitric template repository. ([96faf3f](https://github.com/nitrictech/cli/commit/96faf3f09958a020f14aa911217f6d500d416c7d))
 
 ### [0.0.46](https://github.com/nitrictech/cli/compare/v0.0.45...v0.0.46) (2021-05-28)
 

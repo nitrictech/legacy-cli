@@ -17,30 +17,33 @@ import { NitricCollection } from './collection';
 import { NitricTopic } from './topic';
 import { NitricQueue } from './queue';
 import { NitricSchedule } from './schedule';
-import { NitricAPI } from './api';
 import { NitricStaticSite } from './static-site';
 import { NitricEntrypoint } from './entrypoints';
-import { NitricService } from './service';
+import { NitricFunction, NitricContainer } from './compute';
 
 /**
  * A Nitric application stack descriptor
  */
 export interface NitricStack<
-	ServiceExtensions = Record<string, any>,
+	FunctionExtensions = Record<string, any>,
+	ContainerExtensions = Record<string, any>,
 	BucketExtensions = Record<string, any>,
 	CollectionExtensions = Record<string, any>,
 	TopicExtensions = Record<string, any>,
 	QueueExtensions = Record<string, any>,
 	ScheduleExtensions = Record<string, any>,
-	ApiExtensions = Record<string, any>,
 	SiteExtensions = Record<string, any>,
 	EntrypointExtensions = Record<string, any>,
 > {
 	// Name of the Nitric Stack
 	name: string;
 	// Functions that will be deployed
-	services?: {
-		[name: string]: NitricService<ServiceExtensions>;
+	functions?: {
+		[name: string]: NitricFunction<FunctionExtensions>;
+	};
+	// Containers that will be deployed
+	containers?: {
+		[name: string]: NitricContainer<ContainerExtensions>;
 	};
 	// Buckets that will be deployed
 	buckets?: {
@@ -64,7 +67,7 @@ export interface NitricStack<
 	};
 	// APIs to be deployed
 	apis?: {
-		[name: string]: NitricAPI<ApiExtensions>;
+		[name: string]: string;
 	};
 	// Static sites to be deployed
 	sites?: {

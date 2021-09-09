@@ -15,8 +15,8 @@ import * as pulumi from '@pulumi/pulumi';
 import * as aws from '@pulumi/aws';
 import { OpenAPIV3 } from 'openapi-types';
 import { uniq } from 'lodash';
-import { NamedObject, NitricAPI } from '@nitric/cli-common';
-import { NitricServiceAWSLambda } from './service';
+import { StackAPI } from '@nitric/cli-common';
+import { NitricComputeAWSLambda } from './compute';
 
 type method = 'get' | 'post' | 'put' | 'patch' | 'delete';
 const METHOD_KEYS: method[] = ['get', 'post', 'put', 'patch', 'delete'];
@@ -28,7 +28,7 @@ type AwsApiGatewayHttpMethods = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
 // https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-swagger-extensions-integration.html
 interface AwsExtentions {
 	'x-amazon-apigateway-integration': {
-		uri: string | object;
+		uri: string | Record<string, unknown>;
 		responses?: any;
 		passthroughBehaviour?: string;
 		httpMethod: AwsApiGatewayHttpMethods;
@@ -39,9 +39,9 @@ interface AwsExtentions {
 }
 
 interface NitricApiAwsApiGatewayArgs {
-	api: NamedObject<NitricAPI>;
-	// TODO: Create more abstract service type here...
-	services: NitricServiceAWSLambda[];
+	api: StackAPI;
+	// TODO: Create more abstract func type here...
+	lambdas: NitricComputeAWSLambda[];
 }
 
 /**
@@ -62,14 +62,16 @@ export class NitricApiAwsApiGateway extends pulumi.ComponentResource {
 		super('nitric:api:AwsApiGateway', name, {}, opts);
 
 		const defaultResourceOptions: pulumi.ResourceOptions = { parent: this };
-		const { api, services } = args;
+		const { api, lambdas } = args;
 		const { name: nitricName, ...rest } = api;
 
 		this.name = name;
 
+		const openapi = api.document;
+
 		const targetNames = uniq(
-			Object.keys(api.paths).reduce((acc, p) => {
-				const path = api.paths[p]!;
+			Object.keys(openapi.paths).reduce((acc, p) => {
+				const path = openapi.paths[p]!;
 
 				return [
 					...acc,
@@ -84,12 +86,12 @@ export class NitricApiAwsApiGateway extends pulumi.ComponentResource {
 		);
 
 		const transformedDoc = pulumi
-			.all(services.map((s) => s.lambda.invokeArn.apply((arn) => `${s.name}||${arn}`)))
+			.all(lambdas.map((s) => s.lambda.invokeArn.apply((arn) => `${s.name}||${arn}`)))
 			.apply((nameArnPairs) => {
 				const transformedApi = {
 					...rest,
-					paths: Object.keys(api.paths).reduce((acc, pathKey) => {
-						const path = api.paths[pathKey]!;
+					paths: Object.keys(openapi.paths).reduce((acc, pathKey) => {
+						const path = openapi.paths[pathKey]!;
 						const newMethods = Object.keys(path)
 							.filter((k) => METHOD_KEYS.includes(k as method))
 							.reduce((acc, method) => {
@@ -158,7 +160,7 @@ export class NitricApiAwsApiGateway extends pulumi.ComponentResource {
 		);
 
 		// Generate lambda permissions enabling the API Gateway to invoke the functions it targets
-		services
+		lambdas
 			.filter((f) => targetNames.includes(f.name))
 			.forEach((f) => {
 				new aws.lambda.Permission(

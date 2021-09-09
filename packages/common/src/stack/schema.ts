@@ -15,26 +15,26 @@
 import { JSONSchema7 } from 'json-schema';
 import ajv, { DefinedError } from 'ajv';
 import { NitricStack } from '../types';
+import fs from 'fs';
+import path from 'path';
+import YAML from 'yaml';
+import { StackAPIDocument } from './api';
 
 /**
- * Pattern for stack resources names, e.g. service names, topic names, buckets, etc.
+ * Pattern for stack resources names, e.g. func names, topic names, buckets, etc.
  */
 export const resourceNamePattern = /^\w+([.\\-]\w+)*$/.toString().slice(1, -1);
 /**
  * CRON expression string pattern
  */
 export const cronExpressionPattern = /^.*$/.toString().slice(1, -1);
-/**
- * Pattern for matching valid service runtime names, e.g. function/nodets12
- */
-export const serviceRuntimeTemplatePattern = /^[^/]+\/[^/]+$/.toString().slice(1, -1);
 
 /**
  * OpenAPI 3.0 Schema, with Nitric extensions added, such as x-nitric-target
  */
 const OPENAPI_3_SCHEMA: JSONSchema7 = {
 	$id: 'https://spec.openapis.org/oas/3.0/schema/2019-04-02',
-	$schema: 'http://json-schema.org/draft-04/schema#',
+	//$schema: 'http://json-schema.org/draft-04/schema#',
 	description: 'Validation schema for OpenAPI Specification 3.0.X.',
 	type: 'object',
 	required: ['openapi', 'info', 'paths'],
@@ -839,7 +839,7 @@ const OPENAPI_3_SCHEMA: JSONSchema7 = {
 						},
 						type: {
 							type: 'string',
-							enum: ['service'],
+							enum: ['function', 'container'],
 						},
 					},
 					required: ['name', 'type'],
@@ -1541,24 +1541,19 @@ export const STACK_SCHEMA: JSONSchema7 = {
 			type: 'string',
 			pattern: resourceNamePattern,
 		},
-		services: {
-			title: 'services',
+		functions: {
+			title: 'functions',
 			type: 'object',
 			patternProperties: {
 				[resourceNamePattern]: {
-					title: 'service',
-					description: 'A nitric compute service, such as a serverless function',
+					title: 'function',
+					description: 'A nitric compute func, such as a serverless function',
 					type: 'object',
 					properties: {
-						path: { type: 'string' },
-						runtime: {
-							title: 'service runtime',
-							description: 'The template/runtime the service is based on',
-							type: 'string',
-							pattern: serviceRuntimeTemplatePattern,
-						},
+						handler: { type: 'string' },
+						context: { type: 'string' },
 						triggers: {
-							title: 'service triggers',
+							title: 'func triggers',
 							type: 'object',
 							properties: {
 								topics: {
@@ -1572,7 +1567,41 @@ export const STACK_SCHEMA: JSONSchema7 = {
 							additionalProperties: false,
 						},
 					},
-					required: ['path', 'runtime'],
+					required: ['handler'],
+					additionalProperties: false,
+				},
+			},
+			minProperties: 1,
+			additionalProperties: false,
+		},
+		containers: {
+			title: 'containers',
+			description: 'custom project containers to build with docker',
+			type: 'object',
+			patternProperties: {
+				[resourceNamePattern]: {
+					title: 'container',
+					description: 'A OCI source',
+					type: 'object',
+					properties: {
+						dockerfile: { type: 'string' },
+						context: { type: 'string' },
+						triggers: {
+							title: 'func triggers',
+							type: 'object',
+							properties: {
+								topics: {
+									type: 'array',
+									items: {
+										type: 'string',
+									},
+								},
+							},
+							minProperties: 1,
+							additionalProperties: false,
+						},
+					},
+					required: ['dockerfile', 'context'],
 					additionalProperties: false,
 				},
 			},
@@ -1586,7 +1615,7 @@ export const STACK_SCHEMA: JSONSchema7 = {
 			patternProperties: {
 				[resourceNamePattern]: {
 					title: 'document collection',
-					description: 'A document service collection',
+					description: 'A document func collection',
 					type: 'object',
 					properties: {
 						/* currently no properties provided for collections */
@@ -1734,7 +1763,9 @@ export const STACK_SCHEMA: JSONSchema7 = {
 		apis: {
 			type: 'object',
 			patternProperties: {
-				[resourceNamePattern]: OPENAPI_3_SCHEMA,
+				[resourceNamePattern]: {
+					type: 'string',
+				},
 			},
 			minProperties: 1,
 			additionalProperties: false,
@@ -1766,7 +1797,7 @@ export const STACK_SCHEMA: JSONSchema7 = {
 										type: {
 											description: 'The resource type of the target',
 											type: 'string',
-											enum: ['site', 'api', 'service'],
+											enum: ['site', 'api', 'function', 'container'],
 										},
 									},
 									required: ['target', 'type'],
@@ -1814,9 +1845,17 @@ const stackSchemaErrorToDetails = (error: DefinedError): string => {
 	switch (error.keyword) {
 		case 'additionalProperties':
 			if (
-				['apis', 'collections', 'topics', 'queues', 'buckets', 'schedules', 'services', 'entrypoints'].indexOf(
-					location.trim(),
-				) !== -1
+				[
+					'apis',
+					'collections',
+					'topics',
+					'queues',
+					'buckets',
+					'schedules',
+					'functions',
+					'containers',
+					'entrypoints',
+				].indexOf(location.trim()) !== -1
 			) {
 				return `Invalid ${location.slice(0, -1)} name "${
 					error.params.additionalProperty
@@ -1868,7 +1907,7 @@ const stackError = (errors: string[] | string): Error => {
  * Returns void if validation is successful, otherwise throws an exception containing validation error details.
  * @param potentialStack the stack to validate.
  */
-export const validateStack = (potentialStack: any): void => {
+export const validateStack = (potentialStack: any, filePath: string): void => {
 	// Validate Schema Errors
 	const schemaValidator = new ajv({
 		// schemaId: "auto",
@@ -1885,20 +1924,34 @@ export const validateStack = (potentialStack: any): void => {
 		throw stackError(errors);
 	}
 
-	potentialStack = potentialStack as unknown as NitricStack;
+	const pStack: NitricStack = potentialStack as unknown as NitricStack;
 
 	// Validate logical errors (e.g. pointing to names that don't exist, even if they're valid).
 	const logicErrors: string[] = [];
 
-	// Validate Service Configurations
-	if (potentialStack.services) {
+	// Validate Func Configurations
+	if (pStack.functions) {
 		// Validate topic triggers
-		Object.entries(potentialStack.services).forEach(([serviceName, service]: [string, any]) => {
-			if (service.triggers && service.triggers.topics) {
-				service.triggers.topics.forEach((triggerTopic) => {
-					if (!(potentialStack.topics && potentialStack.topics[triggerTopic])) {
+		Object.entries(pStack.functions).forEach(([funcName, func]: [string, any]) => {
+			if (func.triggers && func.triggers.topics) {
+				func.triggers.topics.forEach((triggerTopic) => {
+					if (!(pStack.topics && pStack.topics[triggerTopic])) {
+						logicErrors.push(`Invalid topic trigger for functions.${funcName}, topic "${triggerTopic}" doesn't exist`);
+					}
+				});
+			}
+		});
+	}
+
+	// Validate Container Configurations
+	if (pStack.containers) {
+		// Validate topic triggers
+		Object.entries(pStack.containers).forEach(([containerName, container]: [string, any]) => {
+			if (container.triggers && container.triggers.topics) {
+				container.triggers.topics.forEach((triggerTopic) => {
+					if (!(pStack.topics && pStack.topics[triggerTopic])) {
 						logicErrors.push(
-							`Invalid topic trigger for services.${serviceName}, topic "${triggerTopic}" doesn't exist`,
+							`Invalid topic trigger for containers.${containerName}, topic "${triggerTopic}" doesn't exist`,
 						);
 					}
 				});
@@ -1907,10 +1960,10 @@ export const validateStack = (potentialStack: any): void => {
 	}
 
 	// Validate Entrypoint Configurations
-	if (potentialStack.entrypoints) {
-		Object.entries(potentialStack.entrypoints).forEach(([entrypointName, entrypoint]: [string, any]) => {
+	if (pStack.entrypoints) {
+		Object.entries(pStack.entrypoints).forEach(([entrypointName, entrypoint]: [string, any]) => {
 			Object.entries(entrypoint.paths).forEach(([pathName, path]: [string, any]) => {
-				if (!(potentialStack[`${path.type}s`] && potentialStack[`${path.type}s`][path.target])) {
+				if (!(pStack[`${path.type}s`] && pStack[`${path.type}s`][path.target])) {
 					logicErrors.push(
 						`Invalid target for entrypoints.${entrypointName}.${pathName}, target ${path.type} "${path.target}" doesn't exist`,
 					);
@@ -1920,10 +1973,10 @@ export const validateStack = (potentialStack: any): void => {
 	}
 
 	// Validate Schedule Configurations
-	if (potentialStack.schedules) {
-		Object.entries(potentialStack.schedules).forEach(([scheduleName, schedule]: [string, any]) => {
+	if (pStack.schedules) {
+		Object.entries(pStack.schedules).forEach(([scheduleName, schedule]: [string, any]) => {
 			const target = schedule.target;
-			if (!(potentialStack[`${target.type}s`] && potentialStack[`${target.type}s`][target.name])) {
+			if (!(pStack[`${target.type}s`] && pStack[`${target.type}s`][target.name])) {
 				logicErrors.push(
 					`Invalid target for schedules.${scheduleName}, target ${target.type} "${target.name}" doesn't exist`,
 				);
@@ -1932,22 +1985,39 @@ export const validateStack = (potentialStack: any): void => {
 	}
 
 	// Validate API Gateway Configurations
-	if (potentialStack.apis) {
-		Object.entries(potentialStack.apis).forEach(([apiName, api]: [string, any]) => {
-			Object.entries(api.paths).forEach(([pathName, path]: [string, any]) => {
-				Object.entries(path).forEach(([opName, op]: [string, any]) => {
-					if (!/^(get|put|post|delete|options|head|patch|trace)$/.test(opName)) {
-						// skip properties that aren't http operations.
-						return;
-					}
-					const target = op['x-nitric-target'];
-					if (!(potentialStack[`${target.type}s`] && potentialStack[`${target.type}s`][target.name])) {
-						logicErrors.push(
-							`Invalid target for apis.${apiName}.${pathName}.${opName}, target ${target.type} "${target.name}" doesn't exist`,
-						);
-					}
+	if (pStack.apis) {
+		Object.entries(pStack.apis).forEach(([apiName, api]: [string, string]) => {
+			// see if the file exists...
+			const file = path.join(filePath, api);
+
+			if (!fs.existsSync(file)) {
+				logicErrors.push(`API file ${api} does not exist relative to ${filePath}`);
+			} else {
+				// Load and validate the files contents
+				const contents = fs.readFileSync(file);
+				const api = YAML.parse(contents.toString()) as StackAPIDocument;
+
+				const validate = schemaValidator.compile(OPENAPI_3_SCHEMA);
+
+				if (!validate(api)) {
+					logicErrors.push(`${apiName} at ${api} is not a valid Open API 3.0 document`);
+				}
+
+				Object.entries(api.paths).forEach(([pathName, path]: [string, any]) => {
+					Object.entries(path).forEach(([opName, op]: [string, any]) => {
+						if (!/^(get|put|post|delete|options|head|patch|trace)$/.test(opName)) {
+							// skip properties that aren't http operations.
+							return;
+						}
+						const target = op['x-nitric-target'];
+						if (!(potentialStack[`${target.type}s`] && potentialStack[`${target.type}s`][target.name])) {
+							logicErrors.push(
+								`Invalid target for apis.${apiName}.${pathName}.${opName}, target ${target.type} "${target.name}" doesn't exist`,
+							);
+						}
+					});
 				});
-			});
+			}
 		});
 	}
 

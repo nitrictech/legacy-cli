@@ -12,11 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Task, Stack, mapObject, NitricServiceImage } from '@nitric/cli-common';
+import { Task, Stack, mapObject, NitricContainerImage } from '@nitric/cli-common';
 import * as pulumi from '@pulumi/pulumi';
 import { LocalWorkspace } from '@pulumi/pulumi/automation';
 import * as digitalocean from '@pulumi/digitalocean';
-import { createServiceSpec } from './function';
+import { createComputeServiceSpec } from './compute';
 import fs from 'fs';
 import path from 'path';
 
@@ -30,7 +30,7 @@ interface DeployOptions {
 	stack: Stack;
 	region: string;
 	// Currently each digital ocean account
-	// may only have one docker container registry
+	// may only have one docker source registry
 	registryName: string;
 	token: string;
 }
@@ -115,33 +115,50 @@ export class Deploy extends Task<DeployResults> {
 							throw new Error('Digital ocean stacks MUST specify at least one entrypoint!');
 						}
 
-						const services = stack.getServices();
+						const funcs = stack.getFunctions();
+						const containers = stack.getContainers();
 
-						if (services.length > 0) {
+						if (funcs.length > 0 || containers.length > 0) {
 							const containerRegistry = await digitalocean.getContainerRegistry({
 								name: registryName,
 							});
 
 							// TODO: This currently assumes that the registry is empty
-							if (services.length > REGISTRY_LIMITS[containerRegistry.subscriptionTierSlug]) {
+							if (funcs.length + containers.length > REGISTRY_LIMITS[containerRegistry.subscriptionTierSlug]) {
 								pulumi.log.error(
-									'Provided registry cannot support the number of functions in this stack, look at upgrading your DOCR subscription tier',
+									'Provided registry cannot support the number of functions/containers in this stack, look at upgrading your DOCR subscription tier',
 								);
 							}
 
-							const serviceImages = services.map((service) => {
-								return {
-									serviceName: service.getName(),
-									image: new NitricServiceImage(service.getName(), {
-										service,
-										username: token,
-										password: token,
-										imageName: pulumi.interpolate`registry.digitalocean.com/${registryName}/${service.getName()}`,
-										server: 'registry.digitalocean.com',
-										nitricProvider: 'do',
-									}),
-								};
+							const standardImageArgs = (name: string): any => ({
+								username: token,
+								password: token,
+								imageName: pulumi.interpolate`registry.digitalocean.com/${registryName}/${name}`,
+								server: 'registry.digitalocean.com',
 							});
+
+							const deployedImages = [
+								...funcs.map((func) => {
+									return {
+										name: func.getName(),
+										image: new NitricContainerImage(func.getName(), {
+											unit: func,
+											sourceImageName: func.getImageTagName('do'),
+											...standardImageArgs(func.getName()),
+										}),
+									};
+								}),
+								...containers.map((container) => {
+									return {
+										name: container.getName(),
+										image: new NitricContainerImage(container.getName(), {
+											unit: container,
+											sourceImageName: container.getImageTagName('do'),
+											...standardImageArgs(container.getName()),
+										}),
+									};
+								}),
+							];
 
 							if (Object.keys(entrypoints || {}).length > 1) {
 								pulumi.log.warn('Multiple entrypoints will result in multiple digital ocean apps being created!');
@@ -162,8 +179,8 @@ export class Deploy extends Task<DeployResults> {
 									throw new Error(`Entrypoint [${name}] must contain a default path /`);
 								}
 
-								const servicePaths = normalizedPaths.filter(({ type }) => type === 'service');
-								const otherPaths = normalizedPaths.filter(({ type }) => type !== 'service');
+								const servicePaths = normalizedPaths.filter(({ type }) => ['function', 'service'].includes(type));
+								const otherPaths = normalizedPaths.filter(({ type }) => !['function', 'service'].includes(type));
 
 								if (otherPaths.length > 0) {
 									pulumi.log.warn(
@@ -174,11 +191,11 @@ export class Deploy extends Task<DeployResults> {
 								}
 
 								// Create the functions
-								const results = serviceImages
-									.filter(({ serviceName }) => {
-										return servicePaths.find(({ target }) => target == serviceName) != undefined;
+								const results = deployedImages
+									.filter(({ name }) => {
+										return servicePaths.find(({ target }) => target == name) != undefined;
 									})
-									.map(({ serviceName, image }) => createServiceSpec(serviceName, image, entrypoint));
+									.map(({ name, image }) => createComputeServiceSpec(name, image, entrypoint));
 
 								const app = new digitalocean.App(stack.getName(), {
 									spec: {

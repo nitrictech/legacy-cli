@@ -12,17 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Stack, Task, mapObject } from '@nitric/cli-common';
+import { Stack, Task, mapObject, NitricContainerImage } from '@nitric/cli-common';
 import { LocalWorkspace } from '@pulumi/pulumi/automation';
 import { resources, storage, web, containerregistry } from '@pulumi/azure-native';
-import { createBucket } from './bucket';
-import { createTopic } from './topic';
-import { createFunctionAsApp } from './function';
-import { createQueue } from './queue';
-import { createAPI } from './api';
 import * as pulumi from '@pulumi/pulumi';
 import fs from 'fs';
 import path from 'path';
+import {
+	NitricComputeAzureAppService,
+	NitricEventgridTopic,
+	NitricAzureStorageBucket,
+	NitricStorageQueue,
+	NitricAzureStorageSite,
+	NitricApiAzureApiManagement,
+	NitricEntrypointAzureFrontDoor,
+} from '../../resources';
 
 interface DeployOptions {
 	stack: Stack;
@@ -47,7 +51,7 @@ export class Deploy extends Task<void> {
 
 	async do(): Promise<void> {
 		const { stack, orgName, adminEmail, region } = this;
-		const { buckets, apis = {}, topics = {}, schedules = {}, queues } = stack.asNitricStack();
+		const { buckets = {}, topics = {}, schedules = {}, queues = {}, entrypoints = {} } = stack.asNitricStack();
 
 		// Use absolute path to log files, so it's easier for users to locate them if printed to the console.
 		const errorFile = path.resolve(await stack.getLoggingFile('error-azure'));
@@ -70,37 +74,10 @@ export class Deploy extends Task<void> {
 							location: region,
 						});
 
-						const registry = new containerregistry.Registry(`${stack.getName()}-registry`, {
-							resourceGroupName: resourceGroup.name,
-							location: resourceGroup.location,
-							registryName: `${stack.getName().replace(/-/g, '')}Registry`,
-							adminUserEnabled: true,
-							sku: {
-								name: 'Basic',
-							},
-						});
-
-						// Deploy
-						const appServicePlan = new web.AppServicePlan(`${stack.getName()}Plan`, {
-							name: `${stack.getName()}Plan`,
-							location: resourceGroup.location,
-							resourceGroupName: resourceGroup.name,
-							kind: 'Linux',
-							reserved: true,
-							sku: {
-								// for development only
-								// Will upgrade tiers/elasticity for different stack tiers e.g. dev/test/prod (prefab recipes)
-								//name: 'B1',
-								//tier: 'Basic',
-								//size: 'B1',
-								name: 'F1',
-								tier: 'Free',
-								size: 'F1',
-							},
-						});
-
 						// Create a new storage account for this stack
-						if (buckets || queues) {
+						// DEPLOY STORAGE BASED ASSETS
+						let deployedSites: NitricAzureStorageSite[] = [];
+						if (Object.keys(buckets).length || Object.keys(queues).length || stack.getSites().length) {
 							const account = new storage.StorageAccount(`${stack.getName()}-storage-account`, {
 								resourceGroupName: resourceGroup.name,
 								// 24 character limit
@@ -113,17 +90,132 @@ export class Deploy extends Task<void> {
 
 							// Not using refeschedulerrences produced currently,
 							// but leaving as map in case we need to reference in future
-							mapObject(buckets || {}).map((b) => createBucket(resourceGroup, account, b));
-							mapObject(queues || {}).map((q) => createQueue(resourceGroup, account, q));
+							mapObject(buckets || {}).map(
+								(b) =>
+									new NitricAzureStorageBucket(b.name, {
+										resourceGroup,
+										bucket: b,
+										storageAcct: account,
+									}),
+							);
+							mapObject(queues || {}).map(
+								(q) =>
+									new NitricStorageQueue(q.name, {
+										queue: q,
+										storageAcct: account,
+										resourceGroup,
+									}),
+							);
+							deployedSites = stack.getSites().map(
+								(s) =>
+									new NitricAzureStorageSite(s.getName(), {
+										site: s,
+										storageAcct: account,
+										resourceGroup,
+									}),
+							);
 						}
 
-						const deployedTopics = mapObject(topics).map((t) => createTopic(resourceGroup, t));
+						// DEPLOY TOPICS
+						const deployedTopics = mapObject(topics).map(
+							(t) =>
+								new NitricEventgridTopic(t.name, {
+									resourceGroup,
+									topic: t,
+								}),
+						);
 
-						// Deploy functions here...
-						// need to determine our deployment method for them
-						const DeployedServices = stack
-							.getServices()
-							.map((f) => createFunctionAsApp(resourceGroup, registry, appServicePlan, f, deployedTopics));
+						// DEPLOY SERVICES
+						let deployedAzureApps: NitricComputeAzureAppService[] = [];
+						if (stack.getFunctions().length > 0) {
+							// deploy a registry for deploying this stacks containers
+							// TODO: We will want to prefer a pre-existing registry, supplied by the user
+							const registry = new containerregistry.Registry(`${stack.getName()}-registry`, {
+								resourceGroupName: resourceGroup.name,
+								location: resourceGroup.location,
+								registryName: `${stack.getName().replace(/-/g, '')}Registry`,
+								adminUserEnabled: true,
+								sku: {
+									name: 'Basic',
+								},
+							});
+
+							// Deploy create an app func plan for this stack
+							const plan = new web.AppServicePlan(`${stack.getName()}Plan`, {
+								name: `${stack.getName()}Plan`,
+								location: resourceGroup.location,
+								resourceGroupName: resourceGroup.name,
+								kind: 'Linux',
+								reserved: true,
+								sku: {
+									// for development only
+									// Will upgrade tiers/elasticity for different stack tiers e.g. dev/test/prod (prefab recipes)
+									//name: 'B1',
+									//tier: 'Basic',
+									//size: 'B1',
+									name: 'F1',
+									tier: 'Free',
+									size: 'F1',
+								},
+							});
+
+							// get registry credentials
+							const credentials = pulumi
+								.all([resourceGroup.name, registry.name])
+								.apply(([resourceGroupName, registryName]) =>
+									containerregistry.listRegistryCredentials({
+										resourceGroupName: resourceGroupName,
+										registryName: registryName,
+									}),
+								);
+							const adminUsername = credentials.apply((credentials) => credentials.username!);
+							const adminPassword = credentials.apply((credentials) => credentials.passwords![0].value!);
+
+							deployedAzureApps = [
+								...stack.getFunctions().map((func) => {
+									// Deploy the lambdas image
+									const image = new NitricContainerImage(`${func.getName()}-image`, {
+										unit: func,
+										imageName: pulumi.interpolate`${registry.loginServer}/${func.getImageTagName('azure')}`,
+										sourceImageName: func.getImageTagName('azure'),
+										username: adminUsername,
+										password: adminPassword,
+										server: registry.loginServer,
+									});
+
+									// Create a new Nitric azure app func instance
+									return new NitricComputeAzureAppService(func.getName(), {
+										source: func,
+										resourceGroup,
+										plan,
+										registry,
+										topics: deployedTopics,
+										image,
+									});
+								}),
+								...stack.getContainers().map((container) => {
+									// Deploy the lambdas image
+									const image = new NitricContainerImage(`${container.getName()}-image`, {
+										unit: container,
+										imageName: pulumi.interpolate`${registry.loginServer}/${container.getImageTagName('azure')}`,
+										sourceImageName: container.getImageTagName('azure'),
+										username: adminUsername,
+										password: adminPassword,
+										server: registry.loginServer,
+									});
+
+									// Create a new Nitric azure app func instance
+									return new NitricComputeAzureAppService(container.getName(), {
+										source: container,
+										resourceGroup,
+										plan,
+										registry,
+										topics: deployedTopics,
+										image,
+									});
+								}),
+							];
+						}
 
 						// TODO: Add schedule support
 						// NOTE: Currently CRONTAB support is required, we either need to revisit the design of
@@ -133,7 +225,29 @@ export class Deploy extends Task<void> {
 							// schedules.map(s => createSchedule(resourceGroup, s))
 						}
 
-						mapObject(apis).map((a) => createAPI(resourceGroup, orgName, adminEmail, a, DeployedServices));
+						const deployedApis = stack.getApis().map(
+							(a) =>
+								new NitricApiAzureApiManagement(a.name, {
+									resourceGroup,
+									orgName,
+									adminEmail,
+									api: a,
+									services: deployedAzureApps,
+								}),
+						);
+
+						// FIXME: Implement front door deployment logic,
+						// class is currently just a placeholder
+						mapObject(entrypoints).map(
+							(e) =>
+								new NitricEntrypointAzureFrontDoor(e.name, {
+									resourceGroup,
+									entrypoint: e,
+									services: deployedAzureApps,
+									sites: deployedSites,
+									apis: deployedApis,
+								}),
+						);
 					} catch (e) {
 						pulumi.log.error(`An error occurred, see latest azure:error log for details: ${errorFile}`);
 						fs.appendFileSync(errorFile, e.stack || e.toString());

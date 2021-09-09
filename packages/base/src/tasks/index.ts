@@ -13,10 +13,7 @@
 // limitations under the License.
 //
 
-export * from './build';
 export * from './doctor';
 export * from './make';
-export * from './repository';
 export * from './run';
-export * from './store';
 export * from './template';

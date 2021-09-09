@@ -17,7 +17,7 @@ import { mocked } from 'ts-jest/utils';
 import { MIN_PORT, MAX_PORT, getPortRange, getContainerSubscriptions, sortImages } from './run';
 import * as getPort from 'get-port';
 import { Listr } from 'listr2';
-import { NitricImage, NitricStack } from '@nitric/cli-common';
+import { ContainerImage, NitricStack } from '@nitric/cli-common';
 
 jest.mock('dockerode');
 jest.mock('get-port');
@@ -36,7 +36,6 @@ jest.mock('cli-ux', () => ({
 }));
 jest.mock('listr2');
 jest.mock('../tasks/run');
-jest.mock('../tasks/build');
 
 // We want to ensure tests fail if these constant values are unintentionally changed
 describe('Given MIN_PORT is constant', () => {
@@ -137,17 +136,15 @@ describe('Given getContainerSubscriptions', () => {
 			const subscribedStack = {
 				name: 'subscribed-stack',
 				...topicStack,
-				services: {
+				functions: {
 					'function-one': {
-						path: './function-one',
-						runtime: 'official/nextjs',
+						handler: './function-one',
 						triggers: {
 							topics: ['topic-one'],
 						},
 					},
 					'function-two': {
-						path: './function-one',
-						runtime: 'official/nextjs',
+						handler: './function-one',
 						triggers: {
 							topics: ['topic-two'],
 						},
@@ -168,7 +165,7 @@ describe('Given getContainerSubscriptions', () => {
 			const unsubscribedStack = {
 				name: 'unsubscribed-stack',
 				...topicStack,
-				services: {},
+				functions: {},
 			};
 
 			it('Should return the topics with empty subscriber address arrays', () => {
@@ -253,12 +250,12 @@ describe('Given executing nitric run', () => {
 
 	// 		afterAll(jest.resetAllMocks);
 
-	// 		it('Should create a single RunFunctionTask', () => {
-	// 			expect(RunFunctionTask).toBeCalledTimes(1);
+	// 		it('Should create a single RunContainerTask', () => {
+	// 			expect(RunContainerTask).toBeCalledTimes(1);
 	// 		});
 
 	// 		it.skip('Should create run function task from nitric.yaml function properties', () => {
-	// 			expect(RunFunctionTask).toBeCalledWith(
+	// 			expect(RunContainerTask).toBeCalledWith(
 	// 				expect.objectContaining({
 	// 					// image: "",
 	// 					port: MIN_PORT,
@@ -269,8 +266,8 @@ describe('Given executing nitric run', () => {
 	// 			);
 	// 		});
 
-	// 		it('Should execute the RunFunctionTask', async () => {
-	// 			expect(RunFunctionTask).toBeCalled();
+	// 		it('Should execute the RunContainerTask', async () => {
+	// 			expect(RunContainerTask).toBeCalled();
 	// 		});
 	// 	});
 	// });
@@ -278,14 +275,12 @@ describe('Given executing nitric run', () => {
 	describe('Given a nitric stack with multiple functions', () => {
 		const multiFunctionStack: NitricStack = {
 			name: 'test-stack',
-			services: {
+			functions: {
 				'dummy-func1': {
-					runtime: 'custom',
-					path: 'dummy-func1',
+					handler: 'dummy-func1',
 				},
 				'dummy-func2': {
-					runtime: 'custom',
-					path: 'dummy-func2',
+					handler: 'dummy-func2',
 				},
 			},
 		};
@@ -302,10 +297,59 @@ describe('Given executing nitric run', () => {
 			describe('When one function has a subscription', () => {
 				const subscribedStack: NitricStack = {
 					name: eventTopicStack.name,
-					services: {
-						...eventTopicStack.services,
+					functions: {
+						...eventTopicStack.functions,
 						'dummy-func1': {
-							...eventTopicStack.services!['dummy-func1'],
+							...eventTopicStack.functions!['dummy-func1'],
+							triggers: {
+								topics: ['test-topic'],
+							},
+						},
+					},
+					topics: eventTopicStack.topics,
+				};
+
+				it('Should subscribe the function', () => {
+					const subscriptions = getContainerSubscriptions(subscribedStack);
+					expect(subscriptions).toEqual({
+						'test-topic': ['http://dummy-func1:9001'],
+					});
+				});
+			});
+		});
+	});
+
+	describe('Given a nitric stack with multiple containers', () => {
+		const multiContainerStack: NitricStack = {
+			name: 'test-stack',
+			containers: {
+				'dummy-func1': {
+					context: 'dummy-func1',
+					dockerfile: './Dockerfile',
+				},
+				'dummy-func2': {
+					context: 'dummy-func2',
+					dockerfile: './Dockerfile',
+				},
+			},
+		};
+
+		describe('Given an event topic', () => {
+			const eventTopicStack: NitricStack = {
+				...multiContainerStack,
+				// add the topic
+				topics: {
+					'test-topic': {},
+				},
+			};
+
+			describe('When one function has a subscription', () => {
+				const subscribedStack: NitricStack = {
+					name: eventTopicStack.name,
+					containers: {
+						...eventTopicStack.containers,
+						'dummy-func1': {
+							...eventTopicStack.containers!['dummy-func1'],
 							triggers: {
 								topics: ['test-topic'],
 							},
@@ -326,48 +370,48 @@ describe('Given executing nitric run', () => {
 
 	describe('Given multiple nitric images', () => {
 		it('Should sort the images by name their function alphabetical function names', () => {
-			const unsortedImages: NitricImage[] = [
+			const unsortedImages: ContainerImage[] = [
 				{
 					id: '1111',
-					serviceName: 'a-function',
+					name: 'a-function',
 				},
 				{
 					id: '1111',
-					serviceName: 'c-function',
+					name: 'c-function',
 				},
 				{
 					id: '1111',
-					serviceName: 'same-name',
+					name: 'same-name',
 				},
 				{
 					id: '1111',
-					serviceName: 'same-name',
+					name: 'same-name',
 				},
 				{
 					id: '1111',
-					serviceName: 'b-function',
+					name: 'b-function',
 				},
 			];
 			expect(sortImages(unsortedImages)).toEqual([
 				{
 					id: '1111',
-					serviceName: 'a-function',
+					name: 'a-function',
 				},
 				{
 					id: '1111',
-					serviceName: 'b-function',
+					name: 'b-function',
 				},
 				{
 					id: '1111',
-					serviceName: 'c-function',
+					name: 'c-function',
 				},
 				{
 					id: '1111',
-					serviceName: 'same-name',
+					name: 'same-name',
 				},
 				{
 					id: '1111',
-					serviceName: 'same-name',
+					name: 'same-name',
 				},
 			]);
 		});

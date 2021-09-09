@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export interface NitricImage {
+export interface ContainerImage {
 	id: string;
-	serviceName: string;
+	name: string;
 }
