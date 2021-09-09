@@ -2,6 +2,25 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.86](https://github.com/nitrictech/cli/compare/v0.0.85...v0.0.86) (2021-09-09)
+
+
+### Features
+
+* Add .packrc support for env variable and service context. ([0e79b57](https://github.com/nitrictech/cli/commit/0e79b570851d3c91bebe7629e6731d5d1d0a24d2))
+* buildpacks implementation. ([0da1cc2](https://github.com/nitrictech/cli/commit/0da1cc2d5a5feae37b469704620996ffe7766fd0))
+* make:stack to create new Nitric Stacks from templates ([fbdd02a](https://github.com/nitrictech/cli/commit/fbdd02a738ac92053b2f78501ea32ca3548a5006))
+* Support APIs as separate files. ([4ef10da](https://github.com/nitrictech/cli/commit/4ef10da4a752b72f7663c081de07e070f3c391a7))
+* support functions and custom containers ([745e852](https://github.com/nitrictech/cli/commit/745e852f7ff519f4acd4b5c2aa075a72ecc51c4c))
+
+
+### Bug Fixes
+
+* Add env for nitric run NITRIC_DEV_VOLUME. ([889888f](https://github.com/nitrictech/cli/commit/889888fdc2cca4244644a3a1b1ec677ca9bfe98f))
+* cleanup pack containers. ([427fc06](https://github.com/nitrictech/cli/commit/427fc06099acf457ab6c6f4f7ea024b23040a435))
+* setup nitric run volume in .nitric/run relative to cwd. ([eebf817](https://github.com/nitrictech/cli/commit/eebf817a429ce328c1217af9bfdc3632eb528a8f))
+* update stack name for template stacks ([0006ab9](https://github.com/nitrictech/cli/commit/0006ab9f375caff8fa95a6e4b2687702164c8d7e))
+
 ### [0.0.85](https://github.com/nitrictech/cli/compare/v0.0.84...v0.0.85) (2021-09-03)
 
 ### [0.0.84](https://github.com/nitrictech/cli/compare/v0.0.82...v0.0.84) (2021-08-26)
