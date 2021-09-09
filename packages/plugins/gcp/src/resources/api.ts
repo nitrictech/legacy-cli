@@ -149,6 +149,7 @@ export class NitricApiGcpApiGateway extends pulumi.ComponentResource {
 				`${name}-acct-binding`,
 				{
 					service: svc.cloudrun.name,
+					location: svc.cloudrun.location,
 					member: pulumi.interpolate`serviceAccount:${apiInvoker.email}`,
 					role: 'roles/run.invoker',
 				},
