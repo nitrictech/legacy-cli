@@ -88,6 +88,7 @@ export class NitricComputeCloudRun extends pulumi.ComponentResource {
 				member: pulumi.interpolate`serviceAccount:${invokerAccount.email}`,
 				role: 'roles/run.invoker',
 				service: this.cloudrun.name,
+				location: this.cloudrun.location,
 			});
 
 			triggers.topics.forEach((sub) => {

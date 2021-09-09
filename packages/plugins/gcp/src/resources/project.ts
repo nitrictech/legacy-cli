@@ -77,7 +77,7 @@ export class NitricGcpProject extends pulumi.ComponentResource {
 			`pubsub-token-creator`,
 			{
 				role: 'roles/iam.serviceAccountTokenCreator',
-				member: pulumi.interpolate`serviceAccount:services-${project.number}@gcp-sa-pubsub.iam.gserviceaccount.com`,
+				member: pulumi.interpolate`serviceAccount:service-${project.number}@gcp-sa-pubsub.iam.gserviceaccount.com`,
 				project: project.id,
 			},
 			{
