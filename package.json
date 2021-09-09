@@ -1,6 +1,5 @@
 {
 	"name": "nitric-cli",
-	"version": "0.0.86",
 	"description": "CLI monorepo for the Nitric framework",
 	"author": "Nitric <https://github.com/nitric-dev>",
 	"scripts": {
@@ -20,7 +19,8 @@
 		"license:add": "license-check-and-add add -f ./licenseconfig.json",
 		"license:remove": "license-check-and-add remove -f ./licenseconfig.json",
 		"publish:all": "yarn workspaces foreach --no-private run npm:publish",
-		"nitric": "yarn workspace @nitric/cli nitric"
+		"nitric": "yarn workspace @nitric/cli nitric",
+		"version:all": "yarn workspaces foreach --no-private run set:version"
 	},
 	"contributors": [
 		"Jye Cusch <jye.cusch@gmail.com>",
