@@ -105,7 +105,7 @@ export class NitricComputeAWSLambda extends pulumi.ComponentResource {
 		);
 
 		new aws.iam.RolePolicy(
-			`${service.getName()}SecretsAccess`,
+			`${source.getName()}SecretsAccess`,
 			{
 				role: lambdaRole.id,
 				policy: JSON.stringify({

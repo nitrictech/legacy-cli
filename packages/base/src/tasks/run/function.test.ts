@@ -16,6 +16,7 @@ import 'jest';
 import { mocked } from 'ts-jest/utils';
 import { RunContainerTask, Cleanup } from '.';
 import Docker, { Network } from 'dockerode';
+import { Stack } from '@nitric/cli-common';
 
 jest.mock('get-port');
 jest.mock('fs');
@@ -42,6 +43,9 @@ describe('Given a Nitric function is being run locally as a source', () => {
 	test('A source image should be created', async () => {
 		expect.assertions(1);
 		const runContainerTask = new RunContainerTask({
+			stack: new Stack('nitric.yaml', {
+				name: 'test-stack',
+			}),
 			image: {
 				id: 'test-id',
 				name: 'test-function',
@@ -61,6 +65,9 @@ describe('Given a Nitric function is being run locally as a source', () => {
 	describe('When docker run takes too long to respond', () => {
 		test('The task promise should reject with details', () => {
 			const runContainerTask = new RunContainerTask({
+				stack: new Stack('nitric.yaml', {
+					name: 'test-stack',
+				}),
 				image: {
 					id: 'test-id',
 					name: 'test-function',
@@ -94,6 +101,9 @@ describe('Given a Nitric function is being run locally as a source', () => {
 		});
 
 		const runConfig = {
+			stack: new Stack('nitric.yaml', {
+				name: 'test-stack',
+			}),
 			image: {
 				id: 'test-id',
 				name: 'test-function',
@@ -132,6 +142,9 @@ describe('Given a Nitric function is being run locally as a source', () => {
 		test('The network config should be passed to Docker', async () => {
 			expect.assertions(1);
 			const runContainerTask = new RunContainerTask({
+				stack: new Stack('nitric.yaml', {
+					name: 'test-stack',
+				}),
 				image: {
 					id: 'test-id',
 					name: 'test-function',
@@ -174,6 +187,9 @@ describe('Given a Nitric function is being run locally as a source', () => {
 			test('A warning should be logged', async () => {
 				expect.assertions(1);
 				const runContainerTask = new RunContainerTask({
+					stack: new Stack('nitric.yaml', {
+						name: 'test-stack',
+					}),
 					image: {
 						id: 'test-id',
 						name: 'test-function',
@@ -196,6 +212,9 @@ describe('Given a Nitric function is being run locally as a source', () => {
 			test('The bridge network should be used instead', async () => {
 				expect.assertions(1);
 				const runContainerTask = new RunContainerTask({
+					stack: new Stack('nitric.yaml', {
+						name: 'test-stack',
+					}),
 					image: {
 						id: 'test-id',
 						name: 'test-function',
@@ -231,6 +250,9 @@ describe('Given a Nitric function is being run locally as a source', () => {
 		test('The volume config should be passed to Docker', async () => {
 			expect.assertions(1);
 			const runContainerTask = new RunContainerTask({
+				stack: new Stack('nitric.yaml', {
+					name: 'test-stack',
+				}),
 				image: {
 					id: 'test-id',
 					name: 'test-function',
