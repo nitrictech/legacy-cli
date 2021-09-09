@@ -25,28 +25,44 @@ jobs:
         registry-url: 'https://registry.npmjs.org'
         always-auth: true
 
-    - name: Install Dependencies
-      run: yarn --immutable
-
-    - name: Build Common
-      run: yarn build:common
-
-    - name: Publish to NPM
-      run: yarn publish:all
-      env:
-        NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-
     - name: Normalize version string
       run: |
         version="${{ github.event.release.tag_name }}"
         echo "::set-output name=VERSION::`echo ${version:1}`"
       id: normalize_version
+
+    - name: Install Dependencies
+      run: yarn --immutable
+
+    # Update version metadata to match tag version
+    - name: Update Versions
+      run: yarn version:all ${{ steps.normalize_version.outputs.VERSION }}
+
+    - name: Build Common
+      run: yarn build:common
+
+    # Release Production
+    - name: Publish latest to NPM
+      if: "!github.event.release.prerelease"
+      run: yarn publish:all
+      env:
+        NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+    # release RC
+    - name: Publish latest RC to NPM
+      if: "github.event.release.prerelease"
+      run: yarn publish:all --tag rc-latest
+      env:
+        NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+
     
+    
+    # TODO: Re-instate when ready for binary releases
     # Signal the releases repostory to prepare a release
-    - name: Chocolatey Release
-      uses: peter-evans/repository-dispatch@v1
-      with:
-        token: ${{ secrets.RELEASE_TOKEN }}
-        repository: nitrictech/cli-chocolatey
-        event-type: choco-release
-        client-payload: '{"version": "${{ steps.normalize_version.outputs.VERSION }}"}'
+    #- name: Chocolatey Release
+    #  uses: peter-evans/repository-dispatch@v1
+    #  with:
+    #    token: ${{ secrets.RELEASE_TOKEN }}
+    #    repository: nitrictech/cli-chocolatey
+    #    event-type: choco-release
+    #    client-payload: '{"version": "${{ steps.normalize_version.outputs.VERSION }}"}'
