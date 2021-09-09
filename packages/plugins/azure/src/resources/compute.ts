@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 import * as pulumi from '@pulumi/pulumi';
-import { resources, web, containerregistry, eventgrid } from '@pulumi/azure-native';
+import * as az from '@pulumi/azure-native';
 import { NitricContainerImage, StackFunction, StackContainer } from '@nitric/cli-common';
 import { NitricEventgridTopic } from './topic';
 
@@ -20,12 +20,12 @@ interface NitricComputeAzureAppServiceArgs {
 	/**
 	 * Azure resource group to deploy func to
 	 */
-	resourceGroup: resources.ResourceGroup;
+	resourceGroup: az.resources.ResourceGroup;
 
 	/**
 	 * App Service plan to deploy this func to
 	 */
-	plan: web.AppServicePlan;
+	plan: az.web.AppServicePlan;
 
 	/**
 	 * Nitric Function or Custom Container
@@ -35,7 +35,7 @@ interface NitricComputeAzureAppServiceArgs {
 	/**
 	 * Registry the image is deployed to
 	 */
-	registry: containerregistry.Registry;
+	registry: az.containerregistry.Registry;
 
 	/**
 	 * A deployed Nitric Image
@@ -53,7 +53,7 @@ interface NitricComputeAzureAppServiceArgs {
  */
 export class NitricComputeAzureAppService extends pulumi.ComponentResource {
 	public readonly name: string;
-	public readonly webapp: web.WebApp;
+	public readonly webapp: az.web.WebApp;
 
 	constructor(name: string, args: NitricComputeAzureAppServiceArgs, opts?: pulumi.ComponentResourceOptions) {
 		super('nitric:func:AppService', name, {}, opts);
@@ -65,7 +65,7 @@ export class NitricComputeAzureAppService extends pulumi.ComponentResource {
 		const nitricContainer = source.getDescriptor();
 
 		const credentials = pulumi.all([resourceGroup.name, registry.name]).apply(([resourceGroupName, registryName]) =>
-			containerregistry.listRegistryCredentials({
+			az.containerregistry.listRegistryCredentials({
 				resourceGroupName: resourceGroupName,
 				registryName: registryName,
 			}),
@@ -79,12 +79,15 @@ export class NitricComputeAzureAppService extends pulumi.ComponentResource {
 		// So hopefully this should be as simple as including a gateway plugin for
 		// Azure that utilizes that contract.
 		// return new appservice.FunctionApp()
-		this.webapp = new web.WebApp(
+		this.webapp = new az.web.WebApp(
 			source.getName(),
 			{
 				serverFarmId: plan.id,
 				name: `${source.getStack().getName()}-${source.getName()}`,
 				resourceGroupName: resourceGroup.name,
+				identity: {
+					type: 'SystemAssigned',
+				},
 				siteConfig: {
 					appSettings: [
 						{
@@ -114,6 +117,18 @@ export class NitricComputeAzureAppService extends pulumi.ComponentResource {
 			},
 			defaultResourceOptions,
 		);
+
+		// Give role assignments to this identity for accessing necessary resources
+		// i.e. storage account, eventgrid topics and databases
+		// this.webapp.identity;
+		az.authorization.getClientConfig();
+		new az.authorization.RoleAssignment('', {
+			principalId: this.webapp.identity.apply((id) => id!.principalId),
+			// Storage contributor role
+			roleDefinitionId: 'ba92f5b4-2d11-453d-a403-e96b0029c9fe',
+			scope: pulumi.interpolate`/subscriptions/{subscriptionId}/resourceGroups/${resourceGroup.name}`,
+		});
+
 		const { triggers = {} } = nitricContainer;
 
 		// Deploy an evengrid webhook subscription
@@ -121,7 +136,7 @@ export class NitricComputeAzureAppService extends pulumi.ComponentResource {
 			const topic = topics.find((t) => t.name === s);
 
 			if (topic) {
-				new eventgrid.EventSubscription(
+				new az.eventgrid.EventSubscription(
 					`${source.getName()}-${topic.name}-subscription`,
 					{
 						eventSubscriptionName: `${source.getName()}-${topic.name}-subscription`,
