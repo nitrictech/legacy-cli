@@ -63,7 +63,6 @@ export class NitricApiAwsApiGateway extends pulumi.ComponentResource {
 
 		const defaultResourceOptions: pulumi.ResourceOptions = { parent: this };
 		const { api, lambdas } = args;
-		const { name: nitricName, ...rest } = api;
 
 		this.name = name;
 
@@ -89,7 +88,7 @@ export class NitricApiAwsApiGateway extends pulumi.ComponentResource {
 			.all(lambdas.map((s) => s.lambda.invokeArn.apply((arn) => `${s.name}||${arn}`)))
 			.apply((nameArnPairs) => {
 				const transformedApi = {
-					...rest,
+					...openapi,
 					paths: Object.keys(openapi.paths).reduce((acc, pathKey) => {
 						const path = openapi.paths[pathKey]!;
 						const newMethods = Object.keys(path)
