@@ -22,7 +22,7 @@ describe('MakeStackTask: ', () => {
 	describe("When the stack folder doesn't exist", () => {
 		test('The new stack directory is created', async () => {
 			await new MakeStackTask({ name: 'test-stack', force: true }).do();
-			expect(fs.mkdirSync).toBeCalledWith('./test-stack');
+			expect(fs.mkdirSync).toBeCalledWith('./test-stack', { recursive: true });
 		});
 	});
 

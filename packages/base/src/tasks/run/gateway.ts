@@ -40,7 +40,7 @@ export interface RunGatewayTaskOptions {
  */
 export function createAPIStagingDirectory(): string {
 	if (!fs.existsSync(`${STAGING_API_DIR}`)) {
-		fs.mkdirSync(`${STAGING_API_DIR}`);
+		fs.mkdirSync(`${STAGING_API_DIR}`, { recursive: true });
 	}
 
 	return `${STAGING_API_DIR}`;
@@ -52,7 +52,7 @@ export function createAPIStagingDirectory(): string {
 export function createAPIDirectory(apiName: string): string {
 	const stagingDir = createAPIStagingDirectory();
 	if (!fs.existsSync(`${stagingDir}/${apiName}`)) {
-		fs.mkdirSync(`${stagingDir}/${apiName}`);
+		fs.mkdirSync(`${stagingDir}/${apiName}`, { recursive: true });
 	}
 
 	return `${stagingDir}/${apiName}`;
