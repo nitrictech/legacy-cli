@@ -26,6 +26,9 @@ import {
 	NitricAzureStorageSite,
 	NitricApiAzureApiManagement,
 	NitricEntrypointAzureFrontDoor,
+	NitricCollectionCosmosMongo,
+	NitricDatabaseCosmosMongo,
+	NitricDatabaseAccountMongoDB,
 } from '../../resources';
 
 interface DeployOptions {
@@ -51,7 +54,14 @@ export class Deploy extends Task<void> {
 
 	async do(): Promise<void> {
 		const { stack, orgName, adminEmail, region } = this;
-		const { buckets = {}, topics = {}, schedules = {}, queues = {}, entrypoints = {} } = stack.asNitricStack();
+		const {
+			buckets = {},
+			collections = {},
+			topics = {},
+			schedules = {},
+			queues = {},
+			entrypoints = {},
+		} = stack.asNitricStack();
 
 		// Use absolute path to log files, so it's easier for users to locate them if printed to the console.
 		const errorFile = path.resolve(await stack.getLoggingFile('error-azure'));
@@ -223,6 +233,30 @@ export class Deploy extends Task<void> {
 						if (schedules) {
 							pulumi.log.warn('Schedules are not currently supported for Azure deployments');
 							// schedules.map(s => createSchedule(resourceGroup, s))
+						}
+
+						if (Object.keys(collections).length) {
+							// CREATE DB ACCOUNT
+							const { account } = new NitricDatabaseAccountMongoDB(stack.getName(), {
+								resourceGroup,
+							});
+
+							// CREATE DB
+							const { database } = new NitricDatabaseCosmosMongo(stack.getName(), {
+								account,
+								resourceGroup,
+							});
+
+							// DEPLOY COLLECTIONS
+							mapObject(collections).map(
+								(coll) =>
+									new NitricCollectionCosmosMongo(coll.name, {
+										collection: coll,
+										account,
+										database,
+										resourceGroup,
+									}),
+							);
 						}
 
 						const deployedApis = stack.getApis().map(

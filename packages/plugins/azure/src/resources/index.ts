@@ -17,6 +17,8 @@ export * from './topic';
 export * from './queue';
 export * from './compute';
 export * from './collection';
+export * from './database-account';
+export * from './database';
 export * from './site';
 export * from './api';
 export * from './entrypoint';

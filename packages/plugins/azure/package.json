@@ -62,8 +62,8 @@
 		"directory": "packages/plugins/azure"
 	},
 	"scripts": {
-		"postpack": "rm -f oclif.manifest.json",
-		"prepack": "rm -rf lib && tsc -p tsconfig.build.json && oclif-dev manifest && oclif-dev readme",
+		"postpack": "rimraf -f oclif.manifest.json",
+		"prepack": "rimraf -rf lib && tsc -p tsconfig.build.json && oclif-dev manifest && oclif-dev readme",
 		"test": "tsc --emitDeclarationOnly && jest --passWithNoTests",
 		"set:version": "npm version --version-git-tag false",
 		"npm:publish": "yarn npm publish --access restricted --tolerate-republish"
