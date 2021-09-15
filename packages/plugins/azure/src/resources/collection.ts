@@ -50,16 +50,7 @@ export class NitricCollectionCosmosMongo extends pulumi.ComponentResource {
 				options: {},
 				resource: {
 					id: collection.name,
-					indexes: [
-						{
-							key: {
-								keys: [],
-							},
-							options: {
-								unique: true,
-							},
-						},
-					],
+					// _id index is created by default, add indexes here once we have them in stack
 				},
 			},
 			defaultResourceOptions,
