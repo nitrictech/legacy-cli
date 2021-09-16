@@ -518,8 +518,10 @@ export default class Run extends BaseCommand {
 				});
 			});
 
-			process.stdin.setRawMode!(true);
-			process.stdin.resume();
+			if (process.stdin.setRawMode) {
+				process.stdin.setRawMode(true);
+				process.stdin.resume();
+			}
 
 			await cleanUp;
 
