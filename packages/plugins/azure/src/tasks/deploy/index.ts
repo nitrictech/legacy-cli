@@ -14,7 +14,7 @@
 
 import { Stack, Task, mapObject, NitricContainerImage } from '@nitric/cli-common';
 import { LocalWorkspace } from '@pulumi/pulumi/automation';
-import { resources, storage, web, containerregistry } from '@pulumi/azure-native';
+import { authorization, resources, storage, web, containerregistry, keyvault } from '@pulumi/azure-native';
 import * as pulumi from '@pulumi/pulumi';
 import fs from 'fs';
 import path from 'path';
@@ -29,6 +29,7 @@ import {
 	NitricCollectionCosmosMongo,
 	NitricDatabaseCosmosMongo,
 	NitricDatabaseAccountMongoDB,
+	NitricComputeAzureAppServiceEnvVariable,
 } from '../../resources';
 
 interface DeployOptions {
@@ -77,12 +78,36 @@ export class Deploy extends Task<void> {
 				program: async () => {
 					// Now we can start deploying with Pulumi
 					try {
+						const clientConfig = await authorization.getClientConfig();
+
 						// Create a new resource group for the nitric stack
 						// This'll be used for basically everything we deploy in this stack
 						const resourceGroup = new resources.ResourceGroup(stack.getName(), {
 							resourceGroupName: stack.getName(),
 							location: region,
 						});
+
+						// Create a stack level keyvault if secrets are enabled
+						// At the moment secrets have no config level setting
+						const kvault = new keyvault.Vault(`${stack.getName()}-key-vault`, {
+							resourceGroupName: resourceGroup.name,
+							properties: {
+								enableRbacAuthorization: true,
+								sku: {
+									family: 'A',
+									name: 'standard',
+								},
+								tenantId: clientConfig.tenantId,
+							},
+						});
+
+						// Universal app service environment variables
+						let appServiceEnv: NitricComputeAzureAppServiceEnvVariable[] = [
+							{
+								name: 'KVAULT_NAME',
+								value: kvault.name,
+							},
+						];
 
 						// Create a new storage account for this stack
 						// DEPLOY STORAGE BASED ASSETS
@@ -97,6 +122,20 @@ export class Deploy extends Task<void> {
 									name: 'Standard_LRS',
 								},
 							});
+
+							// Ensure deployed app services are pointed to
+							// the created storage account endpoints
+							appServiceEnv = [
+								...appServiceEnv,
+								{
+									name: 'AZURE_STORAGE_ACCOUNT_BLOB_ENDPOINT',
+									value: account.primaryEndpoints.blob,
+								},
+								{
+									name: 'AZURE_STORAGE_ACCOUNT_QUEUE_ENDPOINT',
+									value: account.primaryEndpoints.queue,
+								},
+							];
 
 							// Not using refeschedulerrences produced currently,
 							// but leaving as map in case we need to reference in future
@@ -134,6 +173,43 @@ export class Deploy extends Task<void> {
 									topic: t,
 								}),
 						);
+
+						if (Object.keys(collections).length) {
+							// CREATE DB ACCOUNT
+							const { account } = new NitricDatabaseAccountMongoDB(stack.getName(), {
+								resourceGroup,
+							});
+
+							// CREATE DB
+							const { database } = new NitricDatabaseCosmosMongo(stack.getName(), {
+								account,
+								resourceGroup,
+							});
+
+							// TODO: Add connection string to app service instance
+							appServiceEnv = [
+								...appServiceEnv,
+								// Add the DB connection string for the stack shared database
+								{
+									name: 'MONGODB_CONNECTION_STRING',
+									// TODO: Determine if this is the correct value
+									// may need to use ListConnectionStrings
+									// against the created account instead...
+									value: account.documentEndpoint,
+								},
+							];
+
+							// DEPLOY COLLECTIONS
+							mapObject(collections).map(
+								(coll) =>
+									new NitricCollectionCosmosMongo(coll.name, {
+										collection: coll,
+										account,
+										database,
+										resourceGroup,
+									}),
+							);
+						}
 
 						// DEPLOY SERVICES
 						let deployedAzureApps: NitricComputeAzureAppService[] = [];
@@ -196,11 +272,13 @@ export class Deploy extends Task<void> {
 									// Create a new Nitric azure app func instance
 									return new NitricComputeAzureAppService(func.getName(), {
 										source: func,
+										subscriptionId: clientConfig.subscriptionId,
 										resourceGroup,
 										plan,
 										registry,
 										topics: deployedTopics,
 										image,
+										env: appServiceEnv,
 									});
 								}),
 								...stack.getContainers().map((container) => {
@@ -217,11 +295,13 @@ export class Deploy extends Task<void> {
 									// Create a new Nitric azure app func instance
 									return new NitricComputeAzureAppService(container.getName(), {
 										source: container,
+										subscriptionId: clientConfig.subscriptionId,
 										resourceGroup,
 										plan,
 										registry,
 										topics: deployedTopics,
 										image,
+										env: appServiceEnv,
 									});
 								}),
 							];
@@ -233,30 +313,6 @@ export class Deploy extends Task<void> {
 						if (schedules) {
 							pulumi.log.warn('Schedules are not currently supported for Azure deployments');
 							// schedules.map(s => createSchedule(resourceGroup, s))
-						}
-
-						if (Object.keys(collections).length) {
-							// CREATE DB ACCOUNT
-							const { account } = new NitricDatabaseAccountMongoDB(stack.getName(), {
-								resourceGroup,
-							});
-
-							// CREATE DB
-							const { database } = new NitricDatabaseCosmosMongo(stack.getName(), {
-								account,
-								resourceGroup,
-							});
-
-							// DEPLOY COLLECTIONS
-							mapObject(collections).map(
-								(coll) =>
-									new NitricCollectionCosmosMongo(coll.name, {
-										collection: coll,
-										account,
-										database,
-										resourceGroup,
-									}),
-							);
 						}
 
 						const deployedApis = stack.getApis().map(
