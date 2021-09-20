@@ -272,12 +272,13 @@ export class Deploy extends Task<void> {
 									// Create a new Nitric azure app func instance
 									return new NitricComputeAzureAppService(func.getName(), {
 										source: func,
+										subscriptionId: clientConfig.subscriptionId,
 										resourceGroup,
 										plan,
 										registry,
 										topics: deployedTopics,
 										image,
-										env: [],
+										env: appServiceEnv,
 									});
 								}),
 								...stack.getContainers().map((container) => {
@@ -294,6 +295,7 @@ export class Deploy extends Task<void> {
 									// Create a new Nitric azure app func instance
 									return new NitricComputeAzureAppService(container.getName(), {
 										source: container,
+										subscriptionId: clientConfig.subscriptionId,
 										resourceGroup,
 										plan,
 										registry,
