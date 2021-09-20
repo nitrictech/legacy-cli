@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 import * as pulumi from '@pulumi/pulumi';
-import { resources, web, containerregistry, eventgrid } from '@pulumi/azure-native';
+import { types, authorization, resources, web, containerregistry, eventgrid } from '@pulumi/azure-native';
 import { NitricContainerImage, StackFunction, StackContainer } from '@nitric/cli-common';
 import { NitricEventgridTopic } from './topic';
 
@@ -22,6 +22,11 @@ export interface NitricComputeAzureAppServiceEnvVariable {
 }
 
 interface NitricComputeAzureAppServiceArgs {
+	/**
+	 * SubscriptionId this resources is being deployed under
+	 */
+	subscriptionId: string | pulumi.Output<string>;
+
 	/**
 	 * Azure resource group to deploy func to
 	 */
@@ -58,6 +63,16 @@ interface NitricComputeAzureAppServiceArgs {
 	env?: NitricComputeAzureAppServiceEnvVariable[];
 }
 
+// Built in role definitions for Azure
+// See below URL for mapping
+// https://docs.microsoft.com/en-us/azure/role-based-access-control/built-in-roles
+const ROLE_DEFINITION_MAP = {
+	KeyVaultSecretsOfficer: 'b86a8fe4-44ce-4948-aee5-eccb2c155cd7',
+	StorageBlobDataContributor: 'ba92f5b4-2d11-453d-a403-e96b0029c9fe',
+	StorageQueueDataContributor: '974c5e8b-45b9-4653-ba55-5f855dd0fb88',
+	EventGridDataSender: 'd5a91429-5739-47e2-a06b-3470a27159e7',
+};
+
 /**
  * Azure App Service implementation of a Nitric Function or Custom Container
  */
@@ -68,7 +83,7 @@ export class NitricComputeAzureAppService extends pulumi.ComponentResource {
 	constructor(name: string, args: NitricComputeAzureAppServiceArgs, opts?: pulumi.ComponentResourceOptions) {
 		super('nitric:func:AppService', name, {}, opts);
 		const defaultResourceOptions: pulumi.ResourceOptions = { parent: this };
-		const { source, resourceGroup, plan, registry, image, topics, env = [] } = args;
+		const { source, subscriptionId, resourceGroup, plan, registry, image, topics, env = [] } = args;
 
 		this.name = name;
 
@@ -127,6 +142,21 @@ export class NitricComputeAzureAppService extends pulumi.ComponentResource {
 			defaultResourceOptions,
 		);
 		const { triggers = {} } = nitricContainer;
+
+		// Assign roles to the deployed app service
+		Object.entries(ROLE_DEFINITION_MAP).map(
+			([name, id]) =>
+				new authorization.RoleAssignment(
+					`${source.getName()}${name}`,
+					{
+						principalId: this.webapp.identity.apply((t) => t!.principalId),
+						principalType: types.enums.authorization.PrincipalType.MSI,
+						roleDefinitionId: pulumi.interpolate`/subscriptions/${subscriptionId}/providers/Microsoft.Authorization/roleDefinitions/${id}`,
+						scope: pulumi.interpolate`subscriptions/${subscriptionId}/resourceGroups/${resourceGroup.name}`,
+					},
+					defaultResourceOptions,
+				),
+		);
 
 		// Deploy an evengrid webhook subscription
 		(triggers.topics || []).forEach((s) => {

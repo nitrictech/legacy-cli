@@ -92,6 +92,7 @@ export class Deploy extends Task<void> {
 						const kvault = new keyvault.Vault(`${stack.getName()}-key-vault`, {
 							resourceGroupName: resourceGroup.name,
 							properties: {
+								enableRbacAuthorization: true,
 								sku: {
 									family: 'A',
 									name: 'standard',
