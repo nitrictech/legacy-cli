@@ -16,6 +16,11 @@ import { resources, web, containerregistry, eventgrid } from '@pulumi/azure-nati
 import { NitricContainerImage, StackFunction, StackContainer } from '@nitric/cli-common';
 import { NitricEventgridTopic } from './topic';
 
+export interface NitricComputeAzureAppServiceEnvVariable {
+	name: string;
+	value: string | pulumi.Output<string>;
+}
+
 interface NitricComputeAzureAppServiceArgs {
 	/**
 	 * Azure resource group to deploy func to
@@ -46,6 +51,11 @@ interface NitricComputeAzureAppServiceArgs {
 	 * Deployed Nitric Service Topics
 	 */
 	topics: NitricEventgridTopic[];
+
+	/**
+	 * Environment variables for this compute instance
+	 */
+	env?: NitricComputeAzureAppServiceEnvVariable[];
 }
 
 /**
@@ -58,7 +68,7 @@ export class NitricComputeAzureAppService extends pulumi.ComponentResource {
 	constructor(name: string, args: NitricComputeAzureAppServiceArgs, opts?: pulumi.ComponentResourceOptions) {
 		super('nitric:func:AppService', name, {}, opts);
 		const defaultResourceOptions: pulumi.ResourceOptions = { parent: this };
-		const { source, resourceGroup, plan, registry, image, topics } = args;
+		const { source, resourceGroup, plan, registry, image, topics, env = [] } = args;
 
 		this.name = name;
 
@@ -107,6 +117,8 @@ export class NitricComputeAzureAppService extends pulumi.ComponentResource {
 							name: 'WEBSITES_PORT',
 							value: '9001',
 						},
+						// Append additional env variables
+						...env,
 					],
 					// alwaysOn: true,
 					linuxFxVersion: pulumi.interpolate`DOCKER|${image.imageUri}`,
