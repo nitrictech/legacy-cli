@@ -110,6 +110,9 @@ export class NitricComputeAzureAppService extends pulumi.ComponentResource {
 				serverFarmId: plan.id,
 				name: `${source.getStack().getName()}-${source.getName()}`,
 				resourceGroupName: resourceGroup.name,
+				identity: {
+					type: 'SystemAssigned',
+				},
 				siteConfig: {
 					appSettings: [
 						{
@@ -150,7 +153,7 @@ export class NitricComputeAzureAppService extends pulumi.ComponentResource {
 					`${source.getName()}${name}`,
 					{
 						principalId: this.webapp.identity.apply((t) => t!.principalId),
-						principalType: types.enums.authorization.PrincipalType.MSI,
+						principalType: types.enums.authorization.PrincipalType.ServicePrincipal,
 						roleDefinitionId: pulumi.interpolate`/subscriptions/${subscriptionId}/providers/Microsoft.Authorization/roleDefinitions/${id}`,
 						scope: pulumi.interpolate`subscriptions/${subscriptionId}/resourceGroups/${resourceGroup.name}`,
 					},

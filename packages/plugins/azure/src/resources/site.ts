@@ -45,7 +45,7 @@ export class NitricAzureStorageSite extends pulumi.ComponentResource {
 			site.getName(),
 			{
 				resourceGroupName: resourceGroup.name,
-				accountName: storageAcct.name,
+				accountName: this.storageAccount.name,
 				indexDocument: 'index.html',
 			},
 			defaultResourceOptions,

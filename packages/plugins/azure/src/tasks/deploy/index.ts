@@ -90,6 +90,7 @@ export class Deploy extends Task<void> {
 						// Create a stack level keyvault if secrets are enabled
 						// At the moment secrets have no config level setting
 						const kvault = new keyvault.Vault(`${stack.getName()}-key-vault`, {
+							vaultName: `${stack.getName()}`.substring(0, 24),
 							resourceGroupName: resourceGroup.name,
 							properties: {
 								enableRbacAuthorization: true,
@@ -117,9 +118,9 @@ export class Deploy extends Task<void> {
 								resourceGroupName: resourceGroup.name,
 								// 24 character limit
 								accountName: `${stack.getName().replace(/-/g, '')}`,
-								kind: 'Storage',
+								kind: storage.Kind.StorageV2,
 								sku: {
-									name: 'Standard_LRS',
+									name: storage.SkuName.Standard_LRS,
 								},
 							});
 
@@ -331,6 +332,8 @@ export class Deploy extends Task<void> {
 						mapObject(entrypoints).map(
 							(e) =>
 								new NitricEntrypointAzureFrontDoor(e.name, {
+									stackName: stack.getName(),
+									subscriptionId: clientConfig.subscriptionId,
 									resourceGroup,
 									entrypoint: e,
 									services: deployedAzureApps,

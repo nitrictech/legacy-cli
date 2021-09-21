@@ -68,6 +68,17 @@ export class NitricEntrypointAzureFrontDoor extends pulumi.ComponentResource {
 				},
 				odataType: DEFAULT_ODATA_TYPE,
 			};
+			const feEndpoints = [
+				{
+					id: pulumi.interpolate`/subscriptions/${subscriptionId}/resourceGroups/${resourceGroup.name}/providers/Microsoft.Network/frontDoors/${frontDoorName}/frontendEndpoints/default`,
+				},
+			];
+			const healthProbeSettings = {
+				id: pulumi.interpolate`/subscriptions/${subscriptionId}/resourceGroups/${resourceGroup.name}/providers/Microsoft.Network/frontDoors/${frontDoorName}/healthProbeSettings/healthProbeSettings1`,
+			};
+			const loadBalancingSettings = {
+				id: pulumi.interpolate`/subscriptions/${subscriptionId}/resourceGroups/${resourceGroup.name}/providers/Microsoft.Network/frontDoors/${frontDoorName}/loadBalancingSettings/loadBalancingSettings1`,
+			};
 
 			switch (type) {
 				case 'api': {
@@ -88,8 +99,14 @@ export class NitricEntrypointAzureFrontDoor extends pulumi.ComponentResource {
 							backends: [
 								{
 									address: domainName as pulumi.Output<string>,
+									httpPort: 80,
+									httpsPort: 443,
+									priority: 1,
+									weight: 1,
 								},
 							],
+							loadBalancingSettings,
+							healthProbeSettings,
 						},
 						route: {
 							name: routeName,
@@ -97,6 +114,7 @@ export class NitricEntrypointAzureFrontDoor extends pulumi.ComponentResource {
 							enabledState: 'Enabled',
 							patternsToMatch: [`${key}*`],
 							routeConfiguration: routeConfig,
+							frontendEndpoints: feEndpoints,
 						},
 					};
 				}
@@ -117,8 +135,14 @@ export class NitricEntrypointAzureFrontDoor extends pulumi.ComponentResource {
 							backends: [
 								{
 									address: endpointOrigin,
+									httpPort: 80,
+									httpsPort: 443,
+									priority: 1,
+									weight: 1,
 								},
 							],
+							loadBalancingSettings,
+							healthProbeSettings,
 						},
 						route: {
 							name: routeName,
@@ -127,6 +151,7 @@ export class NitricEntrypointAzureFrontDoor extends pulumi.ComponentResource {
 							patternsToMatch: [`${key}*`],
 							// TODO: Will probably change this to redirect instead of forwarding for sites
 							routeConfiguration: routeConfig,
+							frontendEndpoints: feEndpoints,
 						},
 					};
 				}
@@ -144,8 +169,14 @@ export class NitricEntrypointAzureFrontDoor extends pulumi.ComponentResource {
 							backends: [
 								{
 									address: deployedService.webapp.defaultHostName,
+									httpPort: 80,
+									httpsPort: 443,
+									priority: 1,
+									weight: 1,
 								},
 							],
+							healthProbeSettings,
+							loadBalancingSettings,
 						},
 						route: {
 							name: routeName,
@@ -153,6 +184,7 @@ export class NitricEntrypointAzureFrontDoor extends pulumi.ComponentResource {
 							enabledState: 'Enabled',
 							patternsToMatch: [`${key}*`],
 							routeConfiguration: routeConfig,
+							frontendEndpoints: feEndpoints,
 						},
 					};
 				}
@@ -165,6 +197,8 @@ export class NitricEntrypointAzureFrontDoor extends pulumi.ComponentResource {
 		this.frontdoor = new network.FrontDoor(
 			this.name,
 			{
+				// Location MUST be global
+				location: 'global',
 				resourceGroupName: this.resourceGroup.name,
 				enabledState: 'Enabled',
 				frontDoorName,
@@ -191,6 +225,23 @@ export class NitricEntrypointAzureFrontDoor extends pulumi.ComponentResource {
 				],
 				// Create routing rules from load balancer path configs
 				routingRules: rules.map(({ route }) => route),
+				loadBalancingSettings: [
+					{
+						name: 'loadBalancingSettings1',
+						sampleSize: 4,
+						successfulSamplesRequired: 2,
+					},
+				],
+				healthProbeSettings: [
+					{
+						enabledState: 'Enabled',
+						healthProbeMethod: 'HEAD',
+						intervalInSeconds: 120,
+						name: 'healthProbeSettings1',
+						path: '/',
+						protocol: 'Http',
+					},
+				],
 			},
 			defaultResourceOptions,
 		);
