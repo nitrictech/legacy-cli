@@ -29,6 +29,7 @@ export class NitricAzureStorageSite extends pulumi.ComponentResource {
 	public readonly name: string;
 	public readonly container: storage.StorageAccountStaticWebsite;
 	public readonly resourceGroup: resources.ResourceGroup;
+	public readonly storageAccount: storage.StorageAccount;
 
 	constructor(name: string, args: NitricAzureStorageBucketArgs, opts?: pulumi.ComponentResourceOptions) {
 		super('nitric:site:AzureStorage', name, {}, opts);
@@ -37,6 +38,7 @@ export class NitricAzureStorageSite extends pulumi.ComponentResource {
 
 		this.name = name;
 		this.resourceGroup = resourceGroup;
+		this.storageAccount = storageAcct;
 
 		// TODO: Add additional config for index/error documents
 		this.container = new storage.StorageAccountStaticWebsite(
@@ -69,6 +71,7 @@ export class NitricAzureStorageSite extends pulumi.ComponentResource {
 		// Finalize the deployment
 		this.registerOutputs({
 			resourceGroup: this.resourceGroup,
+			storgeAccount: this.storageAccount,
 			container: this.container,
 			name: this.name,
 		});
