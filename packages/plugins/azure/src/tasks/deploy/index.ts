@@ -310,8 +310,8 @@ export class Deploy extends Task<void> {
 
 						// TODO: Add schedule support
 						// NOTE: Currently CRONTAB support is required, we either need to revisit the design of
-						// our scheduled expressions or implement a workaround for request a feature.
-						if (schedules) {
+						// our scheduled expressions or implement a workaround or request a feature.
+						if (Object.keys(schedules)) {
 							pulumi.log.warn('Schedules are not currently supported for Azure deployments');
 							// schedules.map(s => createSchedule(resourceGroup, s))
 						}
@@ -327,7 +327,7 @@ export class Deploy extends Task<void> {
 								}),
 						);
 
-						// FIXME: Implement front door deployment logic,
+						// FIXME: Implement Front Door deployment logic,
 						// class is currently just a placeholder
 						mapObject(entrypoints).map(
 							(e) =>
@@ -341,10 +341,10 @@ export class Deploy extends Task<void> {
 									apis: deployedApis,
 								}),
 						);
-					} catch (e) {
+					} catch (err) {
 						pulumi.log.error(`An error occurred, see latest azure:error log for details: ${errorFile}`);
-						fs.appendFileSync(errorFile, e.stack || e.toString());
-						throw e;
+						fs.appendFileSync(errorFile, (err as Error).stack || (err as Error).toString());
+						throw err;
 					}
 				},
 			});
@@ -359,8 +359,8 @@ export class Deploy extends Task<void> {
 				},
 			});
 			console.log(upRes);
-		} catch (e) {
-			fs.appendFileSync(errorFile, e.stack || e.toString());
+		} catch (err) {
+			fs.appendFileSync(errorFile, (err as Error).stack || (err as Error).toString());
 			throw new Error(`An error occurred, see latest do:error log for details: ${errorFile}`);
 		}
 	}

@@ -16,6 +16,9 @@ import { NamedObject, NitricTopic } from '@nitric/cli-common';
 import { resources, eventgrid } from '@pulumi/azure-native';
 
 interface NitricEventgridTopicArgs {
+	/**
+	 * Nitric Topic Definition which defines how to create this Event Grid Topic
+	 */
 	topic: NamedObject<NitricTopic>;
 	resourceGroup: resources.ResourceGroup;
 }
@@ -25,7 +28,7 @@ interface NitricEventgridTopicArgs {
  */
 export class NitricEventgridTopic extends pulumi.ComponentResource {
 	public readonly name: string;
-	public readonly eventgrid: eventgrid.Topic;
+	public readonly eventGridTopic: eventgrid.Topic;
 	public readonly resourceGroup: resources.ResourceGroup;
 
 	constructor(name: string, args: NitricEventgridTopicArgs, opts?: pulumi.ComponentResourceOptions) {
@@ -35,7 +38,7 @@ export class NitricEventgridTopic extends pulumi.ComponentResource {
 
 		this.name = name;
 		this.resourceGroup = resourceGroup;
-		this.eventgrid = new eventgrid.Topic(
+		this.eventGridTopic = new eventgrid.Topic(
 			topic.name,
 			{
 				topicName: topic.name,
@@ -47,7 +50,7 @@ export class NitricEventgridTopic extends pulumi.ComponentResource {
 		// Finalize the deployment
 		this.registerOutputs({
 			resourceGroup: this.resourceGroup,
-			eventgrid: this.eventgrid,
+			eventgrid: this.eventGridTopic,
 			name: this.name,
 		});
 	}
@@ -56,14 +59,14 @@ export class NitricEventgridTopic extends pulumi.ComponentResource {
 	 *
 	 * @returns
 	 */
-	public getSasKeys = (): pulumi.Output<[string, string]> => {
-		const sasKeys = pulumi.all([this.resourceGroup.name, this.eventgrid.name]).apply(([resourceGroupName, topicName]) =>
-			eventgrid.listTopicSharedAccessKeys({
-				resourceGroupName,
-				topicName,
-			}),
-		);
+	// public getSharedAccessKeys = (): pulumi.Output<[string, string]> => {
+	// 	const sasKeys = pulumi.all([this.resourceGroup.name, this.eventgrid.name]).apply(([resourceGroupName, topicName]) =>
+	// 		eventgrid.listTopicSharedAccessKeys({
+	// 			resourceGroupName,
+	// 			topicName,
+	// 		}),
+	// 	);
 
-		return sasKeys.apply((k) => [k.key1!, k.key2!]) as pulumi.Output<[string, string]>;
-	};
+	// 	return sasKeys.apply((k) => [k.key1!, k.key2!]) as pulumi.Output<[string, string]>;
+	// };
 }

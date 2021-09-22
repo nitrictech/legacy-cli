@@ -38,7 +38,7 @@ export class NitricApiAzureApiManagement extends pulumi.ComponentResource {
 	public readonly resourceGroup: resources.ResourceGroup;
 
 	constructor(name: string, args: NitricApiAzureApiManagementArgs, opts?: pulumi.ComponentResourceOptions) {
-		super('nitric:bucket:AzureStorage', name, {}, opts);
+		super('nitric:api:AzureApiManagement', name, {}, opts);
 		const defaultResourceOptions: pulumi.ResourceOptions = { parent: this };
 		const { resourceGroup, orgName, adminEmail, api, services } = args;
 

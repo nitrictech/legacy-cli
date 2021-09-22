@@ -36,7 +36,7 @@ type DefaultOdataType = pulumi.Input<'#Microsoft.Azure.FrontDoor.Models.Frontdoo
 const DEFAULT_ODATA_TYPE: DefaultOdataType = '#Microsoft.Azure.FrontDoor.Models.FrontdoorForwardingConfiguration';
 
 /**
- * Nitric Azure Front Door based Entrypoing
+ * Nitric Azure Front Door based Entrypoint
  */
 export class NitricEntrypointAzureFrontDoor extends pulumi.ComponentResource {
 	public readonly name: string;

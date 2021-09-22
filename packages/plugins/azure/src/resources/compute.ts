@@ -53,7 +53,7 @@ interface NitricComputeAzureAppServiceArgs {
 	image: NitricContainerImage;
 
 	/**
-	 * Deployed Nitric Service Topics
+	 * Deployed Nitric Topics that Trigger this Compute Resource
 	 */
 	topics: NitricEventgridTopic[];
 
@@ -161,7 +161,7 @@ export class NitricComputeAzureAppService extends pulumi.ComponentResource {
 				),
 		);
 
-		// Deploy an evengrid webhook subscription
+		// Deploy an Event Grid webhook subscription
 		(triggers.topics || []).forEach((s) => {
 			const topic = topics.find((t) => t.name === s);
 
@@ -170,7 +170,7 @@ export class NitricComputeAzureAppService extends pulumi.ComponentResource {
 					`${source.getName()}-${topic.name}-subscription`,
 					{
 						eventSubscriptionName: `${source.getName()}-${topic.name}-subscription`,
-						scope: topic.eventgrid.id,
+						scope: topic.eventGridTopic.id,
 						destination: {
 							endpointType: 'WebHook',
 							endpointUrl: this.webapp.defaultHostName,
@@ -180,9 +180,9 @@ export class NitricComputeAzureAppService extends pulumi.ComponentResource {
 					},
 					defaultResourceOptions,
 				);
+			} else {
+				throw new Error(`Failed to subscribe ${this.name} to ${s}, matching Event Grid topic not found.`);
 			}
-
-			// TODO: Throw error in case of misconfiguration?
 		});
 
 		this.registerOutputs({
