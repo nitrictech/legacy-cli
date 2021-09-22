@@ -362,7 +362,7 @@ export class Deploy extends Task<void> {
 			console.log(upRes);
 		} catch (err) {
 			fs.appendFileSync(errorFile, (err as Error).stack || (err as Error).toString());
-			throw new Error(`An error occurred, see latest do:error log for details: ${errorFile}`);
+			throw new Error(`An error occurred, see latest azure:error log for details: ${errorFile}`);
 		}
 	}
 }
