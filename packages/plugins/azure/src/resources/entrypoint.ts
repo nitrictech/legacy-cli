@@ -99,6 +99,7 @@ export class NitricEntrypointAzureFrontDoor extends pulumi.ComponentResource {
 							backends: [
 								{
 									address: domainName as pulumi.Output<string>,
+									backendHostHeader: domainName as pulumi.Output<string>,
 									httpPort: 80,
 									httpsPort: 443,
 									priority: 1,
@@ -135,6 +136,7 @@ export class NitricEntrypointAzureFrontDoor extends pulumi.ComponentResource {
 							backends: [
 								{
 									address: endpointOrigin,
+									backendHostHeader: endpointOrigin,
 									httpPort: 80,
 									httpsPort: 443,
 									priority: 1,
@@ -169,6 +171,7 @@ export class NitricEntrypointAzureFrontDoor extends pulumi.ComponentResource {
 							backends: [
 								{
 									address: deployedService.webapp.defaultHostName,
+									backendHostHeader: deployedService.webapp.defaultHostName,
 									httpPort: 80,
 									httpsPort: 443,
 									priority: 1,
@@ -234,7 +237,7 @@ export class NitricEntrypointAzureFrontDoor extends pulumi.ComponentResource {
 				],
 				healthProbeSettings: [
 					{
-						enabledState: 'Enabled',
+						enabledState: 'Disabled',
 						healthProbeMethod: 'HEAD',
 						intervalInSeconds: 120,
 						name: 'healthProbeSettings1',
