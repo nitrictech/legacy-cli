@@ -132,6 +132,10 @@ export class NitricComputeAzureAppService extends pulumi.ComponentResource {
 							value: adminPassword,
 						},
 						{
+							name: 'TOLERATE_MISSING_SERVICES',
+							value: 'true',
+						},
+						{
 							name: 'WEBSITES_PORT',
 							value: '9001',
 						},
