@@ -17,7 +17,7 @@ import execa from 'execa';
 
 export class CheckPulumiPluginTask extends Task<boolean> {
 	constructor() {
-		super('Checking azure pulumi plugin installation');
+		super('Checking azure-native pulumi plugin installation');
 	}
 
 	async do(): Promise<boolean> {
@@ -25,7 +25,7 @@ export class CheckPulumiPluginTask extends Task<boolean> {
 		try {
 			const result = execa.commandSync('pulumi plugin ls');
 
-			if (result.stdout.includes('azure')) {
+			if (result.stdout.includes('azure-native')) {
 				return true;
 			}
 		} catch (e) {
