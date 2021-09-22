@@ -17,6 +17,7 @@ import { oneLine } from 'common-tags';
 import { Task } from './task';
 import { ContainerImage } from '../types';
 import { StackFunction } from '../stack';
+import which from 'which';
 
 interface BuildFunctionTaskOptions {
 	baseDir: string;
@@ -40,26 +41,38 @@ export class BuildFunctionTask extends Task<ContainerImage> {
 	async do(): Promise<ContainerImage> {
 		const imageId = this.service.getImageTagName(this.provider);
 
+		let baseCmd = oneLine`
+			build ${imageId} 
+			--builder ${BUILDER_IMAGE}
+			${Object.entries(this.service.getPackEnv())
+				.map(([k, v]) => `--env ${k}=${v}`)
+				.join(' ')}
+			--env BP_MEMBRANE_PROVIDER=${this.provider}
+			--env BP_NITRIC_SERVICE_HANDLER=${this.service.getContextRelativeDirectory()}
+			--pull-policy if-not-present
+			--default-process membrane
+		`;
+
+		const packInstalled = which.sync('which', { nothrow: true });
+
+		if (!packInstalled) {
+			baseCmd = oneLine`
+				docker run
+				--rm
+				--privileged=true
+				-v /var/run/docker.sock:/var/run/docker.sock
+				-v ${this.service.getContext()}:/workspace -w /workspace
+				${PACK_IMAGE} ${baseCmd}
+			`;
+		} else {
+			baseCmd = oneLine`pack ${baseCmd}`;
+		}
+
 		// Run docker
 		// TODO: This will need to be updated for mono repo support
 		// FIXME: Need to confirm docker sock mounting will work on windows
 		try {
-			const packProcess = execa.command(oneLine`
-				docker run
-					--rm
-					--privileged=true
-					-v /var/run/docker.sock:/var/run/docker.sock
-					-v ${this.service.getContext()}:/workspace -w /workspace
-					${PACK_IMAGE} build ${imageId} 
-					--builder ${BUILDER_IMAGE}
-					${Object.entries(this.service.getPackEnv())
-						.map(([k, v]) => `--env ${k}=${v}`)
-						.join(' ')}
-					--env BP_MEMBRANE_PROVIDER=${this.provider}
-					--env BP_NITRIC_SERVICE_HANDLER=${this.service.getContextRelativeDirectory()}
-					--pull-policy if-not-present
-					--default-process membrane
-			`);
+			const packProcess = execa.command(baseCmd);
 
 			// pipe build to stdout
 			packProcess.stdout.on('data', (data) => {

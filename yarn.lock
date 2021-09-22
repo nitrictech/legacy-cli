@@ -757,6 +757,7 @@ __metadata:
     "@types/stream-to-promise": ^2.2.1
     "@types/universal-analytics": ^0.4.4
     "@types/uuid": ^8.3.0
+    "@types/which": ^2.0.1
     ajv: ^8.6.2
     common-tags: ^1.8.0
     dotenv: ^10.0.0
@@ -779,6 +780,7 @@ __metadata:
     typescript: ^4.3
     universal-analytics: ^0.4.23
     uuid: ^8.3.2
+    which: ^2.0.2
     yaml: ^2.0.0-7
   languageName: unknown
   linkType: soft
@@ -1737,6 +1739,13 @@ __metadata:
   version: 8.3.1
   resolution: "@types/uuid@npm:8.3.1"
   checksum: 5864be83031f5836be985187ecebb2769936bf223bad896dac381f1a0fdd2ae239f448263196f752d62a4ecc8563817d6d94e329eb2099a28e743ab206e7bfea
+  languageName: node
+  linkType: hard
+
+"@types/which@npm:^2.0.1":
+  version: 2.0.1
+  resolution: "@types/which@npm:2.0.1"
+  checksum: 75d38ca462d462c60e8ff63be1551807403e20d4d8dc10a7cb41004625fa45ae0656af5f62907ae249e8551c0275d65618f7ec791c206bfd6c53ed12c0121401
   languageName: node
   linkType: hard
 
