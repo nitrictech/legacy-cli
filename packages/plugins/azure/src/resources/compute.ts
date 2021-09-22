@@ -136,6 +136,10 @@ export class NitricComputeAzureAppService extends pulumi.ComponentResource {
 							value: 'true',
 						},
 						{
+							name: 'AZURE_SUBSCRIPTION_ID',
+							value: subscriptionId,
+						},
+						{
 							name: 'WEBSITES_PORT',
 							value: '9001',
 						},
