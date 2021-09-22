@@ -93,6 +93,7 @@ export class Deploy extends Task<void> {
 							vaultName: `${stack.getName()}`.substring(0, 24),
 							resourceGroupName: resourceGroup.name,
 							properties: {
+								enableSoftDelete: false,
 								enableRbacAuthorization: true,
 								sku: {
 									family: 'A',
