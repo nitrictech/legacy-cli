@@ -14,7 +14,14 @@
 
 import { flags } from '@oclif/command';
 import { Deploy, DEPLOY_TASK_KEY, DeployResult } from '../../tasks/deploy';
-import { BaseCommand, wrapTaskForListr, Stack, constants, createBuildListrTask } from '@nitric/cli-common';
+import {
+	BaseCommand,
+	wrapTaskForListr,
+	Stack,
+	constants,
+	createBuildListrTask,
+	checkDockerDaemon,
+} from '@nitric/cli-common';
 import { Listr } from 'listr2';
 import path from 'path';
 import AWS from 'aws-sdk';
@@ -63,8 +70,12 @@ export default class AwsDeploy extends BaseCommand {
 	static args = [{ name: 'dir', default: '.' }];
 
 	async do(): Promise<any> {
+		// Check docker daemon is running
+		checkDockerDaemon('doctor:aws');
+
 		const { args, flags } = this.parse(AwsDeploy);
 		const { dir } = args;
+
 		const sts = new AWS.STS();
 		const { Account: derivedAccountId } = await sts.getCallerIdentity({}).promise();
 

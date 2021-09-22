@@ -16,3 +16,4 @@ export * from './dir';
 export * from './stack';
 export * from './tagged-templates';
 export * from './map-object';
+export * from './check-docker-daemon';
