@@ -18,12 +18,14 @@
 		"execa": "^5.0.0",
 		"inquirer": "^8.0.0",
 		"listr2": "^3.6.2",
+		"mime-types": "^2.1.32",
 		"tslib": "^1"
 	},
 	"devDependencies": {
 		"@oclif/dev-cli": "^1",
 		"@oclif/plugin-help": "^3",
 		"@types/jest": "^26.0.15",
+		"@types/mime-types": "^2.1.1",
 		"@types/node": "^10",
 		"eslint": "^6.8.0",
 		"eslint-config-oclif": "^3.1",

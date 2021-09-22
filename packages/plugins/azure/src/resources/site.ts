@@ -15,6 +15,7 @@ import * as pulumi from '@pulumi/pulumi';
 import path from 'path';
 import { crawlDirectorySync, StackSite } from '@nitric/cli-common';
 import { resources, storage } from '@pulumi/azure-native';
+import mime from 'mime-types';
 
 interface NitricAzureStorageBucketArgs {
 	site: StackSite;
@@ -63,6 +64,7 @@ export class NitricAzureStorageSite extends pulumi.ComponentResource {
 					accountName: storageAcct.name,
 					containerName: this.container.containerName,
 					source: new pulumi.asset.FileAsset(filePath),
+					contentType: mime.lookup(filePath) || undefined,
 				},
 				defaultResourceOptions,
 			);

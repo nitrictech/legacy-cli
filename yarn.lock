@@ -887,6 +887,7 @@ __metadata:
     "@pulumi/docker": ^3.0.0
     "@pulumi/pulumi": ^3.5.1
     "@types/jest": ^26.0.15
+    "@types/mime-types": ^2.1.1
     "@types/node": ^10
     api-spec-converter: ^2.11.4
     cli-ux: ^5.5.1
@@ -901,6 +902,7 @@ __metadata:
     inquirer: ^8.0.0
     jest: ^26.6.1
     listr2: ^3.6.2
+    mime-types: ^2.1.32
     openapi-types: ^7.2.3
     ts-jest: ^26.4.3
     ts-node: ^8
@@ -1566,6 +1568,13 @@ __metadata:
   version: 4.0.1
   resolution: "@types/long@npm:4.0.1"
   checksum: ed2a125330dbf2b425b2e58b1e1151a37106ceeec973f9f191fba0bda83ed00fae6d858254022e8b6e7165fec5f0c3872b7cb5f425c753383fed54699fb63b38
+  languageName: node
+  linkType: hard
+
+"@types/mime-types@npm:^2.1.1":
+  version: 2.1.1
+  resolution: "@types/mime-types@npm:2.1.1"
+  checksum: d282f89f3a492cb04a0cf73a8dc933abca9c598ae8dc15ec77a23c36b658dbd4bddbc8b6afa10ca618839020ca890de0c1c11fca3704e2c47fb6a3d753cfc1ae
   languageName: node
   linkType: hard
 
@@ -8415,7 +8424,7 @@ fsevents@^2.1.2:
   languageName: node
   linkType: hard
 
-"mime-types@npm:^2.1.12, mime-types@npm:~2.1.19":
+"mime-types@npm:^2.1.12, mime-types@npm:^2.1.32, mime-types@npm:~2.1.19":
   version: 2.1.32
   resolution: "mime-types@npm:2.1.32"
   dependencies:
