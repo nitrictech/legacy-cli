@@ -14,7 +14,7 @@
 
 import { Stack, Task, mapObject, NitricContainerImage } from '@nitric/cli-common';
 import { LocalWorkspace } from '@pulumi/pulumi/automation';
-import { authorization, resources, storage, web, containerregistry, keyvault } from '@pulumi/azure-native';
+import { authorization, resources, storage, web, containerregistry, keyvault, documentdb } from '@pulumi/azure-native';
 import * as pulumi from '@pulumi/pulumi';
 import fs from 'fs';
 import path from 'path';
@@ -188,16 +188,30 @@ export class Deploy extends Task<void> {
 								resourceGroup,
 							});
 
+							// get connection string
+							const connectionStrings = pulumi
+								.all([resourceGroup.name, account.name])
+								.apply(([resourceGroupName, accountName]) =>
+									documentdb.listDatabaseAccountConnectionStrings({ resourceGroupName, accountName }),
+								);
+
+							const connectionString = connectionStrings.apply((cs) => cs.connectionStrings![0].connectionString);
+
+							if (!connectionString) {
+								throw new Error('No connection strings found for azure database');
+							}
+
 							// TODO: Add connection string to app service instance
 							appServiceEnv = [
 								...appServiceEnv,
-								// Add the DB connection string for the stack shared database
+								// Add the DB connection string and database name for the stack shared database
 								{
 									name: 'MONGODB_CONNECTION_STRING',
-									// TODO: Determine if this is the correct value
-									// may need to use ListConnectionStrings
-									// against the created account instead...
-									value: account.documentEndpoint,
+									value: connectionString,
+								},
+								{
+									name: 'MONGODB_DATABASE',
+									value: database.name,
 								},
 							];
 
