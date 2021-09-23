@@ -94,7 +94,7 @@ export class NitricApiAzureApiManagement extends pulumi.ComponentResource {
 
 					if (func) {
 						new apimanagement.ApiOperationPolicy(
-							'',
+							`${name}-api-${pathMethod.operationId}`,
 							{
 								resourceGroupName: resourceGroup.name,
 								apiId: this.api.id,
