@@ -142,7 +142,7 @@ export default class AzureDeploy extends BaseCommand {
 		plan: flags.enum({
 			options: Object.keys(APPSERVICE_PLANS),
 			char: 'p',
-			description: 'azure region to deploy to',
+			description: 'azure appservice plan tier',
 		}),
 		file: flags.string({
 			char: 'f',
