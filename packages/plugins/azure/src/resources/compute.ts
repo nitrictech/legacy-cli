@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 import * as pulumi from '@pulumi/pulumi';
-import { types, authorization, resources, web, containerregistry, eventgrid } from '@pulumi/azure-native';
-import { NitricContainerImage, StackFunction, StackContainer } from '@nitric/cli-common';
 import { NitricEventgridTopic } from './topic';
+import { types, authorization, resources, web, containerregistry } from '@pulumi/azure-native';
+import { NitricContainerImage, StackFunction, StackContainer } from '@nitric/cli-common';
 
 export interface NitricComputeAzureAppServiceEnvVariable {
 	name: string;
@@ -53,7 +53,7 @@ interface NitricComputeAzureAppServiceArgs {
 	image: NitricContainerImage;
 
 	/**
-	 * Deployed Nitric Service Topics
+	 * Deployed Nitric Topics that Trigger this Compute Resource
 	 */
 	topics: NitricEventgridTopic[];
 
@@ -79,6 +79,7 @@ const ROLE_DEFINITION_MAP = {
 export class NitricComputeAzureAppService extends pulumi.ComponentResource {
 	public readonly name: string;
 	public readonly webapp: web.WebApp;
+	public readonly subscriptions: NitricEventgridTopic[];
 
 	constructor(name: string, args: NitricComputeAzureAppServiceArgs, opts?: pulumi.ComponentResourceOptions) {
 		super('nitric:func:AppService', name, {}, opts);
@@ -104,12 +105,16 @@ export class NitricComputeAzureAppService extends pulumi.ComponentResource {
 		// So hopefully this should be as simple as including a gateway plugin for
 		// Azure that utilizes that contract.
 		// return new appservice.FunctionApp()
+
 		this.webapp = new web.WebApp(
 			source.getName(),
 			{
 				serverFarmId: plan.id,
 				name: `${source.getStack().getName()}-${source.getName()}`,
 				resourceGroupName: resourceGroup.name,
+				identity: {
+					type: 'SystemAssigned',
+				},
 				siteConfig: {
 					appSettings: [
 						{
@@ -127,6 +132,14 @@ export class NitricComputeAzureAppService extends pulumi.ComponentResource {
 						{
 							name: 'DOCKER_REGISTRY_SERVER_PASSWORD',
 							value: adminPassword,
+						},
+						{
+							name: 'TOLERATE_MISSING_SERVICES',
+							value: 'true',
+						},
+						{
+							name: 'AZURE_SUBSCRIPTION_ID',
+							value: subscriptionId,
 						},
 						{
 							name: 'WEBSITES_PORT',
@@ -150,7 +163,7 @@ export class NitricComputeAzureAppService extends pulumi.ComponentResource {
 					`${source.getName()}${name}`,
 					{
 						principalId: this.webapp.identity.apply((t) => t!.principalId),
-						principalType: types.enums.authorization.PrincipalType.MSI,
+						principalType: types.enums.authorization.PrincipalType.ServicePrincipal,
 						roleDefinitionId: pulumi.interpolate`/subscriptions/${subscriptionId}/providers/Microsoft.Authorization/roleDefinitions/${id}`,
 						scope: pulumi.interpolate`subscriptions/${subscriptionId}/resourceGroups/${resourceGroup.name}`,
 					},
@@ -158,33 +171,21 @@ export class NitricComputeAzureAppService extends pulumi.ComponentResource {
 				),
 		);
 
-		// Deploy an evengrid webhook subscription
-		(triggers.topics || []).forEach((s) => {
-			const topic = topics.find((t) => t.name === s);
-
-			if (topic) {
-				new eventgrid.EventSubscription(
-					`${source.getName()}-${topic.name}-subscription`,
-					{
-						eventSubscriptionName: `${source.getName()}-${topic.name}-subscription`,
-						scope: topic.eventgrid.id,
-						destination: {
-							endpointType: 'WebHook',
-							endpointUrl: this.webapp.defaultHostName,
-							// TODO: Reduce event chattiness here and handle internally in the Azure AppService HTTP Gateway?
-							maxEventsPerBatch: 1,
-						},
-					},
-					defaultResourceOptions,
-				);
-			}
-
-			// TODO: Throw error in case of misconfiguration?
-		});
+		// Determine required subscriptions so they can be setup once the container starts
+		this.subscriptions = (triggers.topics || [])
+			.map((s) => {
+				const topic = topics.find((t) => t.name === s);
+				if (!topic) {
+					pulumi.log.error(`Failed to find matching Event Grid topic for name ${s}.`);
+				}
+				return topic;
+			})
+			.filter((topic) => !!topic) as NitricEventgridTopic[];
 
 		this.registerOutputs({
 			wepapp: this.webapp,
 			name: this.name,
+			subscriptions: this.subscriptions,
 		});
 	}
 }

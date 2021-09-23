@@ -55,7 +55,7 @@ describe('Doctor Command:', () => {
 		let whichSpy: jest.SpyInstance;
 
 		beforeAll(() => {
-			whichSpy = jest.spyOn(which, 'sync').mockReturnValue(true); // Installed.
+			whichSpy = jest.spyOn(which, 'sync').mockReturnValue(['/usr/bin/test']); // Installed.
 		});
 
 		afterAll(() => {
@@ -91,7 +91,7 @@ describe('Doctor Command:', () => {
 		let confirmSpy: jest.SpyInstance;
 
 		beforeAll(() => {
-			whichSpy = jest.spyOn(which, 'sync').mockReturnValue(false); // Not installed.
+			whichSpy = jest.spyOn(which, 'sync').mockReturnValue(null); // Not installed.
 			fsSpy = jest.spyOn(fs, 'existsSync').mockReturnValue(false);
 			confirmSpy = jest.spyOn(cli, 'confirm');
 		});

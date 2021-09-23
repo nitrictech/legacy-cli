@@ -66,6 +66,7 @@
 		"./**/*.{ts,js}": "eslint --fix-dry-run"
 	},
 	"dependencies": {
+		"axios": "^0.21.4",
 		"legally": "^3.5.10",
 		"rimraf": "^3.0.2"
 	},

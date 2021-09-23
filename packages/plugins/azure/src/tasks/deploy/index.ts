@@ -14,7 +14,16 @@
 
 import { Stack, Task, mapObject, NitricContainerImage } from '@nitric/cli-common';
 import { LocalWorkspace } from '@pulumi/pulumi/automation';
-import { authorization, resources, storage, web, containerregistry, keyvault } from '@pulumi/azure-native';
+import {
+	authorization,
+	resources,
+	storage,
+	web,
+	containerregistry,
+	keyvault,
+	eventgrid,
+	documentdb,
+} from '@pulumi/azure-native';
 import * as pulumi from '@pulumi/pulumi';
 import fs from 'fs';
 import path from 'path';
@@ -31,12 +40,15 @@ import {
 	NitricDatabaseAccountMongoDB,
 	NitricComputeAzureAppServiceEnvVariable,
 } from '../../resources';
+import { AppServicePlan } from '../../types';
+import axios from 'axios';
 
 interface DeployOptions {
 	stack: Stack;
 	region: string;
 	orgName: string;
 	adminEmail: string;
+	servicePlan: AppServicePlan;
 }
 
 export class Deploy extends Task<void> {
@@ -44,13 +56,15 @@ export class Deploy extends Task<void> {
 	private orgName: string;
 	private adminEmail: string;
 	private region: string;
+	private servicePlan: AppServicePlan;
 
-	constructor({ stack, orgName, adminEmail, region }: DeployOptions) {
+	constructor({ stack, orgName, adminEmail, region, servicePlan }: DeployOptions) {
 		super('Deploying Infrastructure');
 		this.stack = stack;
 		this.orgName = orgName;
 		this.adminEmail = adminEmail;
 		this.region = region;
+		this.servicePlan = servicePlan;
 	}
 
 	async do(): Promise<void> {
@@ -90,8 +104,10 @@ export class Deploy extends Task<void> {
 						// Create a stack level keyvault if secrets are enabled
 						// At the moment secrets have no config level setting
 						const kvault = new keyvault.Vault(`${stack.getName()}-key-vault`, {
+							vaultName: `${stack.getName()}`.substring(0, 24),
 							resourceGroupName: resourceGroup.name,
 							properties: {
+								enableSoftDelete: false,
 								enableRbacAuthorization: true,
 								sku: {
 									family: 'A',
@@ -117,9 +133,9 @@ export class Deploy extends Task<void> {
 								resourceGroupName: resourceGroup.name,
 								// 24 character limit
 								accountName: `${stack.getName().replace(/-/g, '')}`,
-								kind: 'Storage',
+								kind: storage.Kind.StorageV2,
 								sku: {
-									name: 'Standard_LRS',
+									name: storage.SkuName.Standard_LRS,
 								},
 							});
 
@@ -186,16 +202,30 @@ export class Deploy extends Task<void> {
 								resourceGroup,
 							});
 
+							// get connection string
+							const connectionStrings = pulumi
+								.all([resourceGroup.name, account.name])
+								.apply(([resourceGroupName, accountName]) =>
+									documentdb.listDatabaseAccountConnectionStrings({ resourceGroupName, accountName }),
+								);
+
+							const connectionString = connectionStrings.apply((cs) => cs.connectionStrings![0].connectionString);
+
+							if (!connectionString) {
+								throw new Error('No connection strings found for azure database');
+							}
+
 							// TODO: Add connection string to app service instance
 							appServiceEnv = [
 								...appServiceEnv,
-								// Add the DB connection string for the stack shared database
+								// Add the DB connection string and database name for the stack shared database
 								{
 									name: 'MONGODB_CONNECTION_STRING',
-									// TODO: Determine if this is the correct value
-									// may need to use ListConnectionStrings
-									// against the created account instead...
-									value: account.documentEndpoint,
+									value: connectionString,
+								},
+								{
+									name: 'MONGODB_DATABASE',
+									value: database.name,
 								},
 							];
 
@@ -234,14 +264,9 @@ export class Deploy extends Task<void> {
 								kind: 'Linux',
 								reserved: true,
 								sku: {
-									// for development only
-									// Will upgrade tiers/elasticity for different stack tiers e.g. dev/test/prod (prefab recipes)
-									//name: 'B1',
-									//tier: 'Basic',
-									//size: 'B1',
-									name: 'F1',
-									tier: 'Free',
-									size: 'F1',
+									name: this.servicePlan.size,
+									tier: this.servicePlan.tier,
+									size: this.servicePlan.size,
 								},
 							});
 
@@ -307,10 +332,82 @@ export class Deploy extends Task<void> {
 							];
 						}
 
+						const maxWaitTime = 300000; // 5 minutes.
+
+						// Setup subscriptions
+						await Promise.all(
+							deployedAzureApps
+								.filter((deployed) => deployed.subscriptions.length)
+								.map(async (deployed) => {
+									pulumi.log.info(`waiting for ${deployed.name} to start before creating subscriptions`);
+									// Get the full URL of the deployed container
+									const hostname = await new Promise((res) => deployed.webapp.defaultHostName.apply(res));
+									const hostUrl = `https://${hostname}`;
+
+									// Poll the URL until the host has started.
+									const start = Date.now();
+									while (Date.now() - start <= maxWaitTime) {
+										pulumi.log.info(`attempting to contact container ${deployed.name} via ${hostUrl}`);
+										try {
+											// TODO: Implement a membrane health check handler in the Membrane and trigger that instead.
+											// Set event type header to simulate a subscription validation event.
+											// These events are automatically resolved by the Membrane and won't be processed by handlers.
+											const config = {
+												headers: {
+													'aeg-event-type': 'SubscriptionValidation',
+												},
+											};
+											// Provide data in the expected shape. The content is current not important.
+											const data = [
+												{
+													id: '',
+													topic: '',
+													subject: '',
+													eventType: '',
+													metadataVersion: '',
+													dataVersion: '',
+													data: {
+														validationCode: '',
+														validationUrl: '',
+													},
+												},
+											];
+											const resp = await axios.post(hostUrl, JSON.stringify(data), config);
+											pulumi.log.info(
+												`container ${deployed.name} is now available with status ${resp.status}, setting up subscription`,
+											);
+											break;
+										} catch (err) {
+											console.log(err);
+											pulumi.log.info('failed to contact container');
+										}
+									}
+									pulumi.log.info(`creating subscriptions for ${deployed.name}`);
+
+									return deployed.subscriptions.map(
+										(sub) =>
+											new eventgrid.EventSubscription(`${deployed.name}-${sub.name}-subscription`, {
+												eventSubscriptionName: `${deployed.name}-${sub.name}-subscription`,
+												scope: sub.eventGridTopic.id,
+												destination: {
+													endpointType: 'WebHook',
+													endpointUrl: hostUrl,
+													// TODO: Reduce event chattiness here and handle internally in the Azure AppService HTTP Gateway?
+													maxEventsPerBatch: 1,
+												},
+												retryPolicy: {
+													maxDeliveryAttempts: 30,
+													eventTimeToLiveInMinutes: 5,
+												},
+											}),
+									);
+								}),
+						);
+
 						// TODO: Add schedule support
 						// NOTE: Currently CRONTAB support is required, we either need to revisit the design of
-						// our scheduled expressions or implement a workaround for request a feature.
-						if (schedules) {
+						// our scheduled expressions or implement a workaround or request a feature.
+						if (Object.keys(schedules).length) {
 							pulumi.log.warn('Schedules are not currently supported for Azure deployments');
 							// schedules.map(s => createSchedule(resourceGroup, s))
 						}
@@ -326,11 +423,13 @@ export class Deploy extends Task<void> {
 								}),
 						);
 
-						// FIXME: Implement front door deployment logic,
+						// FIXME: Implement Front Door deployment logic,
 						// class is currently just a placeholder
 						mapObject(entrypoints).map(
 							(e) =>
 								new NitricEntrypointAzureFrontDoor(e.name, {
+									stackName: stack.getName(),
+									subscriptionId: clientConfig.subscriptionId,
 									resourceGroup,
 									entrypoint: e,
 									services: deployedAzureApps,
@@ -338,10 +437,10 @@ export class Deploy extends Task<void> {
 									apis: deployedApis,
 								}),
 						);
-					} catch (e) {
+					} catch (err) {
 						pulumi.log.error(`An error occurred, see latest azure:error log for details: ${errorFile}`);
-						fs.appendFileSync(errorFile, e.stack || e.toString());
-						throw e;
+						fs.appendFileSync(errorFile, (err as Error).stack || (err as Error).toString());
+						throw err;
 					}
 				},
 			});
@@ -356,9 +455,9 @@ export class Deploy extends Task<void> {
 				},
 			});
 			console.log(upRes);
-		} catch (e) {
-			fs.appendFileSync(errorFile, e.stack || e.toString());
-			throw new Error(`An error occurred, see latest do:error log for details: ${errorFile}`);
+		} catch (err) {
+			fs.appendFileSync(errorFile, (err as Error).stack || (err as Error).toString());
+			throw new Error(`An error occurred, see latest azure:error log for details: ${errorFile}`);
 		}
 	}
 }
