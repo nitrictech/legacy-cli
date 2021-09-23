@@ -14,7 +14,7 @@
 
 import { Stack, Task, mapObject, NitricContainerImage } from '@nitric/cli-common';
 import { LocalWorkspace } from '@pulumi/pulumi/automation';
-import { authorization, resources, storage, web, containerregistry, keyvault, documentdb } from '@pulumi/azure-native';
+import { authorization, resources, storage, web, containerregistry, keyvault, eventgrid, documentdb } from '@pulumi/azure-native';
 import * as pulumi from '@pulumi/pulumi';
 import fs from 'fs';
 import path from 'path';
@@ -31,7 +31,6 @@ import {
 	NitricDatabaseAccountMongoDB,
 	NitricComputeAzureAppServiceEnvVariable,
 } from '../../resources';
-import { AppServicePlan } from '../../types';
 
 interface DeployOptions {
 	stack: Stack;
@@ -321,6 +320,78 @@ export class Deploy extends Task<void> {
 								}),
 							];
 						}
+
+						const maxWaitTime = 300000; // 5 minutes.
+
+						// Setup subscriptions
+						await Promise.all(
+							deployedAzureApps
+								.filter((deployed) => deployed.subscriptions.length)
+								.map(async (deployed) => {
+									pulumi.log.info(`waiting for ${deployed.name} to start before creating subscriptions`);
+									// Get the full URL of the deployed container
+									const hostname = await new Promise((res) => deployed.webapp.defaultHostName.apply(res));
+									const hostUrl = `https://${hostname}`;
+
+									// Poll the URL until the host has started.
+									const start = Date.now();
+									while (Date.now() - start <= maxWaitTime) {
+										pulumi.log.info(`attempting to contact container ${deployed.name} via ${hostUrl}`);
+										try {
+											// TODO: Implement a membrane health check handler in the Membrane and trigger that instead.
+											// Set event type header to simulate a subscription validation event.
+											// These events are automatically resolved by the Membrane and won't be processed by handlers.
+											const config = {
+												headers: {
+													'aeg-event-type': 'SubscriptionValidation',
+												},
+											};
+											// Provide data in the expected shape. The content is current not important.
+											const data = [
+												{
+													id: '',
+													topic: '',
+													subject: '',
+													eventType: '',
+													metadataVersion: '',
+													dataVersion: '',
+													data: {
+														validationCode: '',
+														validationUrl: '',
+													},
+												},
+											];
+											const resp = await axios.post(hostUrl, JSON.stringify(data), config);
+											pulumi.log.info(
+												`container ${deployed.name} is now available with status ${resp.status}, setting up subscription`,
+											);
+											break;
+										} catch (err) {
+											console.log(err);
+											pulumi.log.info('failed to contact container');
+										}
+									}
+									pulumi.log.info(`creating subscriptions for ${deployed.name}`);
+
+									return deployed.subscriptions.map(
+										(sub) =>
+											new eventgrid.EventSubscription(`${deployed.name}-${sub.name}-subscription`, {
+												eventSubscriptionName: `${deployed.name}-${sub.name}-subscription`,
+												scope: sub.eventGridTopic.id,
+												destination: {
+													endpointType: 'WebHook',
+													endpointUrl: hostUrl,
+													// TODO: Reduce event chattiness here and handle internally in the Azure AppService HTTP Gateway?
+													maxEventsPerBatch: 1,
+												},
+												retryPolicy: {
+													maxDeliveryAttempts: 30,
+													eventTimeToLiveInMinutes: 5,
+												},
+											}),
+									);
+								}),
+						);
 
 						// TODO: Add schedule support
 						// NOTE: Currently CRONTAB support is required, we either need to revisit the design of

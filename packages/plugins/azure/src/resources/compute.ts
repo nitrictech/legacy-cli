@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 import * as pulumi from '@pulumi/pulumi';
-import { types, authorization, resources, web, containerregistry, eventgrid } from '@pulumi/azure-native';
-import { NitricContainerImage, StackFunction, StackContainer } from '@nitric/cli-common';
 import { NitricEventgridTopic } from './topic';
+import { types, authorization, resources, web, containerregistry } from '@pulumi/azure-native';
+import { NitricContainerImage, StackFunction, StackContainer } from '@nitric/cli-common';
 
 export interface NitricComputeAzureAppServiceEnvVariable {
 	name: string;
@@ -79,6 +79,7 @@ const ROLE_DEFINITION_MAP = {
 export class NitricComputeAzureAppService extends pulumi.ComponentResource {
 	public readonly name: string;
 	public readonly webapp: web.WebApp;
+	public readonly subscriptions: NitricEventgridTopic[];
 
 	constructor(name: string, args: NitricComputeAzureAppServiceArgs, opts?: pulumi.ComponentResourceOptions) {
 		super('nitric:func:AppService', name, {}, opts);
@@ -104,6 +105,7 @@ export class NitricComputeAzureAppService extends pulumi.ComponentResource {
 		// So hopefully this should be as simple as including a gateway plugin for
 		// Azure that utilizes that contract.
 		// return new appservice.FunctionApp()
+
 		this.webapp = new web.WebApp(
 			source.getName(),
 			{
@@ -169,33 +171,21 @@ export class NitricComputeAzureAppService extends pulumi.ComponentResource {
 				),
 		);
 
-		// Deploy an Event Grid webhook subscription
-		(triggers.topics || []).forEach((s) => {
-			const topic = topics.find((t) => t.name === s);
-
-			if (topic) {
-				new eventgrid.EventSubscription(
-					`${source.getName()}-${topic.name}-subscription`,
-					{
-						eventSubscriptionName: `${source.getName()}-${topic.name}-subscription`,
-						scope: topic.eventGridTopic.id,
-						destination: {
-							endpointType: 'WebHook',
-							endpointUrl: this.webapp.defaultHostName,
-							// TODO: Reduce event chattiness here and handle internally in the Azure AppService HTTP Gateway?
-							maxEventsPerBatch: 1,
-						},
-					},
-					defaultResourceOptions,
-				);
-			} else {
-				throw new Error(`Failed to subscribe ${this.name} to ${s}, matching Event Grid topic not found.`);
-			}
-		});
+		// Determine required subscriptions so they can be setup once the container starts
+		this.subscriptions = (triggers.topics || [])
+			.map((s) => {
+				const topic = topics.find((t) => t.name === s);
+				if (!topic) {
+					pulumi.log.error(`Failed to find matching Event Grid topic for name ${s}.`);
+				}
+				return topic;
+			})
+			.filter((topic) => !!topic) as NitricEventgridTopic[];
 
 		this.registerOutputs({
 			wepapp: this.webapp,
 			name: this.name,
+			subscriptions: this.subscriptions,
 		});
 	}
 }
