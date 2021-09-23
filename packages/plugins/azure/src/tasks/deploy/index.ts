@@ -14,7 +14,16 @@
 
 import { Stack, Task, mapObject, NitricContainerImage } from '@nitric/cli-common';
 import { LocalWorkspace } from '@pulumi/pulumi/automation';
-import { authorization, resources, storage, web, containerregistry, keyvault, eventgrid, documentdb } from '@pulumi/azure-native';
+import {
+	authorization,
+	resources,
+	storage,
+	web,
+	containerregistry,
+	keyvault,
+	eventgrid,
+	documentdb,
+} from '@pulumi/azure-native';
 import * as pulumi from '@pulumi/pulumi';
 import fs from 'fs';
 import path from 'path';
@@ -31,6 +40,8 @@ import {
 	NitricDatabaseAccountMongoDB,
 	NitricComputeAzureAppServiceEnvVariable,
 } from '../../resources';
+import { AppServicePlan } from '../../types';
+import axios from 'axios';
 
 interface DeployOptions {
 	stack: Stack;
