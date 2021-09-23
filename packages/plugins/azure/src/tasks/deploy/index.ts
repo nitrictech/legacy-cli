@@ -325,7 +325,7 @@ export class Deploy extends Task<void> {
 						// TODO: Add schedule support
 						// NOTE: Currently CRONTAB support is required, we either need to revisit the design of
 						// our scheduled expressions or implement a workaround or request a feature.
-						if (Object.keys(schedules)) {
+						if (Object.keys(schedules).length) {
 							pulumi.log.warn('Schedules are not currently supported for Azure deployments');
 							// schedules.map(s => createSchedule(resourceGroup, s))
 						}
