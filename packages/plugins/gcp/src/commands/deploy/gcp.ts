@@ -14,7 +14,14 @@
 
 import { flags } from '@oclif/command';
 import { Deploy, DeployResult, DEPLOY_TASK_KEY } from '../../tasks/deploy';
-import { BaseCommand, wrapTaskForListr, Stack, constants, createBuildListrTask } from '@nitric/cli-common';
+import {
+	BaseCommand,
+	wrapTaskForListr,
+	Stack,
+	constants,
+	createBuildListrTask,
+	checkDockerDaemon,
+} from '@nitric/cli-common';
 import { Listr } from 'listr2';
 import cli from 'cli-ux';
 import path from 'path';
@@ -87,6 +94,9 @@ export default class GcpDeploy extends BaseCommand {
 	static args = [{ name: 'dir' }];
 
 	async do(): Promise<void> {
+		// Check docker daemon is running
+		checkDockerDaemon('doctor:gcp');
+
 		const auth = new google.auth.GoogleAuth({
 			scopes: ['https://www.googleapis.com/auth/cloud-platform'],
 		});

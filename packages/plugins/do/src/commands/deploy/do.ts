@@ -14,7 +14,15 @@
 
 import { flags } from '@oclif/command';
 import { Deploy, DEPLOY_TASK_KEY, DeployResults } from '../../tasks/deploy';
-import { BaseCommand, wrapTaskForListr, Stack, block, constants, createBuildListrTask } from '@nitric/cli-common';
+import {
+	BaseCommand,
+	wrapTaskForListr,
+	Stack,
+	block,
+	constants,
+	createBuildListrTask,
+	checkDockerDaemon,
+} from '@nitric/cli-common';
 import { Listr } from 'listr2';
 import path from 'path';
 import inquirer from 'inquirer';
@@ -46,6 +54,9 @@ export default class DoDeploy extends BaseCommand {
 	static args = [{ name: 'dir', default: '.' }];
 
 	async do(): Promise<any> {
+		// Check docker daemon is running
+		checkDockerDaemon('doctor:do');
+
 		const { args, flags } = this.parse(DoDeploy);
 		const { dir } = args;
 

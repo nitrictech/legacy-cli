@@ -15,7 +15,14 @@
 import { flags } from '@oclif/command';
 import { Listr } from 'listr2';
 import inquirer from 'inquirer';
-import { BaseCommand, Stack, wrapTaskForListr, constants, createBuildListrTask } from '@nitric/cli-common';
+import {
+	BaseCommand,
+	Stack,
+	wrapTaskForListr,
+	constants,
+	createBuildListrTask,
+	checkDockerDaemon,
+} from '@nitric/cli-common';
 import path from 'path';
 import { Deploy } from '../../tasks/deploy';
 
@@ -121,6 +128,9 @@ export default class AzureDeploy extends BaseCommand {
 	];
 
 	async do(): Promise<void> {
+		// Check docker daemon is running
+		checkDockerDaemon('doctor:azure');
+
 		const { args, flags } = this.parse(AzureDeploy);
 		const { ci } = flags;
 		const { dir = '.' } = args;

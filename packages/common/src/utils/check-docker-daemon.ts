@@ -11,9 +11,14 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+import execa from 'execa';
 
-export * from './dir';
-export * from './stack';
-export * from './tagged-templates';
-export * from './map-object';
-export * from './check-docker-daemon';
+export function checkDockerDaemon(doctorCommand = 'doctor'): void {
+	try {
+		execa.sync('docker', ['ps']);
+	} catch {
+		throw new Error(
+			`Docker daemon was not found!\nTry using 'nitric ${doctorCommand}' to confirm it is correctly installed, and check that the service is running.`,
+		);
+	}
+}
