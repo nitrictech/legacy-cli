@@ -18,6 +18,7 @@ import inquirer from 'inquirer';
 import { BaseCommand, Stack, wrapTaskForListr, constants, createBuildListrTask } from '@nitric/cli-common';
 import path from 'path';
 import { Deploy } from '../../tasks/deploy';
+import { AppServicePlan } from '../../types';
 
 const SUPPORTED_REGIONS = [
 	'eastus',
@@ -86,6 +87,41 @@ const SUPPORTED_REGIONS = [
 	'brazilsoutheast',
 ];
 
+const APPSERVICE_PLANS: Record<string, AppServicePlan> = {
+	'Free-F1': {
+		tier: 'Free',
+		size: 'F1',
+	},
+	'Shared-D1': {
+		tier: 'Shared',
+		size: 'D1',
+	},
+	'Basic-B1': {
+		tier: 'Basic',
+		size: 'B1',
+	},
+	'Basic-B2': {
+		tier: 'Basic',
+		size: 'B2',
+	},
+	'Basic-B3': {
+		tier: 'Basic',
+		size: 'B3',
+	},
+	'Standard-S1': {
+		tier: 'Standard',
+		size: 'S1',
+	},
+	'Standard-S2': {
+		tier: 'Standard',
+		size: 'S2',
+	},
+	'Standard-S3': {
+		tier: 'Standard',
+		size: 'S3',
+	},
+};
+
 /**
  * Deploy a stack to Microsoft Azure
  *
@@ -101,6 +137,11 @@ export default class AzureDeploy extends BaseCommand {
 		region: flags.enum({
 			options: SUPPORTED_REGIONS,
 			char: 'r',
+			description: 'azure region to deploy to',
+		}),
+		plan: flags.enum({
+			options: Object.keys(APPSERVICE_PLANS),
+			char: 'p',
 			description: 'azure region to deploy to',
 		}),
 		file: flags.string({
@@ -146,7 +187,7 @@ export default class AzureDeploy extends BaseCommand {
 			promptFlags = await inquirer.prompt(prompts);
 		}
 
-		const { file, region, orgName, adminEmail } = { ...flags, ...promptFlags };
+		const { file, region, orgName, adminEmail, plan } = { ...flags, ...promptFlags };
 
 		if (!region) {
 			throw new Error('Region must be provided, for prompts use the --guided flag');
@@ -163,7 +204,18 @@ export default class AzureDeploy extends BaseCommand {
 		const stack = await Stack.fromFile(path.join(dir, file));
 
 		new Listr(
-			[createBuildListrTask(stack, 'azure'), wrapTaskForListr(new Deploy({ stack, region, orgName, adminEmail }))],
+			[
+				createBuildListrTask(stack, 'azure'),
+				wrapTaskForListr(
+					new Deploy({
+						stack,
+						region,
+						orgName,
+						adminEmail,
+						servicePlan: APPSERVICE_PLANS[plan],
+					}),
+				),
+			],
 			constants.DEFAULT_LISTR_OPTIONS,
 		).run();
 	}

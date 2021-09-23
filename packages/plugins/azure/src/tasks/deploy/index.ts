@@ -31,12 +31,14 @@ import {
 	NitricDatabaseAccountMongoDB,
 	NitricComputeAzureAppServiceEnvVariable,
 } from '../../resources';
+import { AppServicePlan } from '../../types';
 
 interface DeployOptions {
 	stack: Stack;
 	region: string;
 	orgName: string;
 	adminEmail: string;
+	servicePlan: AppServicePlan;
 }
 
 export class Deploy extends Task<void> {
@@ -44,13 +46,15 @@ export class Deploy extends Task<void> {
 	private orgName: string;
 	private adminEmail: string;
 	private region: string;
+	private servicePlan: AppServicePlan;
 
-	constructor({ stack, orgName, adminEmail, region }: DeployOptions) {
+	constructor({ stack, orgName, adminEmail, region, servicePlan }: DeployOptions) {
 		super('Deploying Infrastructure');
 		this.stack = stack;
 		this.orgName = orgName;
 		this.adminEmail = adminEmail;
 		this.region = region;
+		this.servicePlan = servicePlan;
 	}
 
 	async do(): Promise<void> {
@@ -236,14 +240,9 @@ export class Deploy extends Task<void> {
 								kind: 'Linux',
 								reserved: true,
 								sku: {
-									// for development only
-									// Will upgrade tiers/elasticity for different stack tiers e.g. dev/test/prod (prefab recipes)
-									//name: 'B1',
-									//tier: 'Basic',
-									//size: 'B1',
-									name: 'F1',
-									tier: 'Free',
-									size: 'F1',
+									name: this.servicePlan.size,
+									tier: this.servicePlan.tier,
+									size: this.servicePlan.size,
 								},
 							});
 
