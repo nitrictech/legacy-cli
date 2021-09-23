@@ -54,19 +54,4 @@ export class NitricEventgridTopic extends pulumi.ComponentResource {
 			name: this.name,
 		});
 	}
-
-	/**
-	 *
-	 * @returns
-	 */
-	// public getSharedAccessKeys = (): pulumi.Output<[string, string]> => {
-	// 	const sasKeys = pulumi.all([this.resourceGroup.name, this.eventgrid.name]).apply(([resourceGroupName, topicName]) =>
-	// 		eventgrid.listTopicSharedAccessKeys({
-	// 			resourceGroupName,
-	// 			topicName,
-	// 		}),
-	// 	);
-
-	// 	return sasKeys.apply((k) => [k.key1!, k.key2!]) as pulumi.Output<[string, string]>;
-	// };
 }

@@ -63,7 +63,6 @@ export class NitricEntrypointAzureFrontDoor extends pulumi.ComponentResource {
 			const routeName = `${type}-${target}-route`;
 			const routeConfig = {
 				backendPool: {
-					// FIXME: Add above defined pool name here...
 					id: pulumi.interpolate`/subscriptions/${subscriptionId}/resourceGroups/${resourceGroup.name}/providers/Microsoft.Network/frontDoors/${frontDoorName}/backendPools/${poolName}`,
 				},
 				odataType: DEFAULT_ODATA_TYPE,
