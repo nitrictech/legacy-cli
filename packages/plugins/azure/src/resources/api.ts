@@ -49,8 +49,6 @@ export class NitricApiAzureApiManagement extends pulumi.ComponentResource {
 			name,
 			{
 				resourceGroupName: resourceGroup.name,
-				// TODO: Extract from API doc?
-				serviceName: `${api.name}-service`,
 				publisherEmail: adminEmail,
 				publisherName: orgName,
 				// TODO: Add configuration for this
