@@ -65,7 +65,7 @@ export class NitricApiAzureApiManagement extends pulumi.ComponentResource {
 		this.api = new apimanagement.Api(
 			`${name}-api`,
 			{
-				displayName: `${name}-api`,
+				displayName: openapi.info.title || `${name}-api`,
 				protocols: ['https'],
 				apiId: name,
 				format: 'openapi+json',
