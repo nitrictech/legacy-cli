@@ -189,9 +189,12 @@ export class Deploy extends Task<void> {
 
 						if (Object.keys(collections).length) {
 							// CREATE DB ACCOUNT
-							const { account } = new NitricDatabaseAccountMongoDB(stack.getName(), {
-								resourceGroup,
-							});
+							const { account } = new NitricDatabaseAccountMongoDB(
+								`${stack.getName()}`.replace(/-/g, '').substring(0, 13),
+								{
+									resourceGroup,
+								},
+							);
 
 							// CREATE DB
 							const { database } = new NitricDatabaseCosmosMongo(stack.getName(), {
