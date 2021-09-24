@@ -71,6 +71,7 @@ export class NitricApiAzureApiManagement extends pulumi.ComponentResource {
 				format: 'openapi+json',
 				path: '/',
 				resourceGroupName: resourceGroup.name,
+				subscriptionRequired: false,
 				serviceName: this.service.name,
 				// XXX: Do we need to stringify this?
 				// Not need to transform the original spec,
@@ -97,18 +98,31 @@ export class NitricApiAzureApiManagement extends pulumi.ComponentResource {
 							`${name}-api-${pathMethod.operationId}`,
 							{
 								resourceGroupName: resourceGroup.name,
-								apiId: this.api.id,
+								// this.api.id returns a URL path, which is the incorrect value here.
+								//   We instead need the value passed to apiId in the api creation above.
+								// However, we want to maintain the pulumi dependency, so we need to keep the 'apply' call.
+								apiId: this.api.id.apply(() => name),
 								serviceName: this.service.name,
 								// TODO: Need to figure out how this is mapped to a real api operation entity
 								operationId: pathMethod.operationId!,
-								policyId: pulumi.interpolate`${pathMethod.operationId!}Policy`,
+								// policyId must always be set to the static string 'policy' or Azure returns an error.
+								policyId: 'policy',
+								format: 'xml',
 								value: pulumi.interpolate`
-							<policies> 
-								<inbound /> 
-								<backend>    
-									<set-backend-service base-url="https://${func.webapp.defaultHostName}" />
-								</backend>  
-								<outbound />
+								<policies> 
+									<inbound>
+										<base />
+										<set-backend-service base-url="https://${func.webapp.defaultHostName}" />
+									</inbound>
+									<backend>
+										<base />
+									</backend>
+									<outbound>
+										<base />
+									</outbound>
+									<on-error>
+										<base />
+									</on-error>
 							</policies>
 						`,
 							},
