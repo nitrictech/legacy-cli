@@ -103,8 +103,7 @@ export class Deploy extends Task<void> {
 
 						// Create a stack level keyvault if secrets are enabled
 						// At the moment secrets have no config level setting
-						const kvault = new keyvault.Vault(`${stack.getName()}-key-vault`, {
-							vaultName: `${stack.getName()}`.substring(0, 24),
+						const kvault = new keyvault.Vault(`${stack.getName()}`.substring(0, 13), {
 							resourceGroupName: resourceGroup.name,
 							properties: {
 								enableSoftDelete: false,
