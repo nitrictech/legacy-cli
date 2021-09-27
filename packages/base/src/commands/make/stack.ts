@@ -55,7 +55,7 @@ export default class Stack extends BaseCommand {
 		{
 			name: 'template',
 			required: false,
-			description: 'Service template',
+			description: 'Stack template',
 			// TODO: Handle case where no templates are available. Prompt to install template(s).
 			// Present available templates from locally installed repositories
 			choices: async (): Promise<string[]> => {
