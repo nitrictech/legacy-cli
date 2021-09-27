@@ -103,8 +103,7 @@ export class Deploy extends Task<void> {
 
 						// Create a stack level keyvault if secrets are enabled
 						// At the moment secrets have no config level setting
-						const kvault = new keyvault.Vault(`${stack.getName()}-key-vault`, {
-							vaultName: `${stack.getName()}`.substring(0, 24),
+						const kvault = new keyvault.Vault(`${stack.getName()}`.substring(0, 13), {
 							resourceGroupName: resourceGroup.name,
 							properties: {
 								enableSoftDelete: false,
@@ -129,10 +128,8 @@ export class Deploy extends Task<void> {
 						// DEPLOY STORAGE BASED ASSETS
 						let deployedSites: NitricAzureStorageSite[] = [];
 						if (Object.keys(buckets).length || Object.keys(queues).length || stack.getSites().length) {
-							const account = new storage.StorageAccount(`${stack.getName()}-storage-account`, {
+							const account = new storage.StorageAccount(`${stack.getName()}`.replace(/-/g, '').substring(0, 13), {
 								resourceGroupName: resourceGroup.name,
-								// 24 character limit
-								accountName: `${stack.getName().replace(/-/g, '')}`,
 								kind: storage.Kind.StorageV2,
 								sku: {
 									name: storage.SkuName.Standard_LRS,
@@ -192,9 +189,12 @@ export class Deploy extends Task<void> {
 
 						if (Object.keys(collections).length) {
 							// CREATE DB ACCOUNT
-							const { account } = new NitricDatabaseAccountMongoDB(stack.getName(), {
-								resourceGroup,
-							});
+							const { account } = new NitricDatabaseAccountMongoDB(
+								`${stack.getName()}`.replace(/-/g, '').substring(0, 13),
+								{
+									resourceGroup,
+								},
+							);
 
 							// CREATE DB
 							const { database } = new NitricDatabaseCosmosMongo(stack.getName(), {
