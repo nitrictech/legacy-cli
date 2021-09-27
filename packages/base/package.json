@@ -72,14 +72,8 @@
 	"oclif": {
 		"commands": "./lib/commands",
 		"topics": {
-			"templates": {
-				"description": "Commands for template management"
-			},
-			"templates:repos": {
-				"description": "Commands for managing template repositories"
-			},
 			"make": {
-				"description": "Commands to make new projects and assets."
+				"description": "Commands to make new stacks and assets."
 			},
 			"deploy": {
 				"description": "Plugin commands to deploy on supported providers. E.g. `$ nitric deploy:aws`"
