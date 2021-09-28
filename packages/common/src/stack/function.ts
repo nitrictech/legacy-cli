@@ -59,6 +59,14 @@ export class StackFunction<FuncExtensions = Record<string, any>> {
 	}
 
 	/**
+	 *
+	 * @returns the stack version of the function, else the stack version
+	 */
+	getVersion(): string {
+		return this.descriptor.version ? `v${this.descriptor.version}` : this.getStack().getVersion();
+	}
+
+	/**
 	 * Get the build context of the function
 	 * @returns
 	 */

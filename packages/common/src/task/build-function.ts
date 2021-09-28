@@ -47,7 +47,7 @@ export class BuildFunctionTask extends Task<ContainerImage> {
 			${Object.entries(this.service.getPackEnv())
 				.map(([k, v]) => `--env ${k}=${v}`)
 				.join(' ')}
-            --env BP_MEMBRANE_VERSION=v0.12.0-rc.10
+            --env BP_MEMBRANE_VERSION=${this.service.getVersion()}
 			--env BP_MEMBRANE_PROVIDER=${this.provider}
 			--env BP_NITRIC_SERVICE_HANDLER=${this.service.getContextRelativeDirectory()}
 			--pull-policy if-not-present
