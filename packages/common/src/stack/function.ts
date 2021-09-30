@@ -60,7 +60,7 @@ export class StackFunction<FuncExtensions = Record<string, any>> {
 
 	/**
 	 *
-	 * @returns the stack version of the function, else the stack version
+	 * @returns the nitric framework version used by this function
 	 */
 	getVersion(): string {
 		return this.descriptor.version ? `v${this.descriptor.version}` : this.getStack().getVersion();
