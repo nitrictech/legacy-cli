@@ -130,6 +130,14 @@ export class Stack<
 	}
 
 	/**
+	 *
+	 * @returns the nitric framework version used by this stack
+	 */
+	getVersion(): string {
+		return this.descriptor.version ? `v${this.descriptor.version}` : 'latest';
+	}
+
+	/**
 	 * Return the descriptor for the stack
 	 * @param noUndefined if true, removes undefined top level properties from the description.
 	 * Useful when writing to a config file such as YAML and empty optional properties are undesirable.

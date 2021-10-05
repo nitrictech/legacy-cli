@@ -24,6 +24,16 @@ import { StackAPIDocument } from './api';
  * Pattern for stack resources names, e.g. func names, topic names, buckets, etc.
  */
 export const resourceNamePattern = /^\w+([.\\-]\w+)*$/.toString().slice(1, -1);
+
+/**
+ * Pattern for nitric framework versions
+ * taken from: https://semver.org/#is-there-a-suggested-regular-expression-regex-to-check-a-semver-string
+ */
+export const versionPattern =
+	/^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/
+		.toString()
+		.slice(1, -1);
+
 /**
  * CRON expression string pattern
  */
@@ -1541,6 +1551,11 @@ export const STACK_SCHEMA: JSONSchema7 = {
 			type: 'string',
 			pattern: resourceNamePattern,
 		},
+		version: {
+			title: 'nitric framework version',
+			type: 'string',
+			pattern: versionPattern,
+		},
 		functions: {
 			title: 'functions',
 			type: 'object',
@@ -1550,6 +1565,11 @@ export const STACK_SCHEMA: JSONSchema7 = {
 					description: 'A nitric compute func, such as a serverless function',
 					type: 'object',
 					properties: {
+						version: {
+							title: 'nitric framework version',
+							type: 'string',
+							pattern: versionPattern,
+						},
 						handler: { type: 'string' },
 						context: { type: 'string' },
 						triggers: {
