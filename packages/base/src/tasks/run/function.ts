@@ -82,7 +82,15 @@ export class RunContainerTask extends Task<Container> {
 
 		const dockerOptions = {
 			name: `${this.image.name}-${runId}`,
-			Env: [`LOCAL_SUBSCRIPTIONS=${JSON.stringify(subscriptions)}`, `NITRIC_DEV_VOLUME=${NITRIC_DEV_VOLUME}`],
+			Env: [
+				`LOCAL_SUBSCRIPTIONS=${JSON.stringify(subscriptions)}`,
+				`NITRIC_DEV_VOLUME=${NITRIC_DEV_VOLUME}`,
+				// ENV variables to connect the membrane to a local minio instance
+				`MINIO_ENDPOINT=http://minio-${runId}:9000`,
+				// TODO: Update these from defaults
+				`MINIO_ACCESS_KEY=minioadmin`,
+				`MINIO_SECRET_KEY=minioadmin`,
+			],
 			ExposedPorts: {
 				[`${GATEWAY_PORT}/tcp`]: {},
 			},

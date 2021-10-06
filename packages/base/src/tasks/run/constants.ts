@@ -13,3 +13,7 @@
 // limitations under the License.
 
 export const NITRIC_DEV_VOLUME = '/nitric/';
+
+export const NITRIC_RUN_DIR = './.nitric/run';
+// NOTE: octal notation is important here!!!
+export const NITRIC_RUN_PERM = 0o777;
