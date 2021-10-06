@@ -505,6 +505,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@iarna/toml@npm:^2.2.5":
+  version: 2.2.5
+  resolution: "@iarna/toml@npm:2.2.5"
+  checksum: 929a8516a24996b75768f7e0591815e37004f2cdda12b245c9a5ae64f423b4bd2bdd6943fc80e9bb5360a7be0b6d05bac57c178578d9a73acfb2eab125c594ee
+  languageName: node
+  linkType: hard
+
 "@istanbuljs/load-nyc-config@npm:^1.0.0":
   version: 1.1.0
   resolution: "@istanbuljs/load-nyc-config@npm:1.1.0"
@@ -747,6 +754,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@nitric/cli-common@workspace:packages/common"
   dependencies:
+    "@iarna/toml": ^2.2.5
     "@oclif/command": ^1
     "@oclif/config": ^1
     "@pulumi/docker": ^3.0.0

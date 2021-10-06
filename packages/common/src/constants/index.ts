@@ -12,7 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import path from 'path';
 import { ListrBaseClassOptions, ListrDefaultRendererValue, ListrFallbackRendererValue } from 'listr2';
+
+export const DEFAULT_NITRIC_DIR = '.nitric/';
+export const DEFAULT_BUILD_DIR = path.join(DEFAULT_NITRIC_DIR, 'build');
 
 export const DEFAULT_LISTR_OPTIONS: ListrBaseClassOptions<any, ListrDefaultRendererValue, ListrFallbackRendererValue> =
 	{

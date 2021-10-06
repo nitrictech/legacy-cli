@@ -24,7 +24,6 @@ export interface NitricFunction<Ext> extends NitricComputeUnit<Ext> {
 	// build process before beginning the docker build
 	buildScripts?: string[];
 	// files to exclude from final build
-	// can be globs
 	excludes?: string[];
 	// The most requests a single function instance should handle
 	maxRequests?: number;
