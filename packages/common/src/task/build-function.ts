@@ -69,7 +69,7 @@ export class BuildFunctionTask extends Task<ContainerImage> {
 			--default-process membrane
 		`;
 
-		const packInstalled = which.sync('which', { nothrow: true });
+		const packInstalled = which.sync('pack', { nothrow: true });
 
 		if (!packInstalled) {
 			baseCmd = oneLine`
