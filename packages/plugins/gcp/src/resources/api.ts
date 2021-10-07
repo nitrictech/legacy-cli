@@ -11,7 +11,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-import { NitricAPITarget, StackAPIDocument } from '@nitric/cli-common';
+import { NitricAPITarget, StackAPIDocument, constants } from '@nitric/cli-common';
 import * as pulumi from '@pulumi/pulumi';
 import { OpenAPIV2 } from 'openapi-types';
 import * as gcp from '@pulumi/gcp';
@@ -57,7 +57,7 @@ export class NitricApiGcpApiGateway extends pulumi.ComponentResource {
 			const services = Object.keys(path)
 				.filter((k) => METHOD_KEYS.includes(k as method))
 				.reduce((acc, method) => {
-					const pathTarget = p[method as method]?.['x-nitric-target'];
+					const pathTarget = p[method as method]?.[constants.OAI_NITRIC_TARGET_EXT];
 					const svc = services.find(({ name }) => name === pathTarget?.name);
 
 					if (svc && !acc.includes(svc)) {
@@ -85,8 +85,8 @@ export class NitricApiGcpApiGateway extends pulumi.ComponentResource {
 							const p = path[method as method]!;
 
 							// The name of the function we want to target with this APIGateway
-							if (p['x-nitric-target']) {
-								const targetName = p['x-nitric-target'].name;
+							if (p[constants.OAI_NITRIC_TARGET_EXT]) {
+								const targetName = p[constants.OAI_NITRIC_TARGET_EXT].name;
 
 								const invokeUrlPair = nameUrlPairs.find((f) => f.split('||')[0] === targetName);
 
@@ -96,7 +96,7 @@ export class NitricApiGcpApiGateway extends pulumi.ComponentResource {
 
 								const url = invokeUrlPair.split('||')[1];
 								// Discard the old key on the transformed API
-								const { 'x-nitric-target': _, ...rest } = p;
+								const { [constants.OAI_NITRIC_TARGET_EXT]: _, ...rest } = p;
 
 								return {
 									...acc,

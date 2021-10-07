@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 import * as pulumi from '@pulumi/pulumi';
-import { NitricAPITarget, StackAPI } from '@nitric/cli-common';
+import { NitricAPITarget, StackAPI, constants } from '@nitric/cli-common';
 import { resources, apimanagement } from '@pulumi/azure-native';
 import { OpenAPIV3 } from 'openapi-types';
 import { NitricComputeAzureAppService } from '.';
@@ -93,7 +93,9 @@ export class NitricApiAzureApiManagement extends pulumi.ComponentResource {
 					const pathMethod = path[m] as OpenAPIV3.OperationObject<NitricAPITarget>;
 
 					const func = services.find(
-						(f) => pathMethod['x-nitric-target'] && f.name === pathMethod['x-nitric-target'].name,
+						(f) =>
+							pathMethod[constants.OAI_NITRIC_TARGET_EXT] &&
+							f.name === pathMethod[constants.OAI_NITRIC_TARGET_EXT].name,
 					);
 
 					if (func) {

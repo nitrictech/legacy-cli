@@ -15,7 +15,7 @@ import * as pulumi from '@pulumi/pulumi';
 import * as aws from '@pulumi/aws';
 import { OpenAPIV3 } from 'openapi-types';
 import { uniq } from 'lodash';
-import { StackAPI } from '@nitric/cli-common';
+import { StackAPI, constants } from '@nitric/cli-common';
 import { NitricComputeAWSLambda } from './compute';
 
 type method = 'get' | 'post' | 'put' | 'patch' | 'delete';
@@ -75,10 +75,10 @@ export class NitricApiAwsApiGateway extends pulumi.ComponentResource {
 				return [
 					...acc,
 					...Object.keys(path)
-						.filter((k) => METHOD_KEYS.includes(k as method) && path[k]['x-nitric-target'])
+						.filter((k) => METHOD_KEYS.includes(k as method) && path[k][constants.OAI_NITRIC_TARGET_EXT])
 						.map((m) => {
 							const method = path[m as method]!;
-							return method['x-nitric-target'].name;
+							return method[constants.OAI_NITRIC_TARGET_EXT].name;
 						}),
 				];
 			}, [] as string[]),
@@ -98,8 +98,8 @@ export class NitricApiAwsApiGateway extends pulumi.ComponentResource {
 
 								// The name of the function we want to target with this APIGateway
 
-								if (p['x-nitric-name']) {
-									const targetName = p['x-nitric-target'].name;
+								if (p[constants.OAI_NITRIC_TARGET_EXT]) {
+									const targetName = p[constants.OAI_NITRIC_TARGET_EXT].name;
 
 									const invokeArnPair = nameArnPairs.find((f) => f.split('||')[0] === targetName);
 
@@ -109,7 +109,7 @@ export class NitricApiAwsApiGateway extends pulumi.ComponentResource {
 
 									const invokeArn = invokeArnPair.split('||')[1];
 									// Discard the old key on the transformed API
-									const { 'x-nitric-target': _, ...rest } = p;
+									const { [constants.OAI_NITRIC_TARGET_EXT]: _, ...rest } = p;
 
 									return {
 										...acc,
