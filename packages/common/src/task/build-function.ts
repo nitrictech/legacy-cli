@@ -17,7 +17,10 @@ import { oneLine } from 'common-tags';
 import { Task } from './task';
 import { ContainerImage } from '../types';
 import { StackFunction } from '../stack';
+import { DEFAULT_NITRIC_DIR, DEFAULT_BUILD_DIR } from '../constants';
 import which from 'which';
+import TOML from '@iarna/toml';
+import fs from 'fs';
 
 interface BuildFunctionTaskOptions {
 	baseDir: string;
@@ -27,6 +30,12 @@ interface BuildFunctionTaskOptions {
 
 const PACK_IMAGE = 'buildpacksio/pack:0.13.1';
 const BUILDER_IMAGE = 'nitrictech/bp-builder-base';
+
+const DEFAULT_PROJECT_CONFIG = {
+	build: {
+		exclude: [DEFAULT_NITRIC_DIR],
+	},
+};
 
 export class BuildFunctionTask extends Task<ContainerImage> {
 	private service: StackFunction;
@@ -41,13 +50,19 @@ export class BuildFunctionTask extends Task<ContainerImage> {
 	async do(): Promise<ContainerImage> {
 		const imageId = this.service.getImageTagName(this.provider);
 
+		// Create a temporary default ignore file
+		// and delete it when we're done
+		await fs.promises.mkdir(`./${DEFAULT_BUILD_DIR}`, { recursive: true });
+		await fs.promises.writeFile(`./${DEFAULT_BUILD_DIR}/${imageId}.toml`, TOML.stringify(DEFAULT_PROJECT_CONFIG));
+
 		let baseCmd = oneLine`
 			build ${imageId} 
 			--builder ${BUILDER_IMAGE}
 			${Object.entries(this.service.getPackEnv())
 				.map(([k, v]) => `--env ${k}=${v}`)
 				.join(' ')}
-            --env BP_MEMBRANE_VERSION=${this.service.getVersion()}
+			-d ./.nitric/build/${imageId}.toml
+			--env BP_MEMBRANE_VERSION=${this.service.getVersion()}
 			--env BP_MEMBRANE_PROVIDER=${this.provider}
 			--env BP_NITRIC_SERVICE_HANDLER=${this.service.getContextRelativeDirectory()}
 			--pull-policy if-not-present

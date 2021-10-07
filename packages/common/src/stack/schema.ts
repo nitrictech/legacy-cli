@@ -1572,6 +1572,12 @@ export const STACK_SCHEMA: JSONSchema7 = {
 						},
 						handler: { type: 'string' },
 						context: { type: 'string' },
+						excludes: {
+							type: 'array',
+							items: {
+								type: 'string',
+							},
+						},
 						triggers: {
 							title: 'func triggers',
 							type: 'object',

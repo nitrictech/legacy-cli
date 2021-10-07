@@ -24,6 +24,7 @@
 	],
 	"license": "Apache-2.0",
 	"dependencies": {
+		"@iarna/toml": "^2.2.5",
 		"@oclif/command": "^1",
 		"@oclif/config": "^1",
 		"@pulumi/docker": "^3.0.0",
