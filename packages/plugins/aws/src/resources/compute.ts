@@ -105,6 +105,34 @@ export class NitricComputeAWSLambda extends pulumi.ComponentResource {
 		);
 
 		new aws.iam.RolePolicy(
+			`${source.getName()}SQSAccess`,
+			{
+				role: lambdaRole.id,
+				policy: JSON.stringify({
+					Version: '2012-10-17',
+					Statement: [
+						{
+							Effect: 'Allow',
+							Action: [
+								'sqs:ChangeMessageVisibility',
+								'sqs:DeleteMessage',
+								'sqs:GetQueueAttributes',
+								'sqs:GetQueueUrl',
+								'sqs:ListDeadLetterSourceQueues',
+								'sqs:ListQueues',
+								'sqs:ListQueueTags',
+								'sqs:ReceiveMessage',
+								'sqs:SendMessage',
+							],
+							Resource: '*',
+						},
+					],
+				}),
+			},
+			defaultResourceOptions,
+		);
+
+		new aws.iam.RolePolicy(
 			`${source.getName()}SecretsAccess`,
 			{
 				role: lambdaRole.id,
