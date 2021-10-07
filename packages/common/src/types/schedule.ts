@@ -23,12 +23,15 @@ export interface NitricScheduleEvent {
 
 export interface NitricScheduleTarget {
 	type: 'topic'; // ; | "queue"
-	id: string;
+	name: string;
 }
 
 /**
  * A Nitric Schedule definition
  */
+
+// TODO: resolve following
+// eslint-disable-next-line @typescript-eslint/ban-types
 export interface NitricSchedule<Ext extends Record<string, any> = {}> {
 	expression: string;
 	// The Topic to be targeted for schedule

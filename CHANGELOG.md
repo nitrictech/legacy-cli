@@ -4,48 +4,43 @@ All notable changes to this project will be documented in this file. See [standa
 
 ### [0.0.86](https://github.com/nitrictech/cli/compare/v0.0.85...v0.0.86) (2021-09-09)
 
-
 ### Features
 
-* Add .packrc support for env variable and service context. ([0e79b57](https://github.com/nitrictech/cli/commit/0e79b570851d3c91bebe7629e6731d5d1d0a24d2))
-* buildpacks implementation. ([0da1cc2](https://github.com/nitrictech/cli/commit/0da1cc2d5a5feae37b469704620996ffe7766fd0))
-* make:stack to create new Nitric Stacks from templates ([fbdd02a](https://github.com/nitrictech/cli/commit/fbdd02a738ac92053b2f78501ea32ca3548a5006))
-* Support APIs as separate files. ([4ef10da](https://github.com/nitrictech/cli/commit/4ef10da4a752b72f7663c081de07e070f3c391a7))
-* support functions and custom containers ([745e852](https://github.com/nitrictech/cli/commit/745e852f7ff519f4acd4b5c2aa075a72ecc51c4c))
-
+- Add .packrc support for env variable and service context. ([0e79b57](https://github.com/nitrictech/cli/commit/0e79b570851d3c91bebe7629e6731d5d1d0a24d2))
+- buildpacks implementation. ([0da1cc2](https://github.com/nitrictech/cli/commit/0da1cc2d5a5feae37b469704620996ffe7766fd0))
+- make:stack to create new Nitric Stacks from templates ([fbdd02a](https://github.com/nitrictech/cli/commit/fbdd02a738ac92053b2f78501ea32ca3548a5006))
+- Support APIs as separate files. ([4ef10da](https://github.com/nitrictech/cli/commit/4ef10da4a752b72f7663c081de07e070f3c391a7))
+- support functions and custom containers ([745e852](https://github.com/nitrictech/cli/commit/745e852f7ff519f4acd4b5c2aa075a72ecc51c4c))
 
 ### Bug Fixes
 
-* Add env for nitric run NITRIC_DEV_VOLUME. ([889888f](https://github.com/nitrictech/cli/commit/889888fdc2cca4244644a3a1b1ec677ca9bfe98f))
-* cleanup pack containers. ([427fc06](https://github.com/nitrictech/cli/commit/427fc06099acf457ab6c6f4f7ea024b23040a435))
-* setup nitric run volume in .nitric/run relative to cwd. ([eebf817](https://github.com/nitrictech/cli/commit/eebf817a429ce328c1217af9bfdc3632eb528a8f))
-* update stack name for template stacks ([0006ab9](https://github.com/nitrictech/cli/commit/0006ab9f375caff8fa95a6e4b2687702164c8d7e))
+- Add env for nitric run NITRIC_DEV_VOLUME. ([889888f](https://github.com/nitrictech/cli/commit/889888fdc2cca4244644a3a1b1ec677ca9bfe98f))
+- cleanup pack containers. ([427fc06](https://github.com/nitrictech/cli/commit/427fc06099acf457ab6c6f4f7ea024b23040a435))
+- setup nitric run volume in .nitric/run relative to cwd. ([eebf817](https://github.com/nitrictech/cli/commit/eebf817a429ce328c1217af9bfdc3632eb528a8f))
+- update stack name for template stacks ([0006ab9](https://github.com/nitrictech/cli/commit/0006ab9f375caff8fa95a6e4b2687702164c8d7e))
 
 ### [0.0.85](https://github.com/nitrictech/cli/compare/v0.0.84...v0.0.85) (2021-09-03)
 
 ### [0.0.84](https://github.com/nitrictech/cli/compare/v0.0.82...v0.0.84) (2021-08-26)
 
-
 ### Features
 
-* **plugins/gcp:** Add initial service enablement to gcp deployments. ([6bfeaf4](https://github.com/nitrictech/cli/commit/6bfeaf4090e1bb7d682eb0a505f4a2227dc37cec))
-* **plugins/gcp:** Add new component resources for configuring project permissions. ([fa244a9](https://github.com/nitrictech/cli/commit/fa244a96dc579541eb63a68e8ea99b546df82959))
-
+- **plugins/gcp:** Add initial service enablement to gcp deployments. ([6bfeaf4](https://github.com/nitrictech/cli/commit/6bfeaf4090e1bb7d682eb0a505f4a2227dc37cec))
+- **plugins/gcp:** Add new component resources for configuring project permissions. ([fa244a9](https://github.com/nitrictech/cli/commit/fa244a96dc579541eb63a68e8ea99b546df82959))
 
 ### Bug Fixes
 
-* **plugins/gcp:** Add authentication config for APIs to invoke services. ([a85f53f](https://github.com/nitrictech/cli/commit/a85f53f2a77d4f13c80214a7a3d1c67771275e30))
-* **plugins/gcp:** Add missing permission for pubsub push subscriptions. ([aa56042](https://github.com/nitrictech/cli/commit/aa56042cc238dc97e46ddda220887de1b20c8ff0))
-* preserve stack file comments ([cbefc2d](https://github.com/nitrictech/cli/commit/cbefc2d8559537ecb7962938ba5cab933fa3e8cd))
-* print the friendly error message to user ([18a4bb7](https://github.com/nitrictech/cli/commit/18a4bb79d2d43fa74a0a0d62db99842643460362))
+- **plugins/gcp:** Add authentication config for APIs to invoke services. ([a85f53f](https://github.com/nitrictech/cli/commit/a85f53f2a77d4f13c80214a7a3d1c67771275e30))
+- **plugins/gcp:** Add missing permission for pubsub push subscriptions. ([aa56042](https://github.com/nitrictech/cli/commit/aa56042cc238dc97e46ddda220887de1b20c8ff0))
+- preserve stack file comments ([cbefc2d](https://github.com/nitrictech/cli/commit/cbefc2d8559537ecb7962938ba5cab933fa3e8cd))
+- print the friendly error message to user ([18a4bb7](https://github.com/nitrictech/cli/commit/18a4bb79d2d43fa74a0a0d62db99842643460362))
 
 ### [0.0.83](https://github.com/nitrictech/cli/compare/v0.0.82...v0.0.83) (2021-08-26)
 
-
 ### Bug Fixes
 
-* preserve stack file comments ([cbefc2d](https://github.com/nitrictech/cli/commit/cbefc2d8559537ecb7962938ba5cab933fa3e8cd))
-* print the friendly error message to user ([18a4bb7](https://github.com/nitrictech/cli/commit/18a4bb79d2d43fa74a0a0d62db99842643460362))
+- preserve stack file comments ([cbefc2d](https://github.com/nitrictech/cli/commit/cbefc2d8559537ecb7962938ba5cab933fa3e8cd))
+- print the friendly error message to user ([18a4bb7](https://github.com/nitrictech/cli/commit/18a4bb79d2d43fa74a0a0d62db99842643460362))
 
 ### [0.0.82](https://github.com/nitrictech/cli/compare/v0.0.81...v0.0.82) (2021-08-11)
 
