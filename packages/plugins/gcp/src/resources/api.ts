@@ -85,28 +85,35 @@ export class NitricApiGcpApiGateway extends pulumi.ComponentResource {
 							const p = path[method as method]!;
 
 							// The name of the function we want to target with this APIGateway
-							const targetName = p['x-nitric-target'].name;
+							if (p['x-nitric-target']) {
+								const targetName = p['x-nitric-target'].name;
 
-							const invokeUrlPair = nameUrlPairs.find((f) => f.split('||')[0] === targetName);
+								const invokeUrlPair = nameUrlPairs.find((f) => f.split('||')[0] === targetName);
 
-							if (!invokeUrlPair) {
-								throw new Error(`Invalid nitric target ${targetName} defined in api: ${name}`);
+								if (!invokeUrlPair) {
+									throw new Error(`Invalid nitric target ${targetName} defined in api: ${name}`);
+								}
+
+								const url = invokeUrlPair.split('||')[1];
+								// Discard the old key on the transformed API
+								const { 'x-nitric-target': _, ...rest } = p;
+
+								return {
+									...acc,
+									// Inject the new method with translated nitric target
+									[method]: {
+										...(rest as OpenAPIV2.OperationObject),
+										'x-google-backend': {
+											address: url,
+											path_translation: 'APPEND_PATH_TO_ADDRESS',
+										},
+									} as any,
+								};
 							}
-
-							const url = invokeUrlPair.split('||')[1];
-							// Discard the old key on the transformed API
-							const { 'x-nitric-target': _, ...rest } = p;
 
 							return {
 								...acc,
-								// Inject the new method with translated nitric target
-								[method]: {
-									...(rest as OpenAPIV2.OperationObject),
-									'x-google-backend': {
-										address: url,
-										path_translation: 'APPEND_PATH_TO_ADDRESS',
-									},
-								} as any,
+								[method]: p,
 							};
 						}, {} as { [key: string]: OpenAPIV2.OperationObject<GoogleExtensions> });
 
