@@ -91,7 +91,10 @@ export class NitricApiAzureApiManagement extends pulumi.ComponentResource {
 
 					// Get the nitric target URL
 					const pathMethod = path[m] as OpenAPIV3.OperationObject<NitricAPITarget>;
-					const func = services.find((f) => f.name === pathMethod['x-nitric-target'].name);
+
+					const func = services.find(
+						(f) => pathMethod['x-nitric-target'] && f.name === pathMethod['x-nitric-target'].name,
+					);
 
 					if (func) {
 						new apimanagement.ApiOperationPolicy(
