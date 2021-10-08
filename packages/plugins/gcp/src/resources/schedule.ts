@@ -44,7 +44,7 @@ export class NitricScheduleCloudScheduler extends pulumi.ComponentResource {
 						topicName: topic.pubsub.name,
 						data: Buffer.from(JSON.stringify(schedule.event)).toString('base64'),
 					},
-					schedule: schedule.expression,
+					schedule: schedule.expression?.replace(/['"]+/g, ''),
 				},
 				defaultResourceOptions,
 			);

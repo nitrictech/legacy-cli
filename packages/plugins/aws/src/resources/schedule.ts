@@ -46,7 +46,7 @@ export class NitricScheduleEventBridge extends pulumi.ComponentResource {
 				{
 					description: `Nitric schedule trigger for ${schedule.name}`,
 					name: schedule.name,
-					scheduleExpression: `cron(${schedule.expression})`,
+					scheduleExpression: `cron(${schedule.expression?.replace(/['"]+/g, '')})`,
 				},
 				defaultResourceOptions,
 			);
