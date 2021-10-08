@@ -2036,10 +2036,13 @@ export const validateStack = (potentialStack: any, filePath: string): void => {
 							return;
 						}
 						const target = op['x-nitric-target'];
-						if (!(potentialStack[`${target.type}s`] && potentialStack[`${target.type}s`][target.name])) {
-							logicErrors.push(
-								`Invalid target for apis.${apiName}.${pathName}.${opName}, target ${target.type} "${target.name}" doesn't exist`,
-							);
+						// Only validate if a x-nitric-target property is provided
+						if (target) {
+							if (!(potentialStack[`${target.type}s`] && potentialStack[`${target.type}s`][target.name])) {
+								logicErrors.push(
+									`Invalid target for apis.${apiName}.${pathName}.${opName}, target ${target.type} "${target.name}" doesn't exist`,
+								);
+							}
 						}
 					});
 				});

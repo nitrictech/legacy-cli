@@ -24,3 +24,5 @@ export const DEFAULT_LISTR_OPTIONS: ListrBaseClassOptions<any, ListrDefaultRende
 			collapseErrors: false,
 		},
 	};
+
+export const OAI_NITRIC_TARGET_EXT = 'x-nitric-target';
