@@ -19,3 +19,4 @@ export * from './schedule';
 export * from './compute';
 export * from './site';
 export * from './topic';
+export * from './queue';

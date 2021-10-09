@@ -28,6 +28,7 @@ import {
 	NitricBucketS3,
 	NitricCollectionDynamo,
 	NitricComputeAWSLambda,
+	NitricSQSQueue,
 } from '../../resources';
 
 /**
@@ -92,7 +93,14 @@ export class Deploy extends Task<DeployResult> {
 
 	async do(): Promise<DeployResult> {
 		const { stack, region } = this;
-		const { topics = {}, buckets = {}, collections = {}, schedules = {}, entrypoints } = stack.asNitricStack();
+		const {
+			topics = {},
+			queues = {},
+			buckets = {},
+			collections = {},
+			schedules = {},
+			entrypoints,
+		} = stack.asNitricStack();
 		// Use absolute path to log files, so it's easier for users to locate them if printed to the console.
 		const logFile = path.resolve(await stack.getLoggingFile('deploy-aws'));
 		const errorFile = path.resolve(await stack.getLoggingFile('error-aws'));
@@ -128,6 +136,15 @@ export class Deploy extends Task<DeployResult> {
 									bucket,
 								}),
 						);
+
+						// Deploy Queues
+						mapObject(queues).forEach(
+							(queue) =>
+								new NitricSQSQueue(queue.name, {
+									queue,
+								}),
+						);
+
 						// Deploy Document Collections
 						mapObject(collections).forEach(
 							(collection) =>
