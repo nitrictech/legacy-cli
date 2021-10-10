@@ -18,6 +18,7 @@ import fs from 'fs';
 import getPort from 'get-port';
 import streamToPromise from 'stream-to-promise';
 import tar from 'tar-fs';
+import { RunContainerResult } from './types';
 import { DOCKER_LABEL_RUN_ID } from '../../constants';
 
 const GATEWAY_PORT = 8080;
@@ -61,7 +62,7 @@ export function createAPIDirectory(apiName: string): string {
 /**
  * Run local API Gateways for development/testing
  */
-export class RunGatewayTask extends Task<Container> {
+export class RunGatewayTask extends Task<RunContainerResult> {
 	private stackName: string;
 	private api: StackAPI;
 	private port?: number;
@@ -79,7 +80,7 @@ export class RunGatewayTask extends Task<Container> {
 		this.runId = runId;
 	}
 
-	async do(): Promise<Container> {
+	async do(): Promise<RunContainerResult> {
 		const { stackName, api, network, runId } = this;
 
 		if (!this.port) {
@@ -146,6 +147,11 @@ export class RunGatewayTask extends Task<Container> {
 
 		await container.start();
 
-		return container;
+		return {
+			name: api.name,
+			type: 'api',
+			container,
+			ports: [this.port!],
+		};
 	}
 }

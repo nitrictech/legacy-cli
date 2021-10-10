@@ -20,6 +20,7 @@ import fs from 'fs';
 import { DOCKER_LABEL_RUN_ID } from '../../constants';
 import { NITRIC_DEV_VOLUME } from './constants';
 import path from 'path';
+import { RunContainerResult } from './types';
 
 const GATEWAY_PORT = 9001;
 
@@ -42,7 +43,7 @@ export interface RunContainerTaskOptions {
 /**
  * Run a Nitric Function or Container locally for development or testing
  */
-export class RunContainerTask extends Task<Container> {
+export class RunContainerTask extends Task<RunContainerResult> {
 	private stack: Stack;
 	private image: ContainerImage;
 	private port: number | undefined;
@@ -62,7 +63,7 @@ export class RunContainerTask extends Task<Container> {
 		this.runId = runId;
 	}
 
-	async do(): Promise<Container> {
+	async do(): Promise<RunContainerResult> {
 		const { network, subscriptions, runId } = this;
 
 		if (!this.port) {
@@ -178,7 +179,12 @@ export class RunContainerTask extends Task<Container> {
 			runResult.on('container', (container: Container) => {
 				clearTimeout(rejectTimeout);
 				this.update(`Container ${container.id.substring(0, 12)} listening on: ${this.port}`);
-				res(container);
+				res({
+					name: this.image.name,
+					type: 'container',
+					container,
+					ports: [this.port!],
+				});
 			});
 		});
 	}

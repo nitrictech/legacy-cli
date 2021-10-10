@@ -21,6 +21,7 @@ import getPort from 'get-port';
 import os from 'os';
 import streamToPromise from 'stream-to-promise';
 import { DOCKER_LABEL_RUN_ID } from '../../constants';
+import { RunContainerResult } from './types';
 
 const HTTP_PORT = 80;
 const NGINX_CONFIG_FILE = 'nginx.conf';
@@ -147,7 +148,7 @@ export interface RunEntrypointTaskOptions {
 /**
  * Run local http entrypoint(s) as containers for developments/testing purposes.
  */
-export class RunEntrypointTask extends Task<Container> {
+export class RunEntrypointTask extends Task<RunContainerResult> {
 	private entrypoint: NamedObject<NitricEntrypoint>;
 	private stack: Stack;
 	private network?: Network;
@@ -165,7 +166,7 @@ export class RunEntrypointTask extends Task<Container> {
 		this.runId = runId;
 	}
 
-	async do(): Promise<Container> {
+	async do(): Promise<RunContainerResult> {
 		const { stack, network, docker, runId } = this;
 
 		if (!this.port) {
@@ -262,6 +263,11 @@ export class RunEntrypointTask extends Task<Container> {
 			}),
 		);
 
-		return container;
+		return {
+			container,
+			name: this.entrypoint.name,
+			type: 'entrypoint',
+			ports: [this.port!],
+		};
 	}
 }
