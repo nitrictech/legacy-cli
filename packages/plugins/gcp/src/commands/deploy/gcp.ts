@@ -126,8 +126,21 @@ export default class GcpDeploy extends BaseCommand {
 			promptFlags = await inquirer.prompt(prompts);
 		}
 
-		const { project = derivedProject, file, region } = { ...flags, ...promptFlags };
+		const finalFlags = { ...flags, ...promptFlags };
+
+		let { project } = finalFlags;
+		const { file, region } = finalFlags;
 		const stackDefinitionPath = path.join(dir, file);
+
+		if (!project && !derivedProject) {
+			throw new Error(
+				'GCP project must be provided via the -p flag or configured locally (see GCP "Setting Credentials" documentation)',
+			);
+		}
+
+		if (!project?.length) {
+			project = derivedProject;
+		}
 
 		const stack = await Stack.fromFile(stackDefinitionPath);
 
