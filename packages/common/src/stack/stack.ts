@@ -134,7 +134,7 @@ export class Stack<
 	 * @returns the nitric framework version used by this stack
 	 */
 	getVersion(): string {
-		return this.descriptor.version ? `v${this.descriptor.version}` : 'latest';
+		return this.descriptor.version || 'latest';
 	}
 
 	/**
