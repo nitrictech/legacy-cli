@@ -25,7 +25,7 @@ import {
 import { Listr, ListrTask, ListrContext, ListrRenderer } from 'listr2';
 import path from 'path';
 import execa from 'execa';
-import Docker, { Container, Network } from 'dockerode';
+import Docker, { Network } from 'dockerode';
 import getPort from 'get-port';
 import readline from 'readline';
 

@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import { Task, StackAPI, STAGING_API_DIR } from '@nitric/cli-common';
-import Docker, { Container, ContainerCreateOptions, Network, NetworkInspectInfo } from 'dockerode';
+import Docker, { ContainerCreateOptions, Network, NetworkInspectInfo } from 'dockerode';
 import fs from 'fs';
 import getPort from 'get-port';
 import streamToPromise from 'stream-to-promise';

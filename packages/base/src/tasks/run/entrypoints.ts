@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import { NamedObject, NitricEntrypoint, StackSite, Stack, Task } from '@nitric/cli-common';
-import Docker, { Container, ContainerCreateOptions, Network, NetworkInspectInfo } from 'dockerode';
+import Docker, { ContainerCreateOptions, Network, NetworkInspectInfo } from 'dockerode';
 import tar from 'tar-fs';
 import fs from 'fs';
 import path from 'path';
