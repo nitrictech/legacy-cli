@@ -69,7 +69,6 @@ export class Down extends Task<void> {
 				program: NO_OP,
 			});
 
-			// await pulumiStack.setConfig("gcp:region", { value: region });
 			let res;
 			if (this.destroy) {
 				res = await pulumiStack.destroy({ onOutput: this.update.bind(this) });
