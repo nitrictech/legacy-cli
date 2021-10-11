@@ -24,6 +24,11 @@ const BaseFlags = {
 		char: 'f',
 		default: 'nitric.yaml',
 	}),
+	destroy: flags.boolean({
+		char: 'd',
+		default: false,
+		description: 'destroy all resources, including buckets, secrets, and collections',
+	}),
 };
 
 /**
@@ -78,7 +83,7 @@ export default class DownCmd extends BaseCommand {
 			promptFlags = await inquirer.prompt(prompts);
 		}
 
-		const { file } = { ...flags, ...promptFlags };
+		const { file, destroy } = { ...flags, ...promptFlags };
 		const stackDefinitionPath = path.join(dir, file);
 		const stack: NitricStack = await (await Stack.fromFile(stackDefinitionPath)).asNitricStack();
 
@@ -87,6 +92,7 @@ export default class DownCmd extends BaseCommand {
 				wrapTaskForListr(
 					new Down({
 						stackName: stack.name,
+						destroy: destroy,
 					}),
 				),
 			],
