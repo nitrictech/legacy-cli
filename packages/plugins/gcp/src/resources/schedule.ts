@@ -32,24 +32,24 @@ export class NitricScheduleCloudScheduler extends pulumi.ComponentResource {
 		const { schedule, topics } = args;
 		const defaultResourceOptions: pulumi.ResourceOptions = { parent: this };
 
-		const topic = topics.find((t) => t.name === schedule.target.id);
+		const topic = topics.find((t) => t.name === schedule.target.name);
 
 		if (topic) {
 			this.job = new gcp.cloudscheduler.Job(
 				schedule.name,
 				{
 					timeZone: 'UTC',
-					description: `scheduled trigger for ${schedule.target.id}`,
+					description: `scheduled trigger for ${schedule.target.name}`,
 					pubsubTarget: {
 						topicName: topic.pubsub.name,
 						data: Buffer.from(JSON.stringify(schedule.event)).toString('base64'),
 					},
-					schedule: schedule.expression,
+					schedule: schedule.expression?.replace(/['"]+/g, ''),
 				},
 				defaultResourceOptions,
 			);
 		} else {
-			throw new Error(`topic ${schedule.target.id} defined as target for schedule, but does not exist in the stack!`);
+			throw new Error(`topic ${schedule.target.name} defined as target for schedule, but does not exist in the stack!`);
 		}
 
 		this.registerOutputs({

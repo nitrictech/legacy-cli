@@ -36,7 +36,7 @@ export class NitricScheduleEventBridge extends pulumi.ComponentResource {
 		const defaultResourceOptions: pulumi.ResourceOptions = { parent: this };
 		const { schedule, topics } = args;
 
-		const topic = topics.find((t) => t.name === schedule.target.id);
+		const topic = topics.find((t) => t.name === schedule.target.name);
 
 		this.name = schedule.name;
 
@@ -46,7 +46,7 @@ export class NitricScheduleEventBridge extends pulumi.ComponentResource {
 				{
 					description: `Nitric schedule trigger for ${schedule.name}`,
 					name: schedule.name,
-					scheduleExpression: `cron(${schedule.expression})`,
+					scheduleExpression: `cron(${schedule.expression?.replace(/['"]+/g, '')})`,
 				},
 				defaultResourceOptions,
 			);
@@ -55,7 +55,7 @@ export class NitricScheduleEventBridge extends pulumi.ComponentResource {
 				`${schedule.name}Target`,
 				{
 					arn: topic.sns.arn,
-					rule: rule.arn,
+					rule: rule.name,
 				},
 				defaultResourceOptions,
 			);
