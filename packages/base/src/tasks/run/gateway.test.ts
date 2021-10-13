@@ -13,8 +13,8 @@
 // limitations under the License.
 
 import 'jest';
-import { RunGatewayTask } from '.';
-import Docker, { Container } from 'dockerode';
+import { RunGatewayTask, RunContainerResult } from '.';
+import Docker from 'dockerode';
 import getPort from 'get-port';
 import { StackAPI } from '@nitric/cli-common/lib/stack/api';
 import _ from 'stream-to-promise';
@@ -59,10 +59,10 @@ describe('GatewayRunTask', () => {
 	});
 
 	describe('when minimal options are provided', () => {
-		let container: Container;
+		let result: RunContainerResult;
 
 		beforeAll(async () => {
-			container = await new RunGatewayTask({
+			result = await new RunGatewayTask({
 				stackName: 'test',
 				api: MOCK_API,
 				docker: new Docker(),
@@ -84,11 +84,11 @@ describe('GatewayRunTask', () => {
 		});
 
 		it('should start the created source', () => {
-			expect(container.start).toHaveBeenCalled();
+			expect(result.container.start).toHaveBeenCalled();
 		});
 
 		it('should upload the api to the created source', () => {
-			expect(container.putArchive).toHaveBeenCalled();
+			expect(result.container.putArchive).toHaveBeenCalled();
 		});
 
 		it('should use default bridge network', () => {

@@ -12,9 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './network';
-export * from './function';
-export * from './gateway';
-export * from './entrypoints';
-export * from './storage';
-export * from './types';
+import { Container } from 'dockerode';
+
+export interface RunContainerResult {
+	name: string;
+	type: 'container' | 'api' | 'entrypoint';
+	container: Container;
+	ports: number[];
+}
