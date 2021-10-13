@@ -29,6 +29,10 @@ export default class AwsDown extends BaseCommand {
 			char: 'f',
 			description: 'file containing the stack definition of the stack to be torn down',
 		}),
+		destroy: flags.boolean({
+			char: 'd',
+			description: 'destroy all resources, including buckets, secrets, and collections',
+		}),
 	};
 
 	static args = [
@@ -41,13 +45,13 @@ export default class AwsDown extends BaseCommand {
 	async do(): Promise<any> {
 		const { args, flags } = this.parse(AwsDown);
 		const { dir = '.' } = args;
-		const { file = 'nitric.yaml' } = flags;
+		const { file = 'nitric.yaml', destroy } = flags;
 
 		const stackDefinitionPath = path.join(dir, file);
 		const stack = (await Stack.fromFile(stackDefinitionPath)).asNitricStack();
 
 		try {
-			await new Listr([wrapTaskForListr(new Down({ stack }))], constants.DEFAULT_LISTR_OPTIONS).run();
+			await new Listr([wrapTaskForListr(new Down({ stack, destroy }))], constants.DEFAULT_LISTR_OPTIONS).run();
 		} catch (error) {
 			// eat this error to avoid duplicate console output.
 		}

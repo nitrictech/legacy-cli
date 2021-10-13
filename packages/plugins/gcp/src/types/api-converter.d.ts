@@ -15,7 +15,7 @@
 interface ConvertOptions {
 	from: string;
 	to: string;
-	source: string | object;
+	source: string | any;
 }
 
 declare module 'api-spec-converter' {
