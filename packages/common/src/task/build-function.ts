@@ -58,6 +58,7 @@ export class BuildFunctionTask extends Task<ContainerImage> {
 		let baseCmd = oneLine`
 			build ${imageId} 
 			--builder ${BUILDER_IMAGE}
+			--trust-builder
 			${Object.entries(this.service.getPackEnv())
 				.map(([k, v]) => `--env ${k}=${v}`)
 				.join(' ')}
