@@ -168,6 +168,7 @@ export class Deploy extends Task<DeployResult> {
 						mapObject(schedules).map(
 							(s) =>
 								new NitricScheduleCloudScheduler(
+									project.id,
 									s.name,
 									{ schedule: s, topics: deployedTopics },
 									defaultResourceOptions,
