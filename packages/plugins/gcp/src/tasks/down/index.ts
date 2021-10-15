@@ -83,7 +83,11 @@ export class Down extends Task<void> {
 					.filter((resource) => !nonTargets.includes(resource.type))
 					.map((resource) => resource.urn);
 				if (targets.length > 0) {
-					res = await pulumiStack.destroy({ onOutput: this.update.bind(this), target: targets });
+					res = await pulumiStack.destroy({
+						onOutput: this.update.bind(this),
+						target: targets,
+						targetDependents: true,
+					});
 				}
 			}
 			console.log(res);

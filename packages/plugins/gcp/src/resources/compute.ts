@@ -31,6 +31,7 @@ export class NitricComputeCloudRun extends pulumi.ComponentResource {
 	public readonly name: string;
 	public readonly cloudrun: gcp.cloudrun.Service;
 	public readonly url: pulumi.Output<string>;
+	public readonly account: gcp.serviceaccount.Account;
 
 	constructor(name: string, args: NitricComputeCloudRunArgs, opts?: pulumi.ComponentResourceOptions) {
 		super('nitric:func:CloudRun', name, {}, opts);
@@ -41,6 +42,26 @@ export class NitricComputeCloudRun extends pulumi.ComponentResource {
 		const { minScale = 0, maxScale = 10, triggers = {} } = descriptor;
 
 		this.name = source.getName();
+
+		// Create a service account for this cloud run instance
+		this.account = new gcp.serviceaccount.Account(`${name}-acct`, {
+			accountId: `${name}-acct`.substring(0, 30),
+		});
+
+		// Give project editor permissions
+		// FIXME: Trim this down
+		new gcp.projects.IAMMember(`${name}-editor`, {
+			role: 'roles/editor',
+			// Get the cloudrun service account email
+			member: pulumi.interpolate`serviceAccount:${this.account.email}`,
+		});
+
+		// Give secret accessor permissions
+		new gcp.projects.IAMMember(`${name}-secret-access`, {
+			role: 'roles/secretmanager.secretAccessor',
+			// Get the cloudrun service account email
+			member: pulumi.interpolate`serviceAccount:${this.account.email}`,
+		});
 
 		// Deploy the func
 		this.cloudrun = new gcp.cloudrun.Service(
@@ -55,6 +76,7 @@ export class NitricComputeCloudRun extends pulumi.ComponentResource {
 						},
 					},
 					spec: {
+						serviceAccountName: this.account.email,
 						containers: [
 							{
 								image: image.imageUri,
