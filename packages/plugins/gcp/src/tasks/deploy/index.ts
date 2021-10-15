@@ -100,6 +100,27 @@ export class Deploy extends Task<DeployResult> {
 						// Get the current google cloud project
 						const project = await gcp.organizations.getProject({});
 
+						// Enable required services
+
+						new gcp.projects.Service('serviceusage-service', {
+							disableDependentServices: true,
+							project: stack.getName(),
+							service: 'serviceusage.googleapis.com',
+						});
+
+						new gcp.projects.Service('compute-service', {
+							disableDependentServices: true,
+							project: stack.getName(),
+							service: 'compute.googleapis.com',
+						});
+
+						new gcp.projects.Service('cloudresourcemanager-service', {
+							disableDependentServices: true,
+							project: stack.getName(),
+							service: 'cloudresourcemanager.googleapis.com',
+						});
+
+						//APIApp Engine  ???
 						// Setup project and permissions for nitric
 						const nitricProject = new NitricGcpProject('project', {
 							project,
