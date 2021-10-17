@@ -28,7 +28,7 @@ interface BuildFunctionTaskOptions {
 	provider?: string;
 }
 
-const PACK_IMAGE = 'buildpacksio/pack:0.13.1';
+const PACK_IMAGE = 'buildpacksio/pack:0.21.1';
 const BUILDER_IMAGE = 'nitrictech/bp-builder-base';
 
 const DEFAULT_PROJECT_CONFIG = {
@@ -77,12 +77,13 @@ export class BuildFunctionTask extends Task<ContainerImage> {
 				docker run
 				--rm
 				--privileged=true
+				-u root
 				-v /var/run/docker.sock:/var/run/docker.sock
 				-v ${this.service.getContext()}:/workspace -w /workspace
 				${PACK_IMAGE} ${baseCmd}
 			`;
 		} else {
-			baseCmd = oneLine`pack ${baseCmd}`;
+			baseCmd = oneLine`pack ${baseCmd} --path ${this.service.getContext()}`;
 		}
 
 		// Run docker
