@@ -27,7 +27,12 @@ interface NitricScheduleCloudSchedulerArgs {
 export class NitricScheduleCloudScheduler extends pulumi.ComponentResource {
 	public readonly job: gcp.cloudscheduler.Job;
 
-	constructor(name: string, args: NitricScheduleCloudSchedulerArgs, opts?: pulumi.ComponentResourceOptions) {
+	constructor(
+		projectId: string,
+		name: string,
+		args: NitricScheduleCloudSchedulerArgs,
+		opts?: pulumi.ComponentResourceOptions,
+	) {
 		super('nitric:schedule:CloudScheduler', name, {}, opts);
 		const { schedule, topics } = args;
 		const defaultResourceOptions: pulumi.ResourceOptions = { parent: this };
@@ -41,7 +46,8 @@ export class NitricScheduleCloudScheduler extends pulumi.ComponentResource {
 					timeZone: 'UTC',
 					description: `scheduled trigger for ${schedule.target.name}`,
 					pubsubTarget: {
-						topicName: topic.pubsub.name,
+						// Interpolate required by pulumi to translate output<T> into string
+						topicName: pulumi.interpolate`${projectId}/topics/${topic.pubsub.name}`,
 						data: Buffer.from(JSON.stringify(schedule.event)).toString('base64'),
 					},
 					schedule: schedule.expression?.replace(/['"]+/g, ''),
