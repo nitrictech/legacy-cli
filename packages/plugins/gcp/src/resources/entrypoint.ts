@@ -103,7 +103,7 @@ export class NitricEntrypointGoogleCloudLB extends pulumi.ComponentResource {
 					}
 
 					const backend = new gcp.compute.BackendBucket(
-						`${entrypointPath.target}`,
+						`${entrypointPath.target}-bucket`,
 						{
 							bucketName: deployedSite.storage.name,
 							// Enable CDN for sites
@@ -140,7 +140,7 @@ export class NitricEntrypointGoogleCloudLB extends pulumi.ComponentResource {
 					);
 
 					const backend = new gcp.compute.BackendService(
-						`${entrypointPath.target}`,
+						`${entrypointPath.target}-${entrypointPath.type}`,
 						{
 							// Link the NEG to the backend
 							backends: [{ group: serverlessNEG.id }],
