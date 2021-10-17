@@ -77,12 +77,13 @@ export class BuildFunctionTask extends Task<ContainerImage> {
 				docker run
 				--rm
 				--privileged=true
+				-u root
 				-v /var/run/docker.sock:/var/run/docker.sock
 				-v ${this.service.getContext()}:/workspace -w /workspace
 				${PACK_IMAGE} ${baseCmd}
 			`;
 		} else {
-			baseCmd = oneLine`pack ${baseCmd}`;
+			baseCmd = oneLine`pack ${baseCmd} --path ${this.service.getContext()}`;
 		}
 
 		// Run docker
