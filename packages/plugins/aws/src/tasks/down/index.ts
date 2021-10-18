@@ -77,9 +77,10 @@ export class Down extends Task<void> {
 				const nonTargets = protectedTargets //Possible to filter the protected targets in the future
 					.map((val) => val.pulumiTypes)
 					.reduce((acc, val) => acc.concat(val), []);
+
 				//List of targets that will be destroyed, filters out the ones that are protected
 				const targets = deployment.resources
-					.filter((resource) => !nonTargets.includes(resource.type))
+					.filter((resource) => !resource.urn.match('/nitric:site:S3/g') || !nonTargets.includes(resource.type))
 					.map((resource) => resource.urn);
 				if (targets.length > 0) {
 					res = await pulumiStack.destroy({ onOutput: this.update.bind(this), target: targets });
