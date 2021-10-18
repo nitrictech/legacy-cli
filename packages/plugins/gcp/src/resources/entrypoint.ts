@@ -90,6 +90,7 @@ export class NitricEntrypointGoogleCloudLB extends pulumi.ComponentResource {
 
 					return {
 						name: entrypointPath.target,
+						path: entrypointPath.path,
 						backend,
 					};
 				}
@@ -114,6 +115,7 @@ export class NitricEntrypointGoogleCloudLB extends pulumi.ComponentResource {
 
 					return {
 						name: entrypointPath.target,
+						path: entrypointPath.path,
 						backend,
 					};
 				}
@@ -153,6 +155,7 @@ export class NitricEntrypointGoogleCloudLB extends pulumi.ComponentResource {
 
 					return {
 						name: entrypointPath.target,
+						path: entrypointPath.path,
 						backend,
 					};
 				}
@@ -178,7 +181,7 @@ export class NitricEntrypointGoogleCloudLB extends pulumi.ComponentResource {
 		const pathRules =
 			otherEntrypoints.length > 0
 				? otherEntrypoints.map((ep) => {
-						const backend = backends.find((b) => b.name === ep.target)!.backend;
+						const backend = backends.find((b) => b.name === ep.target && b.path == ep.path)!.backend;
 						pulumi.log.info(`other backend: ${ep.target}`, backend);
 						return {
 							paths: [`${ep.path}*`],
