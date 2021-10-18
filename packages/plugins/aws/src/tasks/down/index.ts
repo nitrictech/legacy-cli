@@ -69,9 +69,8 @@ export class Down extends Task<void> {
 				program: NO_OP,
 			});
 
-			let res;
 			if (this.destroy) {
-				res = await pulumiStack.destroy({ onOutput: this.update.bind(this) });
+				await pulumiStack.destroy({ onOutput: this.update.bind(this) });
 			} else {
 				const deployment = (await pulumiStack.exportStack()).deployment as Deployment;
 				const nonTargets = protectedTargets //Possible to filter the protected targets in the future
@@ -82,14 +81,8 @@ export class Down extends Task<void> {
 					.filter((resource) => !nonTargets.includes(resource.type))
 					.map((resource) => resource.urn);
 				if (targets.length > 0) {
-					res = await pulumiStack.destroy({ onOutput: this.update.bind(this), target: targets });
+					await pulumiStack.destroy({ onOutput: this.update.bind(this), target: targets });
 				}
-			}
-			if (res.summary && res.summary.resourceChanges) {
-				const changes = Object.entries(res.summary.resourceChanges)
-					.map((entry) => entry.join(': '))
-					.join(', ');
-				this.update(changes);
 			}
 		} catch (e) {
 			console.log(e);
