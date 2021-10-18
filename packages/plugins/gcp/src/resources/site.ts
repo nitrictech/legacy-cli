@@ -41,6 +41,9 @@ export class NitricSiteCloudStorage extends pulumi.ComponentResource {
 		this.storage = new gcp.storage.Bucket(
 			site.getName(),
 			{
+				website: {
+					mainPageSuffix: 'index.html',
+				},
 				labels: {
 					'x-nitric-name': site.getName(),
 				},
