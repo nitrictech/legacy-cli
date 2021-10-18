@@ -45,7 +45,7 @@ export class NitricQueuePubsub extends pulumi.ComponentResource {
 		new gcp.pubsub.Subscription(`${queue.name}-sub`, {
 			// XXX: Currently required relationship with pubsub queue plugin
 			name: `${queue.name}-nitricqueue`,
-			topic: this.pubsub.id,
+			topic: this.pubsub.name,
 		});
 
 		this.registerOutputs({
