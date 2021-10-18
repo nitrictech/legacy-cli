@@ -70,9 +70,8 @@ export class Down extends Task<void> {
 					/*no op*/
 				},
 			});
-			let res;
 			if (this.destroy) {
-				res = await pulumiStack.destroy({ onOutput: this.update.bind(this) });
+				await pulumiStack.destroy({ onOutput: this.update.bind(this) });
 			} else {
 				const deployment = (await pulumiStack.exportStack()).deployment as Deployment;
 				const nonTargets = protectedTargets //Possible to filter the protected targets in the future
@@ -83,14 +82,13 @@ export class Down extends Task<void> {
 					.filter((resource) => !nonTargets.includes(resource.type))
 					.map((resource) => resource.urn);
 				if (targets.length > 0) {
-					res = await pulumiStack.destroy({
+					await pulumiStack.destroy({
 						onOutput: this.update.bind(this),
 						target: targets,
 						targetDependents: true,
 					});
 				}
 			}
-			console.log(res);
 		} catch (e) {
 			console.log(e);
 			throw e;
