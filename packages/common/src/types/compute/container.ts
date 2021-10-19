@@ -18,5 +18,5 @@ export interface NitricContainer<Ext> extends NitricComputeUnit<Ext> {
 	// The path to the Dockerfile to use to build this source
 	// relative to context
 	dockerfile: string;
-	args: Record<string, string>;
+	args?: Record<string, string>;
 }
