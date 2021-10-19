@@ -89,7 +89,7 @@ export class StackContainer<ContainerExtensions = Record<string, any>> {
 			);
 		}
 
-		return origPath;
+		return fullPath;
 	}
 
 	/**
