@@ -15,11 +15,8 @@
 import { Task } from './task';
 import { ContainerImage } from '../types';
 import { StackContainer } from '../stack';
-import { dockerodeEvtToString } from '../index';
-// import rimraf from 'rimraf';
-
-import tar from 'tar-fs';
-import Docker from 'dockerode';
+import { oneLine } from 'common-tags';
+import execa from 'execa';
 
 interface BuildContainerTaskOptions {
 	baseDir: string;
@@ -40,63 +37,43 @@ export class BuildContainerTask extends Task<ContainerImage> {
 	}
 
 	async do(): Promise<ContainerImage> {
-		const docker = new Docker();
+		const imageId = this.container.getImageTagName(this.provider);
+		const { args = {} } = this.container.getDescriptor();
+		// Create a temporary default ignore file
+		// and delete it when we're done
+		const cmd = oneLine`
+			docker build ${this.container.getContext()} 
+			-f ${this.container.getDockerfile()}
+			-t ${imageId}
+			--build-arg PROVIDER=${this.provider}
+			${Object.keys(args)
+				.map((k) => `--build-arg ${k}=${args[k]}`)
+				.join(' ')}
+		`;
 
-		// const ignoreFiles = await Template.getDockerIgnoreFiles(template);
-
-		const pack = tar.pack(this.container.getContext(), {
-			// TODO: support ignore again
-			// ignore: (name) =>
-			// 	// Simple filter before more complex multimatch
-			// 	ignoreFiles.filter((f) => name.includes(f)).length > 0 || match(name, ignoreFiles).length > 0,
-		});
-
-		// FIXME: Currently dockerode does not support dockerfiles specified outside of build context
-		const dockerfile = this.container.getDockerfile();
-
-		const options = {
-			buildargs: {
-				PROVIDER: this.provider,
-			},
-			t: this.container.getImageTagName(this.provider),
-			dockerfile,
-		};
-
-		let stream: NodeJS.ReadableStream;
 		try {
-			stream = await docker.buildImage(pack, options);
-		} catch (error) {
-			if (error.errno && error.errno === -61) {
-				throw new Error('Unable to connect to docker, is it running locally?');
-			}
-			throw error;
-		}
-
-		// Get build updates
-		const buildResults = await new Promise<any[]>((resolve, reject) => {
-			docker.modem.followProgress(
-				stream,
-				(errorInner: Error, resolveInner: Record<string, any>[]) =>
-					errorInner ? reject(errorInner) : resolve(resolveInner),
-				(event: any) => {
-					try {
-						this.update(dockerodeEvtToString(event));
-					} catch (error) {
-						reject(new Error(error.message.replace(/\n/g, '')));
-					}
+			const dockerProcess = execa.command(cmd, {
+				// Enable buildkit for out of context dockerfile
+				env: {
+					DOCKER_BUILDKIT: '1',
 				},
-			);
-		});
+			});
 
-		const filteredResults = buildResults.filter((obj) => 'aux' in obj && 'ID' in obj['aux']);
-		if (filteredResults.length > 0) {
-			const imageId = filteredResults[filteredResults.length - 1]['aux'].ID.split(':').pop() as string;
-			return { id: imageId, name: this.container.getName() } as ContainerImage;
-		} else {
-			const {
-				errorDetail: { message },
-			} = buildResults.pop() as any;
-			throw new Error(message);
+			// Only outputs on stderr
+			dockerProcess.stderr.on('data', (data) => {
+				// fs.writeFileSync('debug.txt', data);
+				this.update(data.toString());
+			});
+
+			// wait for the process to finalize
+			await dockerProcess;
+		} catch (e) {
+			throw new Error(e.message);
 		}
+
+		return {
+			id: imageId,
+			name: this.container.getName(),
+		};
 	}
 }

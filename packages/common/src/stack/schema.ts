@@ -1612,6 +1612,10 @@ export const STACK_SCHEMA: JSONSchema7 = {
 					properties: {
 						dockerfile: { type: 'string' },
 						context: { type: 'string' },
+						args: {
+							type: 'object',
+							additionalProperties: { type: 'string' },
+						},
 						triggers: {
 							title: 'func triggers',
 							type: 'object',
