@@ -26,6 +26,7 @@ import {
 	NitricScheduleCloudScheduler,
 	NitricSiteCloudStorage,
 	NitricTopicPubsub,
+	NitricQueuePubsub,
 } from '../../resources';
 
 import fs from 'fs';
@@ -75,7 +76,7 @@ export class Deploy extends Task<DeployResult> {
 
 	async do(): Promise<DeployResult> {
 		const { stack, gcpProject, region } = this;
-		const { buckets = {}, topics = {}, schedules = {}, entrypoints } = stack.asNitricStack();
+		const { buckets = {}, topics = {}, queues = {}, schedules = {}, entrypoints } = stack.asNitricStack();
 		const auth = new google.auth.GoogleAuth({
 			scopes: ['https://www.googleapis.com/auth/cloud-platform'],
 		});
@@ -118,6 +119,9 @@ export class Deploy extends Task<DeployResult> {
 						const deployedTopics = mapObject(topics).map(
 							(topic) => new NitricTopicPubsub(topic.name, { topic }, defaultResourceOptions),
 						);
+
+						// deploy the queues
+						mapObject(queues).map((queue) => new NitricQueuePubsub(queue.name, { queue }, defaultResourceOptions));
 
 						// deploy the sites
 						const deployedSites = stack
