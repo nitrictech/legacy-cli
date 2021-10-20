@@ -243,7 +243,7 @@ export class Deploy extends Task<void> {
 
 						// DEPLOY SERVICES
 						let deployedAzureApps: NitricComputeAzureAppService[] = [];
-						if (stack.getFunctions().length > 0) {
+						if (stack.getFunctions().length > 0 || stack.getContainers().length > 0) {
 							// deploy a registry for deploying this stacks containers
 							// TODO: We will want to prefer a pre-existing registry, supplied by the user
 							const registry = new containerregistry.Registry(`${stack.getName()}-registry`, {
