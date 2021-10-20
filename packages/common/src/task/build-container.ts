@@ -26,13 +26,11 @@ interface BuildContainerTaskOptions {
 
 export class BuildContainerTask extends Task<ContainerImage> {
 	private container: StackContainer;
-	// private readonly stack: Stack;
 	private readonly provider: string;
 
 	constructor({ container, provider = 'local' }: BuildContainerTaskOptions) {
 		super(`${container.getName()}`);
 		this.container = container;
-		// this.stack = stack;
 		this.provider = provider;
 	}
 
@@ -44,6 +42,7 @@ export class BuildContainerTask extends Task<ContainerImage> {
 			docker build ${this.container.getContext()} 
 			-f ${this.container.getDockerfile()}
 			-t ${imageId}
+			--progress plain
 			--build-arg PROVIDER=${this.provider}
 			${Object.keys(args)
 				.map((k) => `--build-arg ${k}=${args[k]}`)
