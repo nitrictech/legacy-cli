@@ -39,8 +39,7 @@ export class BuildContainerTask extends Task<ContainerImage> {
 	async do(): Promise<ContainerImage> {
 		const imageId = this.container.getImageTagName(this.provider);
 		const { args = {} } = this.container.getDescriptor();
-		// Create a temporary default ignore file
-		// and delete it when we're done
+
 		const cmd = oneLine`
 			docker build ${this.container.getContext()} 
 			-f ${this.container.getDockerfile()}
