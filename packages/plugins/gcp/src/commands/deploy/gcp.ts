@@ -100,7 +100,7 @@ export default class GcpDeploy extends BaseCommand {
 		const auth = new google.auth.GoogleAuth({
 			scopes: ['https://www.googleapis.com/auth/cloud-platform'],
 		});
-		const derivedProject = (await auth.getClient()).projectId;
+		const derivedProject = await auth.getProjectId();
 		const { args, flags } = this.parse(GcpDeploy);
 		const { nonInteractive } = flags;
 		const { dir = '.' } = args;
