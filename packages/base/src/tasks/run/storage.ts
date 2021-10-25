@@ -13,13 +13,14 @@
 // limitations under the License.
 
 import { NamedObject, NitricBucket, Stack, Task } from '@nitric/cli-common';
-import Docker, { Container, ContainerCreateOptions, Network, NetworkInspectInfo } from 'dockerode';
+import Docker, { ContainerCreateOptions, Network, NetworkInspectInfo } from 'dockerode';
 import fs from 'fs';
 import path from 'path';
 import getPort from 'get-port';
 import streamToPromise from 'stream-to-promise';
 import { DOCKER_LABEL_RUN_ID } from '../../constants';
 import { NITRIC_RUN_DIR, NITRIC_RUN_PERM, NITRIC_DEV_VOLUME } from './constants';
+import { RunContainerResult } from './types';
 
 const MINIO_PORT = 9000;
 // TODO: Determine if we would like to expose the console
@@ -69,7 +70,7 @@ export interface RunStorageServiceTaskOptions {
 /**
  * Run local http entrypoint(s) as containers for developments/testing purposes.
  */
-export class RunStorageServiceTask extends Task<Container> {
+export class RunStorageServiceTask extends Task<RunContainerResult> {
 	private stack: Stack;
 	private buckets: NamedObject<NitricBucket>[];
 	private network?: Network;
@@ -89,7 +90,7 @@ export class RunStorageServiceTask extends Task<Container> {
 		this.runId = runId;
 	}
 
-	async do(): Promise<Container> {
+	async do(): Promise<RunContainerResult> {
 		const { buckets, network, docker, runId } = this;
 
 		if (!this.port) {
@@ -124,8 +125,10 @@ export class RunStorageServiceTask extends Task<Container> {
 		// Pull nginx
 		await streamToPromise(await docker.pull('minio/minio'));
 
+		const containerName = `minio-${runId}`;
+
 		const dockerOptions = {
-			name: `minio-${runId}`,
+			name: containerName,
 			// Pull nginx
 			Image: 'minio/minio',
 			ExposedPorts: {
@@ -169,6 +172,11 @@ export class RunStorageServiceTask extends Task<Container> {
 		// Start the entrypoint source
 		await container.start();
 
-		return container;
+		return {
+			name: containerName,
+			container,
+			type: 'container',
+			ports: [this.port!],
+		};
 	}
 }
