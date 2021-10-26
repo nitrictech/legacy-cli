@@ -13,6 +13,7 @@
 // limitations under the License.
 
 import execa from 'execa';
+import path from 'path';
 import { oneLine } from 'common-tags';
 import { Task } from './task';
 import { ContainerImage } from '../types';
@@ -52,8 +53,13 @@ export class BuildFunctionTask extends Task<ContainerImage> {
 
 		// Create a temporary default ignore file
 		// and delete it when we're done
-		await fs.promises.mkdir(`./${DEFAULT_BUILD_DIR}`, { recursive: true });
-		await fs.promises.writeFile(`./${DEFAULT_BUILD_DIR}/${imageId}.toml`, TOML.stringify(DEFAULT_PROJECT_CONFIG));
+		const contextDirectory = this.service.getDescriptor().context || '.';
+		const contextBuildDirectory = `./${path.join(contextDirectory, DEFAULT_BUILD_DIR)}`;
+
+		await fs.promises.mkdir(contextBuildDirectory, {
+			recursive: true,
+		});
+		await fs.promises.writeFile(`./${contextBuildDirectory}/${imageId}.toml`, TOML.stringify(DEFAULT_PROJECT_CONFIG));
 
 		let baseCmd = oneLine`
 			build ${imageId} 
@@ -99,6 +105,14 @@ export class BuildFunctionTask extends Task<ContainerImage> {
 
 			// wait for the process to finalize
 			await packProcess;
+
+			// clean build files
+			await fs.promises.unlink(`./${contextBuildDirectory}/${imageId}.toml`);
+
+			// remove build directory if empty
+			if (fs.readdirSync(contextBuildDirectory).length === 0) {
+				await fs.promises.rmdir(contextBuildDirectory);
+			}
 		} catch (e) {
 			throw new Error(e.message);
 		}
