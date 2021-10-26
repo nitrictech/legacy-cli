@@ -110,7 +110,7 @@ export class BuildFunctionTask extends Task<ContainerImage> {
 			await fs.promises.unlink(`./${contextBuildDirectory}/${imageId}.toml`);
 
 			// remove build directory if empty
-			if (fs.readdirSync(contextBuildDirectory).length === 0) {
+			if (fs.existsSync(contextBuildDirectory) && fs.readdirSync(contextBuildDirectory).length === 0) {
 				await fs.promises.rmdir(contextBuildDirectory);
 			}
 		} catch (e) {
