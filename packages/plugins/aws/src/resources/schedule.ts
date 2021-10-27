@@ -137,6 +137,35 @@ export class NitricScheduleEventBridge extends pulumi.ComponentResource {
 				},
 				defaultResourceOptions,
 			);
+
+			const snsTopicSchedulePolicy = topic.sns.arn.apply((arn) =>
+				aws.iam.getPolicyDocument({
+					// TODO: According to the docs, 'conditions' are not supported for a policy involving EventBridge
+					// See: https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-use-resource-based.html#eb-sns-permissions
+					//  "You can't use of Condition blocks in Amazon SNS topic policies for EventBridge."
+					// This means any EventBridge rule will be able to publish to this topic.
+					policyId: '__default_policy_ID',
+					statements: [
+						{
+							sid: '__default_statement_ID',
+							effect: 'Allow',
+							actions: ['SNS:Publish'],
+							principals: [
+								{
+									type: 'Service',
+									identifiers: ['events.amazonaws.com'],
+								},
+							],
+							resources: [arn],
+						},
+					],
+				}),
+			);
+
+			new aws.sns.TopicPolicy(`${schedule.name}Target${topic.name}Policy`, {
+				arn: topic.sns.arn,
+				policy: snsTopicSchedulePolicy.apply((snsTopicPolicy) => snsTopicPolicy.json),
+			});
 		}
 
 		this.registerOutputs({
