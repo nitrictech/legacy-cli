@@ -1,6 +1,5 @@
 {
 	"name": "@nitric/cli-common",
-	"version": "0.0.86",
 	"description": "Common Nitric typings and utility functions",
 	"author": "Nitric <https://github.com/nitrictech>",
 	"bugs": "https://github.com/nitrictech/cli/issues",
@@ -16,7 +15,8 @@
 		"build": "yarn run clean && yarn run build:sources",
 		"build:sources": "tsc --project tsconfig.build.json --outDir ./lib/",
 		"test": "tsc --emitDeclarationOnly && jest",
-		"npm:publish": "yarn npm publish --access public --tolerate-republish"
+		"npm:publish": "yarn npm publish --access public --tolerate-republish",
+		"set:version": "npm version --version-git-tag false"
 	},
 	"contributors": [
 		"Jye Cusch <jye.cusch@gmail.com>",
@@ -24,6 +24,7 @@
 	],
 	"license": "Apache-2.0",
 	"dependencies": {
+		"@iarna/toml": "^2.2.5",
 		"@oclif/command": "^1",
 		"@oclif/config": "^1",
 		"@pulumi/docker": "^3.0.0",
@@ -46,6 +47,7 @@
 		"tslib": "^1",
 		"universal-analytics": "^0.4.23",
 		"uuid": "^8.3.2",
+		"which": "^2.0.2",
 		"yaml": "^2.0.0-7"
 	},
 	"files": [
@@ -58,6 +60,7 @@
 		"@types/stream-to-promise": "^2.2.1",
 		"@types/universal-analytics": "^0.4.4",
 		"@types/uuid": "^8.3.0",
+		"@types/which": "^2.0.1",
 		"jest": "^26.6.1",
 		"openapi-types": "^7.2.3",
 		"ts-jest": "^26.4.3",

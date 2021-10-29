@@ -11,7 +11,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-import { NitricAPITarget, StackAPIDocument } from '@nitric/cli-common';
+import { NitricAPITarget, StackAPIDocument, constants } from '@nitric/cli-common';
 import * as pulumi from '@pulumi/pulumi';
 import { OpenAPIV2 } from 'openapi-types';
 import * as gcp from '@pulumi/gcp';
@@ -43,6 +43,12 @@ export class NitricApiGcpApiGateway extends pulumi.ComponentResource {
 	public readonly hostname: pulumi.Output<string>;
 	public readonly url: pulumi.Output<string>;
 
+	public readonly api: gcp.apigateway.Api;
+	public readonly config: gcp.apigateway.ApiConfig;
+	public readonly gateway: gcp.apigateway.Gateway;
+	public readonly invoker: gcp.serviceaccount.Account;
+	public readonly memberships: gcp.cloudrun.IamMember[];
+
 	constructor(name: string, args: NitricApiGcpApiGatewayArgs, opts?: pulumi.ComponentResourceOptions) {
 		super('nitric:api:GcpApiGateway', name, {}, opts);
 		const { api, services } = args;
@@ -54,10 +60,10 @@ export class NitricApiGcpApiGateway extends pulumi.ComponentResource {
 		const targetServices = Object.keys(api.paths).reduce((svcs, path) => {
 			const p = api.paths[path] as OpenAPIV2.PathItemObject<NitricAPITarget>;
 
-			const services = Object.keys(path)
+			const s = Object.keys(p)
 				.filter((k) => METHOD_KEYS.includes(k as method))
 				.reduce((acc, method) => {
-					const pathTarget = p[method as method]?.['x-nitric-target'];
+					const pathTarget = p[method as method]?.[constants.OAI_NITRIC_TARGET_EXT];
 					const svc = services.find(({ name }) => name === pathTarget?.name);
 
 					if (svc && !acc.includes(svc)) {
@@ -67,7 +73,7 @@ export class NitricApiGcpApiGateway extends pulumi.ComponentResource {
 					return acc;
 				}, svcs);
 
-			return svcs;
+			return s;
 		}, [] as NitricComputeCloudRun[]);
 
 		// Replace Nitric API Extensions with google api gateway extensions
@@ -85,28 +91,35 @@ export class NitricApiGcpApiGateway extends pulumi.ComponentResource {
 							const p = path[method as method]!;
 
 							// The name of the function we want to target with this APIGateway
-							const targetName = p['x-nitric-target'].name;
+							if (p[constants.OAI_NITRIC_TARGET_EXT]) {
+								const targetName = p[constants.OAI_NITRIC_TARGET_EXT].name;
 
-							const invokeUrlPair = nameUrlPairs.find((f) => f.split('||')[0] === targetName);
+								const invokeUrlPair = nameUrlPairs.find((f) => f.split('||')[0] === targetName);
 
-							if (!invokeUrlPair) {
-								throw new Error(`Invalid nitric target ${targetName} defined in api: ${name}`);
+								if (!invokeUrlPair) {
+									throw new Error(`Invalid nitric target ${targetName} defined in api: ${name}`);
+								}
+
+								const url = invokeUrlPair.split('||')[1];
+								// Discard the old key on the transformed API
+								const { [constants.OAI_NITRIC_TARGET_EXT]: _, ...rest } = p;
+
+								return {
+									...acc,
+									// Inject the new method with translated nitric target
+									[method]: {
+										...(rest as OpenAPIV2.OperationObject),
+										'x-google-backend': {
+											address: url,
+											path_translation: 'APPEND_PATH_TO_ADDRESS',
+										},
+									} as any,
+								};
 							}
-
-							const url = invokeUrlPair.split('||')[1];
-							// Discard the old key on the transformed API
-							const { 'x-nitric-target': _, ...rest } = p;
 
 							return {
 								...acc,
-								// Inject the new method with translated nitric target
-								[method]: {
-									...(rest as OpenAPIV2.OperationObject),
-									'x-google-backend': {
-										address: url,
-										path_translation: 'APPEND_PATH_TO_ADDRESS',
-									},
-								} as any,
+								[method]: p,
 							};
 						}, {} as { [key: string]: OpenAPIV2.OperationObject<GoogleExtensions> });
 
@@ -124,7 +137,7 @@ export class NitricApiGcpApiGateway extends pulumi.ComponentResource {
 			return Buffer.from(JSON.stringify(transformedApi)).toString('base64');
 		});
 
-		const deployedApi = new gcp.apigateway.Api(
+		this.api = new gcp.apigateway.Api(
 			name,
 			{
 				apiId: name,
@@ -133,7 +146,7 @@ export class NitricApiGcpApiGateway extends pulumi.ComponentResource {
 		);
 
 		// Create a new IAM account for invoking
-		const apiInvoker = new gcp.serviceaccount.Account(
+		this.invoker = new gcp.serviceaccount.Account(
 			`${name}-acct`,
 			{
 				// Limit to 30 characters for service account name
@@ -144,12 +157,13 @@ export class NitricApiGcpApiGateway extends pulumi.ComponentResource {
 		);
 
 		// Bind that IAM account as a member of all available service targets
-		targetServices.map((svc) => {
-			new gcp.cloudrun.IamMember(
-				`${name}-acct-binding`,
+		this.memberships = targetServices.map((svc) => {
+			return new gcp.cloudrun.IamMember(
+				`${name}-${svc.name}-binding`,
 				{
 					service: svc.cloudrun.name,
-					member: pulumi.interpolate`serviceAccount:${apiInvoker.email}`,
+					location: svc.cloudrun.location,
+					member: pulumi.interpolate`serviceAccount:${this.invoker.email}`,
 					role: 'roles/run.invoker',
 				},
 				defaultResourceOptions,
@@ -159,10 +173,10 @@ export class NitricApiGcpApiGateway extends pulumi.ComponentResource {
 		// Now we need to create the document provided and interpolate the deployed service targets
 		// i.e. their Urls...
 		// Deploy the config
-		const deployedConfig = new gcp.apigateway.ApiConfig(
+		this.config = new gcp.apigateway.ApiConfig(
 			`${name}-config`,
 			{
-				api: deployedApi.apiId,
+				api: this.api.apiId,
 				displayName: `${name}-config`,
 				apiConfigId: `${name}-config`,
 				openapiDocuments: [
@@ -176,7 +190,7 @@ export class NitricApiGcpApiGateway extends pulumi.ComponentResource {
 				gatewayConfig: {
 					backendConfig: {
 						// Add the service account for the invoker here...
-						googleServiceAccount: apiInvoker.email,
+						googleServiceAccount: this.invoker.email,
 					},
 				},
 			},
@@ -184,23 +198,28 @@ export class NitricApiGcpApiGateway extends pulumi.ComponentResource {
 		);
 
 		// Deploy the gateway
-		const gateway = new gcp.apigateway.Gateway(
+		this.gateway = new gcp.apigateway.Gateway(
 			`${name}-gateway`,
 			{
 				displayName: `${name}-gateway`,
 				gatewayId: `${name}-gateway`,
-				apiConfig: deployedConfig.id,
+				apiConfig: this.config.id,
 			},
 			defaultResourceOptions,
 		);
 
-		this.hostname = gateway.defaultHostname;
-		this.url = gateway.defaultHostname.apply((n) => `https://${n}`);
+		this.hostname = this.gateway.defaultHostname;
+		this.url = this.gateway.defaultHostname.apply((n) => `https://${n}`);
 
 		this.registerOutputs({
 			name: this.name,
 			hostname: this.hostname,
 			url: this.url,
+			api: this.api,
+			invoker: this.invoker,
+			memberships: this.memberships,
+			config: this.config,
+			gateway: this.gateway,
 		});
 	}
 

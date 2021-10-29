@@ -24,6 +24,16 @@ import { StackAPIDocument } from './api';
  * Pattern for stack resources names, e.g. func names, topic names, buckets, etc.
  */
 export const resourceNamePattern = /^\w+([.\\-]\w+)*$/.toString().slice(1, -1);
+
+/**
+ * Pattern for nitric framework versions
+ * taken from: https://semver.org/#is-there-a-suggested-regular-expression-regex-to-check-a-semver-string
+ */
+export const versionPattern =
+	/^v(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/
+		.toString()
+		.slice(1, -1);
+
 /**
  * CRON expression string pattern
  */
@@ -1541,6 +1551,11 @@ export const STACK_SCHEMA: JSONSchema7 = {
 			type: 'string',
 			pattern: resourceNamePattern,
 		},
+		version: {
+			title: 'nitric framework version',
+			type: 'string',
+			pattern: versionPattern,
+		},
 		functions: {
 			title: 'functions',
 			type: 'object',
@@ -1550,8 +1565,19 @@ export const STACK_SCHEMA: JSONSchema7 = {
 					description: 'A nitric compute func, such as a serverless function',
 					type: 'object',
 					properties: {
+						version: {
+							title: 'nitric framework version',
+							type: 'string',
+							pattern: versionPattern,
+						},
 						handler: { type: 'string' },
 						context: { type: 'string' },
+						excludes: {
+							type: 'array',
+							items: {
+								type: 'string',
+							},
+						},
 						triggers: {
 							title: 'func triggers',
 							type: 'object',
@@ -1586,6 +1612,10 @@ export const STACK_SCHEMA: JSONSchema7 = {
 					properties: {
 						dockerfile: { type: 'string' },
 						context: { type: 'string' },
+						args: {
+							type: 'object',
+							additionalProperties: { type: 'string' },
+						},
 						triggers: {
 							title: 'func triggers',
 							type: 'object',
@@ -2010,10 +2040,13 @@ export const validateStack = (potentialStack: any, filePath: string): void => {
 							return;
 						}
 						const target = op['x-nitric-target'];
-						if (!(potentialStack[`${target.type}s`] && potentialStack[`${target.type}s`][target.name])) {
-							logicErrors.push(
-								`Invalid target for apis.${apiName}.${pathName}.${opName}, target ${target.type} "${target.name}" doesn't exist`,
-							);
+						// Only validate if a x-nitric-target property is provided
+						if (target) {
+							if (!(potentialStack[`${target.type}s`] && potentialStack[`${target.type}s`][target.name])) {
+								logicErrors.push(
+									`Invalid target for apis.${apiName}.${pathName}.${opName}, target ${target.type} "${target.name}" doesn't exist`,
+								);
+							}
 						}
 					});
 				});

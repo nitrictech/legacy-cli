@@ -1,7 +1,6 @@
 {
 	"name": "@nitric/plugin-aws",
 	"description": "An AWS plugin for Nitric",
-	"version": "0.0.86",
 	"author": "Nitric <https://github.com/nitrictech>",
 	"bugs": "https://github.com/nitrictech/cli/issues",
 	"dependencies": {
@@ -66,10 +65,10 @@
 		"directory": "packages/plugins/aws"
 	},
 	"scripts": {
-		"postpack": "rm -f oclif.manifest.json",
-		"prepack": "rm -rf lib && tsc -p tsconfig.build.json && oclif-dev manifest && oclif-dev readme",
+		"postpack": "rimraf -f oclif.manifest.json",
+		"prepack": "rimraf -rf lib && tsc -p tsconfig.build.json && oclif-dev manifest && oclif-dev readme",
 		"test": "tsc --emitDeclarationOnly && jest --passWithNoTests",
-		"version": "oclif-dev readme && git add README.md",
+		"set:version": "npm version --version-git-tag false",
 		"npm:publish": "yarn npm publish --access public --tolerate-republish"
 	}
 }

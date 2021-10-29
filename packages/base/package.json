@@ -1,7 +1,6 @@
 {
 	"name": "@nitric/cli",
 	"description": "CLI tool for nitric applications",
-	"version": "0.0.86",
 	"author": "Nitric <https://github.com/nitrictech>",
 	"bin": {
 		"nitric": "./bin/run"
@@ -73,14 +72,8 @@
 	"oclif": {
 		"commands": "./lib/commands",
 		"topics": {
-			"templates": {
-				"description": "Commands for template management"
-			},
-			"templates:repos": {
-				"description": "Commands for managing template repositories"
-			},
 			"make": {
-				"description": "Commands to make new projects and assets."
+				"description": "Commands to make new stacks and assets."
 			},
 			"deploy": {
 				"description": "Plugin commands to deploy on supported providers. E.g. `$ nitric deploy:aws`"
@@ -101,15 +94,15 @@
 		"directory": "packages/base"
 	},
 	"scripts": {
-		"prepackage": "rm -rf lib && tsc -p tsconfig.build.json && oclif-dev manifest && oclif-dev readme",
-		"postpackage": "rm -f oclif.manifest.json",
+		"prepackage": "rimraf -rf lib && tsc -p tsconfig.build.json && oclif-dev manifest && oclif-dev readme",
+		"postpackage": "rimraf -f oclif.manifest.json",
 		"package:all": "yarn run prepackage && pkg . --out-path ./dist/ --no-bytecode --public-packages '*' --public",
 		"package": "yarn run prepackage && yarn run package:all && yarn run postpackage",
-		"postpack": "rm -f oclif.manifest.json",
-		"prepack": "rm -rf lib && tsc --project tsconfig.build.json && oclif-dev manifest && oclif-dev readme",
+		"postpack": "rimraf -f oclif.manifest.json",
+		"prepack": "rimraf -rf lib && tsc --project tsconfig.build.json && oclif-dev manifest && oclif-dev readme",
 		"test": "tsc --emitDeclarationOnly && jest",
 		"npm:publish": "yarn npm publish --access public --tolerate-republish",
-		"version": "oclif-dev readme && git add README.md",
+		"set:version": "npm version --version-git-tag false",
 		"nitric": "./bin/run"
 	},
 	"pkg": {

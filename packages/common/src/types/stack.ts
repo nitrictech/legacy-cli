@@ -37,6 +37,8 @@ export interface NitricStack<
 > {
 	// Name of the Nitric Stack
 	name: string;
+	// Nitric Framework Version
+	version?: string;
 	// Functions that will be deployed
 	functions?: {
 		[name: string]: NitricFunction<FunctionExtensions>;

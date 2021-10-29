@@ -16,3 +16,5 @@ export * from './network';
 export * from './function';
 export * from './gateway';
 export * from './entrypoints';
+export * from './storage';
+export * from './types';

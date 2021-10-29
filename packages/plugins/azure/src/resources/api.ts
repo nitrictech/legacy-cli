@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 import * as pulumi from '@pulumi/pulumi';
-import { NitricAPITarget, StackAPI } from '@nitric/cli-common';
+import { NitricAPITarget, StackAPI, constants } from '@nitric/cli-common';
 import { resources, apimanagement } from '@pulumi/azure-native';
 import { OpenAPIV3 } from 'openapi-types';
 import { NitricComputeAzureAppService } from '.';
@@ -38,7 +38,7 @@ export class NitricApiAzureApiManagement extends pulumi.ComponentResource {
 	public readonly resourceGroup: resources.ResourceGroup;
 
 	constructor(name: string, args: NitricApiAzureApiManagementArgs, opts?: pulumi.ComponentResourceOptions) {
-		super('nitric:bucket:AzureStorage', name, {}, opts);
+		super('nitric:api:AzureApiManagement', name, {}, opts);
 		const defaultResourceOptions: pulumi.ResourceOptions = { parent: this };
 		const { resourceGroup, orgName, adminEmail, api, services } = args;
 
@@ -49,8 +49,6 @@ export class NitricApiAzureApiManagement extends pulumi.ComponentResource {
 			name,
 			{
 				resourceGroupName: resourceGroup.name,
-				// TODO: Extract from API doc?
-				serviceName: `${api.name}-service`,
 				publisherEmail: adminEmail,
 				publisherName: orgName,
 				// TODO: Add configuration for this
@@ -67,10 +65,13 @@ export class NitricApiAzureApiManagement extends pulumi.ComponentResource {
 		this.api = new apimanagement.Api(
 			`${name}-api`,
 			{
+				displayName: openapi.info?.title || `${name}-api`,
+				protocols: ['https'],
 				apiId: name,
-				format: 'openapi-json',
+				format: 'openapi+json',
 				path: '/',
 				resourceGroupName: resourceGroup.name,
+				subscriptionRequired: false,
 				serviceName: this.service.name,
 				// XXX: Do we need to stringify this?
 				// Not need to transform the original spec,
@@ -90,25 +91,43 @@ export class NitricApiAzureApiManagement extends pulumi.ComponentResource {
 
 					// Get the nitric target URL
 					const pathMethod = path[m] as OpenAPIV3.OperationObject<NitricAPITarget>;
-					const func = services.find((f) => f.name === pathMethod['x-nitric-target'].name);
+
+					const func = services.find(
+						(f) =>
+							pathMethod[constants.OAI_NITRIC_TARGET_EXT] &&
+							f.name === pathMethod[constants.OAI_NITRIC_TARGET_EXT].name,
+					);
 
 					if (func) {
 						new apimanagement.ApiOperationPolicy(
-							'',
+							`${name}-api-${pathMethod.operationId}`,
 							{
 								resourceGroupName: resourceGroup.name,
-								apiId: this.api.id,
+								// this.api.id returns a URL path, which is the incorrect value here.
+								//   We instead need the value passed to apiId in the api creation above.
+								// However, we want to maintain the pulumi dependency, so we need to keep the 'apply' call.
+								apiId: this.api.id.apply(() => name),
 								serviceName: this.service.name,
 								// TODO: Need to figure out how this is mapped to a real api operation entity
 								operationId: pathMethod.operationId!,
-								policyId: pulumi.interpolate`${pathMethod.operationId!}Policy`,
+								// policyId must always be set to the static string 'policy' or Azure returns an error.
+								policyId: 'policy',
+								format: 'xml',
 								value: pulumi.interpolate`
-							<policies> 
-								<inbound /> 
-								<backend>    
-									<set-backend-service base-url="https://${func.webapp.defaultHostName}" />
-								</backend>  
-								<outbound />
+								<policies> 
+									<inbound>
+										<base />
+										<set-backend-service base-url="https://${func.webapp.defaultHostName}" />
+									</inbound>
+									<backend>
+										<base />
+									</backend>
+									<outbound>
+										<base />
+									</outbound>
+									<on-error>
+										<base />
+									</on-error>
 							</policies>
 						`,
 							},

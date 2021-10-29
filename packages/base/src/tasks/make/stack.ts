@@ -53,9 +53,15 @@ export class MakeStackTask extends Task<void> {
 
 		const stackPath = `./${stackName}`;
 
+		if (fs.existsSync(stackPath) && fs.readdirSync(stackPath).length && !this.force) {
+			throw new Error(
+				"Stack directory already exists and isn't empty, choose a different name or use the --force flag to create in a non-empty directory.",
+			);
+		}
+
 		// Create new folder relative to current directory for the new project
 		try {
-			fs.mkdirSync(stackPath);
+			fs.mkdirSync(stackPath, { recursive: true });
 		} catch (error) {
 			if (error.message.includes('file already exists')) {
 				if (!this.force) {

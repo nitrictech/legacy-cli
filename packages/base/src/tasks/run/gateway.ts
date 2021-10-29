@@ -13,11 +13,12 @@
 // limitations under the License.
 
 import { Task, StackAPI, STAGING_API_DIR } from '@nitric/cli-common';
-import Docker, { Container, ContainerCreateOptions, Network, NetworkInspectInfo } from 'dockerode';
+import Docker, { ContainerCreateOptions, Network, NetworkInspectInfo } from 'dockerode';
 import fs from 'fs';
 import getPort from 'get-port';
 import streamToPromise from 'stream-to-promise';
 import tar from 'tar-fs';
+import { RunContainerResult } from './types';
 import { DOCKER_LABEL_RUN_ID } from '../../constants';
 
 const GATEWAY_PORT = 8080;
@@ -40,7 +41,7 @@ export interface RunGatewayTaskOptions {
  */
 export function createAPIStagingDirectory(): string {
 	if (!fs.existsSync(`${STAGING_API_DIR}`)) {
-		fs.mkdirSync(`${STAGING_API_DIR}`);
+		fs.mkdirSync(`${STAGING_API_DIR}`, { recursive: true });
 	}
 
 	return `${STAGING_API_DIR}`;
@@ -52,7 +53,7 @@ export function createAPIStagingDirectory(): string {
 export function createAPIDirectory(apiName: string): string {
 	const stagingDir = createAPIStagingDirectory();
 	if (!fs.existsSync(`${stagingDir}/${apiName}`)) {
-		fs.mkdirSync(`${stagingDir}/${apiName}`);
+		fs.mkdirSync(`${stagingDir}/${apiName}`, { recursive: true });
 	}
 
 	return `${stagingDir}/${apiName}`;
@@ -61,7 +62,7 @@ export function createAPIDirectory(apiName: string): string {
 /**
  * Run local API Gateways for development/testing
  */
-export class RunGatewayTask extends Task<Container> {
+export class RunGatewayTask extends Task<RunContainerResult> {
 	private stackName: string;
 	private api: StackAPI;
 	private port?: number;
@@ -79,7 +80,7 @@ export class RunGatewayTask extends Task<Container> {
 		this.runId = runId;
 	}
 
-	async do(): Promise<Container> {
+	async do(): Promise<RunContainerResult> {
 		const { stackName, api, network, runId } = this;
 
 		if (!this.port) {
@@ -146,6 +147,11 @@ export class RunGatewayTask extends Task<Container> {
 
 		await container.start();
 
-		return container;
+		return {
+			name: api.name,
+			type: 'api',
+			container,
+			ports: [this.port!],
+		};
 	}
 }

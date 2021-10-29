@@ -15,6 +15,7 @@ import * as pulumi from '@pulumi/pulumi';
 import path from 'path';
 import { crawlDirectorySync, StackSite } from '@nitric/cli-common';
 import { resources, storage } from '@pulumi/azure-native';
+import mime from 'mime-types';
 
 interface NitricAzureStorageBucketArgs {
 	site: StackSite;
@@ -29,6 +30,7 @@ export class NitricAzureStorageSite extends pulumi.ComponentResource {
 	public readonly name: string;
 	public readonly container: storage.StorageAccountStaticWebsite;
 	public readonly resourceGroup: resources.ResourceGroup;
+	public readonly storageAccount: storage.StorageAccount;
 
 	constructor(name: string, args: NitricAzureStorageBucketArgs, opts?: pulumi.ComponentResourceOptions) {
 		super('nitric:site:AzureStorage', name, {}, opts);
@@ -37,13 +39,14 @@ export class NitricAzureStorageSite extends pulumi.ComponentResource {
 
 		this.name = name;
 		this.resourceGroup = resourceGroup;
+		this.storageAccount = storageAcct;
 
 		// TODO: Add additional config for index/error documents
 		this.container = new storage.StorageAccountStaticWebsite(
 			site.getName(),
 			{
 				resourceGroupName: resourceGroup.name,
-				accountName: storageAcct.name,
+				accountName: this.storageAccount.name,
 				indexDocument: 'index.html',
 			},
 			defaultResourceOptions,
@@ -61,6 +64,7 @@ export class NitricAzureStorageSite extends pulumi.ComponentResource {
 					accountName: storageAcct.name,
 					containerName: this.container.containerName,
 					source: new pulumi.asset.FileAsset(filePath),
+					contentType: mime.lookup(filePath) || undefined,
 				},
 				defaultResourceOptions,
 			);
@@ -69,6 +73,7 @@ export class NitricAzureStorageSite extends pulumi.ComponentResource {
 		// Finalize the deployment
 		this.registerOutputs({
 			resourceGroup: this.resourceGroup,
+			storgeAccount: this.storageAccount,
 			container: this.container,
 			name: this.name,
 		});

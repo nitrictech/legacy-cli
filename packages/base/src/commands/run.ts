@@ -25,7 +25,7 @@ import {
 import { Listr, ListrTask, ListrContext, ListrRenderer } from 'listr2';
 import path from 'path';
 import execa from 'execa';
-import Docker, { Container, Network } from 'dockerode';
+import Docker, { Network } from 'dockerode';
 import getPort from 'get-port';
 import readline from 'readline';
 
@@ -37,6 +37,9 @@ import {
 	RunGatewayTaskOptions,
 	RunContainerTask,
 	RunContainerTaskOptions,
+	RunStorageServiceTask,
+	RunStorageServiceTaskOptions,
+	RunContainerResult,
 } from '../tasks';
 import { TaskWrapper } from 'listr2/dist/lib/task-wrapper';
 import crypto from 'crypto';
@@ -149,6 +152,14 @@ export function createEntrypointTasks(
 	);
 }
 
+export function createStorageServiceTask(
+	opts: RunStorageServiceTaskOptions,
+	docker: Docker,
+	network: Docker.Network,
+): ListrTask {
+	return wrapTaskForListr(new RunStorageServiceTask({ ...opts, network }, docker));
+}
+
 /**
  * Get tasks to creat a local API Gateway for set of APIs
  * @param stackName of the project stack
@@ -231,12 +242,24 @@ export function createEntrypointContainerRunTasks(
 	};
 }
 
+export function createStorageRunTask(storage: RunStorageServiceTaskOptions, docker: Docker): (ctx, task) => Listr {
+	return (ctx, task: TaskWrapper<unknown, typeof ListrRenderer>): Listr => {
+		return task.newListr(createStorageServiceTask(storage, docker, ctx.network), {
+			// Don't fail all on a single function failure...
+			exitOnError: true,
+			// Added to allow custom handling of SIGINT for run cmd cleanup.
+			registerSignalListeners: false,
+		});
+	};
+}
+
 /**
  * Top level listr run task displayed to the user
  * Will display tasks for creating docker resources
  */
 export function createRunTasks(
 	stack: Stack,
+	storage: RunStorageServiceTaskOptions,
 	containers: RunContainerTaskOptions[],
 	apis: RunGatewayTaskOptions[],
 	entrypoints: RunEntrypointTaskOptions[],
@@ -249,7 +272,10 @@ export function createRunTasks(
 			wrapTaskForListr(new CreateNetworkTask({ name: `${stack.getName()}-net-${runId}`, docker }), 'network'),
 			// Run the functions & containers, attached to the network
 			{
-				title: 'Running Functions & Containers',
+				title: 'Running Storage Service',
+				task: createStorageRunTask(storage, docker),
+			},
+			{
 				task: createContainerRunTasks(stack, containers, docker),
 			},
 			// Start the APIs, to route requests to the containers
@@ -325,8 +351,9 @@ export default class Run extends BaseCommand {
 	 */
 	runContainers = async (stack: Stack, runId: string): Promise<void> => {
 		const nitricStack = stack.asNitricStack();
-		const { entrypoints = {} } = nitricStack;
+		const { entrypoints = {}, buckets = {} } = nitricStack;
 		const namedEntrypoints = Object.entries(entrypoints).map(([name, entrypoint]) => ({ name, ...entrypoint }));
+		const namedBuckets = Object.entries(buckets).map(([name, bucket]) => ({ name, ...bucket }));
 
 		cli.action.stop();
 
@@ -375,9 +402,16 @@ export default class Run extends BaseCommand {
 			}),
 		);
 
+		const runStorageOptions = {
+			buckets: namedBuckets,
+			stack,
+			runId,
+		} as RunStorageServiceTaskOptions;
+
 		// Capture the results of running tasks to setup docker network, functions and containers
 		const runTaskResults = await createRunTasks(
 			stack,
+			runStorageOptions,
 			runContainersTaskOptions,
 			runGatewayOptions,
 			runEntrypointOptions,
@@ -386,35 +420,56 @@ export default class Run extends BaseCommand {
 		).run();
 
 		// Capture created docker resources for cleanup on run termination (see cleanup())
-		const { network: newNetwork, ...results }: { [key: string]: Container } & { network: Network } = runTaskResults;
+		const { network: newNetwork, ...results }: { [key: string]: RunContainerResult } & { network: Network } =
+			runTaskResults;
 
 		this.network = newNetwork;
-		this.runningContainers = results;
+		this.runningContainers = Object.keys(results).reduce(
+			(acc, k) => ({
+				...acc,
+				[k]: results[k].container,
+			}),
+			{},
+		);
 
 		// Present a list of containers (inc. functions and APIs) and their ports on the cli
+		const runningContainers = Object.keys(results)
+			.filter((k) => results[k].type === 'container')
+			.map((k) => results[k].name);
 		cli.table(runContainersTaskOptions, {
 			function: {
 				get: (row): string => row.image && row.image.name,
 			},
-			port: {},
+			port: {
+				get: (row): string | number => (runningContainers.includes(row.image.name) && row.port) || 'Failed to start',
+			},
 		});
 
 		if (nitricStack.apis) {
+			const runningApis = Object.keys(results)
+				.filter((k) => results[k].type === 'api')
+				.map((k) => results[k].name);
 			cli.table(runGatewayOptions, {
 				api: {
 					get: (row): string => row.api && row.api.name,
 				},
-				port: {},
+				port: {
+					get: (row): string | number => (runningApis.includes(row.api.name) && row.port) || 'Failed to start',
+				},
 			});
 		}
 
 		if (nitricStack.entrypoints) {
+			const runningEntrypoints = Object.keys(results)
+				.filter((k) => results[k].type === 'entrypoint')
+				.map((k) => results[k].name);
 			cli.table(runEntrypointOptions, {
 				entrypoint: {
 					get: (row): string => row.entrypoint.name,
 				},
 				url: {
-					get: (row): string => `http://localhost:${row.port}`,
+					get: (row): string =>
+						(runningEntrypoints.includes(row.entrypoint.name) && `http://localhost:${row.port}`) || 'Failed to start',
 				},
 			});
 		}
@@ -518,8 +573,10 @@ export default class Run extends BaseCommand {
 				});
 			});
 
-			process.stdin.setRawMode!(true);
-			process.stdin.resume();
+			if (process.stdin.setRawMode) {
+				process.stdin.setRawMode(true);
+				process.stdin.resume();
+			}
 
 			await cleanUp;
 

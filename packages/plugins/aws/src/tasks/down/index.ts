@@ -14,13 +14,32 @@
 
 import { NitricStack, Task } from '@nitric/cli-common';
 import { LocalWorkspace } from '@pulumi/pulumi/automation';
+import Deployment from '../../types/deployment';
 
 /**
  * Options when tearing down a nitric stack from AWS
  */
 interface DownOptions {
 	stack: NitricStack;
+	destroy: boolean;
 }
+
+interface Target {
+	type: string; //e.g. bucket
+	pulumiTypes: string[];
+}
+
+//Map of the protected destroy targets
+const protectedTargets: Target[] = [
+	{
+		type: 'base',
+		pulumiTypes: ['pulumi:pulumi:Stack', 'pulumi:providers:aws'],
+	},
+	{
+		type: 'bucket',
+		pulumiTypes: ['nitric:bucket:S3', 'aws:s3/bucket:Bucket'],
+	},
+];
 
 const NO_OP = async (): Promise<void> => {
 	return;
@@ -31,10 +50,12 @@ const NO_OP = async (): Promise<void> => {
  */
 export class Down extends Task<void> {
 	private stack: NitricStack;
+	private destroy: boolean;
 
-	constructor({ stack }: DownOptions) {
+	constructor({ stack, destroy }: DownOptions) {
 		super(`Tearing Down Stack: ${stack.name}`);
 		this.stack = stack;
+		this.destroy = destroy;
 	}
 
 	async do(): Promise<void> {
@@ -48,13 +69,21 @@ export class Down extends Task<void> {
 				program: NO_OP,
 			});
 
-			const res = await pulumiStack.destroy({ onOutput: this.update.bind(this) });
+			if (this.destroy) {
+				await pulumiStack.destroy({ onOutput: this.update.bind(this) });
+			} else {
+				const deployment = (await pulumiStack.exportStack()).deployment as Deployment;
+				const nonTargets = protectedTargets //Possible to filter the protected targets in the future
+					.map((val) => val.pulumiTypes)
+					.reduce((acc, val) => acc.concat(val), []);
 
-			if (res.summary && res.summary.resourceChanges) {
-				const changes = Object.entries(res.summary.resourceChanges)
-					.map((entry) => entry.join(': '))
-					.join(', ');
-				this.update(changes);
+				//List of targets that will be destroyed, filters out the ones that are protected
+				const targets = deployment.resources
+					.filter((resource) => !resource.urn.match('/nitric:site:S3/g') || !nonTargets.includes(resource.type))
+					.map((resource) => resource.urn);
+				if (targets.length > 0) {
+					await pulumiStack.destroy({ onOutput: this.update.bind(this), target: targets });
+				}
 			}
 		} catch (e) {
 			console.log(e);

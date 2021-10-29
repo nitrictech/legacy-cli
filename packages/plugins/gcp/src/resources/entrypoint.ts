@@ -59,7 +59,7 @@ export class NitricEntrypointGoogleCloudLB extends pulumi.ComponentResource {
 						`${entrypointPath.target}-neg`,
 						{
 							networkEndpointType: 'INTERNET_FQDN_PORT',
-							//defaultPort: 443,
+							defaultPort: 443,
 						},
 						defaultResourceOptions,
 					);
@@ -78,9 +78,13 @@ export class NitricEntrypointGoogleCloudLB extends pulumi.ComponentResource {
 					const backend = new gcp.compute.BackendService(
 						`${entrypointPath.target}`,
 						{
+							// Default options for timeout and connection draining
+							// without these, receiving 502 error
+							timeoutSec: 10,
+							connectionDrainingTimeoutSec: 10,
 							// Link the NEG to the backend
 							backends: [{ group: apiGatewayNEG.id }],
-							customRequestHeaders: [pulumi.interpolate`Host: ${deployedApi.hostname}`],
+							customRequestHeaders: [pulumi.interpolate`host: ${deployedApi.hostname}`],
 							// TODO: Determine CDN requirements for API gateways
 							enableCdn: false,
 							protocol: 'HTTPS',
@@ -90,6 +94,7 @@ export class NitricEntrypointGoogleCloudLB extends pulumi.ComponentResource {
 
 					return {
 						name: entrypointPath.target,
+						path: entrypointPath.path,
 						backend,
 					};
 				}
@@ -103,7 +108,7 @@ export class NitricEntrypointGoogleCloudLB extends pulumi.ComponentResource {
 					}
 
 					const backend = new gcp.compute.BackendBucket(
-						`${entrypointPath.target}`,
+						`${entrypointPath.target}-bucket`,
 						{
 							bucketName: deployedSite.storage.name,
 							// Enable CDN for sites
@@ -114,6 +119,7 @@ export class NitricEntrypointGoogleCloudLB extends pulumi.ComponentResource {
 
 					return {
 						name: entrypointPath.target,
+						path: entrypointPath.path,
 						backend,
 					};
 				}
@@ -140,7 +146,7 @@ export class NitricEntrypointGoogleCloudLB extends pulumi.ComponentResource {
 					);
 
 					const backend = new gcp.compute.BackendService(
-						`${entrypointPath.target}`,
+						`${entrypointPath.target}-${entrypointPath.type}`,
 						{
 							// Link the NEG to the backend
 							backends: [{ group: serverlessNEG.id }],
@@ -153,6 +159,7 @@ export class NitricEntrypointGoogleCloudLB extends pulumi.ComponentResource {
 
 					return {
 						name: entrypointPath.target,
+						path: entrypointPath.path,
 						backend,
 					};
 				}
@@ -178,7 +185,7 @@ export class NitricEntrypointGoogleCloudLB extends pulumi.ComponentResource {
 		const pathRules =
 			otherEntrypoints.length > 0
 				? otherEntrypoints.map((ep) => {
-						const backend = backends.find((b) => b.name === ep.target)!.backend;
+						const backend = backends.find((b) => b.name === ep.target && b.path == ep.path)!.backend;
 						pulumi.log.info(`other backend: ${ep.target}`, backend);
 						return {
 							paths: [`${ep.path}*`],
@@ -268,7 +275,7 @@ export class NitricEntrypointGoogleCloudLB extends pulumi.ComponentResource {
 				defaultResourceOptions,
 			);
 
-			this.url = pulumi.interpolate`https://${ipAddress}`;
+			this.url = pulumi.interpolate`https://${ipAddress.address}`;
 		}
 
 		pulumi.log.info('Connecting URL map to HTTP proxy', urlMap);
@@ -296,10 +303,10 @@ export class NitricEntrypointGoogleCloudLB extends pulumi.ComponentResource {
 			defaultResourceOptions,
 		);
 
-		(this.ipAddress = forwardingRule.ipAddress),
-			this.registerOutputs({
-				url: this.url,
-				ipAddress: this.ipAddress,
-			});
+		this.ipAddress = forwardingRule.ipAddress;
+		this.registerOutputs({
+			url: this.url,
+			ipAddress: this.ipAddress,
+		});
 	}
 }

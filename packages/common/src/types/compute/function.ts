@@ -18,11 +18,12 @@ export interface NitricFunction<Ext> extends NitricComputeUnit<Ext> {
 	// The location of the function handler
 	// relative to context
 	handler: string;
+	// The build pack version of the membrane used for the function build
+	version?: string;
 	// Scripts that will be executed by the nitric
 	// build process before beginning the docker build
 	buildScripts?: string[];
 	// files to exclude from final build
-	// can be globs
 	excludes?: string[];
 	// The most requests a single function instance should handle
 	maxRequests?: number;

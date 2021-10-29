@@ -1,7 +1,6 @@
 {
 	"name": "@nitric/plugin-azure",
 	"description": "Azure plugin for Nitric",
-	"version": "0.0.86",
 	"author": "Nitric <https://github.com/nitrictech>",
 	"bugs": "https://github.com/nitrictech/cli/issues",
 	"dependencies": {
@@ -19,12 +18,14 @@
 		"execa": "^5.0.0",
 		"inquirer": "^8.0.0",
 		"listr2": "^3.6.2",
+		"mime-types": "^2.1.32",
 		"tslib": "^1"
 	},
 	"devDependencies": {
 		"@oclif/dev-cli": "^1",
 		"@oclif/plugin-help": "^3",
 		"@types/jest": "^26.0.15",
+		"@types/mime-types": "^2.1.1",
 		"@types/node": "^10",
 		"eslint": "^6.8.0",
 		"eslint-config-oclif": "^3.1",
@@ -63,10 +64,10 @@
 		"directory": "packages/plugins/azure"
 	},
 	"scripts": {
-		"postpack": "rm -f oclif.manifest.json",
-		"prepack": "rm -rf lib && tsc -p tsconfig.build.json && oclif-dev manifest && oclif-dev readme",
+		"postpack": "rimraf -f oclif.manifest.json",
+		"prepack": "rimraf -rf lib && tsc -p tsconfig.build.json && oclif-dev manifest && oclif-dev readme",
 		"test": "tsc --emitDeclarationOnly && jest --passWithNoTests",
-		"version": "oclif-dev readme && git add README.md",
+		"set:version": "npm version --version-git-tag false",
 		"npm:publish": "yarn npm publish --access restricted --tolerate-republish"
 	}
 }

@@ -15,7 +15,7 @@ import * as pulumi from '@pulumi/pulumi';
 import * as aws from '@pulumi/aws';
 import { OpenAPIV3 } from 'openapi-types';
 import { uniq } from 'lodash';
-import { StackAPI } from '@nitric/cli-common';
+import { StackAPI, constants } from '@nitric/cli-common';
 import { NitricComputeAWSLambda } from './compute';
 
 type method = 'get' | 'post' | 'put' | 'patch' | 'delete';
@@ -63,7 +63,6 @@ export class NitricApiAwsApiGateway extends pulumi.ComponentResource {
 
 		const defaultResourceOptions: pulumi.ResourceOptions = { parent: this };
 		const { api, lambdas } = args;
-		const { name: nitricName, ...rest } = api;
 
 		this.name = name;
 
@@ -76,10 +75,10 @@ export class NitricApiAwsApiGateway extends pulumi.ComponentResource {
 				return [
 					...acc,
 					...Object.keys(path)
-						.filter((k) => METHOD_KEYS.includes(k as method))
+						.filter((k) => METHOD_KEYS.includes(k as method) && path[k][constants.OAI_NITRIC_TARGET_EXT])
 						.map((m) => {
 							const method = path[m as method]!;
-							return method['x-nitric-target'].name;
+							return method[constants.OAI_NITRIC_TARGET_EXT].name;
 						}),
 				];
 			}, [] as string[]),
@@ -89,7 +88,7 @@ export class NitricApiAwsApiGateway extends pulumi.ComponentResource {
 			.all(lambdas.map((s) => s.lambda.invokeArn.apply((arn) => `${s.name}||${arn}`)))
 			.apply((nameArnPairs) => {
 				const transformedApi = {
-					...rest,
+					...openapi,
 					paths: Object.keys(openapi.paths).reduce((acc, pathKey) => {
 						const path = openapi.paths[pathKey]!;
 						const newMethods = Object.keys(path)
@@ -98,31 +97,40 @@ export class NitricApiAwsApiGateway extends pulumi.ComponentResource {
 								const p = path[method];
 
 								// The name of the function we want to target with this APIGateway
-								const targetName = p['x-nitric-target'].name;
 
-								const invokeArnPair = nameArnPairs.find((f) => f.split('||')[0] === targetName);
+								if (p[constants.OAI_NITRIC_TARGET_EXT]) {
+									const targetName = p[constants.OAI_NITRIC_TARGET_EXT].name;
 
-								if (!invokeArnPair) {
-									throw new Error(`Invalid nitric target ${targetName} defined in api: ${api.name}`);
+									const invokeArnPair = nameArnPairs.find((f) => f.split('||')[0] === targetName);
+
+									if (!invokeArnPair) {
+										throw new Error(`Invalid nitric target ${targetName} defined in api: ${api.name}`);
+									}
+
+									const invokeArn = invokeArnPair.split('||')[1];
+									// Discard the old key on the transformed API
+									const { [constants.OAI_NITRIC_TARGET_EXT]: _, ...rest } = p;
+
+									return {
+										...acc,
+										[method]: {
+											...(rest as OpenAPIV3.OperationObject),
+											'x-amazon-apigateway-integration': {
+												type: 'aws_proxy',
+												httpMethod: 'POST',
+												payloadFormatVersion: '2.0',
+												// TODO: This might cause some trouble
+												// Need to determine if the body of the
+												uri: invokeArn,
+											},
+										} as any, // OpenAPIV3.OperationObject<AwsExtentions>
+									};
 								}
 
-								const invokeArn = invokeArnPair.split('||')[1];
-								// Discard the old key on the transformed API
-								const { 'x-nitric-target': _, ...rest } = p;
-
+								// return method without re-write if x-nitric-target not specified
 								return {
 									...acc,
-									[method]: {
-										...(rest as OpenAPIV3.OperationObject),
-										'x-amazon-apigateway-integration': {
-											type: 'aws_proxy',
-											httpMethod: 'POST',
-											payloadFormatVersion: '2.0',
-											// TODO: This might cause some trouble
-											// Need to determine if the body of the
-											uri: invokeArn,
-										},
-									} as any, // OpenAPIV3.OperationObject<AwsExtentions>
+									[method]: p,
 								};
 							}, {} as { [key: string]: OpenAPIV3.OperationObject<AwsExtentions> });
 

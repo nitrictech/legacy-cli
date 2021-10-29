@@ -12,11 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 import * as pulumi from '@pulumi/pulumi';
-import { resources, web, containerregistry, eventgrid } from '@pulumi/azure-native';
-import { NitricContainerImage, StackFunction, StackContainer } from '@nitric/cli-common';
 import { NitricEventgridTopic } from './topic';
+import { types, authorization, resources, web, containerregistry } from '@pulumi/azure-native';
+import { NitricContainerImage, StackFunction, StackContainer } from '@nitric/cli-common';
+
+export interface NitricComputeAzureAppServiceEnvVariable {
+	name: string;
+	value: string | pulumi.Output<string>;
+}
 
 interface NitricComputeAzureAppServiceArgs {
+	/**
+	 * SubscriptionId this resources is being deployed under
+	 */
+	subscriptionId: string | pulumi.Output<string>;
+
 	/**
 	 * Azure resource group to deploy func to
 	 */
@@ -43,10 +53,25 @@ interface NitricComputeAzureAppServiceArgs {
 	image: NitricContainerImage;
 
 	/**
-	 * Deployed Nitric Service Topics
+	 * Deployed Nitric Topics that Trigger this Compute Resource
 	 */
 	topics: NitricEventgridTopic[];
+
+	/**
+	 * Environment variables for this compute instance
+	 */
+	env?: NitricComputeAzureAppServiceEnvVariable[];
 }
+
+// Built in role definitions for Azure
+// See below URL for mapping
+// https://docs.microsoft.com/en-us/azure/role-based-access-control/built-in-roles
+const ROLE_DEFINITION_MAP = {
+	KeyVaultSecretsOfficer: 'b86a8fe4-44ce-4948-aee5-eccb2c155cd7',
+	StorageBlobDataContributor: 'ba92f5b4-2d11-453d-a403-e96b0029c9fe',
+	StorageQueueDataContributor: '974c5e8b-45b9-4653-ba55-5f855dd0fb88',
+	EventGridDataSender: 'd5a91429-5739-47e2-a06b-3470a27159e7',
+};
 
 /**
  * Azure App Service implementation of a Nitric Function or Custom Container
@@ -54,11 +79,12 @@ interface NitricComputeAzureAppServiceArgs {
 export class NitricComputeAzureAppService extends pulumi.ComponentResource {
 	public readonly name: string;
 	public readonly webapp: web.WebApp;
+	public readonly subscriptions: NitricEventgridTopic[];
 
 	constructor(name: string, args: NitricComputeAzureAppServiceArgs, opts?: pulumi.ComponentResourceOptions) {
 		super('nitric:func:AppService', name, {}, opts);
 		const defaultResourceOptions: pulumi.ResourceOptions = { parent: this };
-		const { source, resourceGroup, plan, registry, image, topics } = args;
+		const { source, subscriptionId, resourceGroup, plan, registry, image, topics, env = [] } = args;
 
 		this.name = name;
 
@@ -79,12 +105,16 @@ export class NitricComputeAzureAppService extends pulumi.ComponentResource {
 		// So hopefully this should be as simple as including a gateway plugin for
 		// Azure that utilizes that contract.
 		// return new appservice.FunctionApp()
+
 		this.webapp = new web.WebApp(
 			source.getName(),
 			{
 				serverFarmId: plan.id,
 				name: `${source.getStack().getName()}-${source.getName()}`,
 				resourceGroupName: resourceGroup.name,
+				identity: {
+					type: 'SystemAssigned',
+				},
 				siteConfig: {
 					appSettings: [
 						{
@@ -104,9 +134,19 @@ export class NitricComputeAzureAppService extends pulumi.ComponentResource {
 							value: adminPassword,
 						},
 						{
+							name: 'TOLERATE_MISSING_SERVICES',
+							value: 'true',
+						},
+						{
+							name: 'AZURE_SUBSCRIPTION_ID',
+							value: subscriptionId,
+						},
+						{
 							name: 'WEBSITES_PORT',
 							value: '9001',
 						},
+						// Append additional env variables
+						...env,
 					],
 					// alwaysOn: true,
 					linuxFxVersion: pulumi.interpolate`DOCKER|${image.imageUri}`,
@@ -116,33 +156,36 @@ export class NitricComputeAzureAppService extends pulumi.ComponentResource {
 		);
 		const { triggers = {} } = nitricContainer;
 
-		// Deploy an evengrid webhook subscription
-		(triggers.topics || []).forEach((s) => {
-			const topic = topics.find((t) => t.name === s);
-
-			if (topic) {
-				new eventgrid.EventSubscription(
-					`${source.getName()}-${topic.name}-subscription`,
+		// Assign roles to the deployed app service
+		Object.entries(ROLE_DEFINITION_MAP).map(
+			([name, id]) =>
+				new authorization.RoleAssignment(
+					`${source.getName()}${name}`,
 					{
-						eventSubscriptionName: `${source.getName()}-${topic.name}-subscription`,
-						scope: topic.eventgrid.id,
-						destination: {
-							endpointType: 'WebHook',
-							endpointUrl: this.webapp.defaultHostName,
-							// TODO: Reduce event chattiness here and handle internally in the Azure AppService HTTP Gateway?
-							maxEventsPerBatch: 1,
-						},
+						principalId: this.webapp.identity.apply((t) => t!.principalId),
+						principalType: types.enums.authorization.PrincipalType.ServicePrincipal,
+						roleDefinitionId: pulumi.interpolate`/subscriptions/${subscriptionId}/providers/Microsoft.Authorization/roleDefinitions/${id}`,
+						scope: pulumi.interpolate`subscriptions/${subscriptionId}/resourceGroups/${resourceGroup.name}`,
 					},
 					defaultResourceOptions,
-				);
-			}
+				),
+		);
 
-			// TODO: Throw error in case of misconfiguration?
-		});
+		// Determine required subscriptions so they can be setup once the container starts
+		this.subscriptions = (triggers.topics || [])
+			.map((s) => {
+				const topic = topics.find((t) => t.name === s);
+				if (!topic) {
+					pulumi.log.error(`Failed to find matching Event Grid topic for name ${s}.`);
+				}
+				return topic;
+			})
+			.filter((topic) => !!topic) as NitricEventgridTopic[];
 
 		this.registerOutputs({
 			wepapp: this.webapp,
 			name: this.name,
+			subscriptions: this.subscriptions,
 		});
 	}
 }
