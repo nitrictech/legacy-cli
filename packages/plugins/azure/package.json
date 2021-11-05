@@ -7,9 +7,11 @@
 		"@nitric/cli-common": "workspace:*",
 		"@oclif/command": "^1",
 		"@oclif/config": "^1",
-		"@pulumi/azure-native": "^1.1.0",
+		"@pulumi/azure-native": "^1.44.0",
+		"@pulumi/azuread": "^5.7.0",
 		"@pulumi/docker": "^3.0.0",
 		"@pulumi/pulumi": "^3.5.1",
+		"@pulumi/random": "^4.3.1",
 		"api-spec-converter": "^2.11.4",
 		"cli-ux": "^5.5.1",
 		"cron-parser": "^3.2.0",
@@ -68,6 +70,6 @@
 		"prepack": "rimraf -rf lib && tsc -p tsconfig.build.json && oclif-dev manifest && oclif-dev readme",
 		"test": "tsc --emitDeclarationOnly && jest --passWithNoTests",
 		"set:version": "npm version --version-git-tag false",
-		"npm:publish": "yarn npm publish --access restricted --tolerate-republish"
+		"npm:publish": "yarn npm publish --access public --tolerate-republish"
 	}
 }

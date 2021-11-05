@@ -18,17 +18,18 @@ import {
 	authorization,
 	resources,
 	storage,
-	web,
 	containerregistry,
 	keyvault,
 	eventgrid,
 	documentdb,
+	operationalinsights,
 } from '@pulumi/azure-native';
+import * as web from '@pulumi/azure-native/web/v20210301';
 import * as pulumi from '@pulumi/pulumi';
 import fs from 'fs';
 import path from 'path';
 import {
-	NitricComputeAzureAppService,
+	NitricComputeAzureContainerApp,
 	NitricEventgridTopic,
 	NitricAzureStorageBucket,
 	NitricStorageQueue,
@@ -40,7 +41,6 @@ import {
 	NitricDatabaseAccountMongoDB,
 	NitricComputeAzureAppServiceEnvVariable,
 } from '../../resources';
-import { AppServicePlan } from '../../types';
 import axios from 'axios';
 
 interface DeployOptions {
@@ -48,7 +48,6 @@ interface DeployOptions {
 	region: string;
 	orgName: string;
 	adminEmail: string;
-	servicePlan: AppServicePlan;
 }
 
 export class Deploy extends Task<void> {
@@ -56,15 +55,13 @@ export class Deploy extends Task<void> {
 	private orgName: string;
 	private adminEmail: string;
 	private region: string;
-	private servicePlan: AppServicePlan;
 
-	constructor({ stack, orgName, adminEmail, region, servicePlan }: DeployOptions) {
+	constructor({ stack, orgName, adminEmail, region }: DeployOptions) {
 		super('Deploying Infrastructure');
 		this.stack = stack;
 		this.orgName = orgName;
 		this.adminEmail = adminEmail;
 		this.region = region;
-		this.servicePlan = servicePlan;
 	}
 
 	async do(): Promise<void> {
@@ -242,7 +239,7 @@ export class Deploy extends Task<void> {
 						}
 
 						// DEPLOY SERVICES
-						let deployedAzureApps: NitricComputeAzureAppService[] = [];
+						let deployedAzureApps: NitricComputeAzureContainerApp[] = [];
 						if (stack.getFunctions().length > 0 || stack.getContainers().length > 0) {
 							// deploy a registry for deploying this stacks containers
 							// TODO: We will want to prefer a pre-existing registry, supplied by the user
@@ -256,17 +253,28 @@ export class Deploy extends Task<void> {
 								},
 							});
 
-							// Deploy create an app func plan for this stack
-							const plan = new web.AppServicePlan(`${stack.getName()}Plan`, {
-								name: `${stack.getName()}Plan`,
-								location: resourceGroup.location,
+							const workspace = new operationalinsights.Workspace('loganalytics', {
 								resourceGroupName: resourceGroup.name,
-								kind: 'Linux',
-								reserved: true,
 								sku: {
-									name: this.servicePlan.size,
-									tier: this.servicePlan.tier,
-									size: this.servicePlan.size,
+									name: 'PerGB2018',
+								},
+								retentionInDays: 30,
+							});
+
+							const workspaceSharedKeys = operationalinsights.getSharedKeysOutput({
+								resourceGroupName: resourceGroup.name,
+								workspaceName: workspace.name,
+							});
+
+							const kube = new web.KubeEnvironment(`${stack.getName()}Kube`, {
+								type: 'Managed',
+								resourceGroupName: resourceGroup.name,
+								appLogsConfiguration: {
+									destination: 'log-analytics',
+									logAnalyticsConfiguration: {
+										customerId: workspace.customerId,
+										sharedKey: workspaceSharedKeys.apply((r) => r.primarySharedKey!),
+									},
 								},
 							});
 
@@ -295,11 +303,11 @@ export class Deploy extends Task<void> {
 									});
 
 									// Create a new Nitric azure app func instance
-									return new NitricComputeAzureAppService(func.getName(), {
+									return new NitricComputeAzureContainerApp(func.getName(), {
 										source: func,
+										kube,
 										subscriptionId: clientConfig.subscriptionId,
 										resourceGroup,
-										plan,
 										registry,
 										topics: deployedTopics,
 										image,
@@ -318,11 +326,11 @@ export class Deploy extends Task<void> {
 									});
 
 									// Create a new Nitric azure app func instance
-									return new NitricComputeAzureAppService(container.getName(), {
+									return new NitricComputeAzureContainerApp(container.getName(), {
 										source: container,
+										kube,
 										subscriptionId: clientConfig.subscriptionId,
 										resourceGroup,
-										plan,
 										registry,
 										topics: deployedTopics,
 										image,
@@ -341,7 +349,7 @@ export class Deploy extends Task<void> {
 								.map(async (deployed) => {
 									pulumi.log.info(`waiting for ${deployed.name} to start before creating subscriptions`);
 									// Get the full URL of the deployed container
-									const hostname = await new Promise((res) => deployed.webapp.defaultHostName.apply(res));
+									const hostname = await new Promise((res) => deployed.containerApp.latestRevisionFqdn.apply(res));
 									const hostUrl = `https://${hostname}`;
 
 									// Poll the URL until the host has started.
