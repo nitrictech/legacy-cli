@@ -14,13 +14,13 @@
 import * as pulumi from '@pulumi/pulumi';
 import { NamedObject, NitricEntrypoint } from '@nitric/cli-common';
 import { resources, network, types } from '@pulumi/azure-native';
-import { NitricComputeAzureAppService, NitricAzureStorageSite, NitricApiAzureApiManagement } from '.';
+import { NitricComputeAzureContainerApp, NitricAzureStorageSite, NitricApiAzureApiManagement } from '.';
 
 interface NitricAzureStorageBucketArgs {
 	stackName: string;
 	subscriptionId: pulumi.Input<string>;
 	entrypoint: NamedObject<NitricEntrypoint>;
-	services: NitricComputeAzureAppService[];
+	services: NitricComputeAzureContainerApp[];
 	sites: NitricAzureStorageSite[];
 	apis: NitricApiAzureApiManagement[];
 	resourceGroup: resources.ResourceGroup;
@@ -169,8 +169,8 @@ export class NitricEntrypointAzureFrontDoor extends pulumi.ComponentResource {
 							name: poolName,
 							backends: [
 								{
-									address: deployedService.webapp.defaultHostName,
-									backendHostHeader: deployedService.webapp.defaultHostName,
+									address: deployedService.containerApp.latestRevisionFqdn,
+									backendHostHeader: deployedService.containerApp.latestRevisionFqdn,
 									httpPort: 80,
 									httpsPort: 443,
 									priority: 1,

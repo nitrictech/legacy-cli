@@ -893,9 +893,11 @@ __metadata:
     "@oclif/config": ^1
     "@oclif/dev-cli": ^1
     "@oclif/plugin-help": ^3
-    "@pulumi/azure-native": ^1.1.0
+    "@pulumi/azure-native": ^1.44.0
+    "@pulumi/azuread": ^5.7.0
     "@pulumi/docker": ^3.0.0
     "@pulumi/pulumi": ^3.5.1
+    "@pulumi/random": ^4.3.1
     "@types/jest": ^26.0.15
     "@types/mime-types": ^2.1.1
     "@types/node": ^10
@@ -1258,12 +1260,21 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@pulumi/azure-native@npm:^1.1.0":
-  version: 1.19.0
-  resolution: "@pulumi/azure-native@npm:1.19.0"
+"@pulumi/azure-native@npm:^1.44.0":
+  version: 1.44.0
+  resolution: "@pulumi/azure-native@npm:1.44.0"
   dependencies:
     "@pulumi/pulumi": ^3.0.0
-  checksum: 5327c95deb5c6f9cf6c986cef01c7b95731a9b09e2b44db48aa00a436b98899eb9c56936619d53f25083a2fe4e5e512ba30ddd23a9af103d36e52c0b9fd5e923
+  checksum: 4339086bc7dd4ecb409fcc149f8ef26a3cd7e33b119ec136acf4e35ff16e4221fe31cde6622b309b36e41f9c208e3e80edf56539fe177dfee3590adef99074ad
+  languageName: node
+  linkType: hard
+
+"@pulumi/azuread@npm:^5.7.0":
+  version: 5.7.0
+  resolution: "@pulumi/azuread@npm:5.7.0"
+  dependencies:
+    "@pulumi/pulumi": ^3.0.0
+  checksum: 63b8fcaa3714fe7f492cc280a523f3514b2d7a5ed06419a9447f78e6d3458dfd9650e8305d22eb09f79a55780ad4a5e84c3bae258309f3cb057c17efc8d43db3
   languageName: node
   linkType: hard
 
@@ -1351,6 +1362,15 @@ __metadata:
   version: 0.3.0
   resolution: "@pulumi/query@npm:0.3.0"
   checksum: d3800398c229712de5f5c85eeac79cc194017d9dbdf8f5a556d7fd863685b08dcca6065b7eb71f40733b310723f7cd8fe7f9bbb90d8a8592ee861839e9651a14
+  languageName: node
+  linkType: hard
+
+"@pulumi/random@npm:^4.3.1":
+  version: 4.3.1
+  resolution: "@pulumi/random@npm:4.3.1"
+  dependencies:
+    "@pulumi/pulumi": ^3.0.0
+  checksum: a9f5bc6d000eb01adc9c46206db030642b178c84ccf800af18df047bcf540b728cad590a5ac7d1de60be09d028e538d15d6907be168131b8483387ef76d7f607
   languageName: node
   linkType: hard
 

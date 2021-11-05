@@ -15,14 +15,14 @@ import * as pulumi from '@pulumi/pulumi';
 import { NitricAPITarget, StackAPI, constants } from '@nitric/cli-common';
 import { resources, apimanagement } from '@pulumi/azure-native';
 import { OpenAPIV3 } from 'openapi-types';
-import { NitricComputeAzureAppService } from '.';
+import { NitricComputeAzureContainerApp } from '.';
 
 interface NitricApiAzureApiManagementArgs {
 	resourceGroup: resources.ResourceGroup;
 	orgName: string;
 	adminEmail: string;
 	api: StackAPI;
-	services: NitricComputeAzureAppService[];
+	services: NitricComputeAzureContainerApp[];
 }
 
 type method = 'get' | 'post' | 'put' | 'update' | 'delete' | 'patch';
@@ -117,7 +117,7 @@ export class NitricApiAzureApiManagement extends pulumi.ComponentResource {
 								<policies> 
 									<inbound>
 										<base />
-										<set-backend-service base-url="https://${func.webapp.defaultHostName}" />
+										<set-backend-service base-url="https://${func.containerApp.latestRevisionFqdn}" />
 									</inbound>
 									<backend>
 										<base />
