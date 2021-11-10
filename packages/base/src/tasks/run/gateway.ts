@@ -71,7 +71,7 @@ export class RunGatewayTask extends Task<RunContainerResult> {
 	private runId: string;
 
 	constructor({ stackName, api, port, docker, network, runId }: RunGatewayTaskOptions) {
-		super('Creating API Gateways');
+		super(`Creating API Gateway ${api.name}`);
 		this.stackName = stackName;
 		this.api = api;
 		this.port = port;
