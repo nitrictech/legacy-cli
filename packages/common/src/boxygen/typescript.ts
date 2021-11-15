@@ -7,7 +7,7 @@ export const baseTsFunction = async (image: Image): Promise<void> => {
 		.run(['yarn', 'global', 'add', 'typescript'])
 		.run(['yarn', 'global', 'add', 'ts-node'])
 		.copy('package.json *.lock *-lock.json', '/')
-		.run(['yarn', 'import', '||', 'echo', '"Lockfile already exists'])
+		.run(['yarn', 'import', '||', 'echo', '"Lockfile already exists"'])
 		.run([
 			'set',
 			'-ex;',
