@@ -32,6 +32,11 @@ import {
 	TS_IGNORE,
 	python,
 	PYTHON_IGNORE,
+	mavenBuild,
+	MAVEN_IGNORE,
+	javaFinal,
+	javascript,
+	JS_IGNORE,
 } from '../boxygen';
 
 interface BuildFunctionTaskOptions {
@@ -66,7 +71,9 @@ export class BuildFunctionTask extends Task<ContainerImage> {
 
 		await Workspace.start(
 			async (wkspc) => {
-				if (descriptor.handler.endsWith('.ts')) {
+				if (descriptor.handler.endsWith('.js')) {
+					await wkspc.image('node:alpine', { ignore: JS_IGNORE }).apply(javascript(descriptor.handler)).commit(imageId);
+				} else if (descriptor.handler.endsWith('.ts')) {
 					// we have a typescript function
 					await wkspc
 						.image('node:alpine', { ignore: TS_IGNORE })
@@ -91,6 +98,18 @@ export class BuildFunctionTask extends Task<ContainerImage> {
 					await wkspc
 						.image('python:3.7-slim', { ignore: PYTHON_IGNORE })
 						.apply(python(descriptor.handler))
+						.apply(installMembrane(this.provider, descriptor.version || 'latest'))
+						.commit(imageId);
+				} else if (descriptor.handler.endsWith('.jar')) {
+					// we have a Java function
+					// TODO: Support additional build systems by checking workspace contents
+					const javaBase = await wkspc.image('maven:3-openjdk-11', { ignore: MAVEN_IGNORE }).apply(mavenBuild).stage();
+
+					// TODO: Support AppCDS stage for faster warmup
+
+					await wkspc
+						.image('adoptopenjdk/openjdk11:x86_64-alpine-jre-11.0.10_9')
+						.apply(javaFinal(descriptor.handler, javaBase))
 						.apply(installMembrane(this.provider, descriptor.version || 'latest'))
 						.commit(imageId);
 				}
