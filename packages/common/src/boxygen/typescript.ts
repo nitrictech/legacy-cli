@@ -1,5 +1,7 @@
 import { Image } from '@nitric/boxygen';
 
+export const TS_IGNORE = ['node_modules/', '.nitric/', '.git/', '.idea/'];
+
 export const baseTsFunction = async (image: Image): Promise<void> => {
 	image
 		.run(['yarn', 'global', 'add', 'typescript'])

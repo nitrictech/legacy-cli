@@ -23,7 +23,16 @@ import { StackFunction } from '../stack';
 //import TOML from '@iarna/toml';
 //import fs from 'fs';
 import { Workspace } from '@nitric/boxygen';
-import { buildGoApp, buildGoFinal, baseTsFunction, configureTsFunction, installMembrane } from '../boxygen';
+import {
+	buildGoApp,
+	buildGoFinal,
+	baseTsFunction,
+	configureTsFunction,
+	installMembrane,
+	TS_IGNORE,
+	python,
+	PYTHON_IGNORE,
+} from '../boxygen';
 
 interface BuildFunctionTaskOptions {
 	baseDir: string;
@@ -60,7 +69,7 @@ export class BuildFunctionTask extends Task<ContainerImage> {
 				if (descriptor.handler.endsWith('.ts')) {
 					// we have a typescript function
 					await wkspc
-						.image('node:alpine')
+						.image('node:alpine', { ignore: TS_IGNORE })
 						.apply(baseTsFunction)
 						.apply(installMembrane(this.provider, descriptor.version || 'latest'))
 						.apply(configureTsFunction(this.service.getDescriptor().handler))
@@ -76,6 +85,13 @@ export class BuildFunctionTask extends Task<ContainerImage> {
 						.image('alpine', { as: `${this.service.getName()}` })
 						.apply(installMembrane(this.provider, descriptor.version || 'latest'))
 						.apply(buildGoFinal(baseImage, '/bin/main'))
+						.commit(imageId);
+				} else if (descriptor.handler.endsWith('.py')) {
+					// we have a python function
+					await wkspc
+						.image('python:3.7-slim', { ignore: PYTHON_IGNORE })
+						.apply(python(descriptor.handler))
+						.apply(installMembrane(this.provider, descriptor.version || 'latest'))
 						.commit(imageId);
 				}
 			},
