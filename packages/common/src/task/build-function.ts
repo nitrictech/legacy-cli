@@ -12,16 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import execa from 'execa';
-import path from 'path';
-import { oneLine } from 'common-tags';
+//import execa from 'execa';
+//import path from 'path';
+//import { oneLine } from 'common-tags';
 import { Task } from './task';
 import { ContainerImage } from '../types';
 import { StackFunction } from '../stack';
-import { DEFAULT_NITRIC_DIR, DEFAULT_BUILD_DIR } from '../constants';
-import which from 'which';
-import TOML from '@iarna/toml';
-import fs from 'fs';
+//import { DEFAULT_NITRIC_DIR, DEFAULT_BUILD_DIR } from '../constants';
+//import which from 'which';
+//import TOML from '@iarna/toml';
+//import fs from 'fs';
+import { Workspace } from '@nitric/boxygen';
+import { buildGoApp, buildGoFinal, baseTsFunction, configureTsFunction, installMembrane } from '../boxygen';
 
 interface BuildFunctionTaskOptions {
 	baseDir: string;
@@ -29,14 +31,14 @@ interface BuildFunctionTaskOptions {
 	provider?: string;
 }
 
-const PACK_IMAGE = 'buildpacksio/pack:0.21.1';
-const BUILDER_IMAGE = 'nitrictech/bp-builder-base';
+//const PACK_IMAGE = 'buildpacksio/pack:0.21.1';
+//const BUILDER_IMAGE = 'nitrictech/bp-builder-base';
 
-const DEFAULT_PROJECT_CONFIG = {
-	build: {
-		exclude: [DEFAULT_NITRIC_DIR],
-	},
-};
+//const DEFAULT_PROJECT_CONFIG = {
+//	build: {
+//		exclude: [DEFAULT_NITRIC_DIR],
+//	},
+//};
 
 export class BuildFunctionTask extends Task<ContainerImage> {
 	private service: StackFunction;
@@ -50,72 +52,106 @@ export class BuildFunctionTask extends Task<ContainerImage> {
 
 	async do(): Promise<ContainerImage> {
 		const imageId = this.service.getImageTagName(this.provider);
+		const descriptor = this.service.getDescriptor();
+		const update = this.update.bind(this);
+
+		await Workspace.start(
+			async (wkspc) => {
+				if (descriptor.handler.endsWith('.ts')) {
+					// we have a typescript function
+					await wkspc
+						.image('node:alpine')
+						.apply(baseTsFunction)
+						.apply(installMembrane(this.provider, descriptor.version || 'latest'))
+						.apply(configureTsFunction(this.service.getDescriptor().handler))
+						.commit(imageId);
+				} else if (descriptor.handler.endsWith('.go')) {
+					// we have a golang function
+					const baseImage = await wkspc
+						.image('golang:alpine')
+						.apply(buildGoApp(this.service.getDescriptor().handler, '/bin/main'))
+						.stage();
+
+					await wkspc
+						.image('alpine', { as: `${this.service.getName()}` })
+						.apply(installMembrane(this.provider, descriptor.version || 'latest'))
+						.apply(buildGoFinal(baseImage, '/bin/main'))
+						.commit(imageId);
+				}
+			},
+			{
+				context: this.service.getContext(),
+				logger: (lines: string[]) => {
+					update(lines.join('\n'));
+				},
+			},
+		);
 
 		// Create a temporary default ignore file
 		// and delete it when we're done
-		const contextDirectory = this.service.getDescriptor().context || '.';
-		const contextBuildDirectory = `./${path.join(contextDirectory, DEFAULT_BUILD_DIR)}`;
+		//const contextDirectory = this.service.getDescriptor().context || '.';
+		//const contextBuildDirectory = `./${path.join(contextDirectory, DEFAULT_BUILD_DIR)}`;
 
-		await fs.promises.mkdir(contextBuildDirectory, {
-			recursive: true,
-		});
-		await fs.promises.writeFile(`./${contextBuildDirectory}/${imageId}.toml`, TOML.stringify(DEFAULT_PROJECT_CONFIG));
+		//await fs.promises.mkdir(contextBuildDirectory, {
+		//	recursive: true,
+		//});
+		//await fs.promises.writeFile(`./${contextBuildDirectory}/${imageId}.toml`, TOML.stringify(DEFAULT_PROJECT_CONFIG));
 
-		let baseCmd = oneLine`
-			build ${imageId} 
-			--builder ${BUILDER_IMAGE}
-			--trust-builder
-			${Object.entries(this.service.getPackEnv())
-				.map(([k, v]) => `--env ${k}=${v}`)
-				.join(' ')}
-			-d ./.nitric/build/${imageId}.toml
-			--env BP_MEMBRANE_VERSION=${this.service.getVersion()}
-			--env BP_MEMBRANE_PROVIDER=${this.provider}
-			--env BP_NITRIC_SERVICE_HANDLER=${this.service.getContextRelativeDirectory()}
-			--pull-policy if-not-present
-			--default-process membrane
-		`;
+		//let baseCmd = oneLine`
+		//	build ${imageId}
+		//	--builder ${BUILDER_IMAGE}
+		//	--trust-builder
+		//	${Object.entries(this.service.getPackEnv())
+		//		.map(([k, v]) => `--env ${k}=${v}`)
+		//		.join(' ')}
+		//	-d ./.nitric/build/${imageId}.toml
+		//	--env BP_MEMBRANE_VERSION=${this.service.getVersion()}
+		//	--env BP_MEMBRANE_PROVIDER=${this.provider}
+		//	--env BP_NITRIC_SERVICE_HANDLER=${this.service.getContextRelativeDirectory()}
+		//	--pull-policy if-not-present
+		//	--default-process membrane
+		//`;
 
-		const packInstalled = which.sync('pack', { nothrow: true });
+		//const packInstalled = which.sync('pack', { nothrow: true });
 
-		if (!packInstalled) {
-			baseCmd = oneLine`
-				docker run
-				--rm
-				--privileged=true
-				-u root
-				-v /var/run/docker.sock:/var/run/docker.sock
-				-v ${this.service.getContext()}:/workspace -w /workspace
-				${PACK_IMAGE} ${baseCmd}
-			`;
-		} else {
-			baseCmd = oneLine`pack ${baseCmd} --path ${this.service.getContext()}`;
-		}
+		//if (!packInstalled) {
+		//	baseCmd = oneLine`
+		//		docker run
+		//		--rm
+		//		--privileged=true
+		//		-u root
+		//		-v /var/run/docker.sock:/var/run/docker.sock
+		//		-v ${this.service.getContext()}:/workspace -w /workspace
+		//		${PACK_IMAGE} ${baseCmd}
+		//	`;
+		//} else {
+		//	baseCmd = oneLine`pack ${baseCmd} --path ${this.service.getContext()}`;
+		//}
 
-		// Run docker
-		// TODO: This will need to be updated for mono repo support
-		// FIXME: Need to confirm docker sock mounting will work on windows
-		try {
-			const packProcess = execa.command(baseCmd);
+		//// Run docker
+		//// TODO: This will need to be updated for mono repo support
+		//// FIXME: Need to confirm docker sock mounting will work on windows
+		//try {
+		//	const packProcess = execa.command(baseCmd);
 
-			// pipe build to stdout
-			packProcess.stdout.on('data', (data) => {
-				this.update(data.toString());
-			});
+		//	// pipe build to stdout
+		//	packProcess.stdout.on('data', (data) => {
+		//		this.update(data.toString());
+		//	});
 
-			// wait for the process to finalize
-			await packProcess;
+		//	// wait for the process to finalize
+		//	await packProcess;
 
-			// clean build files
-			await fs.promises.unlink(`./${contextBuildDirectory}/${imageId}.toml`);
+		//	// clean build files
+		//	await fs.promises.unlink(`./${contextBuildDirectory}/${imageId}.toml`);
 
-			// remove build directory if empty
-			if (fs.existsSync(contextBuildDirectory) && fs.readdirSync(contextBuildDirectory).length === 0) {
-				await fs.promises.rmdir(contextBuildDirectory);
-			}
-		} catch (e) {
-			throw new Error(e.message);
-		}
+		//	// remove build directory if empty
+		//	if (fs.existsSync(contextBuildDirectory) && fs.readdirSync(contextBuildDirectory).length === 0) {
+		//		await fs.promises.rmdir(contextBuildDirectory);
+		//	}
+		//} catch (e) {
+		//	throw new Error(e.message);
+		//}
 
 		return {
 			id: imageId,
