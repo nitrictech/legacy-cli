@@ -471,12 +471,37 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@grpc/grpc-js@npm:^1.1.7":
+  version: 1.4.4
+  resolution: "@grpc/grpc-js@npm:1.4.4"
+  dependencies:
+    "@grpc/proto-loader": ^0.6.4
+    "@types/node": ">=12.12.47"
+  checksum: ee3d52d896b3ef50d3fe34e4d08feac89311904cd417e68e6a312cd524f7e5f920ce87087c3a12487c8933b1a8d272cd4fd1c7b17724258a95bdcbc6374cf35a
+  languageName: node
+  linkType: hard
+
 "@grpc/grpc-js@npm:^1.2.7":
   version: 1.3.6
   resolution: "@grpc/grpc-js@npm:1.3.6"
   dependencies:
     "@types/node": ">=12.12.47"
   checksum: cd56e22bdabed91b8c25241f103c640879f28138c6bfd49906de502298a4ebf3a63fe29aa902d62a4ff1852ce405cd5f23afa73c5eb3fae49ed4d33b3c24f816
+  languageName: node
+  linkType: hard
+
+"@grpc/proto-loader@npm:^0.6.4":
+  version: 0.6.6
+  resolution: "@grpc/proto-loader@npm:0.6.6"
+  dependencies:
+    "@types/long": ^4.0.1
+    lodash.camelcase: ^4.3.0
+    long: ^4.0.0
+    protobufjs: ^6.10.0
+    yargs: ^16.1.1
+  bin:
+    proto-loader-gen-types: build/bin/proto-loader-gen-types.js
+  checksum: 803f0fe5c7d989c6e909bc109090cfeb7c7dfca47f1332475fc9553c26bc1249185bece514bac709a45a0c6de1733040a05ac724c874ffeec52e80f3ad2bbb17
   languageName: node
   linkType: hard
 
@@ -750,11 +775,37 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@nitric/boxygen-api@npm:^0.0.1-rc.3":
+  version: 0.0.1-rc.3
+  resolution: "@nitric/boxygen-api@npm:0.0.1-rc.3"
+  dependencies:
+    "@grpc/grpc-js": ^1.1.7
+    google-protobuf: 3.14.0
+    tslib: ^2.1.0
+  checksum: f47add4ff0209cf0d291ae46055978e070a2ed5b9f9297dfd3b197a19d37b1aebd721f718cbb967ee60ee883df7385b6cbbbadcee0fd53002d870d678d77640c
+  languageName: node
+  linkType: hard
+
+"@nitric/boxygen@npm:^0.0.1-rc.2":
+  version: 0.0.1-rc.2
+  resolution: "@nitric/boxygen@npm:0.0.1-rc.2"
+  dependencies:
+    "@nitric/boxygen-api": ^0.0.1-rc.3
+    common-tags: ^1.8.0
+    execa: ^5.1.1
+    get-port: ^5.1.1
+    google-protobuf: 3.14.0
+    tslib: ^2.1.0
+  checksum: 5dd5b5c8a1dc2f01015faadebe38f5758751860cd0680cc4edd4755775055720dabf3302f0ae39cc8b32b15201a48790028974d4bc815b2b55fc5f5d278a3227
+  languageName: node
+  linkType: hard
+
 "@nitric/cli-common@workspace:*, @nitric/cli-common@workspace:packages/common":
   version: 0.0.0-use.local
   resolution: "@nitric/cli-common@workspace:packages/common"
   dependencies:
     "@iarna/toml": ^2.2.5
+    "@nitric/boxygen": ^0.0.1-rc.2
     "@oclif/command": ^1
     "@oclif/config": ^1
     "@pulumi/docker": ^3.0.0
@@ -5066,7 +5117,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"execa@npm:^5.0.0":
+"execa@npm:^5.0.0, execa@npm:^5.1.1":
   version: 5.1.1
   resolution: "execa@npm:5.1.1"
   dependencies:
@@ -5960,6 +6011,13 @@ fsevents@^2.1.2:
   bin:
     gp12-pem: build/src/bin/gp12-pem.js
   checksum: 22cbb7e2113aa50e3cfbd78d4b6336852a05a6f496e0db858d79d183c50d57f8ff03de727d5d85835d1edbdbda1d1e6317a747da253a76c86a5fe756153f4893
+  languageName: node
+  linkType: hard
+
+"google-protobuf@npm:3.14.0":
+  version: 3.14.0
+  resolution: "google-protobuf@npm:3.14.0"
+  checksum: 4bdc34a78522e57abc7ddc80be8fd4e8c2fe40ba50fbfbe0825615d35b451086586b7ce75cca4b820381df3aeb54f2997fced5e8718952936b806d470538159c
   languageName: node
   linkType: hard
 
@@ -8099,7 +8157,7 @@ fsevents@^2.1.2:
   languageName: node
   linkType: hard
 
-"lodash.camelcase@npm:^4.1.1":
+"lodash.camelcase@npm:^4.1.1, lodash.camelcase@npm:^4.3.0":
   version: 4.3.0
   resolution: "lodash.camelcase@npm:4.3.0"
   checksum: 3cb674ed3b37bb698f2ec5a1c3f607d157279f3015877132e8be5c22cf8048988cb9bf1e61c90dbefea3895a459c095773cc266a5b1a9f4202bcd062b3983e37
@@ -9792,7 +9850,7 @@ fsevents@^2.1.2:
   languageName: node
   linkType: hard
 
-"protobufjs@npm:^6.8.6":
+"protobufjs@npm:^6.10.0, protobufjs@npm:^6.8.6":
   version: 6.11.2
   resolution: "protobufjs@npm:6.11.2"
   dependencies:
@@ -11884,6 +11942,13 @@ resolve@^2.0.0-next.3:
   languageName: node
   linkType: hard
 
+"tslib@npm:^2.1.0":
+  version: 2.3.1
+  resolution: "tslib@npm:2.3.1"
+  checksum: 5ae2f209c5127bad284974c78916f02c72082615f65889a7ed0c7ca6d5f935c30338a0ee7310e1d9652dabc7b7507fd2905035487446d09d45fc1f19de71cf05
+  languageName: node
+  linkType: hard
+
 "tsutils@npm:^3.17.1, tsutils@npm:^3.21.0":
   version: 3.21.0
   resolution: "tsutils@npm:3.21.0"
@@ -12810,7 +12875,7 @@ typescript@~3.7.3:
   languageName: node
   linkType: hard
 
-"yargs@npm:^16.0.0, yargs@npm:^16.2.0":
+"yargs@npm:^16.0.0, yargs@npm:^16.1.1, yargs@npm:^16.2.0":
   version: 16.2.0
   resolution: "yargs@npm:16.2.0"
   dependencies:
