@@ -16,6 +16,7 @@ import { Task } from './task';
 import { ContainerImage } from '../types';
 import { StackFunction } from '../stack';
 import { Workspace } from '@nitric/boxygen';
+import fs from 'fs';
 import {
 	buildGoApp,
 	buildGoFinal,
@@ -26,8 +27,9 @@ import {
 	python,
 	PYTHON_IGNORE,
 	mavenBuild,
-	MAVEN_IGNORE,
-	javaFinal,
+	MAVEN_BASE,
+	JVM_RUNTIME_BASE,
+	javaRuntime,
 	javascript,
 	JS_IGNORE,
 } from '../boxygen';
@@ -52,6 +54,8 @@ export class BuildFunctionTask extends Task<ContainerImage> {
 		const imageId = this.service.getImageTagName(this.provider);
 		const descriptor = this.service.getDescriptor();
 		const update = this.update.bind(this);
+		const membraneInstall = installMembrane(this.provider, descriptor.version);
+		const excludes = descriptor.excludes || [];
 
 		await Workspace.start(
 			async (wkspc) => {
@@ -60,9 +64,9 @@ export class BuildFunctionTask extends Task<ContainerImage> {
 				} else if (descriptor.handler.endsWith('.ts')) {
 					// we have a typescript function
 					await wkspc
-						.image('node:alpine', { ignore: TS_IGNORE })
+						.image('node:alpine', { ignore: [...excludes, ...TS_IGNORE] })
 						.apply(baseTsFunction)
-						.apply(installMembrane(this.provider, descriptor.version || 'latest'))
+						.apply(membraneInstall)
 						.apply(configureTsFunction(this.service.getDescriptor().handler))
 						.commit(imageId);
 				} else if (descriptor.handler.endsWith('.go')) {
@@ -73,34 +77,35 @@ export class BuildFunctionTask extends Task<ContainerImage> {
 						.stage();
 
 					await wkspc
-						.image('alpine', { as: `${this.service.getName()}` })
-						.apply(installMembrane(this.provider, descriptor.version || 'latest'))
+						.image('alpine', { as: `${this.service.getName()}`, ignore: excludes })
+						.apply(membraneInstall)
 						.apply(buildGoFinal(baseImage, '/bin/main'))
 						.commit(imageId);
 				} else if (descriptor.handler.endsWith('.py')) {
 					// we have a python function
 					await wkspc
-						.image('python:3.7-slim', { ignore: PYTHON_IGNORE })
+						.image('python:3.7-slim', { ignore: [...excludes, ...PYTHON_IGNORE] })
 						.apply(python(descriptor.handler))
-						.apply(installMembrane(this.provider, descriptor.version || 'latest'))
+						.apply(membraneInstall)
 						.commit(imageId);
 				} else if (descriptor.handler.endsWith('.jar')) {
 					// we have a Java function
 					// TODO: Support additional build systems by checking workspace contents
-					const javaBase = await wkspc.image('maven:3-openjdk-11', { ignore: MAVEN_IGNORE }).apply(mavenBuild).stage();
+					const javaBase = await wkspc.image(MAVEN_BASE, { ignore: excludes }).apply(mavenBuild).stage();
 
 					// TODO: Support AppCDS stage for faster warmup
 
 					await wkspc
-						.image('adoptopenjdk/openjdk11:x86_64-alpine-jre-11.0.10_9')
-						.apply(javaFinal(descriptor.handler, javaBase))
-						.apply(installMembrane(this.provider, descriptor.version || 'latest'))
+						.image(JVM_RUNTIME_BASE)
+						.apply(javaRuntime(descriptor.handler, javaBase))
+						.apply(membraneInstall)
 						.commit(imageId);
 				}
 			},
 			{
 				context: this.service.getContext(),
 				logger: (lines: string[]) => {
+					fs.appendFileSync(`${imageId}-build.log`, lines.join('\n'));
 					update(lines.join('\n'));
 				},
 			},

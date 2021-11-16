@@ -835,6 +835,7 @@ __metadata:
     simple-git: ^2.37.0
     stream-to-promise: ^3.0.0
     tar-fs: ^2.1.1
+    tiny-glob: ^0.2.9
     ts-jest: ^26.4.3
     tslib: ^1
     typescript: ^4.3
@@ -5932,6 +5933,13 @@ fsevents@^2.1.2:
   dependencies:
     type-fest: ^0.20.2
   checksum: b03813dc4b6b524724b7893718a16c712c8a8d47520342f9d18cbc34171af74f38dea71aeb99c3209cbbe19ba3f3db35dfb15da0a5d9c928b4742386b754d2b1
+  languageName: node
+  linkType: hard
+
+"globalyzer@npm:0.1.0":
+  version: 0.1.0
+  resolution: "globalyzer@npm:0.1.0"
+  checksum: 44d8bd60b2ad2b976e54352d40a3166c9c80a19f72be029e2873fdea19f5ad09e696e12f712aa8a1449a24c391712e0769f1a537c7744e78f597e695b0d3ca12
   languageName: node
   linkType: hard
 
@@ -11724,6 +11732,16 @@ resolve@^2.0.0-next.3:
   version: 2.0.0
   resolution: "timed-out@npm:2.0.0"
   checksum: 0c201b145f6ba9416961f5323f76525fe275e2d16d5ee609dc0e6a95ea7ba02fe1656058163f5fd0a359152e3b44c58ceadd96350a2857c69ce2f81816fb7210
+  languageName: node
+  linkType: hard
+
+"tiny-glob@npm:^0.2.9":
+  version: 0.2.9
+  resolution: "tiny-glob@npm:0.2.9"
+  dependencies:
+    globalyzer: 0.1.0
+    globrex: ^0.1.2
+  checksum: 9b6fdbae5e2ebb12036aae2c7f1a7bcd0d020847d48d4793fcdf761d38f6bd955f948fa7febabb2c87c8f0bed92c5beb78d9474a0ddcf7c93a8eae70dd328662
   languageName: node
   linkType: hard
 
