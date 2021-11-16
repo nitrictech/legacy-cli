@@ -105,7 +105,6 @@ export class BuildFunctionTask extends Task<ContainerImage> {
 			{
 				context: this.service.getContext(),
 				logger: (lines: string[]) => {
-					fs.appendFileSync(`${imageId}-build.log`, lines.join('\n'));
 					update(lines.join('\n'));
 				},
 			},
