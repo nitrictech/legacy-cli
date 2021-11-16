@@ -13,7 +13,7 @@ export const python =
 			.copy('.', '.')
 			.config({
 				env: {
-					PYTHON_PATH: '/app/:${PYTHON_PATH}',
+					PYTHONPATH: '/app/:${PYTHONPATH}',
 				},
 				ports: [9001],
 				cmd: ['python', handler],
