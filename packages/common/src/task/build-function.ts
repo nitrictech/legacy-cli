@@ -16,7 +16,6 @@ import { Task } from './task';
 import { ContainerImage } from '../types';
 import { StackFunction } from '../stack';
 import { Workspace } from '@nitric/boxygen';
-import fs from 'fs';
 import {
 	buildGoApp,
 	buildGoFinal,
