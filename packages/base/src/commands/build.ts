@@ -36,7 +36,7 @@ export default class Build extends BaseCommand {
 		provider: flags.enum({
 			char: 'p',
 			description: 'the targeted provider for this build',
-			options: ['dev', 'gcp', 'aws'],
+			options: ['local', 'gcp', 'aws'],
 		}),
 	};
 

@@ -23,7 +23,7 @@ import { BuildContainerTask } from './build-container';
 export function createBuildTasks(
 	stack: Stack,
 	directory: string,
-	provider = 'dev',
+	provider = 'local',
 ): (BuildFunctionTask | BuildContainerTask)[] {
 	// Create function source images using Buildpacks
 	const funcTasks = stack.getFunctions().map(
@@ -48,7 +48,7 @@ export function createBuildTasks(
 	return [...funcTasks, ...containerTasks];
 }
 
-export function createBuildListrTask(stack: Stack, provider = 'dev'): ListrTask<any> {
+export function createBuildListrTask(stack: Stack, provider = 'local'): ListrTask<any> {
 	return {
 		title: 'Building Services',
 		task: (_, task): Listr =>
