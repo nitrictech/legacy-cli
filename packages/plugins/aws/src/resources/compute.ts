@@ -33,12 +33,6 @@ interface NitricComputeAwsLambdaArgs {
 	topics: NitricSnsTopic[];
 
 	/**
-	 * The amount of provisioned memory
-	 * defaults to 128
-	 */
-	memory?: pulumi.Input<number>;
-
-	/**
 	 * The timeout for the func in seconds
 	 * defaults to 15
 	 */
@@ -55,7 +49,8 @@ export class NitricComputeAWSLambda extends pulumi.ComponentResource {
 	constructor(name, args: NitricComputeAwsLambdaArgs, opts?: pulumi.ComponentResourceOptions) {
 		super('nitric:func:AWSLambda', name, {}, opts);
 
-		const { source, image, topics, timeout = 15, memory = 128 } = args;
+		const { source, image, topics, timeout = 15 } = args;
+		const { memory = 128 } = source.getDescriptor();
 		const defaultResourceOptions: pulumi.ResourceOptions = { parent: this };
 
 		this.name = source.getName();

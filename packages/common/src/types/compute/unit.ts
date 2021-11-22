@@ -20,6 +20,8 @@ export interface NitricComputeUnit<Ext extends Record<string, any> = never> {
 	context?: string;
 	// Triggers used to invoke this compute unit, e.g. Topic Subscriptions
 	triggers?: NitricComputeUnitTriggers;
+	// The memory of the compute instance in MB
+	memory?: number;
 	// The minimum number of instances to keep alive
 	minScale?: number;
 	// The maximum number of instances to scale to

@@ -1572,6 +1572,7 @@ export const STACK_SCHEMA: JSONSchema7 = {
 						},
 						handler: { type: 'string' },
 						context: { type: 'string' },
+						memory: { type: 'number' },
 						excludes: {
 							type: 'array',
 							items: {
@@ -1612,6 +1613,7 @@ export const STACK_SCHEMA: JSONSchema7 = {
 					properties: {
 						dockerfile: { type: 'string' },
 						context: { type: 'string' },
+						memory: { type: 'number' },
 						args: {
 							type: 'object',
 							additionalProperties: { type: 'string' },
