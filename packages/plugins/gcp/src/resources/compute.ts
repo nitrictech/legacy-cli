@@ -36,6 +36,7 @@ export class NitricComputeCloudRun extends pulumi.ComponentResource {
 	constructor(name: string, args: NitricComputeCloudRunArgs, opts?: pulumi.ComponentResourceOptions) {
 		super('nitric:func:CloudRun', name, {}, opts);
 		const { source, image, location, topics } = args;
+		const { memory = 128 } = source.getDescriptor();
 		const descriptor = source.getDescriptor();
 		const defaultResourceOptions: pulumi.ResourceOptions = { parent: this };
 
@@ -85,6 +86,11 @@ export class NitricComputeCloudRun extends pulumi.ComponentResource {
 										containerPort: 9001,
 									},
 								],
+								resources: {
+									limits: {
+										memory: `${memory}Mi`,
+									},
+								},
 							},
 						],
 					},
