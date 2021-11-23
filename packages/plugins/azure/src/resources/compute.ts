@@ -211,6 +211,10 @@ export class NitricComputeAzureContainerApp extends pulumi.ComponentResource {
 					{
 						name: 'myapp',
 						image: image.imageUri,
+						resources: {
+							cpu: 0.25,
+							memory: `${memory}Mi`,
+						},
 						env: [
 							{
 								name: 'AZURE_SUBSCRIPTION_ID',
@@ -231,10 +235,6 @@ export class NitricComputeAzureContainerApp extends pulumi.ComponentResource {
 							{
 								name: 'TOLERATE_MISSING_SERVICES',
 								value: 'true',
-							},
-							{
-								name: 'WEBSITE_MEMORY_LIMIT_MB',
-								value: `${memory}`,
 							},
 							...env,
 						],
