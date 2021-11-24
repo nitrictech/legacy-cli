@@ -127,7 +127,7 @@ export class NitricComputeAzureContainerApp extends pulumi.ComponentResource {
 		super('nitric:func:ContainerApp', name, {}, opts);
 		const defaultResourceOptions: pulumi.ResourceOptions = { parent: this };
 		const { source, subscriptionId, resourceGroup, kube, registry, image, topics, env = [] } = args;
-		const { memory = 128 } = source.getDescriptor();
+		const { memory = 512 } = source.getDescriptor();
 
 		this.name = name;
 
