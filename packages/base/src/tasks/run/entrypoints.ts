@@ -76,6 +76,7 @@ export function createNginxConfig(entrypoint: NamedObject<NitricEntrypoint>, sta
 					(s) => `
 				location ${s.path} {
 					root /www/${s.target};
+					try_files $uri $uri/ /index.html;
 				}
 			`,
 				)
