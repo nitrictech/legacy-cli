@@ -103,6 +103,7 @@ export class BuildFunctionTask extends Task<ContainerImage> {
 			},
 			{
 				context: this.service.getContext(),
+				version: 'v0.0.1-rc.3',
 				logger: (lines: string[]) => {
 					update(lines.join('\n'));
 				},

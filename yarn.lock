@@ -786,9 +786,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@nitric/boxygen@npm:^0.0.1-rc.6":
-  version: 0.0.1-rc.6
-  resolution: "@nitric/boxygen@npm:0.0.1-rc.6"
+"@nitric/boxygen@npm:^0.0.1-rc.9":
+  version: 0.0.1-rc.9
+  resolution: "@nitric/boxygen@npm:0.0.1-rc.9"
   dependencies:
     "@grpc/grpc-js": ^1.4.4
     "@nitric/boxygen-api": ^0.0.1-rc.3
@@ -799,7 +799,7 @@ __metadata:
     google-protobuf: 3.14.0
     tcp-port-used: ^1.0.2
     tslib: ^2.1.0
-  checksum: 830b0ff7b36f696e3e3af7d39e3fd246a27d91fe1a2b8e6f28c8583451a4ff6b5d8600f47381bbe71ab0aecae5ed07a1ec8bc2785974ee967b69905df3fc3f81
+  checksum: 0a4fc712dd4c07b25d84246124ecbfbd0a857b2c076ec6d0a4bd10e7aba9da379588541b0a18b52c534dafb2cad4d3645969bbd38b02e5f20b0afa9c4a829447
   languageName: node
   linkType: hard
 
@@ -808,7 +808,7 @@ __metadata:
   resolution: "@nitric/cli-common@workspace:packages/common"
   dependencies:
     "@iarna/toml": ^2.2.5
-    "@nitric/boxygen": ^0.0.1-rc.6
+    "@nitric/boxygen": ^0.0.1-rc.9
     "@oclif/command": ^1
     "@oclif/config": ^1
     "@pulumi/docker": ^3.0.0
