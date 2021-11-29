@@ -77,6 +77,7 @@ describe('createNginxConfig', () => {
 			expect(config).toContain(`
 				location / {
 					root /www/test;
+					try_files $uri $uri/ /index.html;
 				}
 			`);
 		});
