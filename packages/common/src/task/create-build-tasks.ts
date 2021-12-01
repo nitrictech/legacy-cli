@@ -56,7 +56,7 @@ export function createBuildListrTask(stack: Stack, provider = 'dev'): ListrTask<
 				// Create a sub-task to build each func in the project
 				createBuildTasks(stack, stack.getDirectory(), provider).map((t) => wrapTaskForListr(t)),
 				{
-					concurrent: true,
+					concurrent: 3,
 					// Don't fail all on a single function failure...
 					exitOnError: true,
 					// Added to allow custom handling of SIGINT for run cmd cleanup.

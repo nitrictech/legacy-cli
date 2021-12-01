@@ -102,6 +102,7 @@ export class BuildFunctionTask extends Task<ContainerImage> {
 				}
 			},
 			{
+				timeout: 30000,
 				context: this.service.getContext(),
 				version: 'v0.0.1-rc.3',
 				logger: (lines: string[]) => {
