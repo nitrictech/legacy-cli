@@ -18,8 +18,8 @@ import { uniq } from 'lodash';
 import { StackAPI, constants } from '@nitric/cli-common';
 import { NitricComputeAWSLambda } from './compute';
 
-type method = 'get' | 'post' | 'put' | 'patch' | 'delete';
-const METHOD_KEYS: method[] = ['get', 'post', 'put', 'patch', 'delete'];
+type method = 'get' | 'post' | 'put' | 'patch' | 'delete' | 'options';
+const METHOD_KEYS: method[] = ['get', 'post', 'put', 'patch', 'delete', 'options'];
 
 type AwsApiGatewayIntegrationType = 'http' | 'http_proxy' | 'aws' | 'aws_proxy' | 'mock';
 type AwsApiGatewayHttpMethods = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
