@@ -24,9 +24,9 @@ interface NitricApiGcpApiGatewayArgs {
 	services: NitricComputeCloudRun[];
 }
 
-type method = 'get' | 'post' | 'put' | 'patch' | 'delete';
+type method = 'get' | 'post' | 'put' | 'patch' | 'delete' | 'options';
 
-const METHOD_KEYS: method[] = ['get', 'post', 'put', 'patch', 'delete'];
+const METHOD_KEYS: method[] = ['get', 'post', 'put', 'patch', 'delete', 'options'];
 
 interface GoogleExtensions {
 	'x-google-backend': {

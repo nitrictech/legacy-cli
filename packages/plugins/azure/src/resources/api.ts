@@ -25,8 +25,8 @@ interface NitricApiAzureApiManagementArgs {
 	services: NitricComputeAzureContainerApp[];
 }
 
-type method = 'get' | 'post' | 'put' | 'update' | 'delete' | 'patch';
-const METHODS: method[] = ['get', 'post', 'put', 'update', 'delete', 'patch'];
+type method = 'get' | 'post' | 'put' | 'update' | 'delete' | 'patch' | 'options';
+const METHODS: method[] = ['get', 'post', 'put', 'update', 'delete', 'patch', 'options'];
 
 /**
  * Nitric Azure Api Management based API
