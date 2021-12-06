@@ -363,8 +363,6 @@ export default class Run extends BaseCommand {
 			[key: string]: RunTargets;
 		};
 
-		console.log('result', result);
-
 		const { ['Preparing Dev Images']: runImages } = result;
 		// Build the source images for each function in the project stack
 		// const builtImages = (await new Listr([createBuildListrTask(stack)]).run()) as { [key: string]: ContainerImage };
@@ -388,8 +386,6 @@ export default class Run extends BaseCommand {
 				} as RunGatewayTaskOptions;
 			}),
 		);
-
-		console.log('runImages', runImages);
 
 		const runContainersTaskOptions = await Promise.all(
 			Object.keys(runImages).map(async (k) => {
