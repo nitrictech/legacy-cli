@@ -21,6 +21,7 @@ import {
 	ContainerImage,
 	NitricStack,
 	createBuildListrTask,
+	RunTargets,
 } from '@nitric/cli-common';
 import { Listr, ListrTask, ListrContext, ListrRenderer } from 'listr2';
 import path from 'path';
@@ -38,6 +39,7 @@ import {
 	RunContainerTask,
 	RunContainerTaskOptions,
 	RunStorageServiceTask,
+	BuildDevImages,
 	RunStorageServiceTaskOptions,
 	RunContainerResult,
 } from '../tasks';
@@ -357,17 +359,24 @@ export default class Run extends BaseCommand {
 
 		cli.action.stop();
 
+		const result = (await new Listr([wrapTaskForListr(new BuildDevImages({ stack }))]).run()) as {
+			[key: string]: RunTargets;
+		};
+
+		console.log('result', result);
+
+		const { ['Preparing Dev Images']: runImages } = result;
 		// Build the source images for each function in the project stack
-		const builtImages = (await new Listr([createBuildListrTask(stack)]).run()) as { [key: string]: ContainerImage };
+		// const builtImages = (await new Listr([createBuildListrTask(stack)]).run()) as { [key: string]: ContainerImage };
 
 		// Filter out undefined and non-image results from build tasks
-		let images = Object.values(builtImages).filter((i) => i && i.name) as ContainerImage[];
+		// let images = Object.values(builtImages).filter((i) => i && i.name) as ContainerImage[];
 
 		// Generate a range of ports to try to assign to containers
 		const portRange = getPortRange();
 
 		// Images are sorted to ensure they're typically assigned the same port between reloads.
-		images = sortImages(images);
+		// images = sortImages(images);
 
 		const runGatewayOptions = await Promise.all(
 			stack.getApis().map(async (api) => {
@@ -380,10 +389,12 @@ export default class Run extends BaseCommand {
 			}),
 		);
 
+		console.log('runImages', runImages);
+
 		const runContainersTaskOptions = await Promise.all(
-			images.map(async (image) => {
+			Object.keys(runImages).map(async (k) => {
 				return {
-					image,
+					...runImages[k],
 					runId,
 					port: await getPort({ port: portRange }),
 					subscriptions: getContainerSubscriptions(nitricStack),

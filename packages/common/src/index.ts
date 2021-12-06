@@ -53,3 +53,4 @@ export * from './config';
 export * from './preferences';
 export * from './resources';
 export * as constants from './constants';
+export * from './boxygen';

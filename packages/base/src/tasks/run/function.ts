@@ -36,6 +36,8 @@ export interface RunContainerTaskOptions {
 	image: ContainerImage;
 	port?: number | undefined;
 	subscriptions?: Record<string, string[]>;
+	volumes?: Record<string, string>;
+	cmd?: string[];
 	network?: Network;
 	runId: string;
 }
@@ -51,8 +53,13 @@ export class RunContainerTask extends Task<RunContainerResult> {
 	private network: Network | undefined;
 	private subscriptions: Record<string, string[]> | undefined;
 	private runId: string;
+	private volumes: Record<string, string>;
+	private cmd: string[] | undefined;
 
-	constructor({ stack, image, port, network, subscriptions, runId }: RunContainerTaskOptions, docker?: Docker) {
+	constructor(
+		{ stack, image, port, network, subscriptions, runId, volumes = {}, cmd }: RunContainerTaskOptions,
+		docker?: Docker,
+	) {
 		super(`${image.name} - ${image.id.substring(0, 12)}`);
 		this.stack = stack;
 		this.image = image;
@@ -61,6 +68,8 @@ export class RunContainerTask extends Task<RunContainerResult> {
 		this.network = network;
 		this.subscriptions = subscriptions;
 		this.runId = runId;
+		this.volumes = volumes;
+		this.cmd = cmd;
 	}
 
 	async do(): Promise<RunContainerResult> {
@@ -96,6 +105,7 @@ export class RunContainerTask extends Task<RunContainerResult> {
 				[`${GATEWAY_PORT}/tcp`]: {},
 			},
 			Volumes: {},
+			Cmd: this.cmd,
 			Labels: {
 				[DOCKER_LABEL_RUN_ID]: runId,
 			},
@@ -131,6 +141,7 @@ export class RunContainerTask extends Task<RunContainerResult> {
 		const MOUNT_POINT = NITRIC_DEV_VOLUME;
 		dockerOptions['Volumes'] = {
 			[MOUNT_POINT]: {},
+			...Object.keys(this.volumes).reduce((acc, v) => ({ ...acc, [v]: {} }), {}),
 		};
 		dockerOptions['HostConfig'] = {
 			...(dockerOptions['HostConfig'] || {}),
@@ -140,6 +151,11 @@ export class RunContainerTask extends Task<RunContainerResult> {
 					Source: nitricRunDir, // volume.name,
 					Type: 'bind',
 				},
+				...Object.entries(this.volumes).map(([Target, Source]) => ({
+					Target,
+					Source,
+					Type: 'bind' as any,
+				})),
 			],
 		};
 

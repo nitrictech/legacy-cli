@@ -12,10 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './network';
-export * from './function';
-export * from './gateway';
-export * from './entrypoints';
-export * from './storage';
-export * from './types';
-export * from './build-dev';
+import { Image } from '@nitric/boxygen';
+
+export const TS_IGNORE = ['node_modules/', '.nitric/', '.git/', '.idea/'];
+
+export const baseTsImage = async (image: Image): Promise<void> => {
+	image.run(['yarn', 'global', 'add', 'typescript', 'ts-node', 'nodemon']).config({
+		// Will start nodemon with automatic hot-reload watchers
+		volumes: ['app'],
+		ports: [9001],
+	});
+};
