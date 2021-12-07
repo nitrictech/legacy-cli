@@ -90,6 +90,9 @@ export class RunContainerTask extends Task<RunContainerResult> {
 			}
 		}
 
+		const dotEnv = path.join(this.stack.getDirectory(), '.env');
+		const envArr = fs.existsSync(dotEnv) ? fs.readFileSync(dotEnv, 'utf8').split('\n') : [];
+
 		const dockerOptions = {
 			name: `${this.image.name}-${runId}`,
 			Env: [
@@ -100,6 +103,7 @@ export class RunContainerTask extends Task<RunContainerResult> {
 				// TODO: Update these from defaults
 				`MINIO_ACCESS_KEY=minioadmin`,
 				`MINIO_SECRET_KEY=minioadmin`,
+				...envArr,
 			],
 			ExposedPorts: {
 				[`${GATEWAY_PORT}/tcp`]: {},
