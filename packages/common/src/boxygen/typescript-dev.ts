@@ -19,7 +19,7 @@ export const TS_IGNORE = ['node_modules/', '.nitric/', '.git/', '.idea/'];
 export const baseTsImage = async (image: Image): Promise<void> => {
 	image.run(['yarn', 'global', 'add', 'typescript', 'ts-node', 'nodemon']).config({
 		// Will start nodemon with automatic hot-reload watchers
-		volumes: ['app'],
+		volumes: ['/app'],
 		ports: [9001],
 	});
 };
