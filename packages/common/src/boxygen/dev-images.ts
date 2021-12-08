@@ -3,7 +3,6 @@ import { Workspace } from '@nitric/boxygen';
 import { baseTsImage } from './typescript-dev';
 import { installMembrane } from './membrane';
 import { ContainerImage } from '../types';
-import os from 'os';
 
 export interface RunTargets {
 	[key: string]: {
@@ -43,7 +42,7 @@ export const prepareDevImages = async (stack: Stack, logger: (log: string[]) => 
 							[f.getName()]: {
 								cmd: [
 									'nodemon',
-									os.platform() === 'win32' ? '--legacy-watch' : '--watch',
+									'--watch',
 									'/app/**',
 									'--ext',
 									'ts,json',
